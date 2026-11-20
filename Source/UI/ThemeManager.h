@@ -1,6 +1,8 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include <map>
+#include <string>
 
 // Runtime contract for visual-only themes. The manager is intentionally isolated
 // from PluginProcessor, APVTS, DSP, sampler and scheduler code.
@@ -61,6 +63,16 @@ public:
         juce::Image metersSlidersSpriteSheet;
         juce::Image framesPanelsSpriteSheet;
         juce::Image iconsSpriteSheet;
+        // Skin-1 authored state images are decoded on the UI thread and cached
+        // at 128px to keep the editor's resident artwork footprint bounded.
+        std::map<std::string, juce::Image> controlStateArtwork;
+        const juce::Image* findControlArtwork(const juce::String& controlId,
+                                              const juce::String& state) const noexcept
+        {
+            const auto key = (controlId + "|" + state).toStdString();
+            const auto found = controlStateArtwork.find(key);
+            return found != controlStateArtwork.end() ? &found->second : nullptr;
+        }
         // Compatibility aliases used by the existing editor shell.
         juce::Colour canvas { 0xff080b14 };
         juce::Colour canvasInset { 0xff0c1422 };
