@@ -73,6 +73,20 @@ public:
         return false;
     }
 
+    // Host audio configuration snapshots for read-only UI telemetry.
+    double getHostSampleRateSnapshot() const noexcept
+    {
+        return hostSampleRateSnapshot.load(std::memory_order_relaxed);
+    }
+    int getLastProcessedBlockSizeSnapshot() const noexcept
+    {
+        return lastProcessedBlockSizeSnapshot.load(std::memory_order_relaxed);
+    }
+    int getPreparedMaximumBlockSizeSnapshot() const noexcept
+    {
+        return preparedMaximumBlockSizeSnapshot.load(std::memory_order_relaxed);
+    }
+
     // Lock-free post-output peak snapshot for UI meters. Values are linear 0..1+.
     float getOutputPeak(int channel) const noexcept
     {
@@ -91,6 +105,9 @@ private:
     std::atomic<int> patternPreviewSlot { -1 };
     std::array<std::array<std::atomic<bool>, 128>, 16> displayHeldNotes {};
     std::array<std::atomic<float>, 2> outputPeakMeters {};
+    std::atomic<double> hostSampleRateSnapshot { 44100.0 };
+    std::atomic<int> lastProcessedBlockSizeSnapshot { 0 };
+    std::atomic<int> preparedMaximumBlockSizeSnapshot { 512 };
     double currentSampleRate = 44100.0;
     int maximumBlockSize = 512;
     ppgu::sampler::SamplerEngine sampler;
