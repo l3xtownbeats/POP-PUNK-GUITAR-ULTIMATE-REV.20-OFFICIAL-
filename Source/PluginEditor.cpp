@@ -1320,6 +1320,46 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     g.fillEllipse(cx - 2.5f, cy - 2.5f, 5.0f, 5.0f);
 }
 
+void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height,
+                                               float sliderPos, float minSliderPos, float maxSliderPos,
+                                               juce::Slider::SliderStyle style, juce::Slider& slider)
+{
+    if (style != juce::Slider::LinearHorizontal || !palette.metersSlidersSpriteSheet.isValid())
+    {
+        juce::LookAndFeel_V4::drawLinearSlider(g, x, y, width, height,
+                                               sliderPos, minSliderPos, maxSliderPos, style, slider);
+        return;
+    }
+
+    const bool useLongTrack = width >= 420;
+    const int sourceX = 60;
+    const int sourceY = useLongTrack ? 445 : 570;
+    const int sourceWidth = useLongTrack ? 820 : 390;
+    const int sourceHeight = 22;
+    const auto track = juce::Rectangle<int>(x + 4, y + (height - 12) / 2,
+                                             juce::jmax(1, width - 8), 12);
+    g.drawImage(palette.metersSlidersSpriteSheet, track.getX(), track.getY(),
+                track.getWidth(), track.getHeight(), sourceX, sourceY, sourceWidth, sourceHeight);
+
+    const float proportion = juce::jlimit(0.0f, 1.0f,
+        (sliderPos - static_cast<float>(x + 4)) / static_cast<float>(juce::jmax(1, width - 8)));
+    const int fillWidth = juce::jlimit(0, track.getWidth(),
+        juce::roundToInt(static_cast<float>(track.getWidth()) * proportion));
+    if (fillWidth > 0)
+    {
+        g.setColour(palette.token("accent_glow").withAlpha(0.88f));
+        g.fillRoundedRectangle(track.withWidth(fillWidth).toFloat().reduced(1.0f), 4.0f);
+    }
+
+    const int thumbSize = juce::jlimit(16, 30, height + 8);
+    const int thumbX = juce::jlimit(track.getX() - thumbSize / 2,
+        track.getRight() - thumbSize / 2,
+        juce::roundToInt(sliderPos) - thumbSize / 2);
+    const int thumbY = track.getCentreY() - thumbSize / 2;
+    g.drawImage(palette.metersSlidersSpriteSheet, thumbX, thumbY, thumbSize, thumbSize,
+                910, 640, 32, 32);
+}
+
 void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
                                                    const juce::Colour& base, bool hovered, bool down)
 {
@@ -1688,6 +1728,12 @@ void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
                                            bounds.getX(), bounds.getBottom(), false));
     g.fillRoundedRectangle(bounds, 12.0f);
     drawThemeArtworkLayers(g, area, p, 0.10f, 0.42f, 0.0f);
+    if (p.framesPanelsSpriteSheet.isValid())
+    {
+        const auto header = area.reduced(1, 1).removeFromTop(30);
+        g.drawImage(p.framesPanelsSpriteSheet, header.getX(), header.getY(),
+                    header.getWidth(), header.getHeight(), 30, 650, 450, 60);
+    }
     g.setColour(p.token("control_border").withAlpha(0.78f));
     g.drawRoundedRectangle(bounds.reduced(0.5f), 12.0f, 1.0f);
 
