@@ -167,6 +167,7 @@ target_compile_definitions(ppgu_stage_sprite_contracts PRIVATE JUCE_WEB_BROWSER=
 target_link_libraries(ppgu_stage_sprite_contracts PRIVATE juce::juce_core juce::juce_graphics juce::juce_gui_basics)
 juce_generate_juce_header(ppgu_stage_sprite_contracts)
 
+
 # End-to-end MIDI -> PatternScheduler -> SamplerEngine -> rendered audio test.
 # It compiles the same processor/editor/UI/sampler sources used by the VST3.
 juce_add_console_app(ppgu_processor_pattern_tests
@@ -194,6 +195,9 @@ target_link_libraries(ppgu_processor_pattern_tests PRIVATE
     juce::juce_recommended_warning_flags)
 juce_generate_juce_header(ppgu_processor_pattern_tests)
 add_test(NAME ppgu_processor_pattern_tests COMMAND ppgu_processor_pattern_tests)
+
+add_test(NAME ppgu_skin1_premium_artwork_package_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_skin1_premium_artwork_package.py)
 
 add_test(NAME ppgu_sound_asset_registry_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/TestSoundAssetRegistry.py)

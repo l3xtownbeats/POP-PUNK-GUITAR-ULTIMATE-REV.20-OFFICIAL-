@@ -86,6 +86,31 @@ int main()
                            "NEON STAGE frames/panels atlas decoded");
                     expect(artworkCandidate.getPalette().iconsSpriteSheet.isValid(),
                            "NEON STAGE icon atlas decoded");
+                    const auto& skinOne = artworkCandidate.getPalette();
+                    expect(skinOne.backgroundArtwork.isValid()
+                               && skinOne.backgroundArtwork.getWidth() == 2560
+                               && skinOne.backgroundArtwork.getHeight() == 1440,
+                           "NEON STAGE 2560x1440 premium background decoded");
+                    expect(skinOne.materialArtwork.isValid()
+                               && skinOne.materialArtwork.getWidth() == 1024
+                               && skinOne.materialArtwork.getHeight() == 1024,
+                           "NEON STAGE 1024x1024 material texture decoded");
+                    expect(skinOne.stageGlowArtwork.isValid()
+                               && skinOne.stageGlowArtwork.getWidth() == 800
+                               && skinOne.stageGlowArtwork.getHeight() == 450,
+                           "NEON STAGE stage-glow layer decoded");
+                    expect(skinOne.edgeHighlightArtwork.isValid()
+                               && skinOne.edgeHighlightArtwork.getWidth() == 800
+                               && skinOne.edgeHighlightArtwork.getHeight() == 450,
+                           "NEON STAGE edge-highlight layer decoded");
+                    expect(skinOne.specularArtwork.isValid()
+                               && skinOne.specularArtwork.getWidth() == 800
+                               && skinOne.specularArtwork.getHeight() == 450,
+                           "NEON STAGE specular layer decoded");
+                    expect(skinOne.shadowArtwork.isValid()
+                               && skinOne.shadowArtwork.getWidth() == 800
+                               && skinOne.shadowArtwork.getHeight() == 450,
+                           "NEON STAGE shadow layer decoded");
                 }
             }
 

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include <map>
+#include <string>
 
 // Runtime contract for visual-only themes. The manager is intentionally isolated
 // from PluginProcessor, APVTS, DSP, sampler and scheduler code.
@@ -47,12 +49,30 @@ public:
         juce::Image textureArtwork;
         juce::Image bezelArtwork;
         juce::Image crestArtwork;
+        // High-resolution Skin-1 stage stack. These images are decoded only while
+        // the visual theme is loaded on the message thread; audio code never sees them.
+        juce::Image backgroundArtwork;
+        juce::Image materialArtwork;
+        juce::Image stageGlowArtwork;
+        juce::Image edgeHighlightArtwork;
+        juce::Image specularArtwork;
+        juce::Image shadowArtwork;
         // Optional NEON STAGE sprite atlases. Only SKIN-1 supplies these;
         // other approved themes continue using the shared vector fallback.
         juce::Image controlsSpriteSheet;
         juce::Image metersSlidersSpriteSheet;
         juce::Image framesPanelsSpriteSheet;
         juce::Image iconsSpriteSheet;
+        // Skin-1 authored state images are decoded on the UI thread and cached
+        // at 128px to keep the editor's resident artwork footprint bounded.
+        std::map<std::string, juce::Image> controlStateArtwork;
+        const juce::Image* findControlArtwork(const juce::String& controlId,
+                                              const juce::String& state) const
+        {
+            const auto key = (controlId + "|" + state).toStdString();
+            const auto found = controlStateArtwork.find(key);
+            return found != controlStateArtwork.end() ? &found->second : nullptr;
+        }
         // Compatibility aliases used by the existing editor shell.
         juce::Colour canvas { 0xff080b14 };
         juce::Colour canvasInset { 0xff0c1422 };
