@@ -12,6 +12,7 @@ on:
       - "assets/library/**"
       - "tools/validate_skin_registry_16.py"
       - "tools/generate_neon_stage_spritesheets.py"
+      - "tools/package_active_skins.py"
       - "tools/validate_library_tiers.py"
       - "SoundHunter/**"
       - "tools/audit_soundbank.py"
