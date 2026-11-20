@@ -244,7 +244,7 @@ for name,box in (("standard_header",[30,650,480,710]),("compact_header",[520,650
     im=add_glow(im,lambda dd,c,b=box:dd.rounded_rectangle(b,radius=7,outline=c,width=3),P["glow_blue"],5)
     d=ImageDraw.Draw(im)
     d.rounded_rectangle(box,radius=7,fill=rgba(P["metal"]),outline=rgba(P["metal_border"]),width=2)
-    label(d,box,name.upper(),P["text"],11)
+    # Header text is drawn live by the JUCE component using its current section title.
     headers[name]={"bbox":box}
 label(ImageDraw.Draw(im),(30,745,970,775),"DISPLAY BACKGROUND / DARK TRANSLUCENT CYAN GRID",P["text"],12)
 display=[30,785,970,990]
