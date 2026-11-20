@@ -733,7 +733,7 @@ private:
             graphics.setColour(theme.token("accent").withAlpha(0.95f));
             graphics.strokePath(sweep, juce::PathStrokeType(2.0f,
                 juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-            graphics.setColour(theme.token("accentGlow").withAlpha(0.55f));
+            graphics.setColour(theme.token("accent_glow").withAlpha(0.55f));
             graphics.fillEllipse(centre - 3.0f, centre - 3.0f, 6.0f, 6.0f);
             images.push_back(std::move(image));
         }
