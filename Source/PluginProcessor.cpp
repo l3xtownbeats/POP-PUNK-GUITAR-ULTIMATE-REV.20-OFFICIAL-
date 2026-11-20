@@ -229,6 +229,9 @@ void PopPunkGuitarUltimateAudioProcessor::prepareToPlay(double sampleRate, int e
 {
     currentSampleRate = juce::jlimit(8000.0, 384000.0, sampleRate);
     maximumBlockSize = juce::jmax(1, expectedBlockSize);
+    hostSampleRateSnapshot.store(currentSampleRate, std::memory_order_relaxed);
+    preparedMaximumBlockSizeSnapshot.store(maximumBlockSize, std::memory_order_relaxed);
+    lastProcessedBlockSizeSnapshot.store(0, std::memory_order_relaxed);
     for (auto& peak : outputPeakMeters)
         peak.store(0.0f, std::memory_order_relaxed);
     sampler.prepare(currentSampleRate);
@@ -313,6 +316,7 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
 
     const int fadeLength = juce::jmax(1, static_cast<int>(currentSampleRate * panicFadeMs / 1000.0));
     const int samples = buffer.getNumSamples();
+    lastProcessedBlockSizeSnapshot.store(samples, std::memory_order_relaxed);
     keyboardState.processNextMidiBuffer(midi, 0, samples, true);
 
     // Publish a lock-free, UI-only snapshot after keyboard-generated events
