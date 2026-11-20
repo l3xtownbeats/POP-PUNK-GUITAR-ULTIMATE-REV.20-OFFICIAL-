@@ -115,6 +115,26 @@ def main() -> int:
             source_relative = (Path(folder) / relative).as_posix()
             copy_one(root, output, source_relative)
 
+        # NEON STAGE DEFAULT ships four extra runtime atlases. Copy them
+        # only for SKIN-1; the other 15 shells retain their existing package.
+        if stable_id == "skin-053":
+            sprite_sheets = assets.get("spriteSheets", {})
+            expected_sheets = {
+                "controls", "meters_sliders", "frames_panels", "icons"
+            }
+            if not isinstance(sprite_sheets, dict) or set(sprite_sheets) != expected_sheets:
+                raise SystemExit("NEON STAGE DEFAULT: spriteSheets must define exactly four atlas paths")
+            for key in sorted(expected_sheets):
+                relative = sprite_sheets.get(key)
+                if not isinstance(relative, str) or not relative:
+                    raise SystemExit(f"NEON STAGE DEFAULT: missing sprite atlas path {key}")
+                copy_one(root, output, (Path(folder) / relative).as_posix())
+
+            sprite_manifest = assets.get("spriteSheetManifest")
+            if sprite_manifest != "assets/spritesheets/neon_stage_spritesheet_manifest.json":
+                raise SystemExit("NEON STAGE DEFAULT: invalid sprite atlas manifest path")
+            copy_one(root, output, (Path(folder) / sprite_manifest).as_posix())
+
         if entry.get("preview") != (Path(folder) / assets["preview"]).as_posix():
             raise SystemExit(f"{name}: registry preview path mismatch")
         if entry.get("hero") != (Path(folder) / assets["hero"]).as_posix():
@@ -130,7 +150,7 @@ def main() -> int:
         raise SystemExit(f"expected 16 staged skin folders, found {len(actual_folders)}")
 
     print("ACTIVE SKIN PACKAGE: PASS")
-    print("Staged exactly 16 registry-referenced premium graphical shells and their 5 required artwork assets each.")
+    print("Staged exactly 16 registry-referenced premium graphical shells; NEON STAGE also includes its four runtime sprite atlases and atlas manifest.")
     print("Legacy folders, archive manifests and unregistered themes are excluded.")
     print(f"Output: {output}")
     return 0
