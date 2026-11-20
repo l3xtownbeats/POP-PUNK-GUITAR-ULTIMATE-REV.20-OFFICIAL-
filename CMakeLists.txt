@@ -73,7 +73,9 @@ target_sources(PPGU PRIVATE
     Source/PluginEditor.cpp
     Source/UI/ThemeManager.cpp
     Source/UI/AuxiliaryPanelLayout.cpp
-    Source/UI/PPGUMultiWindowWorkspace.cpp)
+    Source/UI/PPGUMultiWindowWorkspace.cpp
+    Source/UI/PPGUStageSpriteSheet.cpp
+    Source/UI/PPGUDiscoveryRadar.cpp)
 target_include_directories(PPGU PRIVATE Source Source/Sampler Source/Performance Source/UI)
 target_compile_definitions(PPGU PUBLIC ${PPGU_JUCE_DEFINITIONS})
 target_link_libraries(PPGU PRIVATE
@@ -153,6 +155,22 @@ target_include_directories(ppgu_theme_contracts PRIVATE Source Source/UI)
 target_compile_definitions(ppgu_theme_contracts PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
 target_link_libraries(ppgu_theme_contracts PRIVATE juce::juce_core juce::juce_graphics juce::juce_gui_basics)
 juce_generate_juce_header(ppgu_theme_contracts)
+
+# Validated in-memory sprite-sheet bounds and frame extraction.
+juce_add_console_app(ppgu_stage_sprite_contracts
+    PRODUCT_NAME "PPGU Stage Sprite Contract Tests"
+    NEEDS_WEB_BROWSER FALSE
+    NEEDS_CURL FALSE)
+target_sources(ppgu_stage_sprite_contracts PRIVATE
+    tests/StageSpriteSheetTests.cpp
+    Source/UI/PPGUStageSpriteSheet.cpp)
+add_test(NAME ppgu_stage_sprite_contracts COMMAND ppgu_stage_sprite_contracts)
+set_tests_properties(ppgu_stage_sprite_contracts PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+target_include_directories(ppgu_stage_sprite_contracts PRIVATE Source Source/UI)
+target_compile_definitions(ppgu_stage_sprite_contracts PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
+target_link_libraries(ppgu_stage_sprite_contracts PRIVATE juce::juce_core juce::juce_graphics juce::juce_gui_basics)
+juce_generate_juce_header(ppgu_stage_sprite_contracts)
+
 
 # End-to-end MIDI -> PatternScheduler -> SamplerEngine -> rendered audio test.
 # It compiles the same processor/editor/UI/sampler sources used by the VST3.
