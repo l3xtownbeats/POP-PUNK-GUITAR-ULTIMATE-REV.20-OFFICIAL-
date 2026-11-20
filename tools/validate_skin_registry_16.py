@@ -144,27 +144,27 @@ def main() -> int:
         "glow_blue": "#0048FF",
         "accent_magenta": "#FF007F",
     }
-    if atlas_manifest.get("project") != "NEON_STAGE_MANAGER_3_0" \\
-            or atlas_manifest.get("theme") != "NEON_STAGE_DEFAULT_SKIN_1" \\
-            or atlas_manifest.get("canvas") != [1024, 1024] \\
+    if atlas_manifest.get("project") != "NEON_STAGE_MANAGER_3_0" \
+            or atlas_manifest.get("theme") != "NEON_STAGE_DEFAULT_SKIN_1" \
+            or atlas_manifest.get("canvas") != [1024, 1024] \
             or atlas_manifest.get("base_palette") != expected_palette:
         raise SystemExit("FAIL: NEON STAGE sprite atlas manifest identity/palette mismatch")
     sheets = atlas_manifest.get("sheets", {})
     if set(sheets) != set(atlas_names):
         raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly four sheets")
     controls = sheets["neon_stage_controls_spritesheet.png"]["elements"]
-    if controls.get("knobs", {}).get("frames") != 8 \\
-            or controls.get("knobs", {}).get("size") != [100, 100] \\
+    if controls.get("knobs", {}).get("frames") != 8 \
+            or controls.get("knobs", {}).get("size") != [100, 100] \
             or controls.get("knobs", {}).get("row_y") != [120, 220]:
         raise SystemExit("FAIL: NEON STAGE rotary frame geometry mismatch")
-    if controls.get("toggle_switch", {}).get("states", {}).get("OFF", {}).get("bbox") != [65, 430, 465, 600] \\
+    if controls.get("toggle_switch", {}).get("states", {}).get("OFF", {}).get("bbox") != [65, 430, 465, 600] \
             or controls.get("toggle_switch", {}).get("states", {}).get("ON", {}).get("bbox") != [535, 430, 935, 600]:
         raise SystemExit("FAIL: NEON STAGE toggle switch atlas bounds mismatch")
     if set(controls.get("buttons", {}).get("states", {})) != {"normal", "hover", "pressed", "active"}:
         raise SystemExit("FAIL: NEON STAGE button state atlas is incomplete")
     if sheets["neon_stage_meters_sliders_sheet.png"]["elements"].get("vu_meters", {}).get("levels_count") != 8:
         raise SystemExit("FAIL: NEON STAGE VU meter must contain exactly eight levels")
-    if len(sheets["neon_stage_icons_sheet.png"]["elements"].get("fx_icons", [])) != 7 \\
+    if len(sheets["neon_stage_icons_sheet.png"]["elements"].get("fx_icons", [])) != 7 \
             or len(sheets["neon_stage_icons_sheet.png"]["elements"].get("nav_icons", [])) != 10:
         raise SystemExit("FAIL: NEON STAGE icon atlas must contain 7 FX and 10 navigation icons")
 
