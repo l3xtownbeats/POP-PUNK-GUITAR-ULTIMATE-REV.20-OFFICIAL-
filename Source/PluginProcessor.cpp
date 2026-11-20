@@ -228,6 +228,8 @@ void PopPunkGuitarUltimateAudioProcessor::prepareToPlay(double sampleRate, int e
 {
     currentSampleRate = juce::jlimit(8000.0, 384000.0, sampleRate);
     maximumBlockSize = juce::jmax(1, expectedBlockSize);
+    for (auto& peak : outputPeakMeters)
+        peak.store(0.0f, std::memory_order_relaxed);
     sampler.prepare(currentSampleRate);
     patternScheduler.reset();
     for (auto& channel : patternHeldNotes) channel.fill(false);
