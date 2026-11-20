@@ -1,0 +1,47 @@
+# POP PUNK GUITAR ULTIMATE — REV.20 INFO / ЕДИНЫЙ ЖУРНАЛ
+
+Канонический репозиторий: l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-
+Каноническая ветка: main
+Статус базы: USER APPROVED · CONFIRMED · LOCKED FOR REV.20
+Дата консолидации: 2026-11-20
+
+## 1. Правило одной рабочей линии
+Вся дальнейшая разработка, интеграция, исправления, проверки и сборки ведутся только в этом репозитории и на main. Материалы из 4.0 / 5.0 / REV.17 / REV.18 / REV.19 использованы как источники выборочного переноса. Старые репозитории и ветки не являются рабочими базами и не используются для продолжения разработки.
+
+В REV.20 включается только утверждённое, подтверждённое, совместимое и необходимое. Дубли, временные сборки, черновые журналы, эксперименты и устаревшие темы не включаются в активную базу.
+
+## 2. Зафиксированная продуктовая база
+- Формат: VST3 x64; целевая ОС: Windows 10 x64; обязательный хост-приёмщик: FL Studio 20 x64.
+- Главные режимы только два: MELODY и PATTERN.
+- AUTOCHORDS — дополнительное окно внутри PATTERN, не третий главный режим.
+- В обоих режимах MIDI-клавиша запускает один конкретный mapped note/event clip, а не полный LOOP/RIFF/phrase. Whole-take/phrase preview — отдельное действие в браузере.
+- Один общий Sample Engine; WAV/SFZ, voice allocation, velocity mapping, background streaming/page cache и bounded queues.
+- Задачи файловой системы, сканирование, hashing и загрузка выполняются вне audio callback.
+- Утверждённый визуальный эталон: NEON STAGE DEFAULT / SKIN-1 / stable ID skin-053.
+- Продукт содержит ровно 16 логических тем SKIN-1…SKIN-16; registry index не является логическим номером темы.
+- 27 пользовательских control IDs и семь утверждённых FX bypass IDs не изменять без отдельного утверждения.
+- Сэмплы допускаются в распространяемый продукт только при CC0/PD, иной лицензии с явным правом bundle/redistribution либо письменном разрешении правообладателя.
+
+## 3. Ровно 16 графических оболочек
+Единственный активный набор: SKIN-1…SKIN-16. SKIN-1 — NEON STAGE DEFAULT (skin-053 / index 53). Остальные утверждённые оболочки имеют stable IDs skin-103…skin-117 (indices 103…117). Вся старая и экспериментальная коллекция тем вне этих 16 исключена.
+
+SKIN-1 имеет PNG/manifest assets. SKIN-2…SKIN-16 имеют утверждённые theme manifests и SVG foundations; PNG preview/hero и runtime validation ещё pending. Эти темы остаются в registry как design-only и не показываются как selectable runtime themes до runtimeReady=true.
+
+## 4. Sound library и factory bank
+- В REV.20 сохранены L3XTOWN inventory: 393 source path records, 387 unique SHA-256 audio contents, 6 exact duplicate-content pairs; оригинальные WAV остаются на исходном хранении.
+- Filename/folder routing provisional; audio-content review и local copy preflight остаются открытыми.
+- BASIC LIBRARY target: 10–12 GB. EXPANDED LIBRARY target: примерно 40 GB и необязательна для core presets.
+- Core factory target: 500 playable presets — 250 MELODY + 250 PATTERN, все usable из BASIC LIBRARY.
+- Перенесённый factory_bank_300.json — partial authored catalog (150+150), не 500-предметный deliverable и не proof playable.
+- Для каждого sample обязательны source/provenance, redistribution clearance, SHA-256, valid mapping и human listening evidence.
+
+## 5. Статусы и доказательства
+APPROVED/LOCKED — продуктовое решение утверждено. PRESENT — артефакт присутствует. IMPLEMENTED — production code path есть. VERIFIED — тест завершён на точном REV.20 SHA. HOST-VERIFIED — FL Studio 20 acceptance записан. RELEASE-READY — build/test/legal/package/host gates закрыты.
+
+Нельзя считать импортированные исходники собранными или тесты пройденными без фактических результатов на REV.20 commit SHA.
+
+## 6. Статус консолидации
+Source engineering HEAD REV.19: 7b540ff9cddbc2b0327c83611b49e222bce51d2b.
+Destination main before migration: 2aeffd1c594232a933e9e5577ffad4efb6877263.
+Migration commit: 2bd623a666090d4ef017296f52fdb568808a227b.
+Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Studio 20 acceptance are not yet recorded.
