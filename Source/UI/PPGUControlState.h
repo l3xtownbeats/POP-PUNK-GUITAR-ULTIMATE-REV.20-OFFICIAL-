@@ -6,8 +6,9 @@
  * Visual-only state mapping for Skin-1 authored control artwork.
  *
  * Skin-1 runtime manifests use: default, hover, pressed, disabled, dragged.
- * A latched/toggled control reuses the authored pressed artwork as its ON state;
- * the APVTS toggle itself remains the source of truth for the actual parameter.
+ * Active toggles ask for an optional "active" image; the current Skin-1 pack
+ * has no separate active PNG, so the LookAndFeel falls back to its ON atlas.
+ * The APVTS toggle itself remains the source of truth for the parameter.
  */
 enum class PPGUArtworkState
 {
@@ -25,7 +26,7 @@ inline juce::String ppguArtworkStateName(PPGUArtworkState state)
     {
         case PPGUArtworkState::Hover:    return "hover";
         case PPGUArtworkState::Pressed:  return "pressed";
-        case PPGUArtworkState::Active:   return "pressed";
+        case PPGUArtworkState::Active:   return "active";
         case PPGUArtworkState::Disabled: return "disabled";
         case PPGUArtworkState::Dragged:  return "dragged";
         case PPGUArtworkState::Normal:   return "default";
