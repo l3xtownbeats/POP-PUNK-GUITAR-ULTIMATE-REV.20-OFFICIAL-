@@ -1,0 +1,14 @@
+L3XTOWN inventory started: 16.11.2026 22:05:41,45
+Starting read-only inventory...
+F:\POP PUNK GUITAR ULTIMATE\BUILD_L3XTOWN_INVENTORY.py:10: SyntaxWarning: invalid escape sequence '\P'
+  --root "F:\POP PUNK GUITAR ULTIMATE\Samples\SourceLibraries\L3XTOWN GUITAR" ^
+L3XTOWN inventory scan complete (read-only).
+Rows: 393
+Files found: 393; missing: 0
+Size matches: 393; mismatches: 0
+SHA-256 matches: 393; mismatches: 0
+WAV headers readable: 393; unsupported/unreadable: 0
+Full inventory: F:\POP PUNK GUITAR ULTIMATE\L3XTOWN_FULL_INVENTORY.csv
+Reconciliation report: F:\POP PUNK GUITAR ULTIMATE\L3XTOWN_INVENTORY_RECONCILIATION.csv
+Do not distribute the library until any missing files or hash mismatches are reviewed.
+SUCCESS: Inventory reports created.
