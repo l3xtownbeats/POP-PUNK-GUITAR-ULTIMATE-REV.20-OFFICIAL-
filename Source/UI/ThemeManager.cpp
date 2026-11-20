@@ -887,7 +887,29 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
                 resetToDefault();
                 return false;
             }
-            decodedControlStates.emplace(key, decoded.rescaled(128, 128, juce::Graphics::highResamplingQuality));
+            // The authored PNGs are square presentation tiles. Crop the control
+            // face out of the tile before caching so a knob/switch is not rendered
+            // with its surrounding label card inside a small JUCE control.
+            auto controlFace = decoded;
+            int cacheWidth = 128;
+            int cacheHeight = 128;
+            if (controlId.startsWith("knob"))
+            {
+                controlFace = decoded.getClippedImage({ 28, 20, 200, 200 });
+            }
+            else if (controlId.startsWith("fx_switch"))
+            {
+                controlFace = decoded.getClippedImage({ 22, 60, 212, 140 });
+                cacheHeight = 84;
+            }
+            if (!controlFace.isValid())
+            {
+                lastError = "NEON STAGE control-state crop produced an invalid image";
+                resetToDefault();
+                return false;
+            }
+            decodedControlStates.emplace(key, controlFace.rescaled(
+                cacheWidth, cacheHeight, juce::Graphics::highResamplingQuality));
         }
         if (decodedControlStates.size() != 135)
         {
