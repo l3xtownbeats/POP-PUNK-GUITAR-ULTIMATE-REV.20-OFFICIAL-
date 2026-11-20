@@ -30,3 +30,19 @@ Auto Sound Hunter and Curator remain disabled. This change does not perform unco
 - Chromatic and out-of-scale fallback behaviour.
 - Invalid key/note rejection.
 - Upper MIDI range handling without note overflow.
+
+## Сценарии приёмки
+
+| Режим | Вход MIDI | AutoChords | Ожидаемое поведение |
+|---|---|---|---|
+| MELODY | C4 | ON | Только C4 |
+| MELODY | C4 | OFF | Только C4 |
+| PATTERN / C major | C4 | ON | C4–E4–G4 |
+| PATTERN / C major | D4 | ON | D4–F4–A4 |
+| PATTERN / A minor | A3 | ON | A3–C4–E4 |
+| PATTERN | C4, E4, G4 | ON | Входной аккорд без расширения |
+| PATTERN | C4 | OFF | Только входной C4 |
+
+Эта версия генерирует внутренние ноты для движка паттерна/семплера. MIDI-события обратно в DAW не передаются. AutoChords не меняет прямой режим MELODY.
+
+Перед выпуском остаются ручные проверки переключения AutoChords, удержания/отпускания MIDI-ноты и смены тональности во время удержания ноты в FL Studio 20.
