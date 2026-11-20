@@ -470,7 +470,7 @@ public:
 
         hostAudioLabel.setJustificationType(juce::Justification::topLeft);
         hostAudioLabel.setFont(makeThemeFont(palette, 9.5f, false, true));
-        hostAudioLabel.setColour(juce::Label::textColourId, palette.token("lcdText"));
+        hostAudioLabel.setColour(juce::Label::textColourId, palette.token("lcd_text"));
         addAndMakeVisible(hostAudioLabel);
         refreshHostAudioLabel();
         startTimerHz(2);
@@ -525,7 +525,7 @@ public:
         heading.setColour(juce::Label::textColourId, palette.token("text_primary"));
         description.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         hostAudioLabel.setFont(makeThemeFont(palette, 9.5f, false, true));
-        hostAudioLabel.setColour(juce::Label::textColourId, palette.token("lcdText"));
+        hostAudioLabel.setColour(juce::Label::textColourId, palette.token("lcd_text"));
         scaleLabel.setColour(juce::Label::textColourId, palette.token("accent"));
         gapLabel.setColour(juce::Label::textColourId, palette.token("accent"));
         configureSlider(scaleSlider, 0.5, 1.5, 0.05, scaleSlider.getValue());
