@@ -1,0 +1,58 @@
+{
+  "project": "NEON STAGE Manager 3.0",
+  "version": "3.0.0",
+  "design_system": "Obsidian Neon Purple",
+  "color_palette": {
+    "background": "#0B0B0D",
+    "panel": "#121216",
+    "surface": "#17171D",
+    "border": "#292932",
+    "metal": "#383842",
+    "neon_purple": "#B300FF",
+    "neon_bright": "#D45CFF"
+  },
+  "assets": [
+    {
+      "asset_id": "btn_main_standard",
+      "filename": "buttons/NSM_BUTTON_MAIN_NORMAL.png",
+      "category": "buttons",
+      "width": 220,
+      "height": 64,
+      "format": "PNG_RGBA",
+      "transparency": true,
+      "states": {
+        "normal": "buttons/NSM_BUTTON_MAIN_NORMAL.png",
+        "hover": "buttons/NSM_BUTTON_MAIN_HOVER.png",
+        "pressed": "buttons/NSM_BUTTON_MAIN_PRESSED.png",
+        "disabled": "buttons/NSM_BUTTON_MAIN_DISABLED.png"
+      },
+      "intended_usage": "Primary action triggers, Scan and Import controls"
+    },
+    {
+      "asset_id": "spr_knob_rot_128",
+      "filename": "sprites/NSM_SPRITE_KNOB_ROTATION_128.png",
+      "category": "sprites",
+      "width": 512,
+      "height": 512,
+      "frame_width": 128,
+      "frame_height": 128,
+      "frames_total": 12,
+      "grid": "4x3",
+      "angle_min": -135,
+      "angle_max": 135,
+      "format": "PNG_RGBA",
+      "transparency": true,
+      "intended_usage": "Parametric rotary controls (Volume, Tone, Drive, Cutoff)"
+    },
+    {
+      "asset_id": "pnl_rack_main",
+      "filename": "panels/NSM_PANEL_MAIN_FRAME.png",
+      "category": "panels",
+      "width": 960,
+      "height": 540,
+      "format": "PNG_RGBA",
+      "transparency": true,
+      "intended_usage": "Central workplace housing workstation displays"
+    }
+  ]
+}
