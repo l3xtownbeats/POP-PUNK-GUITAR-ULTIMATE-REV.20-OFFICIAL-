@@ -171,6 +171,56 @@ def main() -> int:
             or len(sheets["neon_stage_icons_sheet.png"]["elements"].get("nav_icons", [])) != 10:
         raise SystemExit("FAIL: NEON STAGE icon atlas must contain 7 FX and 10 navigation icons")
 
+    expected_knob_boxes = [
+        [65, 120, 165, 220], [175, 120, 275, 220],
+        [285, 120, 385, 220], [395, 120, 495, 220],
+        [65, 220, 165, 320], [175, 220, 275, 320],
+        [285, 220, 385, 320], [395, 220, 495, 320],
+    ]
+    knob_frames = controls.get("knobs", {}).get("frames_bbox", [])
+    if [frame.get("bbox") for frame in knob_frames] != expected_knob_boxes \
+            or [frame.get("angle_deg") for frame in knob_frames] != list(range(0, 360, 45)):
+        raise SystemExit("FAIL: NEON STAGE rotary frame positions/angles mismatch")
+
+    meters = sheets["neon_stage_meters_sliders_sheet.png"]["elements"]
+    if meters.get("vu_meters", {}).get("bbox_area") != [30, 25, 970, 350] \
+            or len(meters.get("vu_meters", {}).get("instances", [])) != 8:
+        raise SystemExit("FAIL: NEON STAGE VU meter atlas geometry mismatch")
+    sliders = meters.get("sliders", {})
+    if sliders.get("types") != ["long_slider", "short_slider"] \
+            or sliders.get("bbox_area") != [30, 380, 970, 760]:
+        raise SystemExit("FAIL: NEON STAGE slider atlas area/types mismatch")
+    slider_instances = sliders.get("instances", {})
+    if slider_instances.get("long_slider", {}).get("track_bbox") != [60, 445, 880, 467] \
+            or slider_instances.get("short_slider", {}).get("track_bbox") != [60, 570, 450, 592] \
+            or slider_instances.get("thumb", {}).get("bbox") != [910, 640, 942, 672]:
+        raise SystemExit("FAIL: NEON STAGE slider track/thumb geometry mismatch")
+    leds = meters.get("status_leds", {})
+    expected_led_states = ["off", "cyan", "blue", "magenta"]
+    if leds.get("round", {}).get("states") != expected_led_states \
+            or leds.get("square", {}).get("states") != expected_led_states \
+            or leds.get("round", {}).get("row_y") != [810, 920] \
+            or leds.get("square", {}).get("row_y") != [810, 920]:
+        raise SystemExit("FAIL: NEON STAGE status LED states/rows mismatch")
+
+    panels = sheets["neon_stage_frames_panels_sheet.png"]["elements"]
+    if set(panels.get("9_slice_corners", {})) != {
+        "top_left", "top_right", "bottom_left", "bottom_right"
+    } or set(panels.get("borders", {})) != {
+        "top_border", "bottom_border", "left_border", "right_border"
+    } or set(panels.get("dividers", {})) != {
+        "horizontal_thin", "horizontal_thick", "vertical_thin", "vertical_thick"
+    } or set(panels.get("header_bars", {})) != {"standard_header", "compact_header"}:
+        raise SystemExit("FAIL: NEON STAGE frame/panel atlas components are incomplete")
+    display = panels.get("display_bg", {})
+    if display.get("grid") is not True or display.get("tint") != "dark_translucent_cyan":
+        raise SystemExit("FAIL: NEON STAGE display background specification mismatch")
+
+    icons = sheets["neon_stage_icons_sheet.png"]["elements"]
+    if icons.get("fx_icons") != ["wave", "eq", "distortion", "chorus", "delay", "reverb", "cabinet"] \
+            or icons.get("nav_icons") != ["crown", "power", "settings", "info", "folder", "search", "guitar", "antenna", "palette", "play"]:
+        raise SystemExit("FAIL: NEON STAGE icon names/order mismatch")
+
     expected_ready = [item[2] for item in EXPECTED]
     if ready != expected_ready:
         raise SystemExit(f"FAIL: all 16 approved themes must be runtime-ready after exact-SHA SVG decode/package validation; got {ready}")
