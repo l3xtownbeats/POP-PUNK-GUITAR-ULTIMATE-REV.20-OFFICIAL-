@@ -27,6 +27,7 @@ int main()
 {
     bool ok = true;
     ok = expect("C major tonic", 60, 0, 1, {{ 60, 64, 67 }}) && ok;
+    ok = expect("C major lower octave", 48, 0, 1, {{ 48, 52, 55 }}) && ok;
     ok = expect("D minor in C major", 62, 0, 1, {{ 62, 65, 69 }}) && ok;
     ok = expect("B diminished in C major", 71, 0, 1, {{ 71, 74, 77 }}) && ok;
     ok = expect("A minor tonic", 57, 9, 2, {{ 57, 60, 64 }}) && ok;
