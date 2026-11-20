@@ -60,3 +60,15 @@ These are design approvals with runtime readiness separately verified on REV.20.
 ## Runtime gate passed — 2026-11-20
 
 All 16 approved shells are now selectable in REV.20. Exact target workflow 44717722638 passed Windows x64 VST3 build, full CTest, ThemeManager load and three SVG-layer decode for all themes, all 32 PNG CRC/dimension checks, registry validation and 16-only package staging. Only manual host and release gates remain.
+
+
+## NEON STAGE DEFAULT sprite atlas package — 2026-11-20
+
+SKIN-1 / `skin-053` now declares four 1024x1024 transparent PNG atlases under `Skin_053/assets/spritesheets/`:
+
+- `neon_stage_controls_spritesheet.png`: eight rotary frames, OFF/ON toggle art and normal/hover/pressed/active button states. Rotary and button backgrounds are consumed by the JUCE LookAndFeel; parameter values and button bindings remain native.
+- `neon_stage_meters_sliders_sheet.png`: eight-segment VU samples, long/short slider artwork and round/square status LED states.
+- `neon_stage_frames_panels_sheet.png`: 9-slice corners, borders, dividers, header bars and display grid.
+- `neon_stage_icons_sheet.png`: seven FX and ten navigation icons.
+
+The source-of-truth layout and bounding boxes are recorded in `neon_stage_spritesheet_manifest.json`. Regenerate with `python tools/generate_neon_stage_spritesheets.py` (requires Pillow), then run `python tools/validate_skin_registry_16.py`. The generator is also run by the Windows x64 VST3 workflow before compilation and package staging. The sprite atlases are visual-only and do not change the APVTS, DSP, sampler, MIDI, preset catalogue, control geometry or audio callback.
