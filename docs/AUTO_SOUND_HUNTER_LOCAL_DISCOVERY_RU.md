@@ -7,6 +7,7 @@
 - Bound the scan to a fixed maximum number of directory entries.
 - Bound hashing to 128 MiB per file and 512 MiB total per scan; larger files or files beyond the budget remain inventoried with an explicit hash-skipped status.
 - Display candidates as `NEEDS_REVIEW` and `UNREVIEWED`.
+- The native discovery radar animates only while the local scan worker is active and stops on completion or error. It does not display a fabricated percentage or system-load metric.
 
 ## Safety boundary
 - No source file is moved, renamed, deleted, rewritten, extracted, copied or overwritten.
