@@ -2073,28 +2073,25 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
     const auto& p = themeManager.getPalette();
     g.fillAll(p.token("window_bg"));
     drawThemeArtworkLayers(g, getLocalBounds(), p, 0.16f, 0.78f, 0.055f);
+
     auto area = getLocalBounds().reduced(14);
     area.removeFromTop(48);
     area.removeFromBottom(132);
     area.removeFromTop(8);
-    const int gap = 10;
-    const int browserWidth = juce::jlimit(190, 250, area.getWidth() / 5);
-    const int rightWidth = juce::jlimit(230, 300, area.getWidth() / 4);
-    auto browser = area.removeFromLeft(browserWidth);
-    area.removeFromLeft(gap);
-    auto right = area.removeFromRight(rightWidth);
-    area.removeFromRight(gap);
-    drawPanel(g, browser, "PRESET LIBRARY");
-    drawPanel(g, area, "GUITAR ENGINE  /  PERFORMANCE");
-    drawPanel(g, right, "SIGNAL CHAIN");
+    const auto fxChain = area.removeFromBottom(56);
+    area.removeFromBottom(8);
 
-    // Subtle NEON STAGE center identity; controls remain live JUCE components.
-    auto badge = area.removeFromTop(3);
-    g.setColour(p.token("accent"));
-    g.fillRoundedRectangle(badge.toFloat(), 1.5f);
-    g.setColour(p.token("text_secondary").withAlpha(0.12f));
-    for (int x = area.getX() + 16; x < area.getRight(); x += 32)
-        g.drawVerticalLine(x, (float)area.getY() + 8.0f, (float)area.getBottom() - 8.0f);
+    const int leftWidth = juce::jlimit(180, 220, area.getWidth() / 5);
+    const int rightWidth = juce::jlimit(240, 285, area.getWidth() / 4);
+    auto left = area.removeFromLeft(leftWidth);
+    area.removeFromLeft(10);
+    auto right = area.removeFromRight(rightWidth);
+    area.removeFromRight(10);
+
+    drawPanel(g, left, "AUTOCHORDS  /  PRESETS");
+    drawPanel(g, area, "FX EDIT  /  NEON STAGE");
+    drawPanel(g, right, "AMP & TONE");
+    drawPanel(g, fxChain, "FX CHAIN");
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::resized()
@@ -2107,8 +2104,8 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     if (auxiliaryWorkspace != nullptr)
         auxiliaryWorkspace->setBounds(bounds);
 
-    // NEON STAGE three-zone shell: browser / instrument / amp+FX.
-    // Lower performance strip remains full width. APVTS attachments are untouched.
+    // Approved NEON STAGE six-part composition:
+    // header / left fretboard / centre FX edit / right Amp & Tone / FX chain / piano.
     auto header = bounds.removeFromTop(48);
     titleLabel.setBounds(header.removeFromLeft(105).reduced(2, 4));
     subtitleLabel.setBounds(18, 47, 150, 14);
@@ -2122,6 +2119,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     loadButton.setBounds(header.removeFromRight(112).reduced(2, 5));
     header.removeFromRight(8);
 
+    // Performance monitor, status and the native MIDI keyboard occupy the footer.
     auto footer = bounds.removeFromBottom(132);
     statusLabel.setBounds(footer.removeFromBottom(22).reduced(3, 1));
     footer.removeFromBottom(4);
@@ -2131,59 +2129,77 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     if (keyboard != nullptr)
         keyboard->setBounds(footer.reduced(2, 2));
 
-    bounds.removeFromTop(8);
-    const int gap = 10;
-    const int browserWidth = juce::jlimit(190, 250, bounds.getWidth() / 5);
-    const int rightWidth = juce::jlimit(230, 300, bounds.getWidth() / 4);
-    auto browser = bounds.removeFromLeft(browserWidth);
-    bounds.removeFromLeft(gap);
-    auto right = bounds.removeFromRight(rightWidth);
-    bounds.removeFromRight(gap);
-    auto centre = bounds;
-
-    // Left preset browser: section chrome is reserved above live controls.
-    browser.removeFromTop(34);
-    presetBox.setBounds(browser.removeFromTop(42).reduced(3, 3));
-    browser.removeFromTop(5);
-    categoryBox.setBounds(browser.removeFromTop(34).reduced(3, 2));
-    browser.removeFromTop(5);
-    presetSearch.setBounds(browser.removeFromTop(34).reduced(3, 2));
-
-    // Center instrument zone: tabs, mode and all nine performance controls.
-    auto modeRow = centre.removeFromTop(42);
-    melodyTab.setBounds(modeRow.removeFromLeft(modeRow.getWidth() / 3).reduced(2, 3));
-    patternTab.setBounds(modeRow.removeFromLeft(modeRow.getWidth() / 2).reduced(2, 3));
-    modeBox.setBounds(modeRow.reduced(2, 3));
-    centre.removeFromTop(6);
-    auto knobArea = centre;
-    knobArea.removeFromBottom(42);
-    const int cols = 3;
-    const int rows = 3;
-    const int cellW = juce::jmax(1, knobArea.getWidth() / cols);
-    const int cellH = juce::jmax(1, knobArea.getHeight() / rows);
-    for (size_t i = 0; i < knobs.size(); ++i)
-    {
-        const int col = static_cast<int>(i) % cols;
-        const int row = static_cast<int>(i) / cols;
-        auto cell = juce::Rectangle<int>(knobArea.getX() + col * cellW,
-            knobArea.getY() + row * cellH, cellW, cellH).reduced(3, 2);
-        knobLabels[i].setBounds(cell.removeFromTop(20));
-        knobs[i].setBounds(cell.reduced(2, 1));
-    }
-    startModeBox.setBounds(centre.removeFromBottom(36).reduced(3, 2));
-
-    // Right rack: section chrome is reserved above amplifier and FX headings.
-    right.removeFromTop(34);
-    ampTitle.setBounds(right.removeFromTop(32).reduced(5, 2));
-    fxTitle.setBounds(right.removeFromTop(28).reduced(5, 1));
+    bounds.removeFromBottom(8);
+    auto fxChain = bounds.removeFromBottom(56);
+    fxTitle.setBounds(fxChain.removeFromLeft(88).reduced(3, 5));
+    fxChain.removeFromLeft(4);
+    constexpr int fxGap = 4;
+    const int fxButtonWidth = juce::jmax(1,
+        (fxChain.getWidth() - fxGap * static_cast<int>(fxButtons.size() - 1))
+            / static_cast<int>(fxButtons.size()));
     for (size_t i = 0; i < fxButtons.size(); ++i)
     {
-        auto row = right.removeFromTop(juce::jmax(1, right.getHeight()
-            / static_cast<int>(fxButtons.size() - i)));
-        fxButtons[i].setBounds(row.reduced(5, 2));
+        auto slot = fxChain.removeFromLeft(fxButtonWidth);
+        fxButtons[i].setBounds(slot.reduced(2, 5));
+        if (i + 1 < fxButtons.size())
+            fxChain.removeFromLeft(fxGap);
     }
 
-    // Legacy title is no longer part of the visible main shell.
+    bounds.removeFromTop(8);
+    constexpr int workspaceGap = 10;
+    const int leftWidth = juce::jlimit(180, 220, bounds.getWidth() / 5);
+    const int rightWidth = juce::jlimit(240, 285, bounds.getWidth() / 4);
+    auto left = bounds.removeFromLeft(leftWidth);
+    bounds.removeFromLeft(workspaceGap);
+    auto right = bounds.removeFromRight(rightWidth);
+    bounds.removeFromRight(workspaceGap);
+    auto centre = bounds;
+
+    // Left: preset filtering and the PATTERN-only reference fretboard.
+    left.removeFromTop(34);
+    categoryBox.setBounds(left.removeFromTop(34).reduced(4, 2));
+    left.removeFromTop(4);
+    presetSearch.setBounds(left.removeFromTop(34).reduced(4, 2));
+    left.removeFromTop(4);
+    presetBox.setBounds(left.removeFromTop(40).reduced(4, 2));
+    left.removeFromTop(6);
+    if (chordDiagram != nullptr)
+    {
+        chordDiagram->setVisible(modeBox.getSelectedId() == 2);
+        chordDiagram->setBounds(left.reduced(4, 2));
+    }
+
+    // Centre: MELODY/PATTERN transport and the real APVTS-backed FX editor.
+    auto modeRow = centre.removeFromTop(38);
+    melodyTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
+    patternTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
+    modeBox.setBounds(modeRow.removeFromLeft(138).reduced(2, 3));
+    startModeBox.setBounds(modeRow.reduced(2, 3));
+    centre.removeFromTop(5);
+    if (mainFxEdit != nullptr)
+        mainFxEdit->setBounds(centre.reduced(2, 2));
+
+    // Right: all nine locked REV.20 controls; the first four are Amp/Tone,
+    // the remaining five retain the approved performance/feel controls.
+    right.removeFromTop(34);
+    ampTitle.setBounds(right.removeFromTop(24).reduced(5, 1));
+    const int columns = 3;
+    const int rows = 3;
+    const int cellWidth = juce::jmax(1, right.getWidth() / columns);
+    const int cellHeight = juce::jmax(1, right.getHeight() / rows);
+    for (size_t i = 0; i < knobs.size(); ++i)
+    {
+        const int column = static_cast<int>(i) % columns;
+        const int row = static_cast<int>(i) / columns;
+        auto cell = juce::Rectangle<int>(right.getX() + column * cellWidth,
+            right.getY() + row * cellHeight, cellWidth, cellHeight).reduced(2, 2);
+        knobLabels[i].setBounds(cell.removeFromTop(17));
+        knobs[i].setBounds(cell.reduced(1, 1));
+    }
+
+    // This legacy heading is retained for compatibility but is represented by
+    // the horizontal seven-switch bar above.
+    fxTitle.setVisible(true);
     playbackTitle.setVisible(false);
 }
 
