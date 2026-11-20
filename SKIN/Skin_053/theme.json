@@ -334,7 +334,13 @@
     "hero": "assets/hero.png",
     "texture": "svg/texture.svg",
     "bezel": "svg/bezel.svg",
-    "crest": "svg/crest.svg"
+    "crest": "svg/crest.svg",
+    "spriteSheets": {
+      "controls": "assets/spritesheets/neon_stage_controls_spritesheet.png",
+      "meters_sliders": "assets/spritesheets/neon_stage_meters_sliders_sheet.png",
+      "frames_panels": "assets/spritesheets/neon_stage_frames_panels_sheet.png",
+      "icons": "assets/spritesheets/neon_stage_icons_sheet.png"
+    }
   },
   "compatibility": {
     "minimumPluginVersion": "4.0.0",
