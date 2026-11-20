@@ -1157,11 +1157,7 @@ private:
 class PPGUChordDiagram final : public juce::Component
 {
 public:
-    PPGUChordDiagram()
-    {
-        setAccessible(true);
-        setDescription("Reference guitar chord diagram for A major. Display only; MIDI chord generation is not connected.");
-    }
+    PPGUChordDiagram() = default;
 
     void setPalette(const PPGUThemeManager::Palette& value)
     {
