@@ -52,10 +52,16 @@ jobs:
         shell: pwsh
         run: python tools/validate_skin_registry_16.py
 
-      - name: Upload REV.20 Windows x64 VST3
+      - name: Stage exactly 16 approved skin folders beside VST3
+        shell: pwsh
+        run: python tools/package_active_skins.py --root SKIN --output build/PPGU_artefacts/Release/VST3/Skins
+
+      - name: Upload REV.20 Windows x64 VST3 and matching 16-skin pack
         uses: actions/upload-artifact@v4
         with:
           name: PPGU-REV20-Windows-x64-VST3
-          path: build/PPGU_artefacts/Release/VST3/*.vst3
+          path: |
+            build/PPGU_artefacts/Release/VST3/*.vst3
+            build/PPGU_artefacts/Release/VST3/Skins/**
           if-no-files-found: error
           retention-days: 14

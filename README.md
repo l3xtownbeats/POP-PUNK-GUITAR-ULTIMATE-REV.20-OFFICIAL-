@@ -22,7 +22,7 @@ Both modes follow the approved one-key/one-note-event rule: each ordinary MIDI k
 
 ## Visual identity
 
-The canonical visual shell and default theme is **SKIN-1 / NEON STAGE DEFAULT / `skin-053`**. The complete approved set is exactly 16 named premium graphical shells: SKIN-1 through SKIN-16. All 15 additional shells have individual manifests, vector material layers and preview/hero artwork. Their artwork asset pack has passed strict source-branch validation; enabling them in the REV.20 runtime remains gated on REV.20 exact-SHA build and host acceptance. No legacy skin batches or additional themes are part of the product.
+The canonical visual shell and default theme is **SKIN-1 / NEON STAGE DEFAULT / `skin-053`**. The complete approved set is exactly 16 named premium graphical shells: SKIN-1 through SKIN-16. All 15 additional shells have individual manifests, vector material layers and preview/hero artwork. Their artwork asset pack has passed strict source-branch validation. The REV.20 source now includes SVG loading/drawing integration and a 16-only package step; exact-SHA Windows CTest/runtime validation and FL Studio 20 host acceptance are still required before marking all skins runtime-ready. No legacy skin batches or additional themes are part of the product.
 
 ## Repository map
 

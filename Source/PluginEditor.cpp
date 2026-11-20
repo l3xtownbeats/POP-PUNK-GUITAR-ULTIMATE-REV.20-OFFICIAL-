@@ -44,6 +44,48 @@ juce::Font makeThemeFont(const PPGUThemeManager::Palette& palette, float baseSiz
     return juce::Font(family, baseSize * palette.fontScale, style)
         .withExtraKerningFactor(palette.letterSpacing);
 }
+
+void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
+                            const PPGUThemeManager::Palette& palette,
+                            float textureOpacity = 0.10f,
+                            float bezelOpacity = 0.32f,
+                            float crestOpacity = 0.035f)
+{
+    if (palette.textureArtwork.isValid() && textureOpacity > 0.0f)
+    {
+        g.saveState();
+        g.setOpacity(textureOpacity);
+        g.drawImageWithin(palette.textureArtwork, bounds.getX(), bounds.getY(),
+                         bounds.getWidth(), bounds.getHeight(),
+                         juce::RectanglePlacement::stretchToFit);
+        g.restoreState();
+    }
+
+    if (palette.bezelArtwork.isValid() && bezelOpacity > 0.0f)
+    {
+        g.saveState();
+        g.setOpacity(bezelOpacity);
+        g.drawImageWithin(palette.bezelArtwork, bounds.getX(), bounds.getY(),
+                         bounds.getWidth(), bounds.getHeight(),
+                         juce::RectanglePlacement::stretchToFit);
+        g.restoreState();
+    }
+
+    if (palette.crestArtwork.isValid() && crestOpacity > 0.0f
+        && bounds.getWidth() >= 320 && bounds.getHeight() >= 220)
+    {
+        const auto crestWidth = juce::jmin(420, juce::jmax(1, bounds.getWidth() - 32));
+        const auto crestHeight = juce::jmin(148, juce::jmax(1, bounds.getHeight() - 32));
+        const auto crestBounds = bounds.withSizeKeepingCentre(crestWidth, crestHeight);
+        g.saveState();
+        g.setOpacity(crestOpacity);
+        g.drawImageWithin(palette.crestArtwork, crestBounds.getX(), crestBounds.getY(),
+                          crestBounds.getWidth(), crestBounds.getHeight(),
+                          juce::RectanglePlacement::centred);
+        g.restoreState();
+    }
+}
+
 }
 
 // Scrollable visual browser for the complete registry. Preview images are loaded
@@ -71,7 +113,7 @@ public:
         subtitle.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(subtitle);
 
-        search.setTextToShowWhenEmpty("SEARCH THEMES...", palette.token("text_secondary"));
+        search.setTextToShowWhenEmpty("SEARCH SKINS...", palette.token("text_secondary"));
         search.setColour(juce::TextEditor::backgroundColourId, palette.token("control_bg"));
         search.setColour(juce::TextEditor::textColourId, palette.token("text_primary"));
         search.setColour(juce::TextEditor::outlineColourId, palette.token("control_border"));
@@ -79,12 +121,8 @@ public:
         search.onTextChange = [this] { rebuildCards(); };
         addAndMakeVisible(search);
 
-        familyFilter.addItem("ALL FAMILIES", 1);
-        familyFilter.addItem("CARBON STUDIO", 2); familyFilter.addItem("NEON BASEMENT", 3);
-        familyFilter.addItem("CHROME PARADE", 4); familyFilter.addItem("WOOD SUMMER", 5);
-        familyFilter.addItem("VINTAGE TAPE", 6); familyFilter.addItem("SUNSET SUBURB", 7);
-        familyFilter.addItem("SPECIAL", 8); familyFilter.addItem("LEGACY THEMES", 9);
-        familyFilter.addItem("FAVORITES ONLY", 10);
+        familyFilter.addItem("ALL SKINS", 1);
+        familyFilter.addItem("FAVORITES ONLY", 2);
         familyFilter.setSelectedId(1, juce::dontSendNotification);
         familyFilter.setColour(juce::ComboBox::backgroundColourId, palette.token("control_bg"));
         familyFilter.setColour(juce::ComboBox::textColourId, palette.token("text_primary"));
@@ -150,6 +188,12 @@ public:
         applyButton.setColour(juce::TextButton::buttonColourId, palette.token("accent"));
         applyButton.setColour(juce::TextButton::textColourOffId, palette.token("window_bg"));
         grid.setPalette(palette); rebuildCards(); repaint();
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.11f, 0.30f, 0.025f);
     }
 
     bool keyPressed(const juce::KeyPress& key) override
@@ -224,7 +268,8 @@ private:
             g.setColour(palette.token("text_primary")); g.setFont(makeThemeFont(palette, 12.5f, false, true));
             g.drawText(item.name, textArea.removeFromTop(18.0f), juce::Justification::centredLeft, true);
             g.setColour(palette.token("text_secondary")); g.setFont(makeThemeFont(palette, 9.0f));
-            g.drawText(item.family + "  /  " + item.layout, textArea.removeFromTop(14.0f),
+            g.drawText("SKIN " + juce::String(item.index).paddedLeft('0', 2)
+                           + "  /  " + item.layout, textArea.removeFromTop(14.0f),
                        juce::Justification::centredLeft, true);
             const auto tag = item.active ? juce::String("ACTIVE")
                 : (selected ? juce::String("SELECTED") : juce::String("PREVIEW"));
@@ -321,15 +366,10 @@ private:
     {
         grid.clearCards(); visibleIndices.clear();
         const auto query = search.getText().trim().toLowerCase();
-        const int selectedFamily = familyFilter.getSelectedId();
-        const bool favoritesOnly = selectedFamily == 10;
-        const juce::StringArray families { "", "carbon_studio", "neon_basement", "chrome_parade",
-            "wood_summer", "vintage_tape", "sunset_suburb", "special", "legacy" };
-        const auto familyKey = selectedFamily > 1 && selectedFamily <= families.size()
-            ? families[selectedFamily - 1] : juce::String{};
+        const int selectedFilter = familyFilter.getSelectedId();
+        const bool favoritesOnly = selectedFilter == 2;
         for (const auto& item : skins)
         {
-            if (familyKey.isNotEmpty() && item.familyKey != familyKey) continue;
             const bool isFavorite = favorites.contains(item.id);
             if (favoritesOnly && !isFavorite) continue;
             auto cardItem = item; cardItem.favorite = isFavorite;
@@ -455,6 +495,12 @@ public:
         repaint();
     }
 
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.12f, 0.34f, 0.04f);
+    }
+
     void resized() override
     {
         auto area = getLocalBounds().reduced(12);
@@ -536,6 +582,12 @@ public:
         repaint();
     }
 
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.12f, 0.34f, 0.04f);
+    }
+
     void resized() override
     {
         auto area = getLocalBounds().reduced(18);
@@ -581,6 +633,7 @@ public:
                                                palette.tokens.panel,
                                                bounds.getX(), bounds.getBottom(), false));
         g.fillRoundedRectangle(bounds, 9.0f);
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.045f, 0.0f, 0.0f);
         g.setColour(palette.tokens.controlBorder.withAlpha(0.9f));
         g.drawRoundedRectangle(bounds.reduced(0.5f), 9.0f, 1.0f);
         g.setColour(palette.tokens.accent);
@@ -860,6 +913,7 @@ public:
     void paint(juce::Graphics& g) override
     {
         g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.32f, 0.035f);
         auto area = getLocalBounds().toFloat().reduced(12.0f);
         g.setColour(palette.token("control_border"));
         g.drawRoundedRectangle(area, 10.0f, 1.0f);
@@ -1045,6 +1099,12 @@ public:
         apply.setColour(juce::TextButton::textColourOffId, palette.token("window_bg"));
     }
 
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.30f, 0.035f);
+    }
+
     void resized() override
     {
         auto area = getLocalBounds().reduced(22);
@@ -1155,6 +1215,7 @@ public:
     void paint(juce::Graphics& g) override
     {
         g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.30f, 0.035f);
         g.setColour(palette.token("control_border"));
         g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(12), 10, 1);
     }
@@ -1578,6 +1639,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
                                            p.token("panel"),
                                            bounds.getX(), bounds.getBottom(), false));
     g.fillRoundedRectangle(bounds, 12.0f);
+    drawThemeArtworkLayers(g, area, p, 0.10f, 0.42f, 0.0f);
     g.setColour(p.token("control_border").withAlpha(0.78f));
     g.drawRoundedRectangle(bounds.reduced(0.5f), 12.0f, 1.0f);
 
@@ -1600,6 +1662,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
 {
     const auto& p = themeManager.getPalette();
     g.fillAll(p.token("window_bg"));
+    drawThemeArtworkLayers(g, getLocalBounds(), p, 0.16f, 0.78f, 0.055f);
     auto area = getLocalBounds().reduced(14);
     area.removeFromTop(48);
     area.removeFromBottom(132);

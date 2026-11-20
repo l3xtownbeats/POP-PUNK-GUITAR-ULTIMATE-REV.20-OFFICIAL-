@@ -90,3 +90,11 @@ Static validation utilities and focused contract tests may be used for engineeri
 - On exact SHA `142013dbeb315b95246fdcd476f4485af0aa659b`, Windows x64 configure and VST3/all C++ target build passed. CTest ran 14 tests: 12 passed, 2 failed.
 - Failure 1 was a test assertion using unpadded stable IDs and incorrect artwork path resolution. Failure 2 was a test importing a missing module. Both are corrected in the next REV.20 commit; a narrowly scoped SFZ path-safety helper is added, not a full sample-library audit engine.
 - The skin asset validator and artifact upload were skipped due to CTest failures. Do not claim CI green until a fresh exact-SHA run completes every step.
+
+
+## 16-skin runtime artwork integration (2026-11-20)
+
+- Imported the safe SVG asset loader and reference-counted palette artwork from the source PR #58 work branch, preserving the REV.20 default label `NEON STAGE DEFAULT` and current 16-theme identity mapping.
+- Main editor, auxiliary panels, gallery, Pattern/AutoChords, performance and floating workspace now draw the selected skin's texture/bezel/crest layers. Gallery shows only ALL SKINS and FAVORITES ONLY. Existing preview/apply/cancel workflow and favorite persistence remain.
+- Added ThemeManager test decoding all three SVG layers for each of the 16 manifests. Existing runtimeReady registry flags remain unchanged (only SKIN-1 true) until this exact REV.20 test and package workflow pass.
+- Added 16-only package staging and included the matching SKIN directory in the VST3 artifact. The latest exact-SHA run is pending; no runtime acceptance claim is made yet.

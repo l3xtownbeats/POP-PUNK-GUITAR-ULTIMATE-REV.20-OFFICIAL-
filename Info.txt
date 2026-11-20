@@ -95,3 +95,12 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - CTest ran 14 tests: 12 PASSED, 2 FAILED. `ppgu_theme_contracts` exposed two test-only defects: the assertion formatted `skin-053` as `skin-53`, and preview/hero lookup used `theme.json/assets` rather than the sibling `theme.json` parent `assets/` folder. Both assertions corrected; JUCE GUI initializer added to the theme test.
 - `ppgu_sample_library_audit_path_contract` failed because the imported test referenced a missing `audit_sample_library.py`. REV.20 now adds the narrowly scoped `tools/sfz_path_safety.py` helper and updates the test import. The helper only covers SFZ path normalization/assignment token handling; it is not represented as a full sample-library auditor.
 - Full CTest rerun required. Asset validator and VST3 artifact upload were skipped by `if: success()` after CTest failed.
+
+
+## 2026-11-20 — 16-skin ThemeManager and UI artwork integration added
+- Selective runtime artwork integration from source PR #58 has now been ported into REV.20 `Source/UI/ThemeManager.cpp/.h`, `Source/PluginEditor.cpp` and `Source/UI/PPGUMultiWindowWorkspace.cpp`.
+- ThemeManager loads the current theme's local SVG texture/bezel/crest on the UI thread with relative-path, traversal, symlink, file-size, external-content and XML checks; renders into bounded reference-counted images. Palette fallback identity remains the exact locked **NEON STAGE DEFAULT** label.
+- Main NEON STAGE shell, preset/workspace panels, skin gallery, settings/import, performance, FX EDIT, PATTERN section, AutoChords and floating workspace receive their active theme artwork layers. No processor, APVTS, DSP, MIDI, sampler or audio-callback change is intended.
+- Gallery batch/family filters were removed. Only ALL SKINS and FAVORITES ONLY remain; card labels use logical SKIN ordinals, not stable IDs. Existing Preview/Apply/Cancel and favorite actions are preserved.
+- `tests/ThemeManagerTests.cpp` now attempts ThemeManager loading and all three SVG decodes for every one of the 16 theme manifests, including the 15 previously design-only entries. This new exact-REV.20 test has not yet passed in CI; do not set SKIN-2…16 runtimeReady until the updated exact-SHA validation succeeds.
+- `tools/package_active_skins.py` and the Windows workflow now stage and upload exactly 16 folders plus preview/hero/texture/bezel/crest alongside the VST3; the script was adapted to REV.20's `defaultStableId` schema key.

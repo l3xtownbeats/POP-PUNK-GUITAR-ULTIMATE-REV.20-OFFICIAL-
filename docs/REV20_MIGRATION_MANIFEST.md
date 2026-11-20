@@ -50,3 +50,16 @@ This is a selective consolidation, not a merge of old branches. Old repositories
 - Exactly two top-level product modes: MELODY and PATTERN. AUTOCHORDS and other tools remain auxiliary windows/functions within these modes.
 - Core bank target: 500 playable presets, 250 MELODY + 250 PATTERN. The PATTERN 250 are distributed across PATTERN's own windows, sections and functions, not one flat list.
 - BASIC LIBRARY is 15 GB and included. Initial EXPANDED add-on is +15 GB (30 GB combined at initial tier), optional for core presets and extensible without a product cap.
+
+
+## Selective runtime artwork integration (2026-11-20)
+
+From source PR #58, the following artwork-only code was integrated into current REV.20 files without wholesale branch merge:
+
+- `Source/UI/ThemeManager.cpp/.h`: safe local SVG loading for texture/bezel/crest and bounded image rendering, with path/content validation. REV.20 retains the exact default name NEON STAGE DEFAULT.
+- `Source/PluginEditor.cpp`: artwork drawing in the main editor and auxiliary surfaces; 16-skin-only gallery filtering; stable-ID/logical-ordinal labels; prior Preview/Apply/Cancel interaction retained.
+- `Source/UI/PPGUMultiWindowWorkspace.cpp`: subtle theme texture layer for workspace background/floating windows.
+- `tests/ThemeManagerTests.cpp`: exact-SHA regression test now decodes all 3 SVG assets for every one of the 16 theme manifests.
+- `tools/package_active_skins.py`: stages exactly the 16 active themes and five required assets each; adapted to REV.20 registry `defaultStableId` key. Windows workflow uploads the .vst3 bundle plus matching `Skins/` pack.
+
+These code changes are present, but their exact target commit Windows build/CTest/asset/package validation has not yet returned a completed passing result. `runtimeReady` flags remain unchanged pending that evidence. No APVTS/DSP/MIDI/sampler/audio callback changes are intended.

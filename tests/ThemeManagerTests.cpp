@@ -61,6 +61,23 @@ int main()
             expect(ids.insert(id.toStdString()).second, id + " ID is unique");
             const auto manifest = skinRoot.getChildFile(path);
             expect(manifest.existsAsFile(), id + " design manifest is preserved");
+
+            // Every approved skin must load its palette and decode all local SVG
+            // artwork layers, even while a release/host gate remains pending.
+            PPGUThemeManager artworkCandidate;
+            const bool artworkLoaded = manifest.existsAsFile() && artworkCandidate.loadFromFile(manifest);
+            expect(artworkLoaded, id + " theme manifest and SVG artwork load"
+                   + (artworkLoaded ? juce::String{} : ": " + artworkCandidate.getLastError()));
+            if (artworkLoaded)
+            {
+                expect(artworkCandidate.getPalette().id == id, id + " artwork candidate ID matches");
+                expect(artworkCandidate.getPalette().name == entry.getProperty("name", "").toString(),
+                       id + " artwork candidate display name matches");
+                expect(artworkCandidate.getPalette().textureArtwork.isValid(), id + " texture SVG decoded");
+                expect(artworkCandidate.getPalette().bezelArtwork.isValid(), id + " bezel SVG decoded");
+                expect(artworkCandidate.getPalette().crestArtwork.isValid(), id + " crest SVG decoded");
+            }
+
             if (ready)
             {
                 ++runtimeReadyCount;
