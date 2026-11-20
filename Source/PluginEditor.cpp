@@ -1252,6 +1252,28 @@ namespace { void getPluginModuleAnchor() {} }
 void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int w, int h,
                                                     float pos, float start, float end, juce::Slider& slider)
 {
+    if (palette.controlsSpriteSheet.isValid())
+    {
+        // Eight authored 100x100 frames at 45-degree increments. Quantization
+        // is visual only; the Slider's continuous parameter value is unchanged.
+        const int frame = juce::jlimit(0, 7, juce::roundToInt(pos * 7.0f));
+        const int sourceX = 65 + (frame % 4) * 110;
+        const int sourceY = frame < 4 ? 120 : 220;
+        const int diameter = juce::jmax(1, juce::roundToInt(
+            static_cast<float>(juce::jmin(w, h)) * 0.82f));
+        const int destinationX = x + (w - diameter) / 2;
+        const int destinationY = y + (h - diameter) / 2;
+        g.drawImage(palette.controlsSpriteSheet, destinationX, destinationY,
+                    diameter, diameter, sourceX, sourceY, 100, 100);
+        if (!slider.isEnabled())
+        {
+            g.setColour(palette.token("window_bg").withAlpha(0.48f));
+            g.fillEllipse(static_cast<float>(destinationX), static_cast<float>(destinationY),
+                          static_cast<float>(diameter), static_cast<float>(diameter));
+        }
+        return;
+    }
+
     const float d = juce::jmin(static_cast<float>(w), static_cast<float>(h)) * 0.76f;
     const float r = d * 0.5f;
     const float cx = x + w * 0.5f;
@@ -1301,6 +1323,20 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
 void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
                                                    const juce::Colour& base, bool hovered, bool down)
 {
+    if (palette.controlsSpriteSheet.isValid() && button.isEnabled())
+    {
+        // Atlas state boxes are authored at 225x125; JUCE draws the button's
+        // text/icon afterwards, so labels remain live and accessible.
+        int sourceX = 25;
+        if (down) sourceX = 505;
+        else if (button.getToggleState()) sourceX = 745;
+        else if (hovered) sourceX = 265;
+        const auto bounds = button.getLocalBounds();
+        g.drawImage(palette.controlsSpriteSheet, bounds.getX(), bounds.getY(),
+                    bounds.getWidth(), bounds.getHeight(), sourceX, 690, 225, 125);
+        return;
+    }
+
     auto bounds = button.getLocalBounds().toFloat().reduced(0.5f);
     const bool enabled = button.isEnabled();
     const bool focused = enabled && button.hasKeyboardFocus(true);
