@@ -202,6 +202,10 @@ def main() -> int:
             or leds.get("round", {}).get("row_y") != [810, 920] \
             or leds.get("square", {}).get("row_y") != [810, 920]:
         raise SystemExit("FAIL: NEON STAGE status LED states/rows mismatch")
+    for shape in ("round", "square"):
+        rows = leds.get(shape, {}).get("instances", {})
+        if set(rows) != {"810", "920"} or any(set(row) != set(expected_led_states) for row in rows.values()):
+            raise SystemExit(f"FAIL: NEON STAGE {shape} LEDs must have all four states in both rows")
 
     panels = sheets["neon_stage_frames_panels_sheet.png"]["elements"]
     if set(panels.get("9_slice_corners", {})) != {
