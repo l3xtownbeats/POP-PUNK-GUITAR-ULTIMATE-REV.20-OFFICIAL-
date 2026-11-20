@@ -73,6 +73,14 @@ public:
         return false;
     }
 
+    // Lock-free post-output peak snapshot for UI meters. Values are linear 0..1+.
+    float getOutputPeak(int channel) const noexcept
+    {
+        if (channel < 0 || channel >= static_cast<int>(outputPeakMeters.size()))
+            return 0.0f;
+        return outputPeakMeters[static_cast<size_t>(channel)].load(std::memory_order_relaxed);
+    }
+
 private:
     std::atomic<bool> panicRequested { false };
     std::atomic<int> selectedSongSection { 0 };
@@ -82,6 +90,7 @@ private:
     }};
     std::atomic<int> patternPreviewSlot { -1 };
     std::array<std::array<std::atomic<bool>, 128>, 16> displayHeldNotes {};
+    std::array<std::atomic<float>, 2> outputPeakMeters {};
     double currentSampleRate = 44100.0;
     int maximumBlockSize = 512;
     ppgu::sampler::SamplerEngine sampler;
