@@ -27,6 +27,9 @@ The full stack is drawn only on the main Skin-1 canvas. Floating panels continue
 - All PNG files are loaded from the local theme directory by `PPGUThemeManager` on the UI/message thread.
 - The audio callback, DSP, sampler, MIDI processing and scheduler do not access artwork.
 - The runtime packager copies all six layers only for `skin-053`.
+- The runtime packager also stages the complete 27-control × 5-state image set (135 PNGs) and its manifest only for `skin-053`.
+- `PPGUThemeManager` validates the control IDs, state names, record count, safe relative paths and 256×256 PNG dimensions, then caches 128×128 UI images.
+- The nine rotary controls and seven FX switches resolve their authored default/hover/pressed/disabled/dragged images by component ID. Rotary indicators remain driven by the live slider value.
 - The existing four Skin-1 sprite atlases, their manifest, the approved theme identity and the existing parameter bindings are preserved.
 - No APVTS IDs, ranges, audio behaviour, plugin layout geometry or theme IDs are changed.
 
