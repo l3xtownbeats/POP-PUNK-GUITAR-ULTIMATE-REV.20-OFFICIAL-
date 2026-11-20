@@ -4,6 +4,7 @@
 #include "PPGUData.h"
 #include "UI/PPGUControlState.h"
 #include "UI/PPGULibraryDiscovery.h"
+#include "UI/PPGUDiscoveryRadar.h"
 
 #include <algorithm>
 #include <cmath>
@@ -619,6 +620,12 @@ public:
         addAndMakeVisible(description);
         rootLabel.setText("Select a local sample folder.", juce::dontSendNotification);
         addAndMakeVisible(rootLabel);
+        radar.setFrames(createRadarFrames(palette), 12);
+        radar.setRunning(false);
+        addAndMakeVisible(radar);
+        scanActivity.setJustificationType(juce::Justification::centredLeft);
+        scanActivity.setText("RADAR IDLE  /  NO SCAN RUNNING", juce::dontSendNotification);
+        addAndMakeVisible(scanActivity);
         chooseButton.setButtonText("CHOOSE FOLDER");
         scanButton.setButtonText("SCAN (READ ONLY)");
         addAndMakeVisible(chooseButton);
@@ -648,6 +655,11 @@ public:
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
         description.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         rootLabel.setColour(juce::Label::textColourId, palette.token("lcd_text"));
+        scanActivity.setFont(makeThemeFont(palette, 10.0f, false, true));
+        scanActivity.setColour(juce::Label::textColourId, palette.token("accent"));
+        const bool radarWasRunning = radar.isRunning();
+        radar.setFrames(createRadarFrames(palette), 12);
+        radar.setRunning(radarWasRunning);
         status.setColour(juce::Label::textColourId, palette.token("accent"));
         results.setColour(juce::TextEditor::backgroundColourId, palette.token("lcd_bg"));
         results.setColour(juce::TextEditor::textColourId, palette.token("text_primary"));
@@ -679,12 +691,55 @@ public:
         actions.removeFromLeft(10);
         scanButton.setBounds(actions.removeFromLeft(165));
         area.removeFromTop(8);
+        auto radarRow = area.removeFromTop(96);
+        radar.setBounds(radarRow.removeFromLeft(96).reduced(3));
+        radarRow.removeFromLeft(10);
+        scanActivity.setBounds(radarRow);
+        area.removeFromTop(5);
         status.setBounds(area.removeFromTop(26));
         area.removeFromTop(5);
         results.setBounds(area);
     }
 
 private:
+    static std::vector<juce::Image> createRadarFrames(const PPGUThemeManager::Palette& theme)
+    {
+        std::vector<juce::Image> images;
+        constexpr int imageSize = 128;
+        constexpr float centre = 64.0f;
+        constexpr float radius = 55.0f;
+
+        for (int frame = 0; frame < 12; ++frame)
+        {
+            juce::Image image(juce::Image::ARGB, imageSize, imageSize, true);
+            juce::Graphics graphics(image);
+            graphics.fillAll(juce::Colours::transparentBlack);
+            graphics.setColour(theme.token("control_border").withAlpha(0.75f));
+            graphics.drawEllipse(centre - radius, centre - radius, radius * 2.0f, radius * 2.0f, 1.2f);
+            graphics.drawEllipse(centre - radius * 0.66f, centre - radius * 0.66f,
+                                 radius * 1.32f, radius * 1.32f, 1.0f);
+            graphics.drawEllipse(centre - radius * 0.33f, centre - radius * 0.33f,
+                                 radius * 0.66f, radius * 0.66f, 0.8f);
+            graphics.drawLine(centre, centre - radius, centre, centre + radius, 0.7f);
+            graphics.drawLine(centre - radius, centre, centre + radius, centre, 0.7f);
+
+            const float angle = juce::MathConstants<float>::twoPi
+                * static_cast<float>(frame) / 12.0f - juce::MathConstants<float>::halfPi;
+            const float endX = centre + std::cos(angle) * radius;
+            const float endY = centre + std::sin(angle) * radius;
+            juce::Path sweep;
+            sweep.startNewSubPath(centre, centre);
+            sweep.lineTo(endX, endY);
+            graphics.setColour(theme.token("accent").withAlpha(0.95f));
+            graphics.strokePath(sweep, juce::PathStrokeType(2.0f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            graphics.setColour(theme.token("accentGlow").withAlpha(0.55f));
+            graphics.fillEllipse(centre - 3.0f, centre - 3.0f, 6.0f, 6.0f);
+            images.push_back(std::move(image));
+        }
+        return images;
+    }
+
     void chooseRoot()
     {
         chooseButton.setEnabled(false);
@@ -719,6 +774,8 @@ private:
         chooseButton.setEnabled(false);
         scanButton.setEnabled(false);
         status.setText("Scanning local WAV/SFZ inventory on a worker thread...", juce::dontSendNotification);
+        scanActivity.setText("LOCAL SCAN ACTIVE  /  SEARCHING THE SELECTED FOLDER", juce::dontSendNotification);
+        radar.setRunning(true);
         results.clear();
         const auto scanRoot = root;
         juce::Component::SafePointer<PPGULibraryDiscoveryPanel> safeThis(this);
@@ -734,10 +791,12 @@ private:
 
     void finishScan(ppgu::library::ScanReport report)
     {
+        radar.setRunning(false);
         chooseButton.setEnabled(true);
         scanButton.setEnabled(true);
         if (report.error.isNotEmpty())
         {
+            scanActivity.setText("RADAR IDLE  /  SCAN FAILED", juce::dontSendNotification);
             status.setText("SCAN FAILED  /  " + report.error, juce::dontSendNotification);
             return;
         }
@@ -761,6 +820,10 @@ private:
         if (report.truncated)
             output << "\nSCAN LIMIT REACHED — inventory is incomplete. Narrow the folder and scan again.\n";
         results.setText(output, juce::dontSendNotification);
+        scanActivity.setText(report.truncated
+            ? "RADAR IDLE  /  SCAN FINISHED — INVENTORY TRUNCATED"
+            : "RADAR IDLE  /  SCAN FINISHED",
+            juce::dontSendNotification);
         status.setText("Visited " + juce::String(static_cast<juce::int64>(report.entriesVisited))
             + " entries  /  " + juce::String(static_cast<int>(report.candidates.size()))
             + " WAV/SFZ candidates  /  ALL UNREVIEWED", juce::dontSendNotification);
@@ -768,9 +831,10 @@ private:
 
     PPGUThemeManager::Palette palette;
     juce::File root;
+    PPGUDiscoveryRadar radar;
     juce::ThreadPool scanPool { 1 };
     std::unique_ptr<juce::FileChooser> folderChooser;
-    juce::Label title, description, rootLabel, status;
+    juce::Label title, description, rootLabel, scanActivity, status;
     juce::TextButton chooseButton, scanButton;
     juce::TextEditor results;
 };
