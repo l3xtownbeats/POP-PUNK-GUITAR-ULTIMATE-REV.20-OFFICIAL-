@@ -817,6 +817,126 @@ private:
 
 namespace
 {
+class PPGUNeonVUMeter final : public juce::Component
+{
+public:
+    void setPalette(const PPGUThemeManager::Palette& value) { palette = value; repaint(); }
+    void setLevel(float value)
+    {
+        const auto next = juce::jlimit(0.0f, 1.0f, value);
+        if (std::abs(next - level) > 0.002f)
+        {
+            level = next;
+            repaint();
+        }
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        constexpr int segments = 20;
+        constexpr float gap = 2.0f;
+        auto area = getLocalBounds().toFloat().reduced(2.0f);
+        if (area.isEmpty())
+            return;
+        const float segmentHeight = juce::jmax(1.0f,
+            (area.getHeight() - gap * static_cast<float>(segments - 1)) / static_cast<float>(segments));
+        const int activeCount = juce::roundToInt(level * static_cast<float>(segments));
+        for (int i = 0; i < segments; ++i)
+        {
+            const int levelIndex = segments - 1 - i;
+            auto segment = juce::Rectangle<float>(area.getX(),
+                area.getY() + static_cast<float>(i) * (segmentHeight + gap),
+                area.getWidth(), segmentHeight);
+            const float fraction = static_cast<float>(levelIndex) / static_cast<float>(segments);
+            const auto colour = fraction >= 0.92f ? juce::Colour(0xffff557a)
+                : fraction >= 0.80f ? juce::Colour(0xffff9b45)
+                : fraction >= 0.60f ? juce::Colour(0xffffd84a)
+                                    : palette.token("success");
+            g.setColour(i < activeCount ? colour : palette.token("control_bg").brighter(0.04f));
+            g.fillRoundedRectangle(segment, 1.2f);
+            if (i < activeCount)
+            {
+                g.setColour(colour.withAlpha(0.24f));
+                g.drawRoundedRectangle(segment.expanded(0.7f), 1.5f, 1.0f);
+            }
+        }
+    }
+
+private:
+    PPGUThemeManager::Palette palette;
+    float level = 0.0f;
+};
+
+class PPGUOutputMeter final : public juce::Component, private juce::Timer
+{
+public:
+    explicit PPGUOutputMeter(PopPunkGuitarUltimateAudioProcessor& source) : processor(source)
+    {
+        setOpaque(false);
+        left.setPalette(palette);
+        right.setPalette(palette);
+        addAndMakeVisible(left);
+        addAndMakeVisible(right);
+        startTimerHz(30);
+    }
+
+    void setPalette(const PPGUThemeManager::Palette& value)
+    {
+        palette = value;
+        left.setPalette(value);
+        right.setPalette(value);
+        repaint();
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        auto area = getLocalBounds().toFloat();
+        g.setColour(palette.token("control_bg"));
+        g.fillRoundedRectangle(area, 7.0f);
+        g.setColour(palette.token("control_border"));
+        g.drawRoundedRectangle(area.reduced(0.5f), 7.0f, 1.0f);
+        g.setColour(palette.token("text_secondary"));
+        g.setFont(makeThemeFont(palette, 8.0f, false, true));
+        g.drawText("OUTPUT", getLocalBounds().removeFromTop(15), juce::Justification::centred);
+        g.setFont(makeThemeFont(palette, 7.0f, false, true));
+        g.drawText("L", left.getBounds().translated(0, -12), juce::Justification::centredTop);
+        g.drawText("R", right.getBounds().translated(0, -12), juce::Justification::centredTop);
+    }
+
+    void resized() override
+    {
+        auto area = getLocalBounds().reduced(5);
+        area.removeFromTop(14);
+        const int gap = 5;
+        const int width = juce::jmax(1, (area.getWidth() - gap) / 2);
+        left.setBounds(area.removeFromLeft(width));
+        area.removeFromLeft(gap);
+        right.setBounds(area);
+    }
+
+private:
+    static float toDisplayLevel(float peak) noexcept
+    {
+        const auto db = juce::Decibels::gainToDecibels(juce::jmax(0.000001f, peak), -60.0f);
+        return juce::jlimit(0.0f, 1.0f, (db + 48.0f) / 51.0f);
+    }
+
+    void timerCallback() override
+    {
+        const float leftPeak = toDisplayLevel(processor.getOutputPeak(0));
+        const float rightPeak = toDisplayLevel(processor.getOutputPeak(1));
+        leftLevel = juce::jmax(leftPeak, leftLevel * 0.91f);
+        rightLevel = juce::jmax(rightPeak, rightLevel * 0.91f);
+        left.setLevel(leftLevel);
+        right.setLevel(rightLevel);
+    }
+
+    PopPunkGuitarUltimateAudioProcessor& processor;
+    PPGUThemeManager::Palette palette;
+    PPGUNeonVUMeter left, right;
+    float leftLevel = 0.0f, rightLevel = 0.0f;
+};
+
 class PPGUFXEditPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
 public:
