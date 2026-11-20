@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420">
+<defs><linearGradient id="neon" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#00D9FF"/><stop offset=".52" stop-color="#6B8CFF"/><stop offset="1" stop-color="#D46BFF"/></linearGradient></defs>
+<g fill="none" stroke="url(#neon)" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M96 292L96 116L222 292L222 116" stroke-width="18"/>
+ <path d="M278 292V116H398M278 204H374M278 292H398" stroke-width="18"/>
+ <path d="M460 116V292H574" stroke-width="18"/>
+ <path d="M640 116V292M640 116H772M640 204H748M640 292H772" stroke-width="18"/>
+ <path d="M840 292V116L966 292V116" stroke-width="18"/>
+ <path d="M1032 116H1140M1086 116V292" stroke-width="18"/>
+</g>
+<text x="600" y="370" text-anchor="middle" fill="#B5C4DC" font-family="Segoe UI,Arial,sans-serif" font-size="25" letter-spacing="12">POP PUNK GUITAR ULTIMATE</text>
+</svg>

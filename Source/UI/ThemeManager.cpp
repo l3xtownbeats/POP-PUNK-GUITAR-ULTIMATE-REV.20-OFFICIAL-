@@ -1,0 +1,651 @@
+#include "ThemeManager.h"
+
+#include <limits>
+
+namespace
+{
+    bool isAsciiHexDigit(juce_wchar character) noexcept
+    {
+        return (character >= '0' && character <= '9')
+            || (character >= 'a' && character <= 'f')
+            || (character >= 'A' && character <= 'F');
+    }
+
+    bool isHexColour(const juce::var& value)
+    {
+        const auto text = value.toString();
+        if (text.length() != 7 || text[0] != '#')
+            return false;
+
+        for (int i = 1; i < text.length(); ++i)
+            if (!isAsciiHexDigit(text[i]))
+                return false;
+
+        return true;
+    }
+
+    bool isNumber(const juce::var& value)
+    {
+        return value.isInt() || value.isInt64() || value.isDouble();
+    }
+
+    bool isNonEmptyString(const juce::var& value)
+    {
+        return value.isString() && value.toString().trim().isNotEmpty();
+    }
+
+    bool hasObject(const juce::var& parent, const juce::Identifier& key, juce::var& result)
+    {
+        result = parent.getProperty(key, juce::var());
+        return result.isObject();
+    }
+
+    bool hasStringProperty(const juce::var& parent, const juce::Identifier& key)
+    {
+        return isNonEmptyString(parent.getProperty(key, juce::var()));
+    }
+
+    bool validateGroup(const juce::var& parent,
+                       const juce::Identifier& groupName,
+                       std::initializer_list<const char*> requiredKeys,
+                       std::initializer_list<const char*> colourKeys,
+                       juce::String& error)
+    {
+        juce::var group;
+        if (!hasObject(parent, groupName, group))
+        {
+            error = "Missing token group: " + groupName.toString();
+            return false;
+        }
+
+        for (const auto* key : requiredKeys)
+        {
+            const auto value = group.getProperty(key, juce::var());
+            if (value.isVoid())
+            {
+                error = "Missing token: " + groupName.toString() + "." + key;
+                return false;
+            }
+        }
+
+        for (const auto* key : colourKeys)
+        {
+            if (!isHexColour(group.getProperty(key, juce::var())))
+            {
+                error = "Invalid HEX colour: " + groupName.toString() + "." + key;
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool validateButtonStyle(const juce::var& buttons,
+                             const juce::Identifier& styleName,
+                             juce::String& error)
+    {
+        juce::var style;
+        if (!hasObject(buttons, styleName, style))
+        {
+            error = "Missing button style: " + styleName.toString();
+            return false;
+        }
+
+        const juce::StringArray keys {
+            "background", "foreground", "hover", "pressed", "disabled"
+        };
+        for (const auto& key : keys)
+        {
+            if (!isHexColour(style.getProperty(key, juce::var())))
+            {
+                error = "Invalid button colour: " + styleName.toString() + "." + key;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool validateAssetSpec(const juce::var& assetSpec,
+                           const juce::Identifier& name,
+                           int width, int height, const juce::String& format,
+                           juce::String& error)
+    {
+        juce::var spec;
+        if (!hasObject(assetSpec, name, spec))
+        {
+            error = "Missing asset specification: " + name.toString();
+            return false;
+        }
+
+        const auto widthValue = spec.getProperty("width", juce::var());
+        const auto heightValue = spec.getProperty("height", juce::var());
+        if ((!widthValue.isInt() && !widthValue.isInt64())
+            || (!heightValue.isInt() && !heightValue.isInt64())
+            // Compare in the original 64-bit domain. Narrowing before the
+            // bounds check can wrap hostile int64 dimensions into valid values.
+            || widthValue.toString().getLargeIntValue() != static_cast<juce::int64>(width)
+            || heightValue.toString().getLargeIntValue() != static_cast<juce::int64>(height)
+            || spec.getProperty("format", "").toString() != format)
+        {
+            error = "Invalid asset dimensions or format: " + name.toString();
+            return false;
+        }
+
+        return true;
+    }
+
+    bool validateSkinStudioManifest(const juce::var& root,
+                                    PPGUThemeManager::Palette& palette,
+                                    juce::String& error)
+    {
+        if (root.getProperty("schemaVersion", "").toString() != "1.0.0")
+        {
+            error = "Unsupported Skin Studio schema version";
+            return false;
+        }
+
+        const auto id = root.getProperty("id", "").toString();
+        const auto indexValue = root.getProperty("index", juce::var());
+        const auto index = indexValue.toString().getLargeIntValue();
+        if ((!indexValue.isInt() && !indexValue.isInt64())
+            || id.length() < 8 || !id.startsWith("skin-")
+            || index < 52 || index > std::numeric_limits<int>::max()
+            || id.substring(5).getLargeIntValue() != index)
+        {
+            error = "Invalid Skin Studio ID/index pair";
+            return false;
+        }
+        for (int position = 5; position < id.length(); ++position)
+        {
+            if (!juce::CharacterFunctions::isDigit(id[position]))
+            {
+                error = "Skin Studio ID suffix must contain only digits";
+                return false;
+            }
+        }
+
+        const auto name = root.getProperty("name", "").toString().trim();
+        if (name.isEmpty())
+        {
+            error = "Skin Studio theme name is missing";
+            return false;
+        }
+
+        const auto family = root.getProperty("family", "").toString();
+        if (family != "carbon_studio" && family != "neon_basement"
+            && family != "chrome_parade" && family != "wood_summer"
+            && family != "vintage_tape" && family != "sunset_suburb"
+            && family != "special")
+        {
+            error = "Invalid Skin Studio theme family";
+            return false;
+        }
+
+        const auto layout = root.getProperty("layout", "").toString();
+        if (layout != "STUDIO_CONSOLE" && layout != "WORKSTATION_TOPBAR"
+            && layout != "RACK_SIDE" && layout != "COMPACT_MINI")
+        {
+            error = "Invalid Skin Studio layout";
+            return false;
+        }
+
+        juce::var typography;
+        if (!hasObject(root, "typography", typography)
+            || !hasStringProperty(typography, "ui")
+            || !hasStringProperty(typography, "display")
+            || !hasStringProperty(typography, "weight")
+            || !isNumber(typography.getProperty("scale", juce::var()))
+            || !isNumber(typography.getProperty("letterSpacing", juce::var())))
+        {
+            error = "Skin Studio typography metadata is incomplete";
+            return false;
+        }
+        const auto fontScale = static_cast<double>(typography.getProperty("scale", 1.0));
+        const auto letterSpacing = static_cast<double>(typography.getProperty("letterSpacing", 0.0));
+        if (fontScale < 0.5 || fontScale > 2.0 || letterSpacing < 0.0 || letterSpacing > 2.0)
+        {
+            error = "Skin Studio typography scale or letter spacing is outside the supported range";
+            return false;
+        }
+
+        juce::var paletteTokens;
+        if (!hasObject(root, "palette", paletteTokens))
+        {
+            error = "Skin Studio palette object is missing";
+            return false;
+        }
+
+        const juce::StringArray requiredColours {
+            "window_bg", "panel", "panel_elevated", "control_bg", "control_face",
+            "control_border", "text_primary", "text_secondary", "text_disabled",
+            "accent", "accent_glow", "danger", "warning", "success", "lcd_bg",
+            "lcd_text", "led_on", "led_off", "shadow", "highlight", "lowlight"
+        };
+        const auto* paletteObject = paletteTokens.getDynamicObject();
+        if (paletteObject == nullptr || paletteObject->getProperties().size() != requiredColours.size())
+        {
+            error = "Skin Studio palette must contain exactly 21 tokens";
+            return false;
+        }
+
+        for (const auto& key : requiredColours)
+        {
+            if (!isHexColour(paletteTokens.getProperty(key, juce::var())))
+            {
+                error = "Invalid Skin Studio HEX token: " + key;
+                return false;
+            }
+        }
+
+        juce::var controls;
+        const juce::StringArray requiredControlIds {
+            "preset_browser", "mode_selector", "knob01", "knob02", "knob03",
+            "knob04", "knob05", "knob06", "knob07", "knob08", "knob09",
+            "fx_switch01", "fx_switch02", "fx_switch03", "fx_switch04",
+            "fx_switch05", "fx_switch06", "fx_switch07", "midi_keyboard",
+            "LCD_display", "LED_indicator", "SKIN_button", "Import_Guitar",
+            "Auto_Discover", "Curator", "Settings", "About"
+        };
+        if (!hasObject(root, "controls", controls)
+            || controls.getDynamicObject() == nullptr
+            || controls.getDynamicObject()->getProperties().size()
+                   != requiredControlIds.size() + 1)
+        {
+            error = "Skin Studio control map must contain the exact canonical control set";
+            return false;
+        }
+
+        for (const auto& controlId : requiredControlIds)
+        {
+            if (!controls.getDynamicObject()->hasProperty(controlId))
+            {
+                error = "Skin Studio control map is missing mandatory ID: " + controlId;
+                return false;
+            }
+        }
+
+        if (!controls.getDynamicObject()->hasProperty("sync_selector"))
+        {
+            error = "Skin Studio control map is missing mandatory ID: sync_selector";
+            return false;
+        }
+
+        juce::var assets;
+        if (!hasObject(root, "assets", assets)
+            || assets.getProperty("preview", "").toString() != "assets/preview.png"
+            || assets.getProperty("hero", "").toString() != "assets/hero.png"
+            || !hasStringProperty(assets, "texture")
+            || !hasStringProperty(assets, "bezel")
+            || !hasStringProperty(assets, "crest"))
+        {
+            error = "Skin Studio asset paths are incomplete";
+            return false;
+        }
+
+        juce::var compatibility;
+        if (!hasObject(root, "compatibility", compatibility)
+            || static_cast<bool>(compatibility.getProperty("apvtsChanges", true))
+            || static_cast<bool>(compatibility.getProperty("layoutChanges", true))
+            || static_cast<bool>(compatibility.getProperty("audioChanges", true))
+            || !root.getProperty("reduceInEco", juce::var()).isBool()
+            || !static_cast<bool>(root.getProperty("reduceInEco", false))
+            || !root.getProperty("hotSwapFadeMs", juce::var()).isInt()
+            || static_cast<int>(root.getProperty("hotSwapFadeMs", 0)) != 150)
+        {
+            error = "Skin Studio visual-only/ECO/hot-swap contract is invalid";
+            return false;
+        }
+
+        palette = PPGUThemeManager::Palette{};
+        palette.id = id;
+        palette.name = name;
+        palette.uiTypeface = typography.getProperty("ui", "Segoe UI").toString();
+        palette.displayTypeface = typography.getProperty("display", "Consolas").toString();
+        palette.typographyWeight = typography.getProperty("weight", "semibold").toString();
+        palette.fontScale = static_cast<float>(fontScale);
+        palette.letterSpacing = static_cast<float>(letterSpacing);
+
+        const auto readStudioToken = [&paletteTokens](const juce::String& key)
+        {
+            return juce::Colour::fromString(
+                "ff" + paletteTokens.getProperty(key, juce::var()).toString().substring(1));
+        };
+
+        auto& t = palette.tokens;
+        t.windowBg = readStudioToken("window_bg");
+        t.panel = readStudioToken("panel");
+        t.panelElevated = readStudioToken("panel_elevated");
+        t.controlBg = readStudioToken("control_bg");
+        t.controlFace = readStudioToken("control_face");
+        t.controlBorder = readStudioToken("control_border");
+        t.textPrimary = readStudioToken("text_primary");
+        t.textSecondary = readStudioToken("text_secondary");
+        t.textDisabled = readStudioToken("text_disabled");
+        t.accent = readStudioToken("accent");
+        t.accentGlow = readStudioToken("accent_glow");
+        t.danger = readStudioToken("danger");
+        t.warning = readStudioToken("warning");
+        t.success = readStudioToken("success");
+        t.lcdBg = readStudioToken("lcd_bg");
+        t.lcdText = readStudioToken("lcd_text");
+        t.ledOn = readStudioToken("led_on");
+        t.ledOff = readStudioToken("led_off");
+        t.shadow = readStudioToken("shadow");
+        t.highlight = readStudioToken("highlight");
+        t.lowlight = readStudioToken("lowlight");
+
+        // Keep legacy aliases coherent while the editor migrates to token access.
+        palette.canvas = t.windowBg;
+        palette.canvasInset = t.controlBg;
+        palette.surface = t.panel;
+        palette.surfaceSecondary = t.controlBg;
+        palette.surfaceRaised = t.panelElevated;
+        palette.text = t.textPrimary;
+        palette.textSecondary = t.textSecondary;
+        palette.accent = t.accent;
+        palette.accentSecondary = t.accentGlow;
+        palette.border = t.controlBorder;
+        palette.focus = t.highlight;
+        palette.usedFallback = false;
+        return true;
+    }
+}
+
+bool PPGUThemeManager::readColour(const juce::var& object,
+                                  const juce::Identifier& key,
+                                  juce::Colour& destination)
+{
+    if (!object.isObject())
+        return false;
+
+    const auto value = object.getProperty(key, juce::var());
+    if (!isHexColour(value))
+        return false;
+
+    destination = juce::Colour::fromString("ff" + value.toString().substring(1));
+    return destination.isOpaque();
+}
+
+bool PPGUThemeManager::validateManifest(const juce::var& root,
+                                        Palette& palette,
+                                        juce::String& error)
+{
+    if (!root.isObject())
+    {
+        error = "Theme manifest is not a JSON object";
+        return false;
+    }
+
+    if (root.getProperty("schemaVersion", "").toString() != "1.0.0")
+    {
+        error = "Unsupported theme schema version";
+        return false;
+    }
+
+    const auto id = root.getProperty("id", "").toString();
+    const auto indexValue = root.getProperty("index", juce::var());
+    const int index = static_cast<int>(indexValue);
+    if (!indexValue.isInt() && !indexValue.isInt64())
+    {
+        error = "Theme index must be an integer";
+        return false;
+    }
+    if (id.length() >= 8)
+        return validateSkinStudioManifest(root, palette, error);
+
+    if (id.length() != 7 || !id.startsWith("skin-")
+        || !juce::CharacterFunctions::isDigit(id[5])
+        || !juce::CharacterFunctions::isDigit(id[6])
+        || index < 1 || index > 51
+        || id.substring(5).getIntValue() != index)
+    {
+        error = "Invalid theme ID/index pair";
+        return false;
+    }
+
+    const auto name = root.getProperty("name", "").toString().trim();
+    if (name.isEmpty() || !root.getProperty("description", juce::var()).isString())
+    {
+        error = "Theme name or description is invalid";
+        return false;
+    }
+
+    const auto cluster = root.getProperty("cluster", "").toString();
+    if (cluster != "A" && cluster != "B" && cluster != "C")
+    {
+        error = "Invalid theme cluster";
+        return false;
+    }
+
+    juce::var identity;
+    if (!hasObject(root, "identity", identity)
+        || !hasStringProperty(identity, "material")
+        || !hasStringProperty(identity, "lighting")
+        || !hasStringProperty(identity, "mood"))
+    {
+        error = "Theme identity is incomplete";
+        return false;
+    }
+
+    juce::var tokens;
+    if (!hasObject(root, "tokens", tokens))
+    {
+        error = "Theme tokens object is missing";
+        return false;
+    }
+
+    if (!validateGroup(tokens, "canvas", { "base", "inset" }, { "base", "inset" }, error)
+        || !validateGroup(tokens, "surfaces", { "primary", "secondary", "raised", "overlay" }, { "primary", "secondary", "raised", "overlay" }, error)
+        || !validateGroup(tokens, "borders", { "subtle", "strong", "focus" }, { "subtle", "strong", "focus" }, error)
+        || !validateGroup(tokens, "typography", { "primary", "secondary", "disabled", "onAccent" }, { "primary", "secondary", "disabled", "onAccent" }, error)
+        || !validateGroup(tokens, "rotary", { "body", "ring", "track", "value", "pointer", "disabled" }, { "body", "ring", "track", "value", "pointer", "disabled" }, error)
+        || !validateGroup(tokens, "sliders", { "track", "fill", "thumb", "disabled" }, { "track", "fill", "thumb", "disabled" }, error)
+        || !validateGroup(tokens, "tabs", { "activeBackground", "activeText", "inactiveBackground", "inactiveText", "indicator" }, { "activeBackground", "activeText", "inactiveBackground", "inactiveText", "indicator" }, error)
+        || !validateGroup(tokens, "comboBoxes", { "background", "foreground", "border", "hover", "menuBackground", "selection" }, { "background", "foreground", "border", "hover", "menuBackground", "selection" }, error)
+        || !validateGroup(tokens, "keyboard", { "whiteKey", "blackKey", "whitePressed", "blackPressed", "keyBorder", "octaveLabel" }, { "whiteKey", "blackKey", "whitePressed", "blackPressed", "keyBorder", "octaveLabel" }, error)
+        || !validateGroup(tokens, "meters", { "low", "medium", "high", "background" }, { "low", "medium", "high", "background" }, error)
+        || !validateGroup(tokens, "icons", { "primary", "secondary", "accent", "disabled" }, { "primary", "secondary", "accent", "disabled" }, error)
+        || !validateGroup(tokens, "thumbnails", { "background", "border", "selected", "caption" }, { "background", "border", "selected", "caption" }, error)
+        || !validateGroup(tokens, "windowChrome", { "background", "title", "border", "close" }, { "background", "title", "border", "close" }, error)
+        || !validateGroup(tokens, "hero", { "background", "accent", "secondaryAccent", "highlight" }, { "background", "accent", "secondaryAccent", "highlight" }, error)
+        || !validateGroup(tokens, "accents", { "primary", "secondary", "tertiary" }, { "primary", "secondary", "tertiary" }, error)
+        || !validateGroup(tokens, "lighting", { "profile", "glow", "glowIntensity", "edgeHighlight" }, { "glow", "edgeHighlight" }, error))
+        return false;
+
+    juce::var buttons;
+    if (!hasObject(tokens, "buttons", buttons)
+        || !validateButtonStyle(buttons, "primary", error)
+        || !validateButtonStyle(buttons, "secondary", error))
+    {
+        if (error.isEmpty())
+            error = "Button token group is incomplete";
+        return false;
+    }
+
+    juce::var texture;
+    if (!hasObject(tokens, "texture", texture)
+        || !hasStringProperty(texture, "material")
+        || !texture.getProperty("enabled", juce::var()).isBool()
+        || !isNumber(texture.getProperty("intensity", juce::var()))
+        || static_cast<double>(texture.getProperty("intensity", 0.0)) < 0.0
+        || static_cast<double>(texture.getProperty("intensity", 0.0)) > 1.0)
+    {
+        error = "Texture token group is invalid";
+        return false;
+    }
+
+    const auto* textureObject = texture.getDynamicObject();
+    if (textureObject == nullptr || !textureObject->hasProperty("asset"))
+    {
+        error = "Texture asset property is missing";
+        return false;
+    }
+    const auto textureAsset = texture.getProperty("asset", juce::var());
+    if (!textureAsset.isString() && !textureAsset.isVoid())
+    {
+        error = "Texture asset must be a string or null";
+        return false;
+    }
+
+    juce::var lighting;
+    if (!hasObject(tokens, "lighting", lighting)
+        || !hasStringProperty(lighting, "profile")
+        || !isNumber(lighting.getProperty("glowIntensity", juce::var()))
+        || static_cast<double>(lighting.getProperty("glowIntensity", 0.0)) < 0.0
+        || static_cast<double>(lighting.getProperty("glowIntensity", 0.0)) > 1.0)
+    {
+        error = "Lighting intensity/profile is invalid";
+        return false;
+    }
+
+    juce::var assets;
+    if (!hasObject(root, "assets", assets)
+        || !hasStringProperty(assets, "preview")
+        || !hasStringProperty(assets, "hero"))
+    {
+        error = "Theme asset paths are incomplete";
+        return false;
+    }
+
+    const auto optionalTexturePath = assets.getProperty("texture", juce::var());
+    if (!optionalTexturePath.isVoid() && !optionalTexturePath.isString())
+    {
+        error = "Theme texture path must be a string or null";
+        return false;
+    }
+
+    juce::var assetSpec;
+    if (!hasObject(root, "assetSpec", assetSpec)
+        || !validateAssetSpec(assetSpec, "preview", 480, 300, "png", error)
+        || !validateAssetSpec(assetSpec, "hero", 1200, 420, "webp", error))
+        return false;
+
+    juce::var compatibility;
+    if (!hasObject(root, "compatibility", compatibility)
+        || !hasStringProperty(compatibility, "minimumPluginVersion")
+        || static_cast<bool>(compatibility.getProperty("apvtsChanges", true))
+        || static_cast<bool>(compatibility.getProperty("layoutChanges", true))
+        || static_cast<bool>(compatibility.getProperty("audioChanges", true)))
+    {
+        error = "Theme violates the visual-only compatibility contract";
+        return false;
+    }
+
+    juce::var validation;
+    if (!hasObject(root, "validation", validation)
+        || !hasStringProperty(validation, "json")
+        || !hasStringProperty(validation, "assets")
+        || !hasStringProperty(validation, "runtime")
+        || !hasStringProperty(validation, "flStudio20"))
+    {
+        error = "Theme validation metadata is incomplete";
+        return false;
+    }
+
+    palette = Palette{};
+    palette.id = id;
+    palette.name = name;
+    palette.usedFallback = false;
+
+    if (!readColour(tokens.getProperty("canvas", juce::var()), "base", palette.canvas)
+        || !readColour(tokens.getProperty("canvas", juce::var()), "inset", palette.canvasInset)
+        || !readColour(tokens.getProperty("surfaces", juce::var()), "primary", palette.surface)
+        || !readColour(tokens.getProperty("surfaces", juce::var()), "secondary", palette.surfaceSecondary)
+        || !readColour(tokens.getProperty("surfaces", juce::var()), "raised", palette.surfaceRaised)
+        || !readColour(tokens.getProperty("typography", juce::var()), "primary", palette.text)
+        || !readColour(tokens.getProperty("typography", juce::var()), "secondary", palette.textSecondary)
+        || !readColour(tokens.getProperty("accents", juce::var()), "primary", palette.accent)
+        || !readColour(tokens.getProperty("accents", juce::var()), "secondary", palette.accentSecondary)
+        || !readColour(tokens.getProperty("borders", juce::var()), "strong", palette.border)
+        || !readColour(tokens.getProperty("borders", juce::var()), "focus", palette.focus))
+    {
+        error = "One or more palette colours could not be decoded";
+        return false;
+    }
+
+    // Legacy skins predate the flat Skin Studio palette. Preserve their own
+    // visual identity and supply deterministic semantic fallbacks for tokens
+    // that the legacy schema never defined.
+    auto& t = palette.tokens;
+    t.windowBg = palette.canvas;
+    t.panel = palette.surface;
+    t.panelElevated = palette.surfaceRaised;
+    t.controlBg = palette.canvasInset;
+    t.controlFace = palette.surfaceRaised;
+    t.controlBorder = palette.border;
+    t.textPrimary = palette.text;
+    t.textSecondary = palette.textSecondary;
+    t.textDisabled = palette.textSecondary.darker(0.28f);
+    t.accent = palette.accent;
+    t.accentGlow = palette.accentSecondary;
+    t.lcdBg = palette.canvas.darker(0.55f);
+    t.lcdText = palette.text;
+    t.ledOn = palette.accent;
+    t.ledOff = palette.surfaceSecondary.darker(0.45f);
+    t.shadow = palette.canvas.darker(0.40f);
+    t.highlight = palette.focus;
+    t.lowlight = palette.canvas.darker(0.18f);
+
+    return true;
+}
+
+juce::Colour PPGUThemeManager::Palette::token(const juce::String& key) const noexcept
+{
+    if (key == "window_bg") return tokens.windowBg;
+    if (key == "panel") return tokens.panel;
+    if (key == "panel_elevated") return tokens.panelElevated;
+    if (key == "control_bg") return tokens.controlBg;
+    if (key == "control_face") return tokens.controlFace;
+    if (key == "control_border") return tokens.controlBorder;
+    if (key == "text_primary") return tokens.textPrimary;
+    if (key == "text_secondary") return tokens.textSecondary;
+    if (key == "text_disabled") return tokens.textDisabled;
+    if (key == "accent") return tokens.accent;
+    if (key == "accent_glow") return tokens.accentGlow;
+    if (key == "danger") return tokens.danger;
+    if (key == "warning") return tokens.warning;
+    if (key == "success") return tokens.success;
+    if (key == "lcd_bg") return tokens.lcdBg;
+    if (key == "lcd_text") return tokens.lcdText;
+    if (key == "led_on") return tokens.ledOn;
+    if (key == "led_off") return tokens.ledOff;
+    if (key == "shadow") return tokens.shadow;
+    if (key == "highlight") return tokens.highlight;
+    if (key == "lowlight") return tokens.lowlight;
+    return {};
+}
+
+bool PPGUThemeManager::loadFromJson(const juce::String& jsonText)
+{
+    const auto root = juce::JSON::parse(jsonText);
+    Palette candidate;
+    juce::String error;
+
+    if (!validateManifest(root, candidate, error))
+    {
+        lastError = error.isNotEmpty() ? error : "Theme manifest validation failed";
+        resetToDefault();
+        return false;
+    }
+
+    activePalette = candidate;
+    lastError.clear();
+    return true;
+}
+
+bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
+{
+    if (!manifestFile.existsAsFile())
+    {
+        lastError = "Theme manifest file does not exist";
+        resetToDefault();
+        return false;
+    }
+
+    return loadFromJson(manifestFile.loadFileAsString());
+}
+
+void PPGUThemeManager::resetToDefault() noexcept
+{
+    activePalette = Palette{};
+}

@@ -1,0 +1,353 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "skin-053",
+  "index": 53,
+  "name": "NEON STAGE DEFAULT",
+  "family": "special",
+  "layout": "STUDIO_CONSOLE",
+  "description": "Canonical SKIN-1 visual shell: dark graphite studio console with restrained cyan, electric-blue, violet and magenta stage accents. Default minimal mode; effects are opt-in.",
+  "palette": {
+    "window_bg": "#080B14",
+    "panel": "#101827",
+    "panel_elevated": "#17243A",
+    "control_bg": "#0C1422",
+    "control_face": "#1A2940",
+    "control_border": "#31506F",
+    "text_primary": "#F4F7FF",
+    "text_secondary": "#B5C4DC",
+    "text_disabled": "#71829D",
+    "accent": "#00D9FF",
+    "accent_glow": "#6B8CFF",
+    "danger": "#FF557A",
+    "warning": "#FFBE55",
+    "success": "#42E6B0",
+    "lcd_bg": "#050D1B",
+    "lcd_text": "#8DEBFF",
+    "led_on": "#00E5FF",
+    "led_off": "#263B55",
+    "shadow": "#03060B",
+    "highlight": "#8DCBFF",
+    "lowlight": "#080F1B"
+  },
+  "typography": {
+    "ui": "Segoe UI",
+    "display": "Consolas",
+    "weight": "semibold",
+    "scale": 1,
+    "letterSpacing": 0.35
+  },
+  "effects": {
+    "material": "matte graphite / precision anodized metal",
+    "texture": "svg/texture.svg",
+    "bezel": "svg/bezel.svg",
+    "crest": "svg/crest.svg",
+    "shadowDepth": 0.28,
+    "edgeHighlight": 0.18,
+    "glow": "opt-in baked accent lighting; disabled in default minimal mode"
+  },
+  "reduceInEco": true,
+  "hotSwapFadeMs": 150,
+  "controls": {
+    "preset_browser": {
+      "grid": {
+        "x": 2,
+        "y": 0,
+        "w": 5,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "mode_selector": {
+      "grid": {
+        "x": 7,
+        "y": 0,
+        "w": 3,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "SKIN_button": {
+      "grid": {
+        "x": 10,
+        "y": 0,
+        "w": 2,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "LCD_display": {
+      "grid": {
+        "x": 0,
+        "y": 2,
+        "w": 8,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "LED_indicator": {
+      "grid": {
+        "x": 8,
+        "y": 2,
+        "w": 1,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "Import_Guitar": {
+      "grid": {
+        "x": 9,
+        "y": 2,
+        "w": 3,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "knob01": {
+      "grid": {
+        "x": 0,
+        "y": 4,
+        "w": 2,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "knob02": {
+      "grid": {
+        "x": 2,
+        "y": 4,
+        "w": 2,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "knob03": {
+      "grid": {
+        "x": 4,
+        "y": 4,
+        "w": 2,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "knob04": {
+      "grid": {
+        "x": 6,
+        "y": 4,
+        "w": 2,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "knob05": {
+      "grid": {
+        "x": 8,
+        "y": 4,
+        "w": 2,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "knob06": {
+      "grid": {
+        "x": 10,
+        "y": 4,
+        "w": 2,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "knob07": {
+      "grid": {
+        "x": 2,
+        "y": 7,
+        "w": 2,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "knob08": {
+      "grid": {
+        "x": 5,
+        "y": 7,
+        "w": 2,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "knob09": {
+      "grid": {
+        "x": 8,
+        "y": 7,
+        "w": 2,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "fx_switch01": {
+      "grid": {
+        "x": 0,
+        "y": 10,
+        "w": 3,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "fx_switch02": {
+      "grid": {
+        "x": 3,
+        "y": 10,
+        "w": 3,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "fx_switch03": {
+      "grid": {
+        "x": 6,
+        "y": 10,
+        "w": 3,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "fx_switch04": {
+      "grid": {
+        "x": 9,
+        "y": 10,
+        "w": 3,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "fx_switch05": {
+      "grid": {
+        "x": 0,
+        "y": 11,
+        "w": 4,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "fx_switch06": {
+      "grid": {
+        "x": 4,
+        "y": 11,
+        "w": 4,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "fx_switch07": {
+      "grid": {
+        "x": 8,
+        "y": 11,
+        "w": 4,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "midi_keyboard": {
+      "grid": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 2
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "Auto_Discover": {
+      "grid": {
+        "x": 0,
+        "y": 15,
+        "w": 3,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "Curator": {
+      "grid": {
+        "x": 3,
+        "y": 15,
+        "w": 3,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "Settings": {
+      "grid": {
+        "x": 6,
+        "y": 15,
+        "w": 3,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "About": {
+      "grid": {
+        "x": 9,
+        "y": 15,
+        "w": 3,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    },
+    "sync_selector": {
+      "grid": {
+        "x": 9,
+        "y": 3,
+        "w": 3,
+        "h": 1
+      },
+      "presentation": "native-control",
+      "runtimeBinding": "control_schema.json"
+    }
+  },
+  "assets": {
+    "preview": "assets/preview.png",
+    "hero": "assets/hero.png",
+    "texture": "svg/texture.svg",
+    "bezel": "svg/bezel.svg",
+    "crest": "svg/crest.svg"
+  },
+  "compatibility": {
+    "minimumPluginVersion": "4.0.0",
+    "apvtsChanges": false,
+    "layoutChanges": false,
+    "audioChanges": false
+  },
+  "designStatus": "ARTWORK_AND_MANIFEST_UPDATED_RUNTIME_VALIDATION_PENDING",
+  "notes": [
+    "[IDENTITY-RULE] SKIN-1 = NEON STAGE DEFAULT = skin-053/Skin_053. Stable asset ID and index 53 are preserved.",
+    "Default display mode is MINIMALISM; premium glow/effects are opt-in only.",
+    "All control IDs and grid metadata are preserved from the REV18 canonical source.",
+    "Visual-only change: no APVTS, DSP, sampler, MIDI, preset or audio callback changes.",
+    "Existing PNG preview/hero binaries are retained pending visual inspection and the REV18 artwork acceptance checks."
+  ]
+}
