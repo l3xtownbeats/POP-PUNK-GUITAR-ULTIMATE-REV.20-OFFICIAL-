@@ -1087,7 +1087,7 @@ public:
         else
         {
             graphArea = {};
-            outputMeter.setBounds({});
+            outputMeter.setBounds(juce::Rectangle<int>{});
         }
         outputMeter.setVisible(graphHeight > 0);
         status.setBounds(area.removeFromBottom(24));
