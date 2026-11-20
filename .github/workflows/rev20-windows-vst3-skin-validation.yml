@@ -12,6 +12,7 @@ on:
       - "assets/library/**"
       - "tools/validate_skin_registry_16.py"
       - "tools/validate_library_tiers.py"
+      - "tools/sfz_path_safety.py"
       - ".github/workflows/rev20-windows-vst3-skin-validation.yml"
   workflow_dispatch:
 

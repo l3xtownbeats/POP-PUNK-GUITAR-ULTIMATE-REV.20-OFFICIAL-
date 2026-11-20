@@ -88,3 +88,10 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - NEON STAGE remains the premium finish/quality benchmark for the next 15 shells. Each must be expensive-looking, polished, modern, stylish and commercially competitive at the same perceived quality level, while maintaining an unmistakably distinct original art direction.
 - Do not copy NEON STAGE's palette, layout, motifs or artwork. Match quality/finish, not identity. Preserve the shared 27-control, nine rotary binding and seven FX bypass contracts; do not depict unimplemented features as live.
 - SKIN-2 OBSIDIAN has its own premium/luxury direction: deep obsidian, graphite, satin black/brushed metal, restrained metallic accents and refined typography; no acid-neon palette, loud saturated glow or cyberpunk/gamer styling. The current logical label `OBSIDIAN GOLD` remains unchanged in the 16-theme registry pending any explicit name change.
+
+
+## 2026-11-20 — REV.20 CTest diagnostic 001 (run 44715731925)
+- Exact-SHA Windows x64 configure succeeded and the complete C++ build including VST3 target completed successfully on `142013dbeb315b95246fdcd476f4485af0aa659b`.
+- CTest ran 14 tests: 12 PASSED, 2 FAILED. `ppgu_theme_contracts` exposed two test-only defects: the assertion formatted `skin-053` as `skin-53`, and preview/hero lookup used `theme.json/assets` rather than the sibling `theme.json` parent `assets/` folder. Both assertions corrected; JUCE GUI initializer added to the theme test.
+- `ppgu_sample_library_audit_path_contract` failed because the imported test referenced a missing `audit_sample_library.py`. REV.20 now adds the narrowly scoped `tools/sfz_path_safety.py` helper and updates the test import. The helper only covers SFZ path normalization/assignment token handling; it is not represented as a full sample-library auditor.
+- Full CTest rerun required. Asset validator and VST3 artifact upload were skipped by `if: success()` after CTest failed.

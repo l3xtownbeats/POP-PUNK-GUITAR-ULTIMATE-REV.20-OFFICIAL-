@@ -14,6 +14,7 @@ namespace
 
 int main()
 {
+    juce::ScopedJuceInitialiser_GUI juceInitialiser;
     PPGUThemeManager manager;
     expect(manager.getPalette().id == "skin-053", "fallback stable ID is canonical SKIN-1");
     expect(manager.getPalette().name == "NEON STAGE DEFAULT", "fallback name is NEON STAGE DEFAULT");
@@ -52,7 +53,7 @@ int main()
                 || (!indexValue.isInt() && !indexValue.isInt64())) continue;
             const int ordinal = static_cast<int>(ordinalValue.toString().getLargeIntValue());
             const int index = static_cast<int>(indexValue.toString().getLargeIntValue());
-            const auto expectedId = juce::String("skin-") + juce::String(index);
+            const auto expectedId = juce::String("skin-") + juce::String(index).paddedLeft('0', 3);
             expect(ordinal >= 1 && ordinal <= 16, id + " logical ordinal is valid");
             expect(id == expectedId, id + " stable ID/index mapping is preserved");
             expect(ordinals.insert(ordinal).second, id + " ordinal is unique");
@@ -75,9 +76,9 @@ int main()
             else
             {
                 // Artwork may be complete while the theme remains gated from runtime selection.
-                expect(manifest.getChildFile("assets/preview.png").existsAsFile(),
+                expect(manifest.getParentDirectory().getChildFile("assets/preview.png").existsAsFile(),
                        id + " preview artwork is present while runtime remains gated");
-                expect(manifest.getChildFile("assets/hero.png").existsAsFile(),
+                expect(manifest.getParentDirectory().getChildFile("assets/hero.png").existsAsFile(),
                        id + " hero artwork is present while runtime remains gated");
                 expect(!static_cast<bool>(entry.getProperty("runtimeReady", true)),
                        id + " is not selectable before REV.20 runtime acceptance");

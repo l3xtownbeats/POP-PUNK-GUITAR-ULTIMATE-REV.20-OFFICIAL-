@@ -39,8 +39,8 @@ These are verified repository metadata artifacts only. They do not mean that loc
 | L3XTOWN local copy preflight / FACTORY copies | NOT CONFIRMED |
 | SKIN registry | exactly 16 logical entries; only SKIN-1 currently marked runtime-ready |
 | SKIN-2…SKIN-16 | named premium manifests + 45 SVG layers + 30 PNG preview/hero assets PRESENT; source asset audit/build/CTest PASS; REV.20 runtime/host acceptance PENDING |
-| Windows x64 Release build on REV.20 SHA | NOT RUN / NOT CONFIRMED |
-| Full CTest on REV.20 SHA | NOT RUN / NOT CONFIRMED |
+| Windows x64 Release build on REV.20 SHA | PASS on `142013dbeb315b95246fdcd476f4485af0aa659b`; full CTest then failed 12/14 and fixes are in progress |
+| Full CTest on REV.20 SHA | FAILED 12/14 on `142013dbeb315b95246fdcd476f4485af0aa659b`; two test-only defects fixed, rerun pending |
 | pluginval strictness 5 on REV.20 SHA | NOT RUN / NOT CONFIRMED |
 | FL Studio 20 host acceptance on REV.20 SHA | NOT RUN / NOT CONFIRMED |
 
@@ -83,3 +83,10 @@ Static validation utilities and focused contract tests may be used for engineeri
 - The complete user-approved Library Manager acceptance contract is now preserved at `docs/REV20_LIBRARY_MANAGER_APPROVED_REQUIREMENTS.md`; it requires full scan → analyze → classify → register → verify → plugin access → playback → READY, plus safe physical distribution and reconciliation. Its v1.5 audit findings remain implementation gaps unless separately evidenced.
 - The latest skin quality direction (source main commits 9dc719b…662ff905, 2026-11-19): NEON STAGE is the premium finish benchmark, not a template to copy. Every other shell must be equally premium while distinctly original. OBSIDIAN SKIN-2 must use its own restrained blackened-metal/luxury visual direction, not neon/cyberpunk treatment.
 - The current logical theme names, count and stable IDs remain the explicit 16-item REV.20 registry. No theme count or label changed in this update.
+
+
+## Latest REV.20 Windows evidence
+
+- On exact SHA `142013dbeb315b95246fdcd476f4485af0aa659b`, Windows x64 configure and VST3/all C++ target build passed. CTest ran 14 tests: 12 passed, 2 failed.
+- Failure 1 was a test assertion using unpadded stable IDs and incorrect artwork path resolution. Failure 2 was a test importing a missing module. Both are corrected in the next REV.20 commit; a narrowly scoped SFZ path-safety helper is added, not a full sample-library audit engine.
+- The skin asset validator and artifact upload were skipped due to CTest failures. Do not claim CI green until a fresh exact-SHA run completes every step.

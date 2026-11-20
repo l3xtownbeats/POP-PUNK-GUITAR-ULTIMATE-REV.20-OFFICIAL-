@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from audit_sample_library import normalize_suffix, ASSIGNMENT
+from sfz_path_safety import normalize_suffix, ASSIGNMENT
 
 
 def main():
