@@ -124,3 +124,28 @@ REV.20 selectively imported the v1.2.0 machine-readable tier contract, validator
 
 - Run 44707491026 on SHA `38796efe971847cd7b3d9f843995ed3e45f3c8de` configured successfully but the build failed because a JUCE `var` was compared directly with `false` in the expanded skin test (C2666). This was fixed with explicit boolean conversion. The PNG signature validator was also corrected to test the real eight-byte signature.
 - Run 44715731925 was started on SHA `142013dbeb315b95246fdcd476f4485af0aa659b`; check its final result separately. It is not a completed pass until a terminal GitHub Actions conclusion is recorded.
+
+
+## 2026-11-18 — Library Manager approved requirements extended to full operational acceptance
+
+Latest source main sequence: commits `2843ebf` → `d8eacc0` → `ba0abfa` → `dc1fc8d` → `47364a4` → `bba98cc` → `9fdab47` → `3b84d2e` → `a7c05ba`.
+
+- One shared standalone/in-plugin scanner engine and workflow, identical trigger semantics and diagnostics.
+- Mandatory completion certificate and full reconciliation: every source file accounted for; normal exclusions are not treated as technical failures; critical errors are explicitly reported.
+- Full scan/analyse/classify/register/verify/plugin-access/playback/READY flow.
+- Physical FACTORY/Other distribution must be transactional, no-overwrite, checksum-verified, dependency-safe and recoverable. Preview/dry-run alone does not constitute completion.
+- Stable IDs, portable relative paths, database schema migration/governance, secure optional GitHub handoff, no audio payload/secrets in metadata uploads.
+- v1.5 source audit findings are documented honestly: scan prototype lacks physical distribution, complete SFZ parsing, RF64 handling, broad audio decoding, persistent IDs, transactional relational DB, connected license review and full end-to-end recovery tests.
+
+The complete frozen source contract is preserved in `docs/REV20_LIBRARY_MANAGER_APPROVED_REQUIREMENTS.md`. It is a requirements/acceptance baseline, not a statement that these capabilities are complete in REV.20.
+
+## 2026-11-19 — Global premium skin quality standard confirmed
+
+Source commits `9dc719bc4929516c00a00c3b5025859328812d2f`, `d3c26c39eafd432440bff425151ff5004495c9b0`, `fd2c5529fa46b561521b9e44e35e89737631e871`, and `662ff9054c120ed0e0b41726ff4f1a0673c251ca` record the final user confirmation:
+
+- NEON STAGE is the quality/finish benchmark for all 15 additional skins.
+- Equal perceived premium quality, detail, polish and commercial appeal; not a copy of NEON STAGE.
+- Every additional theme needs its own original material, palette and identity.
+- OBSIDIAN SKIN-2 is specifically a premium/luxury blackened-metal theme with restrained metallic highlights; no acid neon, saturated glow or gamer/cyberpunk treatment.
+
+This 2026-11-19 direction is newer than the initial PR #58 theme concept notes and is now carried as an explicit quality requirement in REV.20. It does not change the fixed 16 theme names or stable ID mapping.

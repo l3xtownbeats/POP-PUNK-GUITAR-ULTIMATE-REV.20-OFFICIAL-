@@ -73,3 +73,18 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - The actual source PR #59 validator/test files used mismatched JSON schema field names/version. REV.20 adapts the validator and regression test to the actual v1.2.0 contract fields before inclusion; the mismatch is recorded as corrected, not imported as-is.
 - Added the library tier regression test to CTest. The source PR #59 itself is a draft and does not contain the BASIC/EXPANDED audio payload or prove that 500 presets are playable.
 - Preserve automatic discovery/analysis/classification/distribution, background hashing/indexing, SHA-256/provenance/licensing, exact duplicate control and strict no-disk-I/O/no-block/no-unbounded-allocation audio-callback policy.
+
+
+## 2026-11-18 — USER-APPROVED LIBRARY MANAGER COMPLETION CONTRACT
+- Source document: `docs/LIBRARY_MANAGER_ULTIMATE_APPROVED_REQUIREMENTS.md`, source main revision ending at commit `a7c05ba1d4c32a49939e939958db1eccf90556c8` (2026-11-18 16:06 UTC). It was explicitly approved 2026-11-18 and was extended through 2026-11-18 with shared scanner triggers, completion certificate/reconciliation, critical-error vs normal-exclusion policy, transaction/recovery safeguards, GitHub handoff, end-to-end physical distribution and v1.5 source audit.
+- The full specification is preserved in `docs/REV20_LIBRARY_MANAGER_APPROVED_REQUIREMENTS.md`. It requires a complete pipeline DISCOVER → SCAN → ANALYZE → CLASSIFY → REGISTER → VERIFY FILES → VERIFY MAPPINGS → VERIFY PLUGIN ACCESS → PLAYBACK TEST → READY; scan-only output must never be labelled a complete manager.
+- The standalone manager and in-plugin Library Manager must share one engine/schema/diagnostic model. Scanning/hash/SFZ parse/copy work remains off the audio callback. User originals are never silently overwritten/deleted; physical distribution is transactional, verified, recoverable and reconciled.
+- A complete scan must account for every item, distinguish normal exclusions from critical failures, issue a completion certificate, and only report READY after plugin access/mapping/playback verification.
+- This is an approved requirement contract, not proof all functions exist in the preserved REV.20 LibraryManager implementation. The v1.5 audit calls out missing physical distribution, full SFZ parsing, RF64 handling, audio format probes, persistent stable IDs, transactional SQLite governance, real license approval and robust end-to-end tests.
+
+
+## 2026-11-19 — FINAL GLOBAL PREMIUM SKIN QUALITY STANDARD
+- User-confirmed source journal revision: `docs/REV18_SKIN_APPROVAL_JOURNAL.md`, source main commits `9dc719b`, `d3c26c3`, `fd2c552`, `662ff90` (latest 2026-11-19 15:07 UTC).
+- NEON STAGE remains the premium finish/quality benchmark for the next 15 shells. Each must be expensive-looking, polished, modern, stylish and commercially competitive at the same perceived quality level, while maintaining an unmistakably distinct original art direction.
+- Do not copy NEON STAGE's palette, layout, motifs or artwork. Match quality/finish, not identity. Preserve the shared 27-control, nine rotary binding and seven FX bypass contracts; do not depict unimplemented features as live.
+- SKIN-2 OBSIDIAN has its own premium/luxury direction: deep obsidian, graphite, satin black/brushed metal, restrained metallic accents and refined typography; no acid-neon palette, loud saturated glow or cyberpunk/gamer styling. The current logical label `OBSIDIAN GOLD` remains unchanged in the 16-theme registry pending any explicit name change.

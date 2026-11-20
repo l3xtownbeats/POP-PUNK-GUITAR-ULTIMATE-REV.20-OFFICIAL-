@@ -44,3 +44,14 @@
 - Source CI evidence does not make skins HOST-VERIFIED in REV.20. Runtime loader, 16-only package, preview/apply/cancel/persistence, hot-swap, ECO/memory behaviour, DPI 100/125/150%, pluginval strictness 5 and FL Studio 20 checks must pass against the exact REV.20 SHA before marking all 16 runtime-ready.
 
 **Current REV.20 asset state:** all 16 names/manifests are defined; 30 additional PNGs (15 preview + 15 hero) are included; 45 SVG material foundations are available for SKIN-2…SKIN-16. The source pack passed the strict audit. REV.20 exact-SHA runtime and host acceptance remain a separate gate.
+
+
+## 2026-11-19 — Global premium-quality standard (newest approval)
+
+NEON STAGE is the quality and premium-finish benchmark for all 15 additional themes. Each theme must look equally expensive, polished, modern, stylish and commercially competitive, but must have its own original visual identity. Match quality, not NEON STAGE's exact palette, layout, motifs or artwork.
+
+### SKIN-2 — OBSIDIAN GOLD
+
+The 2026-11-19 approved OBSIDIAN direction is premium/luxury: deep obsidian, graphite, satin black metal, brushed/polished metal, refined typography, precise control surfaces and restrained metallic highlights. No acid-neon palette, loud saturated glow or cyberpunk/gamer styling. The current logical name OBSIDIAN GOLD remains unchanged; the approved distinction is its visual identity, not a new theme slot.
+
+These are design approvals, not runtime acceptance. Preserve the 27-control parity, nine rotary bindings, seven approved FX bypass IDs and all real UI/functionality restrictions.

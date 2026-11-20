@@ -1,0 +1,519 @@
+# Library Manager Ultimate — approved requirements and acceptance contract
+
+**Status:** APPROVED / FROZEN REQUIREMENTS  
+**Product:** POP PUNK GUITAR ULTIMATE (PPGU)  
+**Scope:** Portable Library Manager, shared library database, VST3 integration, and end-to-end sound availability verification.  
+**Approval:** User explicitly approved and confirmed this specification on 2026-11-18.  
+**Important:** This document records requirements. It does not claim that the manager, database integration, or end-to-end tests are already implemented.
+
+## 1. Non-negotiable product outcome
+
+A library is not considered ready merely because files have been scanned or sorted. It is READY only after the VST3 can resolve the registered assets, load the relevant mappings, and pass the required playback/availability checks. The system must not silently omit a library, WAV, SFZ region, note, velocity layer, articulation, or preset dependency.
+
+The acceptance chain is:
+
+`DISCOVER → SCAN → ANALYZE → CLASSIFY → REGISTER → VERIFY FILES → VERIFY MAPPINGS → VERIFY PLUGIN ACCESS → PLAYBACK TEST → READY`
+
+Any failed or uncertain stage must produce a visible diagnostic and a non-READY state.
+
+## 2. Approved portable folder layout
+
+The project may live on any drive, directory, or external disk. No hard-coded drive letters or absolute installation paths are allowed. The root must be resolved relative to the manager executable/script.
+
+```text
+POP PUNK GUITAR ULTIMATE/
+└── Samples/
+    ├── FACTORY/
+    ├── Import Sample Guitar/
+    │   ├── START SCANNER.bat
+    │   └── Library Manager.exe
+    └── Other/
+```
+
+- `Import Sample Guitar` is the sole incoming location for new libraries, archives, banks, WAV, SFZ, and supported materials.
+- `FACTORY` contains validated, correctly mapped, technically usable material whose rights permit the intended use/distribution.
+- `Other` contains unknown, damaged, incomplete, incompatible, unclear-license, or review-required material.
+- Do not create additional top-level directories under `Samples` without explicit user approval.
+- Preserve original source material. Never delete or overwrite originals automatically.
+- Do not automatically delete exact or near-duplicates.
+- Only clear/move an incoming item after a successful, journaled, verified operation. Failed/uncertain items remain recoverable.
+
+## 3. Two entry points, one shared engine
+
+The same analysis/classification engine, database schema, IDs, validation rules, and diagnostics must serve:
+1. The standalone portable manager launched by `START SCANNER.bat` or `Library Manager.exe`.
+2. The manager/import workflow exposed from the VST3 interface.
+
+The plugin must not scan large libraries, hash files, or perform blocking filesystem operations in the audio callback. Use worker threads/processes and a safe IPC/service boundary. The audio thread may consume only already-published, immutable/atomic-ready runtime data.
+
+## 4. Discovery and format validation
+
+Recursively inspect the incoming folder and supported archives. Identify libraries, instruments, SFZ definitions, WAV assets, mappings, metadata, documentation, license files, and relationships between them.
+
+### WAV/audio validation
+- Parse RIFF/WAVE chunks safely; validate encoding, sample rate, bit depth, channels, frame count, duration, and file integrity.
+- Detect truncated, malformed, unsupported, silent, or unreadable files.
+- Preserve metadata and source identity.
+- Record exact SHA-256 checksums. Audio similarity is a separate, non-destructive signal.
+
+### SFZ validation
+- Parse regions and supported opcodes, including sample references, key/velocity ranges, root key, groups, sequence/Round Robin, crossfades, tuning, gain, pan, offsets, loops, and release behavior.
+- Resolve relative paths, `default_path`, includes, and supported macros/wildcards according to documented parser capabilities.
+- Verify every referenced sample exists and is readable.
+- Detect missing references, invalid regions, overlapping/conflicting mappings, unsupported opcodes, and incomplete key/velocity coverage.
+- Attempt path recovery only when there is a unique/reliable match; otherwise report ambiguity and require review.
+- Never silently discard unsupported mapping behavior.
+
+## 5. Musical and instrument analysis
+
+Classify only what can be supported by source metadata or reliable analysis. Never invent uncertain information from filenames.
+
+Supported dimensions include:
+- Instrument family: Electric Guitar, Acoustic Guitar, Nylon Guitar, Steel Guitar, Bass.
+- Tone: Clean, Crunch, Overdrive, Distortion, High Gain, Ambient.
+- Role: Rhythm, Melody, Lead, Solo, Riff, Chords, Power Chords.
+- Articulations when actually mapped: Palm Mute, Sustain, Muted, Slide, Harmonics, Staccato.
+- Techniques when actually represented: Downstroke, Upstroke, Alternate Picking, Strumming.
+- Genres/styles: Pop Punk, Skate Punk, Punk Rock, Melodic Punk, Emo, Alternative Rock, Post-Hardcore, and other supported tags.
+- Musical key/mode only when reliably determined: C–B, Major/Minor.
+- MIDI root key and low/high key ranges.
+- Velocity layers, dynamic layers, Round Robin groups, strings, positions, regions, and sample groups.
+
+Use `UNKNOWN` / `REVIEW_REQUIRED` for uncertain values. One asset may have multiple metadata tags; do not physically duplicate the same WAV into many genre/key folders just to represent multi-tag classification.
+
+## 6. Database and stable asset identity
+
+Maintain a persistent, versioned library database with stable asset IDs. At minimum store:
+- Asset ID, source/library identity, relative path, file type, checksum, file metadata.
+- License evidence, attribution/source, rights decision, and review status.
+- SFZ/map identity and region references.
+- MIDI key/root/ranges, velocity ranges/layers, Round Robin data.
+- Instrument family, tone, role, genre/style, articulation, technique, string/position where known.
+- Validation state, diagnostics, timestamps, and manager/schema version.
+- Availability flags/capabilities for Melody and Pattern.
+- Preset dependencies using stable IDs, not fragile absolute paths.
+
+Database updates and file moves must be transactional or recoverable. Maintain operation journal, resume support, cache, and rollback/recovery. Verify checksums before/after moves and check available disk space.
+
+## 7. Melody and Pattern compatibility maps
+
+The manager must explicitly determine which assets/mappings are suitable for each playback mode.
+
+- **Melody:** single-note ranges, lead/riff/hook lines, octave parts, picked notes, sustain and melodic articulations where available.
+- **Pattern:** chord/power-chord structures, rhythm/riff layers, downstroke/upstroke/strumming and palm-muted patterns where available.
+
+Do not mark a capability available merely because a filename or library title mentions it. Confirm the mapping and required samples. A sound may be available to one mode and unavailable to the other. Unsupported capabilities must be reported, not fabricated.
+
+## 8. Mandatory plugin compatibility and playback gate
+
+This is a blocking release/READY requirement.
+
+For every registered asset and mapping, verify:
+1. Database record and stable ID exist.
+2. Resolved relative path points to the final FACTORY location.
+3. File exists, checksum matches, and audio reader can open it.
+4. SFZ region references resolve to the intended WAV assets.
+5. Key/root/MIDI ranges are valid and coverage gaps are identified.
+6. Every declared velocity layer and Round Robin sequence is accounted for.
+7. Articulations and techniques are exposed only when real mappings support them.
+8. Melody/Pattern capability flags match actual mapping support.
+9. VST3 registry/loader can resolve and load the asset without blocking the audio thread.
+10. Required note/velocity/articulation playback probes produce valid audio, not silence or missing-sample fallbacks.
+
+A library is **READY** only if all mandatory checks pass. Partial success must be reported as **PARTIAL** with exact missing capabilities. Any missing file, broken path, failed load, missing note/layer, invalid map, or playback failure prevents full READY status.
+
+### Plugin startup diagnostics
+On plugin open, validate the library database/version and the dependencies required by the selected preset. Display:
+- `LIBRARY STATUS: READY` when verified.
+- `LIBRARY STATUS: ATTENTION REQUIRED` when there are errors, unresolved items, or incompatible data.
+
+Never silently skip a missing asset. Show the affected library, asset ID/name, file/map, MIDI note or velocity range (when applicable), and actionable reason. Plugin must remain usable with verified assets while clearly reporting unavailable assets.
+
+## 9. Reports and audit trail
+
+After each scan, produce a report containing:
+- Libraries discovered and processed.
+- WAV files discovered, validated, registered, and rejected.
+- SFZ files parsed and regions checked.
+- Missing/broken sample references.
+- MIDI notes and range coverage, including missing notes.
+- Velocity layers and Round Robin coverage.
+- Articulations/techniques actually available.
+- Assets available to Melody and Pattern.
+- Exact duplicates and audio-similarity candidates (non-destructive).
+- License-cleared, unclear-license, and review-required items.
+- File move/copy operations, checksums, warnings, errors, and recovery state.
+- Plugin compatibility and playback probe results.
+
+## 10. Licensing and provenance
+
+Inspect LICENSE, README, EULA, credits, source page, and package documentation. The existence of a license file alone is not proof of redistribution permission. Download/evaluation permission is not redistribution permission. If redistribution/inclusion rights are unclear or disallowed, do not bundle the source samples into a distributable plugin/library; route the material to `Other` for review and record the evidence.
+
+## 11. Safety, reliability, and performance
+
+- Portable Windows 10 x64 operation; end user must not need to install Python.
+- Deliver a real EXE/BAT workflow; GUI polish is secondary to correct execution.
+- Multithreaded scanning, hashing, and analysis; bounded resource use.
+- Cache and resume interrupted scans.
+- Journal all mutations; support rollback/recovery.
+- Dry-run/preview before file moves.
+- Preserve source files and never overwrite silently.
+- Do not scan or mutate files from the plugin audio callback.
+- Do not mark features as complete without implementation and test evidence.
+
+## 12. Acceptance test strategy
+
+Use synthetic fixtures and copies of real libraries; never test destructive operations on the only originals. Include cases for:
+- Valid and malformed WAV, unsupported format, truncated file, silent audio.
+- Valid SFZ, missing sample, broken relative path, default_path, include, wildcard/macro cases supported by parser, invalid key/velocity ranges, incomplete note coverage.
+- Multiple velocity layers and Round Robin sequences.
+- Missing individual notes and articulations.
+- Duplicate checksums and similar audio.
+- Unclear/forbidden redistribution license.
+- Relocated project root and external drive letter change.
+- Interrupted scan, restart/resume, rollback, disk-space failure.
+- Database version mismatch/corruption and plugin startup diagnostics.
+- End-to-end VST3 loading and audible playback probes for registered notes/layers in Melody and Pattern.
+
+A test result must distinguish **implemented**, **unit-tested**, **integration-tested**, and **verified in a real DAW host**. Passing parser tests alone does not prove plugin playback. Do not claim DAW verification until actually performed.
+
+## 13. Release gate
+
+No library release, preset dependency, or project milestone may be declared complete solely because scanning/classification finished. The final gate is successful end-to-end VST3 asset resolution and playback verification, with no unexplained missing assets or notes. Uncertain items remain clearly marked and excluded from READY.
+
+---
+
+## Approval record
+
+User approval received: **“Утверждаю подтверждаю фиксирую”** (2026-11-18).
+
+This specification is the approved baseline. Any change to the folder layout, preservation rules, classification contract, database identity model, compatibility gates, or licensing restrictions requires explicit user approval.
+
+## 14. In-plugin scanner: identical workflow and triggers
+
+The scanner exposed inside the VST3 must be the same Library Manager engine, not a reduced second implementation and not a separate set of classification rules.
+
+The in-plugin scanner must be callable through:
+- An explicit **SCAN / IMPORT GUITAR LIBRARY** button.
+- Adding or selecting guitar sound libraries/files through the plugin's import workflow. The user action must initiate the same discovery, validation, classification, registration, and compatibility checks.
+- Re-scan / refresh when the user requests it, including after files have been added or relocated.
+
+The in-plugin workflow is:
+`USER ADDS LIBRARY OR PRESSES SCAN → SHARED SCANNER ENGINE → ANALYZE → CLASSIFY → REGISTER IN SHARED DATABASE → VERIFY FILES AND MAPPINGS → UPDATE PLUGIN LIBRARY VIEW → REPORT RESULT`
+
+Requirements:
+- Standalone manager and in-plugin scanner use the same engine, schema/version, stable IDs, metadata, classification, license policy, and READY gate.
+- A library imported from the plugin must become visible to the standalone manager, and vice versa, because both use the same project root and shared database.
+- The plugin must show scan progress, current item/library, warnings, errors, and a final summary. It must not imply success when only the file selection dialog completed.
+- Scanning, hashing, audio analysis, archive extraction, database writes, and filesystem changes run outside the audio callback on worker threads/processes.
+- Existing assets and presets must not be invalidated by rescanning. Use stable IDs, transactional database updates, journaling, and safe publication of completed scan results.
+- If the user adds one file or one library, perform an incremental scan where possible, while checking dependencies and affected mappings. Provide a full rescan command for recovery.
+- After import, run the same VST3 compatibility checks: resolve the registered asset, validate SFZ/WAV mappings and note/velocity coverage, and perform supported playback probes before marking the imported content READY.
+- If a scan fails or is interrupted, preserve the previous valid library state and allow retry/resume. Never silently replace a working mapping with an incomplete one.
+- The plugin's library browser must refresh from the shared database after a successful scan and clearly distinguish READY, PARTIAL, and ERROR/REVIEW_REQUIRED assets.
+
+This section makes the plugin's import button and add-library workflow first-class entry points to the exact same scanner mechanism used by the standalone manager.
+
+## 15. Mandatory scan completion certificate and reconciliation report
+
+A scan is not considered complete merely because the progress bar reaches 100% or the scanner finishes traversing folders. After every scan/import/distribution run, the Library Manager MUST produce a persistent, human-readable completion report that proves what was discovered, analyzed, validated, classified, moved, and left unresolved.
+
+### 15.1 Required summary
+The report must include:
+- run ID, start/end timestamps, elapsed time, scanner/database schema versions, selected Samples root;
+- libraries/archives/directories discovered;
+- total files discovered, supported files, unsupported files, files actually analyzed, files skipped (with reason);
+- WAV/audio validation counts, SFZ/map counts, resolved and missing sample references;
+- detected note/key ranges, velocity layers, round-robin groups, articulations and techniques only where verified;
+- exact-duplicate SHA-256 groups and audio-similarity candidates, clearly distinguished;
+- license states: verified for permitted use, prohibited, unknown, and review required;
+- counts and byte totals successfully placed in FACTORY, placed in Other, already correctly registered, and not moved;
+- every warning, error, skipped item, and unresolved item with library name, relative path, reason, and current location;
+- final verification results, including file existence, checksum, SFZ dependency resolution, database registration/stable IDs, and plugin-readiness checks where implemented.
+
+### 15.2 Full accounting / reconciliation
+Every discovered input item must end in exactly one explicit outcome: successfully registered and placed in FACTORY; quarantined/placed in Other; recognized as an already-processed item; or unresolved and retained in Import Sample Guitar. No item may silently disappear from the report or be counted as successful merely because it was encountered.
+
+The report must reconcile totals and show why discovered, analyzed, classified, moved, skipped, and unresolved counts differ. Folder emptiness alone is not proof of successful processing.
+
+### 15.3 Completion states
+- COMPLETE: all discovered items have an accounted-for outcome, all required analysis and post-move verification passed, and no unresolved items remain in Import Sample Guitar. Items intentionally classified to Other may still exist; their reasons must be listed.
+- COMPLETE WITH WARNINGS: all items are accounted for and safely placed, but warnings/review items remain (for example unknown licenses, unsupported formats, or incomplete sample coverage). Such items must not be presented as FACTORY-ready.
+- INCOMPLETE: scan interrupted, errors prevented full analysis or safe placement, reconciliation failed, or unresolved items remain in Import Sample Guitar. The report must identify the exact remaining items and preserve them in place.
+- FAILED: a fatal error prevented a trustworthy report or safe completion; preserve prior valid state and all unprocessed source materials.
+
+### 15.4 User-facing confirmation
+At the end of each run, show a clear summary in the manager UI/console and save a detailed report (human-readable plus machine-readable, e.g. JSON/CSV). Provide OPEN REPORT and, where safe, RETRY FAILED/REVIEW ITEMS actions. The confirmation must explicitly state:
+- what was scanned;
+- what was analyzed and validated;
+- how many items were placed in FACTORY and why;
+- how many were placed in Other and why;
+- what was not processed and why;
+- whether post-move checks passed;
+- whether the run is COMPLETE, COMPLETE WITH WARNINGS, INCOMPLETE, or FAILED.
+
+Never display "everything checked" or "COMPLETE" unless the report's accounting and required verification checks substantiate that statement. Distinguish implemented, unit-tested, integration-tested, and verified in a real Windows/DAW environment.
+
+### 15.5 Safe cleanup of Import Sample Guitar
+Successfully processed source items may be removed from Import Sample Guitar only after their destination files, checksums, dependencies, and database records have been verified and the report records the outcome. Unknown-license, unsupported, corrupt, incomplete, or otherwise rejected materials must be routed to Other with their original files and supporting context preserved. Any item that cannot be safely moved must remain in Import Sample Guitar and force INCOMPLETE status. Never delete source material as a substitute for successful classification or verification.
+
+### 15.6 Normal exclusions are not critical errors
+
+The user-facing completion report must distinguish ordinary library curation from genuine processing failures.
+
+Files that do not belong in the factory guitar library (irrelevant formats, unrelated content, non-guitar material, junk, unsupported or unusable samples, incomplete/unmapped content, and materials whose license does not permit factory redistribution) are normal exclusions or review items. They must NOT inflate the critical-error count merely because they were correctly rejected.
+
+For a fully completed run, the preferred summary is:
+- eligible items successfully validated and placed in FACTORY: count;
+- non-eligible / irrelevant / junk items excluded or routed to Other: count;
+- items awaiting manual license or technical review: count;
+- genuinely failed processing operations: count;
+- critical errors: 0, provided no actual integrity, database, filesystem, data-loss, or reconciliation failure occurred.
+
+The report must include a concise plain-language confirmation, for example:
+"Сканирование и распределение завершено. В FACTORY добавлено: N файлов / M библиотек. Не добавлено в заводскую библиотеку как неподходящие материалы или мусор: K файлов (перечень доступен в отчёте). Критических ошибок: 0."
+
+Do not call excluded items "errors" when the scanner successfully identified and safely excluded them. Do not hide real failures: unreadable files, checksum mismatches, failed moves, unresolved dependencies, database write failures, or unaccounted inputs must remain visible as processing failures and prevent a COMPLETE status where they compromise correctness.
+
+The top-level status may be COMPLETE WITH EXCLUSIONS when all discovered inputs have been accounted for, all eligible materials passed required checks and were safely placed, and all excluded items are safely retained in Other or otherwise accounted for. Use INCOMPLETE only for genuinely unfinished/unaccounted processing, not merely because irrelevant files were excluded.
+
+## 16. Additional engineering safeguards and capabilities (approved design baseline)
+
+The following additions strengthen the manager without changing the approved Samples root structure.
+
+### 16.1 Per-file accounting and library bundles
+- Track both source-library bundles and individual files. Every discovered file receives a stable inventory record and exactly one final outcome.
+- Preserve the complete relative directory structure of a library bundle when relocating it, especially SFZ maps, includes, samples, impulse responses, metadata, documentation, and license evidence.
+- Do not split a dependent SFZ package into unrelated destinations. A bundle is the atomic relocation unit whenever dependencies are shared.
+- Detect nested archives and archive path traversal (zip-slip); never extract outside a controlled staging directory. Enforce configurable size/file-count limits and detect archive bombs.
+- Detect symlinks, junctions, reparse points, hard links, and paths escaping the Import root. Never follow an escaping link.
+
+### 16.2 Accurate classification and evidence
+- Separate observed facts, parsed metadata, signal-analysis estimates, filename/folder hints, and manual decisions. Every inferred tag stores provenance and confidence.
+- Never infer a specific guitar type, genre, playing technique, chord, string, fret position, or articulation solely from a filename and present it as confirmed.
+- Add audio fingerprinting for near-duplicate discovery as a review aid; SHA-256 remains the exact-duplicate identity. Never auto-delete or silently collapse assets.
+- Audio analysis may estimate silence, clipping, peak/RMS, loudness, duration, spectral centroid, onset/transient density, and channel correlation. Estimates must be labelled as estimates and must not overclaim genre or instrument identity.
+- Preserve source sample rate, bit depth, channel count, encoding, duration, and any conversion history. Never convert originals during intake.
+
+### 16.3 Robust SFZ and dependency handling
+- Parse SFZ with a tested tokenizer/state model rather than a single regular expression. Support common opcodes and explicitly report unsupported directives.
+- Resolve default_path, relative sample paths, #include, wildcards, supported macros, and path case differences according to documented support. Do not silently ignore unsupported constructs.
+- Validate all referenced files, key/velocity ranges, sequence/round-robin groups, offsets, loops, and region bounds where applicable.
+- Preserve original SFZ and dependency package; if a path rewrite is needed, write a separately verified normalized copy and record source-to-normalized mapping.
+
+### 16.4 Transactional relocation and recovery
+- Provide preview/dry-run and explicit execution. Use same-volume atomic moves where safe; across volumes use copy -> flush -> verify size and SHA-256 -> commit destination -> only then remove source.
+- Never overwrite an existing destination. Resolve collisions by stable fingerprint and still verify the final path.
+- Write a durable transaction journal before each operation. Support restart/recovery and rollback without destroying pre-existing content.
+- Do not remove source items until destination files, dependencies, database records, and report outcomes are verified.
+- Reconcile the complete pre-scan inventory against final locations. Any unaccounted item prevents a COMPLETE status.
+
+### 16.5 Database and VST3 hand-off
+- Use a versioned, migration-aware database (SQLite preferred for concurrent reads and indexed queries; JSON/CSV remain export formats).
+- Stable asset IDs must not depend only on a path. Preserve source identity and content hash; model multiple SFZ regions as mappings to assets.
+- Publish a manifest/schema contract for the VST3 loader, including relative paths, sample metadata, regions, tags, license status, readiness, and preset references.
+- Write database updates atomically and keep backups/migrations. Never replace a valid database with a partial scan result.
+- Add an integrity command that verifies database records against actual files and checks for orphan files, missing files, duplicate IDs, and broken SFZ dependencies.
+
+### 16.6 Operational quality
+- Provide a real Windows desktop UI with cancellation, pause/resume, progress by stage, live counts, logs, report opening, and retry of safe failed operations.
+- Support Unicode paths, long paths, locked files, low disk space, access denied, network/removable volumes, and interrupted shutdown.
+- Add structured JSON and CSV reports plus a readable HTML report. Reports must distinguish normal exclusions from technical failures and critical errors.
+- Add automated tests for WAV/AIFF/FLAC metadata, malformed/truncated files, SFZ parsing, archives, Unicode/long paths, duplicate handling, collisions, interrupted transactions, rollback, and full inventory reconciliation.
+- Clearly label capability maturity: implemented, unit-tested, integration-tested, and verified on Windows/DAW. Never claim DAW verification based only on unit tests.
+
+### 16.7 Normal exclusions remain non-critical
+Correctly identifying and excluding junk, unrelated or unsuitable material is normal curation, not a critical error. Report the excluded count and reasons separately. Critical errors remain zero when no actual integrity, database, filesystem, data-loss, or reconciliation failure occurred.
+
+## 17. Post-scan handoff to GitHub and library integration review
+
+After the user runs the scanner on their actual Windows library, the manager must produce a portable, shareable analysis package so the results can be reviewed and used for the VST3 integration work.
+
+### 17.1 Required export package
+Create a timestamped export folder containing, at minimum:
+- Full inventory CSV and JSON (one row/record per discovered item, with stable IDs and final outcomes).
+- Audio metadata and technical validation report.
+- SFZ instrument/region map, resolved dependency report, missing-reference report, and unsupported-opcode report.
+- Classification catalogue with tags, confidence, and provenance.
+- Exact duplicate groups (SHA-256) and separately labelled possible-similarity groups.
+- License evidence/status and redistribution eligibility; unknown or restricted licenses must be clearly flagged.
+- FACTORY runtime manifest with stable asset IDs, relative final paths, note/velocity mappings, articulations, RR/groups, readiness state, and Melody/Pattern eligibility.
+- Exclusions/Other report with exact counts and reasons.
+- Completion certificate and reconciliation summary.
+- Database export and schema/version information; include SQLite only if it contains no machine-specific transient paths/secrets and is safe to share.
+- Scanner version, configuration, timestamps, operating environment, and test/validation capability status.
+
+### 17.2 GitHub handoff
+The user must be able to provide the generated export package to the assistant for review, and the project repository must contain the resulting machine-readable library catalogue and integration contract needed by the VST3.
+
+When the user explicitly authorizes or provides a connected GitHub workflow, publish the appropriate reports/manifests/database schema and integration documentation to the approved project repository. Do not assume the scanner can authenticate to GitHub or push automatically unless that capability has actually been configured and tested.
+
+Before publishing:
+- Exclude original WAV/SFZ/audio libraries and any copyrighted or license-restricted sample payloads unless redistribution is expressly permitted.
+- Do not publish personal machine absolute paths, usernames, secrets, access tokens, or private filesystem details.
+- Prefer relative FACTORY paths and stable asset IDs.
+- Review export size and repository suitability; large SQLite files may be better supplied separately by the user rather than committed.
+- Preserve a clear distinction between local full database and repository-safe metadata exports.
+
+### 17.3 Review and integration loop
+After the user supplies or publishes scan results:
+1. Inspect the inventory, report, SFZ maps, classification evidence, exclusions, and readiness manifest.
+2. Identify misclassifications, unresolved dependencies, unsupported content, and missing metadata.
+3. Refine scanner rules only where evidence supports the change; never silently relabel uncertain material as confirmed.
+4. Produce and verify the canonical FACTORY catalogue and VST3 data contract.
+5. Use actual asset IDs and validated mappings as the source for factory preset creation.
+6. Record the exact scan package version and Git commit used for integration.
+
+A scan is not considered integrated merely because reports were generated or uploaded. The VST3 handoff must be reviewed against the real scan outputs.
+
+### 17.4 Two supported user-to-assistant handoff methods
+
+The post-scan results must be easy for the user to deliver for review. Support both methods:
+
+**Method A — upload a text report/package**
+- The manager generates a human-readable UTF-8 TXT or Markdown summary that the user can upload directly into the ChatGPT conversation.
+- Also generate machine-readable JSON and CSV for complete structured analysis. The human-readable document must not replace the detailed machine-readable exports.
+- Split large reports into clearly numbered parts or separate files, with a manifest explaining each file and the scan ID/version.
+- The report must include counts, classification outcomes, exclusions, errors/warnings, SFZ dependency findings, asset IDs, and FACTORY readiness. Do not include audio payloads or secrets.
+- The user may upload the report directly here; the assistant should review it and identify corrections, missing data, and next integration steps.
+
+**Method B — PowerShell / GitHub connection**
+- Provide an optional PowerShell handoff script for Windows that packages only approved metadata/report files and can publish them to the configured GitHub repository using an authenticated Git workflow or GitHub CLI/API.
+- The script must first show a preview of files and destinations and require explicit user confirmation before publishing.
+- Never embed a personal access token in the script, report, command history, or repository. Prefer Git Credential Manager, GitHub CLI authentication (gh auth login), or another secure credential store. Never ask the user to paste tokens into ChatGPT.
+- The script must verify repository owner/name, branch, destination path, current Git state, and upload result; it must not overwrite unrelated files or commit original audio libraries.
+- Include an offline export mode so the user can still upload the generated text/report files manually if GitHub authentication or network access is unavailable.
+- Do not claim PowerShell-to-GitHub publishing is configured or tested until it has been run successfully in the user's Windows environment.
+
+The user may choose either handoff method per scan. Both must produce the same scan ID, report contents, and metadata version so results remain traceable.
+
+## 18. Mandatory end-to-end operation: scan, classify, and physically distribute
+
+The deliverable is a complete operational Library Manager, not a scan-only report generator. A release presented as the full manager MUST perform the complete approved workflow on the user's real Import Sample Guitar contents:
+
+1. Inventory every file and library bundle recursively.
+2. Analyze audio, SFZ maps, dependencies, metadata, hashes, license evidence, and classification confidence.
+3. Decide and record a justified outcome for every discovered item.
+4. Physically relocate eligible, validated, redistribution-permitted library bundles/assets into the approved FACTORY structure, preserving dependencies and relative relationships.
+5. Physically relocate irrelevant, junk, unsupported, incomplete, duplicate-review, or non-redistributable/review-required materials into Other when safe, preserving source structure and evidence. Items that cannot safely be moved remain in Import with an explicit reason.
+6. Register FACTORY assets in the canonical database and generate the VST3 manifest using stable IDs and relative paths.
+7. Verify destination existence, checksums, SFZ references, database records, and full inventory reconciliation before considering source items processed.
+8. Remove successfully relocated source items from Import only after verification. Never delete as a shortcut; never overwrite existing files; never discard originals on error.
+9. Produce the completion certificate and full reports, including exact FACTORY and Other counts, unresolved items, normal exclusions, and genuine technical failures.
+
+A preview/dry-run is a safety feature, not a substitute for execution. The manager must provide a clearly labelled EXECUTE DISTRIBUTION action after preview, with explicit confirmation. A user-selected automatic mode may run the same safe transaction pipeline. The first-run default must be conservative, but the program must not be described as complete until actual relocation and verification are implemented and tested.
+
+### 18.1 Release acceptance criteria
+A full release is accepted only when automated tests demonstrate, at minimum: successful FACTORY relocation of a valid permitted sample bundle; safe routing of irrelevant files to Other; SFZ dependency preservation; collision handling without overwrite; exact duplicate handling without data loss; interruption recovery; rollback on failed verification; database registration; empty Import for fully accounted successful inputs; and accurate completion report counts. Windows 10 x64 execution must be verified before claiming Windows-ready status.
+
+### 18.2 Version labelling
+A scan-only prototype may be distributed only if explicitly labelled SCAN-ONLY / NOT THE COMPLETE MANAGER. It must never be presented as the finished Library Manager requested by the user. The final product must combine scanning, analysis, classification, physical distribution, database generation, reporting, and GitHub handoff in one coherent application.
+
+## 19. Maximum modernization roadmap before finalization
+
+The following capabilities are required to make the manager dependable for large, mixed-source guitar libraries. They extend the existing approved workflow and do not alter the fixed Samples root structure.
+
+### 19.1 Multi-stage, resumable pipeline
+Implement explicit stages with persisted state and progress:
+DISCOVER → INVENTORY → ARCHIVE_INSPECTION → AUDIO_PROBE → SFZ_PARSE → DEPENDENCY_GRAPH → HASH/FINGERPRINT → LICENSE_REVIEW → CLASSIFY → VALIDATE → PREVIEW → TRANSACTIONAL_DISTRIBUTION → RECONCILE → EXPORT.
+- Each stage stores its result and can resume after a crash without repeating completed expensive work.
+- Incremental scans use size, timestamps, file identity, and checksum policy; metadata changes invalidate affected results.
+- Full rescan remains available and can detect external changes.
+- Cancellation and pause are safe at stage and transaction boundaries.
+
+### 19.2 Dependency graph and atomic library units
+- Model each source library as a bundle graph of maps, samples, includes, presets, documentation, licenses, impulse responses, and shared dependencies.
+- Determine safe move units from dependency relationships. Never split a package if that would break a map or shared dependency.
+- Detect one sample referenced by multiple SFZ maps and preserve all relationships.
+- Where safe classification differs within a bundle, use a documented policy: keep the bundle intact and route it to REVIEW/Other rather than breaking dependencies automatically.
+- Record provenance: source archive, original relative path, parent bundle, and final destination.
+
+### 19.3 Audio analysis and format support
+- Build a decoder/probe abstraction with explicit capability reporting for WAV PCM/float, AIFF, FLAC, Ogg Vorbis, MP3, and other formats actually supported by the shipped libraries.
+- Never label a format analyzed if only its extension or metadata was read.
+- Analyze channels, sample rate, bit depth/codec, duration, peak, RMS, DC offset, clipping, silence, leading/trailing silence, transient/onset profile, and optional loudness/crest factor. Store method, sample coverage, and confidence.
+- Use deterministic bounded sampling for fast scans and optional full-file analysis for final validation.
+- Preserve original audio; any generated proxy, waveform, fingerprint, or normalized derivative is separate and never replaces the source.
+- Reject unsupported or corrupt files safely to Other/review with precise reason; do not call them critical errors if safely accounted for.
+
+### 19.4 Classification quality and explainability
+- Separate confirmed metadata, parsed SFZ facts, measurable audio facts, filename hints, model estimates, and human approvals.
+- Every tag includes source, confidence, and timestamp. User corrections override automatic hints but remain auditable.
+- Add a review queue for ambiguous instrument, tone, genre, role, technique, articulation, and mapping.
+- Offer confidence thresholds and conservative defaults; uncertain tags remain UNKNOWN rather than fabricated.
+- Build a rule-test corpus from real, licensed or user-provided samples and measure false-positive/false-negative rates before promoting new rules.
+
+### 19.5 SFZ parser correctness
+- Replace regex-only parsing with a tokenizer/parser that respects comments, quotes, scopes, inherited opcodes, control/global/group/region/header sections, includes, default_path, wildcard expansion, and documented supported macros.
+- Parse opcode values and ranges into typed fields; retain raw source text and source line numbers.
+- Support and test common sampler opcodes; unknown opcodes are reported, not silently ignored.
+- Validate sample path resolution, key and velocity ranges, root keys, offsets, loop bounds, sequence groups, switch keys, crossfades, and inherited values.
+- Generate normalized maps only as separate derivative files and keep an exact source map.
+
+### 19.6 Database and schema governance
+- Use SQLite as the canonical local database with foreign keys, transactions, indexes, schema migrations, WAL-safe access, and integrity checks; export JSON/CSV for portability and review.
+- Stable asset IDs must persist across rescans and path changes; IDs must not be randomly regenerated per scan or depend only on absolute paths.
+- Keep separate Library, Bundle, Asset, AudioFacts, SFZMap, Region, Dependency, Tag, LicenseEvidence, ScanRun, Operation, and PresetReference records.
+- Store only relative paths beneath Samples; no machine-specific absolute paths in the portable manifest.
+- Include schema version, migration history, and a read-only export contract for the future VST3.
+- Database rebuild from verified inventory must be possible without losing user-approved tags or audit history.
+
+### 19.7 Safe distribution and recovery
+- Treat a library bundle as an atomic transaction where required by the dependency graph.
+- Preview shows exact source, destination, reason, eligibility, and estimated bytes before execution.
+- Use no-overwrite semantics and deterministic collision handling; never silently merge two unrelated packages.
+- Across volumes: copy to a staging destination, flush, verify every file hash and dependency, commit destination, update DB, then remove source only after reconciliation.
+- Same-volume moves still require journaled intent, post-move verification, and database reconciliation.
+- Add rollback/recovery UI that explains which operations can be reversed and preserves any pre-existing destination.
+- Check free space, path length, access rights, locked files, reparse points, and destination writeability before committing.
+- Maintain a transaction journal and immutable operation IDs.
+
+### 19.8 Operator experience
+- Main dashboard: source inventory, eligible count, excluded count, review queue, bytes, estimated duration, current stage, and last run.
+- Provide preview, execute, pause, resume, cancel, retry, rollback, open report, export, and integrity-check actions.
+- Display a per-library result card with final destination and a short human-readable reason.
+- Provide a diagnostics bundle with logs, app version, OS/runtime version, capabilities, and sanitized error details.
+- Logs rotate and are bounded; reports remain persistent and searchable.
+- Support Unicode, long paths, DST/time-zone-safe timestamps, locked files, removable/network storage, and paths containing spaces.
+
+### 19.9 Security and privacy
+- Treat archives and text metadata as untrusted input. Defend against zip-slip, archive bombs, malformed metadata, path traversal, symlink/reparse escapes, and hostile filenames.
+- Never execute scripts, installers, macros, or binaries found inside imported libraries.
+- Sanitize HTML reports and CSV formula-leading values.
+- Do not upload audio samples, license-restricted files, personal absolute paths, usernames, secrets, or tokens to GitHub.
+- GitHub publishing is opt-in, previews exact changed files, uses secure credential storage, and verifies remote commit/content after upload.
+
+### 19.10 Quality gates and finalization
+- Maintain automated unit, integration, fault-injection, and Windows end-to-end tests.
+- Test real-world fixtures: large libraries, nested archives, unusual WAV chunks, RF64, PCM/float, malformed SFZ, inherited opcodes, missing samples, duplicate maps, shared samples, Unicode/long paths, permissions, locked files, low disk, interrupted copy, and DB failures.
+- Run static analysis and PowerShell 5.1 compatibility checks. Include a self-test mode that uses generated temporary fixtures only.
+- Final release gate: clean install/portable launch on Windows 10 x64; full dry-run; real distribution test on disposable fixture; recovery test; report export; GitHub handoff test; VST3 manifest validation.
+- Every feature is labelled IMPLEMENTED, UNIT-TESTED, INTEGRATION-TESTED, or WINDOWS-VERIFIED. No feature is called complete based on a specification or static inspection alone.
+
+## 20. Findings from the v1.5 source audit that must be corrected
+The existing v1.5 PowerShell source is a scan prototype, not the complete manager. The following concrete issues are recorded for implementation:
+- It performs no physical distribution and has no transactional move/rollback pipeline.
+- It uses regex-only SFZ inspection and does not implement full SFZ scope/inheritance semantics; comment stripping can also mis-handle comment-like characters inside quoted values.
+- RF64 is accepted as a container signature but the parser reads ordinary 32-bit chunk sizes; RF64 ds64 handling is not implemented.
+- WAV signal analysis currently samples only integer PCM; IEEE float metadata is accepted but signal metrics are not calculated for float samples.
+- Audio extensions beyond WAV are inventoried but not decoded/analyzed by the current script.
+- The duplicate index is scoped to one scan run and duplicate handling is informational only; there is no persistent duplicate resolution policy.
+- Asset records generate a fresh random LibraryId per file, so library identity is not stable between files or scans.
+- The current database is a JSON snapshot, not a transactional relational asset registry; it lacks migration and referential-integrity controls.
+- The current library-level licence field remains UNKNOWN and the approval CSV is only a template; no evidence parser or explicit approval workflow is connected to distribution.
+- Classification is filename/folder hinting only and must not be represented as audio-based instrument/genre recognition.
+- The current self-test covers only a small WAV/SFZ happy path; it does not validate error recovery, move safety, dependency graphs, or Windows end-to-end behavior.
+These are implementation defects/limitations, not user mistakes. A release must close them or clearly label the relevant feature as not implemented.
+
+
+---
+
+## REV.20 superseding decisions (2026-11-20)
+
+This source requirements contract is preserved as the user's approved Library Manager acceptance specification. The following later product decisions supersede any inconsistent older values elsewhere in historical materials:
+
+1. The core factory bank is 500 presets total: 250 MELODY + 250 PATTERN. Both modes must be supported by BASIC alone. PATTERN presets are organised across PATTERN's relevant windows, sections and functions, not one flat 250-item panel.
+2. BASIC LIBRARY has a minimum target of 15 GB, included in the standard package; 15 GB is not a maximum. EXPANDED is an optional additive +15 GB initial tier (30 GB combined at the initial tier), and may grow without a hard cap. This tier contract is specified separately in `assets/library/library_tiers.json` and `docs/REV20_LIBRARY_TIERS_RU.md`.
+3. The plugin has exactly two top-level playing modes, MELODY and PATTERN. AutoChords and all other tools/windows are auxiliary surfaces, not extra top-level modes.
+4. The canonical graphical theme set is exactly 16 shells: NEON STAGE DEFAULT / SKIN-1 plus the 15 named themes SKIN-2…SKIN-16. The latest user-approved premium standard is recorded in `docs/REV20_SKIN_APPROVAL_STANDARD_RU.md`.
+5. This requirements document specifies intended behaviour and acceptance. It does not prove every stage or the full Windows runtime manager is implemented. Continue to distinguish PRESENT, IMPLEMENTED, UNIT-TESTED, INTEGRATION-TESTED, WINDOWS-VERIFIED and HOST-VERIFIED.

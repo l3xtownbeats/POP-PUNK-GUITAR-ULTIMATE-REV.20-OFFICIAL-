@@ -76,3 +76,10 @@ Static validation utilities and focused contract tests may be used for engineeri
 - `assets/library/library_tiers.json` is the machine-readable v1.2.0 contract: BASIC 15 GB minimum included, EXPANDED +15 GB initial optional add-on (30 GB combined), all 500 core presets usable from BASIC alone.
 - `tools/validate_library_tiers.py` and `tests/TestLibraryTierContract.py` validate the actual v1.2.0 field names; the test is registered in CTest.
 - This is contract/test coverage, not evidence that 15 GB of licensed samples or 500 playable presets exist in the repository.
+
+
+## Latest source-branch decisions reconciled (2026-11-18 / 2026-11-19)
+
+- The complete user-approved Library Manager acceptance contract is now preserved at `docs/REV20_LIBRARY_MANAGER_APPROVED_REQUIREMENTS.md`; it requires full scan → analyze → classify → register → verify → plugin access → playback → READY, plus safe physical distribution and reconciliation. Its v1.5 audit findings remain implementation gaps unless separately evidenced.
+- The latest skin quality direction (source main commits 9dc719b…662ff905, 2026-11-19): NEON STAGE is the premium finish benchmark, not a template to copy. Every other shell must be equally premium while distinctly original. OBSIDIAN SKIN-2 must use its own restrained blackened-metal/luxury visual direction, not neon/cyberpunk treatment.
+- The current logical theme names, count and stable IDs remain the explicit 16-item REV.20 registry. No theme count or label changed in this update.
