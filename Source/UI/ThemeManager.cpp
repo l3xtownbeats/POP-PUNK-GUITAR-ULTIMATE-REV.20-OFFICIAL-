@@ -828,7 +828,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         const auto* states = statesVar.getArray();
         const auto* ids = idsVar.getArray();
         const auto* records = recordsVar.getArray();
-        const juce::StringArray requiredStates { "default", "hover", "pressed", "disabled", "dragged" };
+        juce::StringArray requiredStates { "default", "hover", "pressed", "disabled", "dragged" };
         juce::StringArray requiredIds {
             "preset_browser", "mode_selector", "knob01", "knob02", "knob03",
             "knob04", "knob05", "knob06", "knob07", "knob08", "knob09",
