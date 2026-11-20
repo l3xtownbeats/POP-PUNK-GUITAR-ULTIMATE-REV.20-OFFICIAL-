@@ -50,7 +50,7 @@ ScanReport LibraryDiscovery::scan(const juce::File& root, int maximumEntries)
         if (!visitedDirectories.insert(directory.getFullPathName()).second) continue;
         juce::Array<juce::File> children;
         directory.findChildFiles(children, juce::File::findFilesAndDirectories, false, "*",
-                                 juce::File::FollowSymlinks::noFollow);
+                                 juce::File::FollowSymlinks::no);
         for (const auto& child : children)
         {
             if (!isSafeChild(child, root)) continue;
