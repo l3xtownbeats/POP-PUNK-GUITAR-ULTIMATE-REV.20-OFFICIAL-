@@ -1373,6 +1373,19 @@ namespace { void getPluginModuleAnchor() {} }
 void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int w, int h,
                                                     float pos, float start, float end, juce::Slider& slider)
 {
+    const auto controlId = slider.getName();
+    if (const auto* stateImage = palette.findControlArtwork(
+            controlId, !slider.isEnabled() ? "disabled"
+                    : (slider.isMouseButtonDown() ? "dragged"
+                       : (slider.isMouseOver() ? "hover" : "default")));
+        stateImage != nullptr && stateImage->isValid())
+    {
+        const auto diameter = juce::jmax(1, juce::jmin(w, h));
+        g.drawImageWithin(*stateImage, x + (w - diameter) / 2,
+                          y + (h - diameter) / 2, diameter, diameter,
+                          juce::RectanglePlacement::centred);
+        return;
+    }
     if (palette.controlsSpriteSheet.isValid())
     {
         // Eight authored 100x100 frames at 45-degree increments. Quantization
@@ -1485,6 +1498,22 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
 void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
                                                    const juce::Colour& base, bool hovered, bool down)
 {
+    const auto buttonId = button.getName();
+    if (buttonId.startsWith("fx_switch"))
+    {
+        const auto state = !button.isEnabled() ? "disabled"
+            : ((down || button.getToggleState()) ? "pressed"
+               : (hovered ? "hover" : "default"));
+        if (const auto* stateImage = palette.findControlArtwork(buttonId, state);
+            stateImage != nullptr && stateImage->isValid())
+        {
+            const auto bounds = button.getLocalBounds();
+            g.drawImageWithin(*stateImage, bounds.getX(), bounds.getY(),
+                              bounds.getWidth(), bounds.getHeight(),
+                              juce::RectanglePlacement::centred);
+            return;
+        }
+    }
     if (palette.controlsSpriteSheet.isValid() && button.isEnabled())
     {
         // Atlas state boxes are authored at 225x125; JUCE draws the button's
@@ -1758,11 +1787,13 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     melodyTab.onClick = [this] { modeBox.setSelectedId(1); };
     patternTab.onClick = [this] { modeBox.setSelectedId(2); openPatternSectionPanel(); };
     for (size_t i = 0; i < knobs.size(); ++i) {
+        knobs[i].setName("knob" + juce::String(static_cast<int>(i) + 1).paddedLeft('0', 2));
         configureKnob(knobs[i], knobLabels[i], knobNames[i]);
         knobAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.parameters, parameterIDs[i], knobs[i]);
     }
     for (size_t i = 0; i < fxButtons.size(); ++i) {
         auto& b = fxButtons[i];
+        b.setName("fx_switch" + juce::String(static_cast<int>(i) + 1).paddedLeft('0', 2));
         b.setClickingTogglesState(true);
         b.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("control_bg"));
         b.setColour(juce::TextButton::buttonOnColourId, themeManager.getPalette().token("accent"));
