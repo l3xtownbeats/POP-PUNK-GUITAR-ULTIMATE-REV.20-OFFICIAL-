@@ -442,15 +442,16 @@ private:
 };;
 
 // UI-only settings panel: controls the auxiliary workspace and theme preference.
-class PPGUSettingsPanel final : public juce::Component, public PPGUThemeAwarePanel
+class PPGUSettingsPanel final : public juce::Component, public PPGUThemeAwarePanel, private juce::Timer
 {
 public:
-    PPGUSettingsPanel(PPGUThemeManager::Palette paletteIn, float panelScaleIn, int panelGapIn,
+    PPGUSettingsPanel(PopPunkGuitarUltimateAudioProcessor& processorIn,
+                      PPGUThemeManager::Palette paletteIn, float panelScaleIn, int panelGapIn,
                       std::function<void(float)> scaleChangedIn,
                       std::function<void(int)> gapChangedIn,
                       std::function<void()> restoreThemeIn,
                       std::function<void()> openGalleryIn)
-        : palette(std::move(paletteIn)), scaleChanged(std::move(scaleChangedIn)),
+        : processor(processorIn), palette(std::move(paletteIn)), scaleChanged(std::move(scaleChangedIn)),
           gapChanged(std::move(gapChangedIn)), restoreTheme(std::move(restoreThemeIn)),
           openGallery(std::move(openGalleryIn))
     {
@@ -466,6 +467,13 @@ public:
         description.setFont(makeThemeFont(palette, 10.0f, false, false));
         description.setJustificationType(juce::Justification::topLeft);
         addAndMakeVisible(description);
+
+        hostAudioLabel.setJustificationType(juce::Justification::topLeft);
+        hostAudioLabel.setFont(makeThemeFont(palette, 9.5f, false, true));
+        hostAudioLabel.setColour(juce::Label::textColourId, palette.token("lcdText"));
+        addAndMakeVisible(hostAudioLabel);
+        refreshHostAudioLabel();
+        startTimerHz(2);
 
         scaleLabel.setText("AUXILIARY PANEL SCALE", juce::dontSendNotification);
         gapLabel.setText("SPACE BETWEEN PANELS", juce::dontSendNotification);
@@ -516,6 +524,8 @@ public:
         gapLabel.setFont(makeThemeFont(palette, 9.5f, false, true));
         heading.setColour(juce::Label::textColourId, palette.token("text_primary"));
         description.setColour(juce::Label::textColourId, palette.token("text_secondary"));
+        hostAudioLabel.setFont(makeThemeFont(palette, 9.5f, false, true));
+        hostAudioLabel.setColour(juce::Label::textColourId, palette.token("lcdText"));
         scaleLabel.setColour(juce::Label::textColourId, palette.token("accent"));
         gapLabel.setColour(juce::Label::textColourId, palette.token("accent"));
         configureSlider(scaleSlider, 0.5, 1.5, 0.05, scaleSlider.getValue());
@@ -538,7 +548,9 @@ public:
         auto area = getLocalBounds().reduced(12);
         heading.setBounds(area.removeFromTop(20));
         description.setBounds(area.removeFromTop(24));
-        area.removeFromTop(2);
+        area.removeFromTop(5);
+        hostAudioLabel.setBounds(area.removeFromTop(58));
+        area.removeFromTop(5);
         scaleLabel.setBounds(area.removeFromTop(14));
         scaleSlider.setBounds(area.removeFromTop(20));
         area.removeFromTop(2);
@@ -551,6 +563,24 @@ public:
     }
 
 private:
+    void timerCallback() override { refreshHostAudioLabel(); }
+
+    void refreshHostAudioLabel()
+    {
+        const auto sampleRate = processor.getHostSampleRateSnapshot();
+        const auto lastBlock = processor.getLastProcessedBlockSizeSnapshot();
+        const auto preparedMaximum = processor.getPreparedMaximumBlockSizeSnapshot();
+        const auto rateText = juce::String(sampleRate, 0) + " Hz";
+        const auto blockText = lastBlock > 0 ? juce::String(lastBlock) + " samples"
+                                             : juce::String("waiting for audio");
+        hostAudioLabel.setText(
+            "HOST AUDIO CONFIGURATION  /  READ ONLY\n"
+            "Sample rate: " + rateText + "   |   Last processed block: " + blockText
+            + "   |   Prepared maximum: " + juce::String(preparedMaximum)
+            + "\nBuffer size is controlled by the DAW. Change it in FL Studio Audio Settings.",
+            juce::dontSendNotification);
+    }
+
     void configureSlider(juce::Slider& slider, double minimum, double maximum,
                          double interval, double value)
     {
@@ -566,11 +596,12 @@ private:
         slider.setColour(juce::Slider::textBoxOutlineColourId, palette.token("control_border"));
     }
 
+    PopPunkGuitarUltimateAudioProcessor& processor;
     PPGUThemeManager::Palette palette;
     std::function<void(float)> scaleChanged;
     std::function<void(int)> gapChanged;
     std::function<void()> restoreTheme, openGallery;
-    juce::Label heading, description, scaleLabel, gapLabel;
+    juce::Label heading, description, hostAudioLabel, scaleLabel, gapLabel;
     juce::Slider scaleSlider, gapSlider;
     juce::TextButton restoreButton, galleryButton;
 };
@@ -2654,7 +2685,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openSettingsPanel()
 
         juce::Component::SafePointer<PopPunkGuitarUltimateAudioProcessorEditor> safe(this);
         auto content = std::make_unique<PPGUSettingsPanel>(
-            themeManager.getPalette(), panelScale, panelGap,
+            processor, themeManager.getPalette(), panelScale, panelGap,
             [safe](float value)
             {
                 if (safe == nullptr || safe->auxiliaryWorkspace == nullptr)
