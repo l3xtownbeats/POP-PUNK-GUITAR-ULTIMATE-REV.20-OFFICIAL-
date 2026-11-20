@@ -1154,6 +1154,90 @@ private:
     juce::TextButton preview, apply, cancel;
 };
 
+class PPGUChordDiagram final : public juce::Component
+{
+public:
+    PPGUChordDiagram()
+    {
+        setAccessible(true);
+        setDescription("Reference guitar chord diagram for A major. Display only; MIDI chord generation is not connected.");
+    }
+
+    void setPalette(const PPGUThemeManager::Palette& value)
+    {
+        palette = value;
+        repaint();
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        const auto bounds = getLocalBounds().toFloat().reduced(1.0f);
+        g.setColour(palette.token("panel"));
+        g.fillRoundedRectangle(bounds, 8.0f);
+        g.setColour(palette.token("control_border"));
+        g.drawRoundedRectangle(bounds, 8.0f, 1.0f);
+
+        auto heading = getLocalBounds().reduced(10, 7);
+        g.setColour(palette.token("text_secondary"));
+        g.setFont(makeThemeFont(palette, 8.5f, false, true));
+        g.drawText("REFERENCE VOICING", heading.removeFromTop(15), juce::Justification::centredLeft);
+        g.setColour(palette.token("accent"));
+        g.setFont(makeThemeFont(palette, 11.0f, false, true));
+        g.drawText("A MAJ  /  EXAMPLE", heading.removeFromTop(17), juce::Justification::centredLeft);
+
+        const auto grid = getLocalBounds().reduced(20, 42);
+        if (grid.getWidth() < 40 || grid.getHeight() < 35)
+            return;
+
+        constexpr int stringCount = 6;
+        constexpr int fretCount = 4;
+        constexpr std::array<int, stringCount> frets { 0, 0, 2, 2, 2, 0 };
+        const float dx = static_cast<float>(grid.getWidth()) / static_cast<float>(stringCount - 1);
+        const float dy = static_cast<float>(grid.getHeight()) / static_cast<float>(fretCount);
+
+        const float x1 = static_cast<float>(grid.getX());
+        const float x2 = static_cast<float>(grid.getRight());
+        const float y1 = static_cast<float>(grid.getY());
+        const float y2 = static_cast<float>(grid.getBottom());
+
+        g.setColour(palette.token("highlight"));
+        g.drawLine(x1, y1, x2, y1, 2.8f); // Nut
+        g.setColour(palette.token("control_border"));
+        for (int fret = 1; fret <= fretCount; ++fret)
+        {
+            const float y = y1 + static_cast<float>(fret) * dy;
+            g.drawLine(x1, y, x2, y, 1.0f);
+        }
+
+        for (int stringIndex = 0; stringIndex < stringCount; ++stringIndex)
+        {
+            const float x = x1 + static_cast<float>(stringIndex) * dx;
+            g.setColour(palette.token("text_secondary").withAlpha(0.78f));
+            g.drawLine(x, y1, x, y2, 1.15f);
+
+            const int fret = frets[static_cast<size_t>(stringIndex)];
+            if (fret == 0)
+            {
+                g.setColour(palette.token("text_secondary"));
+                g.drawEllipse(x - 3.0f, y1 - 9.0f, 6.0f, 6.0f, 1.0f);
+            }
+            else if (fret > 0 && fret <= fretCount)
+            {
+                const float y = y1 + (static_cast<float>(fret) - 0.5f) * dy;
+                g.setColour(palette.token("accent_glow").withAlpha(0.28f));
+                g.fillEllipse(x - 7.0f, y - 7.0f, 14.0f, 14.0f);
+                g.setColour(palette.token("accent"));
+                g.fillEllipse(x - 4.5f, y - 4.5f, 9.0f, 9.0f);
+                g.setColour(palette.token("text_primary"));
+                g.drawEllipse(x - 4.5f, y - 4.5f, 9.0f, 9.0f, 0.8f);
+            }
+        }
+    }
+
+private:
+    PPGUThemeManager::Palette palette;
+};
+
 class PPGUAutoChordsPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
 public:
@@ -1178,6 +1262,8 @@ public:
         addAndMakeVisible(keyBox);
         addAndMakeVisible(modeBox);
         addAndMakeVisible(patternBox);
+        chordDiagram.setPalette(palette);
+        addAndMakeVisible(chordDiagram);
         keyAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(apvts, "scaleRoot", keyBox);
         modeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(apvts, "scaleMode", modeBox);
         patternAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(apvts, "patternSlot", patternBox);
@@ -1209,6 +1295,7 @@ public:
             box->setColour(juce::ComboBox::outlineColourId, palette.token("control_border"));
             box->setColour(juce::ComboBox::arrowColourId, palette.token("accent"));
         }
+        chordDiagram.setPalette(palette);
         repaint();
     }
 
@@ -1226,19 +1313,24 @@ public:
         stateLabel.setBounds(area.removeFromTop(32));
         offButton.setBounds(area.removeFromTop(44).removeFromLeft(210).reduced(2));
         area.removeFromTop(24);
-        keyLabel.setBounds(area.removeFromTop(22));
-        keyBox.setBounds(area.removeFromTop(44).removeFromLeft(260));
-        area.removeFromTop(20);
-        modeLabel.setBounds(area.removeFromTop(22));
-        modeBox.setBounds(area.removeFromTop(44).removeFromLeft(260));
-        area.removeFromTop(20);
-        patternLabel.setBounds(area.removeFromTop(22));
-        patternBox.setBounds(area.removeFromTop(44).removeFromLeft(360));
+        auto controls = area.removeFromLeft(300);
+        auto diagramArea = area.removeFromRight(196);
+        chordDiagram.setBounds(diagramArea.removeFromTop(176).reduced(3));
+
+        keyLabel.setBounds(controls.removeFromTop(22));
+        keyBox.setBounds(controls.removeFromTop(44).removeFromLeft(260));
+        controls.removeFromTop(20);
+        modeLabel.setBounds(controls.removeFromTop(22));
+        modeBox.setBounds(controls.removeFromTop(44).removeFromLeft(260));
+        controls.removeFromTop(20);
+        patternLabel.setBounds(controls.removeFromTop(22));
+        patternBox.setBounds(controls.removeFromTop(44).removeFromLeft(280));
     }
 private:
     PPGUThemeManager::Palette palette;
     juce::AudioProcessorValueTreeState& apvts;
     juce::Label title, stateLabel, keyLabel, modeLabel, patternLabel;
+    PPGUChordDiagram chordDiagram;
     juce::TextButton offButton;
     juce::ComboBox keyBox, modeBox, patternBox;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> keyAttachment, modeAttachment, patternAttachment;
