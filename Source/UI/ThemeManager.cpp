@@ -208,6 +208,44 @@ namespace
         return true;
     }
 
+    bool loadSafePngArtwork(const juce::File& themeRoot,
+                            const juce::String& relativePath,
+                            int width, int height,
+                            juce::Image& destination,
+                            juce::String& error)
+    {
+        if (relativePath.isEmpty() || relativePath.startsWith("/")
+            || relativePath.contains("..") || relativePath.contains(":")
+            || relativePath.contains("\\"))
+        {
+            error = "Theme PNG path is not a safe relative path";
+            return false;
+        }
+
+        const auto file = themeRoot.getChildFile(relativePath);
+        if (!file.existsAsFile() || !file.isAChildOf(themeRoot)
+            || file.getSize() <= 0 || file.getSize() > 8 * 1024 * 1024)
+        {
+            error = "Theme PNG is missing, outside its theme folder, or exceeds the size limit";
+            return false;
+        }
+        if (file.isSymbolicLink() && !file.getLinkedTarget().isAChildOf(themeRoot))
+        {
+            error = "Theme PNG symbolic link escapes the theme folder";
+            return false;
+        }
+
+        const auto decoded = juce::ImageFileFormat::loadFrom(file);
+        if (!decoded.isValid() || decoded.getWidth() != width || decoded.getHeight() != height)
+        {
+            error = "Theme PNG could not be decoded or has unexpected dimensions";
+            return false;
+        }
+
+        destination = decoded;
+        return true;
+    }
+
     bool validateSkinStudioManifest(const juce::var& root,
                                     PPGUThemeManager::Palette& palette,
                                     juce::String& error)
@@ -740,6 +778,27 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         lastError = error.isNotEmpty() ? error : "Theme artwork loading failed";
         resetToDefault();
         return false;
+    }
+
+    // The default NEON STAGE shell has a four-atlas visual package.
+    // Atlases are decoded only on the UI/control thread and never touched by audio code.
+    if (id == "skin-053")
+    {
+        juce::var spriteSheets;
+        if (!hasObject(assets, "spriteSheets", spriteSheets)
+            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("controls", "").toString(),
+                                  1024, 1024, candidate.controlsSpriteSheet, error)
+            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("meters_sliders", "").toString(),
+                                   1024, 1024, candidate.metersSlidersSpriteSheet, error)
+            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("frames_panels", "").toString(),
+                                   1024, 1024, candidate.framesPanelsSpriteSheet, error)
+            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("icons", "").toString(),
+                                   1024, 1024, candidate.iconsSpriteSheet, error))
+        {
+            lastError = error.isNotEmpty() ? error : "NEON STAGE sprite atlas manifest is incomplete";
+            resetToDefault();
+            return false;
+        }
     }
 
     activePalette = std::move(candidate);
