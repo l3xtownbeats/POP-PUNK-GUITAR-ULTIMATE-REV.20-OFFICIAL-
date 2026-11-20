@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstring>
 #include <set>
+#include <string>
 namespace ppgu::library
 {
 namespace
@@ -42,13 +43,13 @@ ScanReport LibraryDiscovery::scan(const juce::File& root, int maximumEntries)
     }
     maximumEntries = juce::jlimit(1, 100000, maximumEntries);
     std::vector<juce::File> pendingDirectories { root };
-    std::set<juce::String> visitedDirectories;
+    std::set<std::string> visitedDirectories;
     juce::int64 remainingHashBudget = maximumTotalHashBytes;
     while (!pendingDirectories.empty())
     {
         const auto directory = pendingDirectories.back();
         pendingDirectories.pop_back();
-        if (!visitedDirectories.insert(directory.getFullPathName()).second) continue;
+        if (!visitedDirectories.insert(directory.getFullPathName().toStdString()).second) continue;
         juce::Array<juce::File> children;
         directory.findChildFiles(children, juce::File::findFilesAndDirectories, false, "*",
                                  juce::File::FollowSymlinks::no);
