@@ -59,7 +59,7 @@ manifest = {
   "project":"NEON_STAGE_MANAGER_3_0",
   "theme":"NEON_STAGE_DEFAULT_SKIN_1",
   "canvas":[1024,1024],
-  "base_palette":P,
+  "base_palette":{\n    "background":P["background"], "metal_border":P["metal_border"],\n    "glow_cyan":P["glow_cyan"], "glow_blue":P["glow_blue"],\n    "accent_magenta":P["accent_magenta"]\n  },
   "sheets":{}
 }
 
