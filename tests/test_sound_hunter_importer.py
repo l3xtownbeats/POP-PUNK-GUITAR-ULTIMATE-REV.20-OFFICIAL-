@@ -66,6 +66,19 @@ class SoundHunterRegressionTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 sound_hunter.verify_zip_sha256_manifest(z)
 
+    def test_github_headers_uses_actions_token_when_available(self):
+        from unittest import mock
+        with mock.patch.dict("os.environ", {"GITHUB_TOKEN": "unit-test-token"}, clear=True):
+            headers = sound_hunter.github_headers()
+        self.assertEqual(headers["Authorization"], "Bearer unit-test-token")
+        self.assertEqual(headers["Accept"], "application/vnd.github+json")
+
+    def test_github_headers_works_without_token_for_public_sources(self):
+        from unittest import mock
+        with mock.patch.dict("os.environ", {}, clear=True):
+            headers = sound_hunter.github_headers()
+        self.assertNotIn("Authorization", headers)
+
     def test_fetch_repo_archive_pins_immutable_commit_and_hashes_payload(self):
         import hashlib
         import tempfile

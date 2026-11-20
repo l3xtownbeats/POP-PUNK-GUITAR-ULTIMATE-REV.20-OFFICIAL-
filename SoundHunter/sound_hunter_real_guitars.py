@@ -15,8 +15,16 @@ CATALOG = Path(__file__).with_name("real_guitar_sources.json")
 AUDIO = {".wav",".wave",".flac",".ogg",".oga",".mp3",".aif",".aiff",".aifc",".caf",".opus",".m4a",".aac",".wma",".au",".snd",".raw",".pcm",".sf2",".sf3",".gig"}
 UA = "PPGU-SoundHunter/1.0 (+real-recorded-guitar-only)"
 
+def github_headers(accept: str = "application/vnd.github+json") -> dict[str, str]:
+    headers = {"User-Agent": UA, "Accept": accept}
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
 def request(url: str, timeout: int = 90) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/vnd.github+json"})
+    req = urllib.request.Request(url, headers=github_headers())
     with urllib.request.urlopen(req, timeout=timeout) as response:
         return response.read()
 
@@ -43,7 +51,9 @@ def fetch_lfs_object(repo: str, pointer: bytes) -> bytes:
     if not oid_match or not size_match: raise RuntimeError("Malformed Git LFS pointer")
     oid=oid_match.group(1).decode("ascii"); size=int(size_match.group(1))
     payload=json.dumps({"operation":"download","transfers":["basic"],"objects":[{"oid":oid,"size":size}]}).encode()
-    req=urllib.request.Request(f"https://github.com/{repo}.git/info/lfs/objects/batch",data=payload,headers={"User-Agent":UA,"Accept":"application/vnd.git-lfs+json","Content-Type":"application/vnd.git-lfs+json"})
+    lfs_headers = github_headers("application/vnd.git-lfs+json")
+    lfs_headers["Content-Type"] = "application/vnd.git-lfs+json"
+    req=urllib.request.Request(f"https://github.com/{repo}.git/info/lfs/objects/batch",data=payload,headers=lfs_headers)
     with urllib.request.urlopen(req,timeout=90) as response: batch=json.loads(response.read().decode())
     obj=batch.get("objects",[{}])[0]
     if obj.get("error"): raise RuntimeError(f"Git LFS object unavailable: {obj['error']}")

@@ -148,3 +148,10 @@ Artifact ID `14622101740`, SHA-256 `086eba4ad405db45d2674603d07bfbbe3d083091e4d9
 ## CI pluginval update
 
 The Windows VST3 workflow now runs official pluginval Windows 1.0.4 at strictness level 5 after CTest, skin validation and package staging. Pass/fail is pending on the new target SHA. Manual FL Studio 20 remains separate.
+
+
+## Sound Hunter acquisition retry — API quota hardening
+
+- Run 44722128778 failed with GitHub HTTP 403 rate limit exceeded at the first unauthenticated repo metadata request. No audio payload or sample package was created.
+- The importer now adds the Actions job's read-only `GITHUB_TOKEN` to GitHub API requests and Git LFS batch requests. The Ubuntu workflow passes `github.token`; tests cover both token-enabled and public/no-token header cases.
+- Importer, policy and artifact splitter test suites passed on the first run; re-run the acquisition workflow on the updated main SHA before claiming any source acquisition.

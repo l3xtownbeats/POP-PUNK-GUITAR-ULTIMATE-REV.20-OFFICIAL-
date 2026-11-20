@@ -136,3 +136,10 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Added Sound Hunter import subsystem from the source CC0-1.0 allowlist, with immutable source commit pinning, archive SHA-256, strict existing-file hash handling, Windows/POSIX archive path traversal prevention, atomic registry write and rollback of only the current failed run directory. This is a new acquisition toolchain, not yet proof that audio payload has been downloaded or meets BASIC 15 GB.
 - Added a separate Ubuntu workflow to discover/import CC0 real guitar samples, run import/policy/splitter tests, split/verify package parts and upload payload plus provenance. The first acquisition run is triggered by this commit; its measured size and contents must be inspected before treating any files as BASIC library.
 - CTest now includes Sound Hunter importer safety, soundbank policy and artifact splitter tests (expected total 19). The Windows workflow also adds pluginval strictness 5 using the pinned official pluginval 1.0.4 Windows release; its first run is still pending.
+
+
+## 2026-11-20 — Sound Hunter API rate-limit failure isolated and fixed
+- First acquisition run [44722128778](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44722128778) failed before the first repository download: GitHub returned HTTP 403 rate limit exceeded on the unauthenticated public API request. This was infrastructure/API quota, not license denial or corrupt audio.
+- The three Sound Hunter tests completed successfully before acquisition. No package artifact was generated and no new sample payload was accepted into the library.
+- Updated importer request helper to attach the job-scoped `GITHUB_TOKEN` (or `GH_TOKEN`) as Bearer authorization to API requests; the workflow now explicitly exposes `github.token` with read-only contents permission. Git LFS batch requests use the same auth header.
+- Added tests for authenticated and unauthenticated public-request header construction. A new acquisition run is required. Do not mark the library acquisition pass until it finishes and registry/payload are inspected.

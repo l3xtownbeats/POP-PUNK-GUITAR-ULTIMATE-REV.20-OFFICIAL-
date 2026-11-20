@@ -159,3 +159,9 @@ The source-main DSP block implementing live EQ crossover frequencies, independen
 - Live AMP TONE/EQ crossover/Compressor Amount wiring: **REV.20 CI PASS** on SHA `7ea16a30f8abaaae6edf8f0c4e58814864cf4fc2`, workflow 44721066388, CTest 16/16 including `ppgu_fx_dsp_parameter_wiring`.
 - Sound Hunter importer: PORTED with immutable source commit pinning, archive SHA-256, path traversal protection for POSIX/Windows paths, fail-closed current-library hashing and rollback of only failed new run folders. Importer/policy/artifact-splitter tests are now added to CTest; actual acquisition workflow is started by the new commit and output must be audited before library acceptance.
 - Pluginval strictness 5 has been added to the Windows VST3 workflow but is awaiting its first target run.
+
+
+### Sound Hunter acquisition API retry
+
+- First run 44722128778: discovery and all three Python test suites passed; acquisition failed at the first unauthenticated API metadata request with HTTP 403 rate-limit exceeded. No audio files were acquired or uploaded.
+- Added Actions-token bearer auth to GitHub API and Git LFS batch requests, exposed read-only `github.token` in the Ubuntu job, and tests for token/no-token request header behavior. New exact-SHA run required.
