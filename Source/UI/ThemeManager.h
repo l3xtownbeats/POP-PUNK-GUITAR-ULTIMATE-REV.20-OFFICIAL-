@@ -67,7 +67,7 @@ public:
         // at 128px to keep the editor's resident artwork footprint bounded.
         std::map<std::string, juce::Image> controlStateArtwork;
         const juce::Image* findControlArtwork(const juce::String& controlId,
-                                              const juce::String& state) const noexcept
+                                              const juce::String& state) const
         {
             const auto key = (controlId + "|" + state).toStdString();
             const auto found = controlStateArtwork.find(key);
