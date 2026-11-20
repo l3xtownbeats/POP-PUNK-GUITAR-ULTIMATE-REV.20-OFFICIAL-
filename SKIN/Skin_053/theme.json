@@ -340,7 +340,8 @@
       "meters_sliders": "assets/spritesheets/neon_stage_meters_sliders_sheet.png",
       "frames_panels": "assets/spritesheets/neon_stage_frames_panels_sheet.png",
       "icons": "assets/spritesheets/neon_stage_icons_sheet.png"
-    }
+    },
+    "spriteSheetManifest": "assets/spritesheets/neon_stage_spritesheet_manifest.json"
   },
   "compatibility": {
     "minimumPluginVersion": "4.0.0",
