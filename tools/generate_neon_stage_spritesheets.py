@@ -83,7 +83,7 @@ def draw_knob(frame):
         rad=math.radians(a)
         d.line((50+34*math.cos(rad),50+34*math.sin(rad),
                 50+39*math.cos(rad),50+39*math.sin(rad)),fill=rgba(P["dim"]),width=1)
-    angle=frame*45-135
+    angle=frame*45
     rad=math.radians(angle)
     d.line((50+7*math.cos(rad),50+7*math.sin(rad),
             50+29*math.cos(rad),50+29*math.sin(rad)),fill=rgba("#FFFFFF"),width=4)
