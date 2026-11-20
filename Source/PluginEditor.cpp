@@ -1502,6 +1502,36 @@ namespace { void getPluginModuleAnchor() {} }
 void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int w, int h,
                                                     float pos, float start, float end, juce::Slider& slider)
 {
+    const auto controlId = slider.getComponentID();
+    if (controlId.startsWith("knob"))
+    {
+        const auto stateName = ppguSliderArtworkState(slider);
+        if (const auto* artwork = palette.findControlArtwork(controlId, stateName))
+        {
+            if (artwork->isValid())
+            {
+                const int diameter = juce::jmax(1, juce::jmin(w, h) - 2);
+                const int destinationX = x + (w - diameter) / 2;
+                const int destinationY = y + (h - diameter) / 2;
+                g.drawImageWithin(*artwork, destinationX, destinationY, diameter, diameter,
+                                  juce::RectanglePlacement::centred);
+                // Artwork remains position-neutral; the live indicator follows APVTS.
+                const float cx = static_cast<float>(x) + static_cast<float>(w) * 0.5f;
+                const float cy = static_cast<float>(y) + static_cast<float>(h) * 0.5f;
+                const float radius = static_cast<float>(diameter) * 0.30f;
+                const float angle = start + pos * (end - start);
+                juce::Path pointer;
+                pointer.startNewSubPath(cx, cy);
+                pointer.lineTo(cx + std::sin(angle) * radius,
+                               cy - std::cos(angle) * radius);
+                g.setColour(palette.token("text_primary"));
+                g.strokePath(pointer, juce::PathStrokeType(2.2f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                return;
+            }
+        }
+    }
+
     if (palette.controlsSpriteSheet.isValid())
     {
         // Eight authored 100x100 frames at 45-degree increments. Quantization
@@ -1614,6 +1644,22 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
 void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
                                                    const juce::Colour& base, bool hovered, bool down)
 {
+    const auto controlId = button.getComponentID();
+    if (controlId.startsWith("fx_switch"))
+    {
+        const auto stateName = ppguButtonArtworkState(button, hovered, down);
+        if (const auto* artwork = palette.findControlArtwork(controlId, stateName))
+        {
+            if (artwork->isValid())
+            {
+                const auto bounds = button.getLocalBounds();
+                g.drawImageWithin(*artwork, bounds.getX(), bounds.getY(),
+                    bounds.getWidth(), bounds.getHeight(), juce::RectanglePlacement::centred);
+                return;
+            }
+        }
+    }
+
     if (palette.controlsSpriteSheet.isValid() && button.isEnabled())
     {
         // Atlas state boxes are authored at 225x125; JUCE draws the button's
@@ -1873,6 +1919,14 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     startModeBox.setColour(juce::ComboBox::outlineColourId, themeManager.getPalette().token("accent").withAlpha(0.5f));
     addAndMakeVisible(startModeBox);
     startModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(processor.parameters, "syncMode", startModeBox);
+    chordDiagram = std::make_unique<PPGUChordDiagram>();
+    if (auto* diagram = dynamic_cast<PPGUChordDiagram*>(chordDiagram.get()))
+        diagram->setPalette(themeManager.getPalette());
+    addAndMakeVisible(*chordDiagram);
+
+    mainFxEdit = std::make_unique<PPGUFXEditPanel>(processor, 0);
+    addAndMakeVisible(*mainFxEdit);
+
     keyboard = std::make_unique<juce::MidiKeyboardComponent>(processor.keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard);
     keyboard->setAvailableRange(36, 84);
     keyboard->setKeyWidth(18.0f);
@@ -1886,8 +1940,14 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     addAndMakeVisible(*performanceDisplay);
     melodyTab.onClick = [this] { modeBox.setSelectedId(1); };
     patternTab.onClick = [this] { modeBox.setSelectedId(2); openPatternSectionPanel(); };
+    modeBox.onChange = [this]
+    {
+        if (chordDiagram != nullptr)
+            chordDiagram->setVisible(modeBox.getSelectedId() == 2);
+    };
     for (size_t i = 0; i < knobs.size(); ++i) {
         configureKnob(knobs[i], knobLabels[i], knobNames[i]);
+        knobs[i].setComponentID("knob" + juce::String(static_cast<int>(i + 1)).paddedLeft('0', 2));
         knobAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.parameters, parameterIDs[i], knobs[i]);
     }
     for (size_t i = 0; i < fxButtons.size(); ++i) {
@@ -1898,7 +1958,12 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
         b.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
         b.setColour(juce::TextButton::textColourOnId, themeManager.getPalette().token("window_bg"));
         fxAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(processor.parameters, fxParameterIDs[i], b);
-        b.onClick = [this, i] { openFxEditPanel(static_cast<int>(i)); };
+        b.setComponentID("fx_switch" + juce::String(static_cast<int>(i + 1)).paddedLeft('0', 2));
+        b.onClick = [this, i]
+        {
+            if (auto* panel = dynamic_cast<PPGUFXEditPanel*>(mainFxEdit.get()))
+                panel->setSelectedGroup(static_cast<int>(i));
+        };
         addAndMakeVisible(b);
     }
     ampTitle.setText("AMP & TONE", juce::dontSendNotification);
@@ -2478,7 +2543,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openFxEditPanel(int selectedEffe
         spec.title = "FX EDIT  /  NEON STAGE";
         spec.desired = { 1000, 680 };
         spec.minimum = { 620, 440 };
-        spec.content = std::make_unique<PPGUFXEditPanel>(processor.parameters, selectedEffect);
+        spec.content = std::make_unique<PPGUFXEditPanel>(processor, selectedEffect);
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
