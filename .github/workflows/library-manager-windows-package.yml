@@ -1,0 +1,177 @@
+name: Library Manager Windows Package
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "release/3.0-final"
+    paths:
+      - "LibraryManager/**"
+      - ".github/workflows/library-manager-windows-package.yml"
+  pull_request:
+    paths:
+      - "LibraryManager/**"
+      - ".github/workflows/library-manager-windows-package.yml"
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: LibraryManager/requirements*.txt
+
+      - name: Install runtime and packaging dependencies
+        working-directory: LibraryManager
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -r requirements-build.txt
+
+      - name: Compile modules and run Windows regression suite
+        working-directory: LibraryManager
+        run: |
+          python -m compileall -q .
+          python -m unittest discover -v -p "test_*.py"
+
+      - name: Build portable folder
+        working-directory: LibraryManager
+        run: |
+          python -m PyInstaller --noconfirm --clean --windowed --onedir --name POP_PUNK_GUITAR_LIBRARY_MANAGER --paths . --add-data "PORTABLE_USER_GUIDE_RU.md;." --add-data "ppgu_skin;ppgu_skin" --collect-all soundfile --collect-all _soundfile_data --distpath dist manager_gui.py
+
+      - name: Verify executable and bundled resources
+        working-directory: LibraryManager
+        shell: pwsh
+        run: |
+          $app = "dist/POP_PUNK_GUITAR_LIBRARY_MANAGER"
+          $exe = Join-Path $app "POP_PUNK_GUITAR_LIBRARY_MANAGER.exe"
+          if (!(Test-Path $exe)) { throw "Portable GUI executable was not produced: $exe" }
+
+          # Require the embedded CPython runtime inside the distributable folder.
+          $pythonRuntime = Get-ChildItem $app -Recurse -Filter "python311.dll" | Select-Object -First 1
+          if (!$pythonRuntime) { throw "Bundled python311.dll is missing; package is not self-contained." }
+
+          $userGuide = Get-ChildItem $app -Recurse -Filter "PORTABLE_USER_GUIDE_RU.md" | Select-Object -First 1
+          if (!$userGuide) { throw "Russian user guide is missing from the portable package." }
+
+          $skinTheme = Get-ChildItem $app -Recurse -Filter "theme.json" | Where-Object { $_.FullName -match "ppgu_skin" } | Select-Object -First 1
+          if (!$skinTheme) { throw "PPGU NEON STAGE theme manifest is missing from the portable package." }
+
+          $skinHero = Get-ChildItem $app -Recurse -Filter "hero.png" | Where-Object { $_.FullName -match "ppgu_skin" } | Select-Object -First 1
+          if (!$skinHero) { throw "PPGU NEON STAGE hero asset is missing from the portable package." }
+
+      - name: Mark portable data mode, smoke-test, and create ZIP
+        working-directory: LibraryManager
+        shell: pwsh
+        run: |
+          $app = "dist/POP_PUNK_GUITAR_LIBRARY_MANAGER"
+          [guid]::NewGuid().ToString("N") | Set-Content -NoNewline (Join-Path $app "portable.mode")
+
+          $exe = Join-Path $app "POP_PUNK_GUITAR_LIBRARY_MANAGER.exe"
+          $oldPath = $env:PATH
+          try {
+            $env:PATH = "$env:SystemRoot/System32;$env:SystemRoot"
+            $p = Start-Process -FilePath (Resolve-Path $exe) -PassThru
+            Start-Sleep -Seconds 5
+            $p.Refresh()
+            if ($p.HasExited) { throw "Portable-mode app startup failed (code $($p.ExitCode))." }
+            Stop-Process -Id $p.Id -Force
+            Wait-Process -Id $p.Id -ErrorAction SilentlyContinue
+          } finally {
+            $env:PATH = $oldPath
+          }
+
+          $userData = Join-Path $app "UserData"
+          if (!(Test-Path $userData -PathType Container)) { throw "Portable mode did not create its persistent UserData directory." }
+
+          # Never bundle profile data or temporary smoke-test state into the distributable.
+          Remove-Item $userData -Recurse -Force
+
+          $zip = "dist/POP_PUNK_GUITAR_LIBRARY_MANAGER-windows-x64.zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path $app -DestinationPath $zip
+          if (!(Test-Path $zip) -or (Get-Item $zip).Length -lt 1MB) { throw "Portable ZIP is missing or unexpectedly small." }
+
+          $entries = tar -tf $zip
+          if ($LASTEXITCODE -ne 0) { throw "Cannot inspect Portable ZIP." }
+          foreach ($required in @(
+            "POP_PUNK_GUITAR_LIBRARY_MANAGER.exe",
+            "python311.dll",
+            "portable.mode",
+            "PORTABLE_USER_GUIDE_RU.md",
+            "ppgu_skin/theme.json",
+            "ppgu_skin/assets/hero.png"
+          )) {
+            if (!($entries -match [regex]::Escape($required))) {
+              throw "Portable ZIP is missing required entry: $required"
+            }
+          }
+          if ($entries -match "UserData/") { throw "Portable ZIP must not contain smoke-test user data." }
+
+      - name: Upload Portable ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: POP-PUNK-GUITAR-LIBRARY-MANAGER-Portable-Windows-x64
+          path: LibraryManager/dist/POP_PUNK_GUITAR_LIBRARY_MANAGER-windows-x64.zip
+          if-no-files-found: error
+
+      - name: Install Inno Setup compiler
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build and smoke-test Windows installer
+        working-directory: LibraryManager
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}/Inno Setup 6/ISCC.exe"
+          if (!(Test-Path $iscc)) { throw "Inno Setup compiler was not installed: $iscc" }
+
+          & $iscc "POP_PUNK_GUITAR_LIBRARY_MANAGER.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed." }
+
+          $setup = "dist/installer/POP-PUNK-GUITAR-LIBRARY-MANAGER-Setup-Windows-x64.exe"
+          if (!(Test-Path $setup) -or (Get-Item $setup).Length -lt 1MB) {
+            throw "Installer EXE is missing or unexpectedly small: $setup"
+          }
+
+          $installDir = Join-Path $env:TEMP "PPGU-Manager-Installer-Smoke"
+          if (Test-Path $installDir) { Remove-Item $installDir -Recurse -Force }
+          $installArgs = "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /DIR=`"$installDir`""
+          $installer = Start-Process -FilePath (Resolve-Path $setup) -ArgumentList $installArgs -Wait -PassThru
+          if ($installer.ExitCode -ne 0) { throw "Silent installer exited with code $($installer.ExitCode)." }
+
+          $installedExe = Join-Path $installDir "POP_PUNK_GUITAR_LIBRARY_MANAGER.exe"
+          if (!(Test-Path $installedExe)) { throw "Silent installer did not place the GUI executable." }
+
+          $oldPath = $env:PATH
+          try {
+            $env:PATH = "$env:SystemRoot/System32;$env:SystemRoot"
+            $p = Start-Process -FilePath $installedExe -PassThru
+            Start-Sleep -Seconds 5
+            $p.Refresh()
+            if ($p.HasExited) { throw "Installed app startup failed (code $($p.ExitCode))." }
+            Stop-Process -Id $p.Id -Force
+            Wait-Process -Id $p.Id -ErrorAction SilentlyContinue
+          } finally {
+            $env:PATH = $oldPath
+          }
+
+          $installedData = Join-Path $env:LOCALAPPDATA "POP PUNK GUITAR Library Manager"
+          if (!(Test-Path $installedData -PathType Container)) {
+            throw "Installed mode did not create persistent LocalAppData."
+          }
+
+          $uninstaller = Join-Path $installDir "unins000.exe"
+          if (Test-Path $uninstaller) {
+            Start-Process -FilePath $uninstaller -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: POP-PUNK-GUITAR-LIBRARY-MANAGER-Installer-Windows-x64
+          path: LibraryManager/dist/installer/POP-PUNK-GUITAR-LIBRARY-MANAGER-Setup-Windows-x64.exe
+          if-no-files-found: error

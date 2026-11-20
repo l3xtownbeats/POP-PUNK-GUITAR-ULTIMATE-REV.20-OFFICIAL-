@@ -1,0 +1,146 @@
+﻿import wave
+import math
+import csv
+from pathlib import Path
+
+ROOTS = {
+    "NYLON": Path(r"F:\POP PUNK GUITAR ULTIMATE\Samples\FACTORY\Acoustic\Nylon"),
+    "STEEL": Path(r"F:\POP PUNK GUITAR ULTIMATE\Samples\FACTORY\Acoustic\Steel")
+}
+
+desktop = Path.home() / "Desktop"
+csv_file = desktop / "ACOUSTIC_SIGNAL_AUDIT.csv"
+errors_file = desktop / "ACOUSTIC_SIGNAL_AUDIT_ERRORS.txt"
+
+FULL = 8388607
+THRESHOLD = int(FULL * 0.001)
+CLIP = int(FULL * 0.999)
+
+columns = [
+    "library", "file", "duration_sec", "sample_rate",
+    "channels", "bit_depth", "peak_dbfs", "rms_dbfs",
+    "dc_offset", "near_clip_samples",
+    "leading_below_threshold_sec", "trailing_below_threshold_sec"
+]
+
+def analyze(path, library):
+    with wave.open(str(path), "rb") as w:
+        channels = w.getnchannels()
+        width = w.getsampwidth()
+        rate = w.getframerate()
+        frames = w.getnframes()
+
+        if width != 3 or channels != 2 or rate != 48000:
+            raise ValueError("Unexpected WAV format")
+
+        peak = 0
+        squares = 0
+        total = 0
+        count = 0
+        clipping = 0
+        first = None
+        last = None
+        position = 0
+
+        while True:
+            data = w.readframes(8192)
+            if not data:
+                break
+
+            view = memoryview(data)
+            active_first = None
+            active_last = None
+
+            for i in range(0, len(view), 3):
+                v = view[i] | (view[i+1] << 8) | (view[i+2] << 16)
+
+                if v & 0x800000:
+                    v -= 0x1000000
+
+                a = abs(v)
+                peak = max(peak, a)
+                squares += v * v
+                total += v
+                count += 1
+
+                if a >= CLIP:
+                    clipping += 1
+
+                if a > THRESHOLD:
+                    frame = position + i // 6
+                    if active_first is None:
+                        active_first = frame
+                    active_last = frame
+
+            if active_first is not None:
+                if first is None:
+                    first = active_first
+                last = active_last
+
+            position += len(data) // 6
+
+        duration = frames / rate
+        rms = math.sqrt(squares / count) if count else 0
+
+        peak_db = 20 * math.log10(peak / FULL) if peak else float("-inf")
+        rms_db = 20 * math.log10(rms / FULL) if rms else float("-inf")
+
+        return {
+            "library": library,
+            "file": path.name,
+            "duration_sec": round(duration, 4),
+            "sample_rate": rate,
+            "channels": channels,
+            "bit_depth": width * 8,
+            "peak_dbfs": round(peak_db, 3),
+            "rms_dbfs": round(rms_db, 3),
+            "dc_offset": round(total / count / FULL, 9),
+            "near_clip_samples": clipping,
+            "leading_below_threshold_sec": round(
+                first / rate if first is not None else duration, 4
+            ),
+            "trailing_below_threshold_sec": round(
+                (frames - 1 - last) / rate if last is not None else duration, 4
+            )
+        }
+
+results = []
+errors = []
+
+files = []
+
+for library, folder in ROOTS.items():
+    if not folder.exists():
+        errors.append("FOLDER NOT FOUND: " + str(folder))
+        continue
+
+    files.extend(
+        (library, p)
+        for p in sorted(folder.glob("*.wav"))
+    )
+
+print("FILES FOUND:", len(files))
+
+for index, (library, path) in enumerate(files, 1):
+    try:
+        results.append(analyze(path, library))
+    except Exception as e:
+        errors.append(f"{library} | {path.name} | {e}")
+
+    if index % 25 == 0 or index == len(files):
+        print(f"PROGRESS: {index}/{len(files)} | ERRORS: {len(errors)}")
+
+with csv_file.open("w", newline="", encoding="utf-8-sig") as f:
+    writer = csv.DictWriter(f, fieldnames=columns)
+    writer.writeheader()
+    writer.writerows(results)
+
+errors_file.write_text(
+    "\n".join(errors) if errors else "No errors.",
+    encoding="utf-8"
+)
+
+print("\nSUCCESSFULLY ANALYZED:", len(results))
+print("ERRORS:", len(errors))
+print("CSV:", csv_file)
+print("ERROR REPORT:", errors_file)

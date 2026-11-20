@@ -1,0 +1,29 @@
+name: Runner Allocation Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "manager-3-clean-validation"
+
+permissions:
+  contents: read
+
+jobs:
+  runner-check:
+    name: Runner check (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - name: Confirm runner allocation
+        shell: bash
+        run: |
+          echo "Runner allocated successfully."
+          echo "Operating system: $RUNNER_OS"
+          echo "Architecture: $RUNNER_ARCH"
