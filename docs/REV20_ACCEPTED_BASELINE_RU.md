@@ -81,3 +81,13 @@ Windows 10 x64; VST3 x64; FL Studio 20 x64. CMake + JUCE 7.0.12 + C++20 в им�
 ## 9. Статус исходных данных REV.20
 
 В целевом репозитории до переноса были сохранены L3XTOWN inventory/manifest/routing документы, hash manifests, acoustic/electric signal audit и LibraryManager. Их не заменяли исходниками старых веток. Инвентаризация содержит 393 source paths / 387 unique audio contents / 6 exact duplicate-content pairs. Локальный FACTORY preflight и реальное копирование WAV ещё не подтверждены. Не перемещать, не перезаписывать и не удалять оригиналы.
+
+
+## 10. BASIC / EXPANDED LIBRARY — locked distribution contract
+
+- **BASIC LIBRARY:** minimum target 15 GB decimal, included in standard package, mandatory, independently playable; all 500 core factory presets must resolve against BASIC alone. 15 GB is a minimum, not a cap: audio quality, complete mapping, velocity layers, round-robin, articulations and license-cleared unique content determine the final size.
+- **EXPANDED LIBRARY:** optional additive +15 GB initial tier; initial combined total 30 GB (15 + 15). It cannot replace BASIC, is not required for any of the 500 core presets, and may grow without a hard cap.
+- Sample discovery, analysis and classification/distribution are automatic with confidence/review gates. Manual per-WAV assignment is not required. Indexing/hashing run on background workers.
+- No disk I/O, blocking, or unbounded allocation in the audio callback. Keep provenance, redistribution clearance, SHA-256 and license records. Exact duplicates are measured by SHA-256; potential acoustic duplicates require review.
+- Never pad content with duplicates or lower-quality samples to hit a size number. Any sample replacement must preserve or improve note coverage, velocity layers, round-robin, articulations, technical quality, mix readiness and legal rights, with listening/objective evidence and atomic mapping/checksum updates.
+- Current delivery status is NOT COMPLETE: the JSON contract and tests specify the requirement; neither the 15 GB payload nor the 500 playable presets is claimed delivered.

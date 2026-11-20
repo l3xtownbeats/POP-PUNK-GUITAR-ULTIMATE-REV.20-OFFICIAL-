@@ -64,3 +64,12 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Workflow [44707491026](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44707491026) on SHA `38796efe971847cd7b3d9f843995ed3e45f3c8de`: Windows runner allocation, checkout, Python setup, JUCE 7.0.12 checkout and CMake configure all passed.
 - VST3 build stage failed in `tests/ThemeManagerTests.cpp`: JUCE `var == false` comparison was ambiguous (C2666). Product/editor sources compiled in the processor-pattern test target; final overall build did not pass, and CTest/artifact upload were skipped.
 - Corrected the assertion to use explicit boolean conversion and corrected the PNG signature bytes in the strict asset validator. New exact-SHA run is required; do not count the failed run as a successful build.
+
+
+## 2026-11-20 — LIBRARY TIER CONTRACT ADOPTED FROM SOURCE PR #59
+- Reconciled the newest library baseline from draft PR #59 into a canonical REV.20 machine-readable contract: `assets/library/library_tiers.json`.
+- BASIC is included in the standard package, has a minimum target of 15 GB (not a hard cap), is independently playable, and must cover all 500 core factory presets.
+- EXPANDED is an optional additive +15 GB initial tier; initial combined total is 30 GB. It never replaces BASIC and has no hard maximum. Further growth is driven by quality, articulations and additional presets.
+- The actual source PR #59 validator/test files used mismatched JSON schema field names/version. REV.20 adapts the validator and regression test to the actual v1.2.0 contract fields before inclusion; the mismatch is recorded as corrected, not imported as-is.
+- Added the library tier regression test to CTest. The source PR #59 itself is a draft and does not contain the BASIC/EXPANDED audio payload or prove that 500 presets are playable.
+- Preserve automatic discovery/analysis/classification/distribution, background hashing/indexing, SHA-256/provenance/licensing, exact duplicate control and strict no-disk-I/O/no-block/no-unbounded-allocation audio-callback policy.

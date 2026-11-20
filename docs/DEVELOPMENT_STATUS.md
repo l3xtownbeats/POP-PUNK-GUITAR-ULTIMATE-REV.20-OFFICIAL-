@@ -35,7 +35,7 @@ These are verified repository metadata artifacts only. They do not mean that loc
 | Regression tests | PRESENT; not yet run on the REV.20 migration SHA |
 | Factory catalog | 300 definitions (150 MELODY + 150 PATTERN); partial catalog only |
 | 500 core presets (250 MELODY + 250 PATTERN) | NOT COMPLETE; PATTERN must be distributed across its own windows/sections, not one flat list |
-| BASIC LIBRARY (15 GB included) | NOT COMPLETE |
+| BASIC LIBRARY (minimum 15 GB included; no hard cap) | CONTRACT PRESENT; AUDIO PAYLOAD NOT COMPLETE |
 | L3XTOWN local copy preflight / FACTORY copies | NOT CONFIRMED |
 | SKIN registry | exactly 16 logical entries; only SKIN-1 currently marked runtime-ready |
 | SKIN-2…SKIN-16 | named premium manifests + 45 SVG layers + 30 PNG preview/hero assets PRESENT; source asset audit/build/CTest PASS; REV.20 runtime/host acceptance PENDING |
@@ -69,3 +69,10 @@ Static validation utilities and focused contract tests may be used for engineeri
 - Run [44707491026](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44707491026) on SHA `38796efe971847cd7b3d9f843995ed3e45f3c8de`: Windows runner and CMake configure passed; build failed on ambiguous JUCE `var == false` in the newly expanded ThemeManager test. CTest, skin validator and VST3 upload were skipped.
 - Fixed the test to explicitly convert `runtimeReady` to bool. Fixed the strict PNG signature parser to compare the real PNG signature bytes. These changes are being pushed and require a new Windows run.
 - No successful REV.20 VST3 build/CTest is claimed yet.
+
+
+## Library tier contract
+
+- `assets/library/library_tiers.json` is the machine-readable v1.2.0 contract: BASIC 15 GB minimum included, EXPANDED +15 GB initial optional add-on (30 GB combined), all 500 core presets usable from BASIC alone.
+- `tools/validate_library_tiers.py` and `tests/TestLibraryTierContract.py` validate the actual v1.2.0 field names; the test is registered in CTest.
+- This is contract/test coverage, not evidence that 15 GB of licensed samples or 500 playable presets exist in the repository.

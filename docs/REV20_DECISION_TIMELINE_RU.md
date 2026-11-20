@@ -106,3 +106,21 @@ The user reconfirmed and locked the following as the canonical basis:
 - **RELEASE-READY:** only after build, full tests, pluginval, package, licensing and host gates pass.
 
 A source-branch pass must never be reported as a REV.20 pass. A design preview must never be described as a running VST3 screenshot.
+
+
+## 2026-11-16 — PR #59 library capacity contract (newest library sizing baseline)
+
+Draft PR #59, branch `feat/factory-library-15gb-expanded-30gb`, source SHA `c2f52959fd509d7a0bd247e4ea0f7bf836fb9fe3`, records:
+
+- BASIC minimum 15 GB decimal, included in standard product package; 500 core presets playable from BASIC alone.
+- EXPANDED +15 GB optional add-on; 30 GB initial combined total; no hard maximum, never replaces BASIC.
+- Automatic sample discovery, analysis, classification with review gates and automatic distribution; no required manual per-WAV assignment.
+- SHA-256/provenance/license retention, exact duplicate handling, no disk/blocking/unbounded allocation in audio callback.
+- Quality-first payload selection and replacement; don't pad with duplicate audio or degrade quality to satisfy a nominal size.
+
+REV.20 selectively imported the v1.2.0 machine-readable tier contract, validator and tests. The PR's original validator/test used inconsistent schema version/property names; REV.20 corrected them to match the committed JSON contract and registered the test in CTest. The PR remains a draft; neither the audio payload nor 500 playable presets is claimed delivered.
+
+## 2026-11-20 — first REV.20 Windows CI diagnostics
+
+- Run 44707491026 on SHA `38796efe971847cd7b3d9f843995ed3e45f3c8de` configured successfully but the build failed because a JUCE `var` was compared directly with `false` in the expanded skin test (C2666). This was fixed with explicit boolean conversion. The PNG signature validator was also corrected to test the real eight-byte signature.
+- Run 44715731925 was started on SHA `142013dbeb315b95246fdcd476f4485af0aa659b`; check its final result separately. It is not a completed pass until a terminal GitHub Actions conclusion is recorded.

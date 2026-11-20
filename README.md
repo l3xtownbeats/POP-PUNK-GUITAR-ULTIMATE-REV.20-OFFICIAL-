@@ -29,6 +29,7 @@ The canonical visual shell and default theme is **SKIN-1 / NEON STAGE DEFAULT / 
 - `Info.txt` — single canonical project journal and locked decisions.
 - `docs/REV20_ACCEPTED_BASELINE_RU.md` — consolidated approved product baseline and complete 16-name shell table.
 - `docs/REV20_DECISION_TIMELINE_RU.md` — dated decision/provenance timeline from PR #43 through the 2026-11-20 final baseline.
+- `docs/REV20_LIBRARY_TIERS_RU.md` — BASIC/EXPANDED distribution, automatic library management and legal/quality gates.
 - `docs/REV20_MIGRATION_MANIFEST.md` — migration scope, retained work and exclusions.
 - `docs/DEVELOPMENT_STATUS.md` — evidence-based implementation and readiness status.
 - `Source/` — VST3 processor, editor, sampler, pattern and auxiliary UI source.
@@ -39,7 +40,7 @@ The canonical visual shell and default theme is **SKIN-1 / NEON STAGE DEFAULT / 
 
 ## Sound library and presets
 
-The core target is 500 playable factory presets: 250 MELODY and 250 PATTERN, all usable from the included 15 GB BASIC LIBRARY. The initial EXPANDED add-on contributes another 15 GB (30 GB combined at the initial tier) and may grow without a product-imposed ceiling. The 250 PATTERN presets must be organized by the PATTERN workspace's sections/windows/functions, not dumped into one flat 250-item screen. The imported 300-entry catalog is a partial 150+150 definition set, not 500 finished/playable presets. All shipped sample content must have explicit redistribution/embedding rights, provenance and SHA-256 evidence.
+The core target is 500 playable factory presets: 250 MELODY and 250 PATTERN, all usable from the included 15 GB BASIC LIBRARY. The initial EXPANDED add-on contributes another 15 GB (30 GB combined at the initial tier) and may grow without a product-imposed ceiling. The 250 PATTERN presets must be organized by the PATTERN workspace's sections/windows/functions, not dumped into one flat 250-item screen. The imported 300-entry catalog is a partial 150+150 definition set, not 500 finished/playable presets. A machine-readable BASIC/EXPANDED tier contract and CTest validator are included, but the actual licensed audio payload and playable 500-preset deliverable remain incomplete. All shipped sample content must have explicit redistribution/embedding rights, provenance and SHA-256 evidence.
 
 ## Build and acceptance
 
