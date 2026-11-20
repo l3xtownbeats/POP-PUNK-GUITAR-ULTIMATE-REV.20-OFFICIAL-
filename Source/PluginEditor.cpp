@@ -3,6 +3,7 @@
 #include "PluginEditor.h"
 #include "PPGUData.h"
 #include "UI/PPGUControlState.h"
+#include "UI/PPGULibraryDiscovery.h"
 
 #include <algorithm>
 #include <cmath>
