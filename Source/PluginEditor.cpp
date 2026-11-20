@@ -687,6 +687,7 @@ public:
 private:
     void chooseRoot()
     {
+        chooseButton.setEnabled(false);
         folderChooser = std::make_unique<juce::FileChooser>(
             "Choose a local sample folder", juce::File::getSpecialLocation(
                 juce::File::userHomeDirectory), juce::String(), true);
@@ -696,6 +697,7 @@ private:
             [safeThis](const juce::FileChooser& chooser)
             {
                 if (safeThis == nullptr) return;
+                safeThis->chooseButton.setEnabled(true);
                 const auto selected = chooser.getResult();
                 if (selected.isDirectory() && !selected.isSymbolicLink())
                 {

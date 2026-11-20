@@ -43,6 +43,7 @@ ScanReport LibraryDiscovery::scan(const juce::File& root, int maximumEntries)
     maximumEntries = juce::jlimit(1, 100000, maximumEntries);
     std::vector<juce::File> pendingDirectories { root };
     std::set<juce::String> visitedDirectories;
+    juce::int64 remainingHashBudget = maximumTotalHashBytes;
     while (!pendingDirectories.empty())
     {
         const auto directory = pendingDirectories.back();
@@ -70,8 +71,17 @@ ScanReport LibraryDiscovery::scan(const juce::File& root, int maximumEntries)
             candidate.fileBytes = child.getSize();
             candidate.containerStatus = assetType == "WAV_CANDIDATE"
                 ? inspectWavContainer(child) : "SFZ_CONTENT_NOT_PARSED";
-            candidate.sha256 = candidate.fileBytes >= 0 && candidate.fileBytes <= maximumHashBytes
-                ? juce::SHA256(child).toHexString() : "HASH_SKIPPED_SIZE_LIMIT";
+            if (candidate.fileBytes >= 0
+                && candidate.fileBytes <= maximumHashBytes
+                && candidate.fileBytes <= remainingHashBudget)
+            {
+                candidate.sha256 = juce::SHA256(child).toHexString();
+                remainingHashBudget -= candidate.fileBytes;
+            }
+            else
+            {
+                candidate.sha256 = "HASH_SKIPPED_SCAN_BUDGET";
+            }
             candidate.reviewStatus = "NEEDS_REVIEW";
             candidate.licenseStatus = "UNREVIEWED";
             report.candidates.push_back(std::move(candidate));

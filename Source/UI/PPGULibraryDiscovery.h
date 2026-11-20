@@ -22,7 +22,8 @@ class LibraryDiscovery final
 {
 public:
     static constexpr int defaultEntryLimit = 5000;
-    static constexpr juce::int64 maximumHashBytes = 1024LL * 1024LL * 1024LL;
+    static constexpr juce::int64 maximumHashBytes = 128LL * 1024LL * 1024LL;
+        static constexpr juce::int64 maximumTotalHashBytes = 512LL * 1024LL * 1024LL;
     static ScanReport scan(const juce::File& root, int maximumEntries = defaultEntryLimit);
 };
 }
