@@ -1,72 +1,63 @@
-# POP PUNK GUITAR ULTIMATE — Development Status
+# POP PUNK GUITAR ULTIMATE — REV.20 Development Status
 
-Last updated: 2026-11-16
+Last updated: 2026-11-20  
+Canonical repository: `l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-`  
+Canonical branch: `main`  
+Canonical journal: `/Info.txt`
 
-## Repository baseline
+## Consolidated repository baseline
 
-- Repository: `l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE`
-- Default branch: `main`
-- Visibility: private
-- Repository now contains source-library inventories, hash manifests, non-destructive audit scripts, staging-planning tools, and documentation.
-- The VST3 source code/build system and factory preset files are not yet present in the repository baseline inspected for this status.
+The REV.20 main branch now contains the selected production VST3 source, CMake build definition, focused regression tests, the approved 16-shell registry, NEON STAGE assets, sample/preset validation utilities and the required product/license specifications. The repository's pre-existing LibraryManager and L3XTOWN sample-inventory work are retained.
 
-## Approved production sequence
+Migration commit: `2bd623a666090d4ef017296f52fdb568808a227b`  
+Source engineering snapshot: REV.19 Build.03, `7b540ff9cddbc2b0327c83611b49e222bce51d2b`  
+GitHub Actions migration run: [44702430411](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44702430411) — SUCCESS. The run reports 457 copied source/resource files and a successful push to `main`.
 
-1. Inventory candidate audio libraries and preserve originals.
-2. Review rights/redistribution status for each library. For L3XTOWN GUITAR, the owner confirms the recordings are their own; no third-party sample-library licence check is required for those recordings. Check separately for any third-party backing tracks, loops, compositions, or other protected content captured in them.
-3. Build and integrate the BASIC LIBRARY, with a target size of 10–12 GB.
-4. Create and integrate all 500 core factory presets using only sounds available in BASIC LIBRARY.
-5. Only after steps 1–4 are complete, begin plugin, preset, audio-engine, sound-quality, and final-build testing.
+## Verified existing REV.20 library work
 
-**Testing gate:** Do not run plugin, preset, audio-engine, sound-quality, or final-build tests before the BASIC LIBRARY is assembled and integrated and all 500 core factory presets are created and integrated.
+The pre-migration target repository already contained:
+- 393 L3XTOWN source path records and 387 unique SHA-256 audio contents.
+- Six exact duplicate-content pairs retained as aliases.
+- Source inventory, runtime manifest, sample map, factory integration plan and hash manifests.
+- Acoustic/electric filename and signal audits, plus a non-destructive LibraryManager with its own tests.
 
-## Library tiers
+These are verified repository metadata artifacts only. They do not mean that local source WAV files were copied into FACTORY or approved for playable mapping. Original WAVs remain untouched.
 
-- BASIC LIBRARY: target 10–12 GB; every core factory preset must work from this tier alone.
-- EXPANDED LIBRARY: target approximately 40 GB; may add sound variation, alternate takes/layers, improved selection, and additional preset-bank capacity. It must not be required for the 500 core presets.
+## Current VST3 import status
 
-## L3XTOWN GUITAR — current intake
+| Area | REV.20 status at consolidation |
+|---|---|
+| CMake/JUCE VST3 source | PRESENT |
+| PluginProcessor / PluginEditor | PRESENT; skin lookup now separates logical ordinal from immutable stable ID |
+| Shared sampler / SFZ / WAV / streaming / cache source | PRESENT |
+| Pattern scheduler / chord transition source | PRESENT |
+| UI auxiliary workspace / theme manager source | PRESENT |
+| Regression tests | PRESENT; not yet run on the REV.20 migration SHA |
+| Factory catalog | 300 definitions (150 MELODY + 150 PATTERN); partial catalog only |
+| 500 core presets (250 + 250) | NOT COMPLETE |
+| BASIC LIBRARY target (10–12 GB) | NOT COMPLETE |
+| L3XTOWN local copy preflight / FACTORY copies | NOT CONFIRMED |
+| SKIN registry | exactly 16 logical entries; only SKIN-1 currently marked runtime-ready |
+| SKIN-2…SKIN-16 | approved manifests/vector foundations; PNG preview/hero and runtime acceptance pending |
+| Windows x64 Release build on REV.20 SHA | NOT RUN / NOT CONFIRMED |
+| Full CTest on REV.20 SHA | NOT RUN / NOT CONFIRMED |
+| pluginval strictness 5 on REV.20 SHA | NOT RUN / NOT CONFIRMED |
+| FL Studio 20 host acceptance on REV.20 SHA | NOT RUN / NOT CONFIRMED |
 
-The user confirms this is their own guitar-recording library. Current inventory reconciliation:
+## Approved production sequence and gates
 
-- 393 source path records.
-- 387 unique SHA-256 audio contents.
-- 6 exact duplicate-content pairs (12 path records); duplicates are retained as aliases, not treated as independent performances.
-- Total size across all 393 paths: 857,164,526 bytes.
-- Unique-content size: 846,265,382 bytes (approximately 807 MiB).
-- All 393 WAV headers readable; all 393 size and SHA-256 checks match the local inventory report.
-- Format: 44.1 kHz, stereo, 24-bit.
-- Metadata and routing plan are committed; original WAV audio files themselves are not uploaded to the repository.
+1. Preserve and reconcile source inventories and licensing.
+2. Run local preflight against the actual Windows L3XTOWN source folder; never overwrite or destructively alter originals.
+3. Complete BASIC LIBRARY to 10–12 GB from redistributable/owned recordings.
+4. Complete 500 core factory presets (250 MELODY + 250 PATTERN) from BASIC LIBRARY alone.
+5. Review sample mapping, provenance, rights, hashes, performance and human listening.
+6. After the approved content gate, run exact-SHA Windows Release build, CTest, pluginval, package checks and separate FL Studio 20 acceptance.
 
-The 393-path count and 387-unique-content count are both intentional and must not be conflated.
+Static validation utilities and focused contract tests may be used for engineering diagnostics where appropriate, but they are not audio-quality, playable-preset or host acceptance. Release readiness remains blocked until every applicable gate has exact evidence.
 
-## Current status
+## CI
 
-- Repository connected and readable.
-- L3XTOWN source inventory and SHA-256 reconciliation: complete.
-- L3XTOWN runtime metadata ambiguity resolution: complete; 0 unresolved metadata rows.
-- L3XTOWN factory routing plan: generated for all 393 paths; 0 unmapped rows and 0 destination collisions.
-- L3XTOWN audio-content review (pitch, voicing, articulation, tuning, tempo, transient, usable region): pending.
-- L3XTOWN local FACTORY copy preflight: must still be run against the actual Windows source folder before copying.
-- L3XTOWN FACTORY copies: not confirmed as created.
-- BASIC LIBRARY integration: not complete.
-- BASIC LIBRARY 10–12 GB target: not complete.
-- 500 core factory presets: not created/integrated.
-- VST3 source/build system: not yet confirmed in repository.
-- Testing: intentionally blocked by the approved testing gate.
-
-## Current L3XTOWN integration artifacts
-
-- `L3XTOWN_FULL_INVENTORY.csv`
-- `L3XTOWN_RUNTIME_MANIFEST.csv`
-- `L3XTOWN_FACTORY_INTEGRATION_PLAN.csv`
-- `docs/L3XTOWN_BASIC_LIBRARY_INTEGRATION_READINESS.md`
-- `docs/L3XTOWN_RUNTIME_METADATA_RESOLUTION_2026-11-16.md`
-- `tools/prepare_l3xtown_factory_staging.py`
-
-## Safety and integrity rules
-
-- Preserve original sample libraries; do not overwrite, delete, or destructively convert source files.
-- Do not copy to FACTORY until local preflight passes and the user has explicitly approved the copy operation.
-- Treat folder/name-based sample labels as provisional until verified by audio inspection.
-- Do not claim a build, integration, or test has succeeded unless the corresponding artifact or result exists.
+- The pre-existing `library-manager-tests.yml` workflow is retained unchanged.
+- `vst3-build.yml` is added as a manual workflow with explicit readiness inputs for the BASIC LIBRARY and all 500 core presets.
+- The one-time consolidation workflow and importer were removed after the migration commit.
+- No REV.20 VST3 build/test result is claimed by this status page.
