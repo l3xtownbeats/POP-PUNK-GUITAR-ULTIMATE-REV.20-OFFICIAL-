@@ -1,0 +1,24 @@
+ACOUSTIC SIGNAL AUDIT
+=====================
+Files found: 723
+Successfully analyzed: 723
+Errors: 0
+Elapsed seconds: 443.71
+
+[NYLON]
+Files analyzed: 348
+Duration min: 1.2131 sec
+Duration max: 13.9762 sec
+Duration average: 5.4540 sec
+RMS average: -42.302 dBFS
+Peak average: -19.783 dBFS
+Files with near-full-scale samples: 0
+
+[STEEL]
+Files analyzed: 375
+Duration min: 1.8880 sec
+Duration max: 18.5128 sec
+Duration average: 7.7863 sec
+RMS average: -38.136 dBFS
+Peak average: -14.819 dBFS
+Files with near-full-scale samples: 1
