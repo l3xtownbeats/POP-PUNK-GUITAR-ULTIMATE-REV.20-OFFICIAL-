@@ -76,6 +76,17 @@ int main()
                 expect(artworkCandidate.getPalette().textureArtwork.isValid(), id + " texture SVG decoded");
                 expect(artworkCandidate.getPalette().bezelArtwork.isValid(), id + " bezel SVG decoded");
                 expect(artworkCandidate.getPalette().crestArtwork.isValid(), id + " crest SVG decoded");
+                if (id == "skin-053")
+                {
+                    expect(artworkCandidate.getPalette().controlsSpriteSheet.isValid(),
+                           "NEON STAGE controls sprite atlas decoded");
+                    expect(artworkCandidate.getPalette().metersSlidersSpriteSheet.isValid(),
+                           "NEON STAGE meters/sliders atlas decoded");
+                    expect(artworkCandidate.getPalette().framesPanelsSpriteSheet.isValid(),
+                           "NEON STAGE frames/panels atlas decoded");
+                    expect(artworkCandidate.getPalette().iconsSpriteSheet.isValid(),
+                           "NEON STAGE icon atlas decoded");
+                }
             }
 
             if (ready)
