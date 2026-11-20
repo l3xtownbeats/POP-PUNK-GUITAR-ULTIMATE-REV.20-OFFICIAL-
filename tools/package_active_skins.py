@@ -135,6 +135,20 @@ def main() -> int:
                 raise SystemExit("NEON STAGE DEFAULT: invalid sprite atlas manifest path")
             copy_one(root, output, (Path(folder) / sprite_manifest).as_posix())
 
+            # Skin-1's premium canvas is a layered artwork stack, not a single
+            # flattened mockup. Ship each runtime layer beside the VST3 so the
+            # ThemeManager can decode it locally without network access.
+            premium_runtime_layers = (
+                "assets/background/main.png",
+                "assets/textures/material.png",
+                "assets/fx_layers/stage_glow.png",
+                "assets/fx_layers/edge_highlight.png",
+                "assets/fx_layers/specular.png",
+                "assets/fx_layers/shadow.png",
+            )
+            for relative in premium_runtime_layers:
+                copy_one(root, output, (Path(folder) / relative).as_posix())
+
         if entry.get("preview") != (Path(folder) / assets["preview"]).as_posix():
             raise SystemExit(f"{name}: registry preview path mismatch")
         if entry.get("hero") != (Path(folder) / assets["hero"]).as_posix():

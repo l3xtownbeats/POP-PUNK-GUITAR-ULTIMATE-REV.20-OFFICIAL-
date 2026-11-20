@@ -49,8 +49,38 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
                             const PPGUThemeManager::Palette& palette,
                             float textureOpacity = 0.10f,
                             float bezelOpacity = 0.32f,
-                            float crestOpacity = 0.035f)
+                            float crestOpacity = 0.035f,
+                            bool includePremiumStageLayers = false)
 {
+    const auto drawLayer = [&g, bounds](const juce::Image& image, float opacity)
+    {
+        if (!image.isValid() || opacity <= 0.0f)
+            return;
+        g.saveState();
+        g.setOpacity(opacity);
+        g.drawImageWithin(image, bounds.getX(), bounds.getY(), bounds.getWidth(),
+                          bounds.getHeight(), juce::RectanglePlacement::stretchToFit);
+        g.restoreState();
+    };
+
+    // Only the main Skin-1 canvas receives the full-resolution stage stack.
+    // Small floating panels keep their own clean surfaces and avoid redrawing
+    // a full-screen background into every child component.
+    if (includePremiumStageLayers)
+    {
+        drawLayer(palette.backgroundArtwork, 0.36f);
+        if (palette.materialArtwork.isValid())
+        {
+            g.saveState();
+            g.setTiledImageFill(palette.materialArtwork, bounds.getX(), bounds.getY(), 0.055f);
+            g.fillRect(bounds);
+            g.restoreState();
+        }
+        drawLayer(palette.shadowArtwork, 0.18f);
+        drawLayer(palette.stageGlowArtwork, 0.24f);
+        drawLayer(palette.specularArtwork, 0.16f);
+    }
+
     if (palette.textureArtwork.isValid() && textureOpacity > 0.0f)
     {
         g.saveState();
@@ -70,6 +100,9 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
                          juce::RectanglePlacement::stretchToFit);
         g.restoreState();
     }
+
+    if (includePremiumStageLayers)
+        drawLayer(palette.edgeHighlightArtwork, 0.26f);
 
     if (palette.crestArtwork.isValid() && crestOpacity > 0.0f
         && bounds.getWidth() >= 320 && bounds.getHeight() >= 220)
@@ -1845,7 +1878,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
 {
     const auto& p = themeManager.getPalette();
     g.fillAll(p.token("window_bg"));
-    drawThemeArtworkLayers(g, getLocalBounds(), p, 0.16f, 0.78f, 0.055f);
+    drawThemeArtworkLayers(g, getLocalBounds(), p, 0.16f, 0.78f, 0.055f, true);
     auto area = getLocalBounds().reduced(14);
     area.removeFromTop(48);
     area.removeFromBottom(132);
@@ -2100,6 +2133,10 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openSkinGalleryPanel()
             const auto assets = root.getProperty("assets", juce::var());
             auto previewRelative = assets.getProperty("preview", juce::var()).toString();
             if (previewRelative.isEmpty()) previewRelative = "assets/preview.png";
+            // Skin-1's legacy preview.png is a placeholder. Use its real high-resolution
+            // stage background in the gallery until dedicated hero/preview art is supplied.
+            if (candidate.getPalette().id == "skin-053")
+                previewRelative = "assets/background/main.png";
             if (!previewRelative.startsWith("/") && !previewRelative.contains(".."))
             {
                 const auto candidatePreview = manifest.getParentDirectory().getChildFile(previewRelative);
