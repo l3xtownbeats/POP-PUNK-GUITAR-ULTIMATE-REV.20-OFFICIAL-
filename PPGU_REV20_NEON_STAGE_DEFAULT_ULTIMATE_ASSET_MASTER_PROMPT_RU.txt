@@ -1,0 +1,665 @@
+# MASTER PROMPT — POP PUNK GUITAR ULTIMATE REV.20
+# COMPLETE NEON STAGE DEFAULT / SKIN-1 UI ASSET LIBRARY PRODUCTION
+# Русская техническая спецификация для генерации и экспорта отдельных UI-ассетов
+
+Ты работаешь как ведущий UI/UX art director, industrial hardware interface designer, JUCE/VST3 interface asset artist и технический production-дизайнер. Твоя задача — подготовить ПОЛНУЮ ПРОИЗВОДСТВЕННУЮ БИБЛИОТЕКУ ГРАФИЧЕСКИХ РЕСУРСОВ для реального музыкального VST3-инструмента POP PUNK GUITAR ULTIMATE REV.20. Нужны не идеи, не концепт-арт, не один красивый скриншот и не коллаж, а реальные отдельные графические файлы, пригодные для дальнейшей интеграции в JUCE 7 / C++20.
+
+======================================================================
+1. ЕДИНСТВЕННЫЙ ИСТОЧНИК ПРАВДЫ И ПОРЯДОК ПРИОРИТЕТОВ
+======================================================================
+
+Проект: POP PUNK GUITAR ULTIMATE — REV.20 OFFICIAL.
+Репозиторий: https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-
+Рабочая ветка: main.
+Платформа: Windows 10 x64, VST3 x64, JUCE 7.0.12, C++20.
+Обязательная среда ручной проверки: FL Studio 20 x64.
+
+Обязательно изучи приложенные к заданию реальные файлы/референсы проекта, прежде чем рисовать:
+1) Главный утверждённый макет: `01 INTERFACE  NEON STAGE DEFAULT .png` (точное имя файла в репозитории содержит два пробела между INTERFACE и NEON, а также пробел перед расширением).
+2) `Source/PluginEditor.cpp` — фактические подписи, состав главного окна, группы, вспомогательные панели, состояния и размещение зон.
+3) `Source/PluginEditor.h` — реальные 9 главных регуляторов, их подписи, привязки и 7 главных FX-переключателей.
+4) `Source/PluginProcessor.cpp` — реальные параметры/APVTS IDs и названия функций. Не придумывай новые параметры.
+5) `SKIN/Skin_053/theme.json` — утверждённая тема SKIN-1 / NEON STAGE DEFAULT, её палитра, материалы и арт-ресурсы.
+6) `SKIN/theme_manifest.json` — закрытый перечень 16 утверждённых оболочек.
+7) `docs/REV20_ACCEPTED_BASELINE_RU.md`, `docs/REV20_SKIN_APPROVAL_STANDARD_RU.md`, `docs/REV20_FUNCTIONAL_GAP_AUDIT_RU.md` и `docs/REV20_FL20_ACCEPTANCE_CHECKLIST_RU.md` — функциональные и визуальные ограничения.
+
+Приоритет при возможных расхождениях:
+A. Утверждённый главный макет задаёт точную композицию, пропорции, расположение и художественный характер.
+B. Текущие `PluginEditor.cpp/.h` и `PluginProcessor.cpp` задают реальные названия, состав контролов и существующие функциональные привязки.
+C. `theme.json` и skin manifests задают палитру, дизайн-токены, арт-слои и совместимость.
+D. Нельзя незаметно разрешать противоречия самостоятельно: добавляй запись в `ASSET_OPEN_ISSUES.md` с точным описанием конфликта и предложением, какой файл проекта должен быть источником правки.
+
+Если ты не можешь открыть GitHub или изображения, НЕ выдумывай макет по названию. Попроси загрузить сюда главный макет и недостающие референсы. Не заменяй отсутствующую картинку собственной фантазией.
+
+======================================================================
+2. ЧТО ИМЕННО НУЖНО СОЗДАТЬ
+======================================================================
+
+Создай полный комплект ассетов для главной оболочки **SKIN-1 / NEON STAGE DEFAULT / stable ID `skin-053`**. Это исходная эталонная оболочка продукта. Сейчас делается полный законченный комплект SKIN-1. Архитектура, манифест и правила именования должны позволять в будущем производить совместимые наборы для остальных 15 утверждённых тем, но НЕ создавай самовольно новые темы, дополнительные оболочки или новый дизайн продукта.
+
+NEON STAGE DEFAULT — это профессиональная студийная консоль электрогитарного инструмента: premium audio hardware, точная промышленная геометрия, матовый тёмный графит, прецизионный анодированный металл, чёткие рамки, аккуратные фаски, утопленные дисплеи, читаемые шкалы, дорогие аппаратные регуляторы, контролируемые световые акценты. Визуально — премиальный музыкальный VST, а не игровая панель, не дешёвый sci-fi HUD и не случайный cyberpunk dashboard.
+
+Это задание НЕ относится к NEON STAGE Manager 3.0 и НЕ должно использовать его Obsidian Neon Purple palette. Для PPGU используется строго палитра SKIN-1 из `SKIN/Skin_053/theme.json`, перечисленная ниже.
+
+======================================================================
+3. ЖЁСТКО ЗАФИКСИРОВАННЫЙ ВНЕШНИЙ ВИД SKIN-1
+======================================================================
+
+Основная палитра (HEX использовать точно):
+- window_bg:       #080B14
+- panel:           #101827
+- panel_elevated:  #17243A
+- control_bg:      #0C1422
+- control_face:    #1A2940
+- control_border:  #31506F
+- text_primary:    #F4F7FF
+- text_secondary:  #B5C4DC
+- text_disabled:   #71829D
+- accent:          #00D9FF
+- accent_glow:     #6B8CFF
+- danger:          #FF557A
+- warning:         #FFBE55
+- success:         #42E6B0
+- lcd_bg:          #050D1B
+- lcd_text:        #8DEBFF
+- led_on:          #00E5FF
+- led_off:         #263B55
+- shadow:          #03060B
+- highlight:       #8DCBFF
+- lowlight:        #080F1B
+
+Материалы:
+- основа: matte graphite / precision anodized metal;
+- поверхности: матовый графит, тёмный сатинированный металл, умеренно выраженная brushed-metal фактура;
+- кромки: точные металлические bevels и тонкие холодные отражения;
+- активные зоны: чистый cyan `#00D9FF`, редкие electric-blue/violet accents `#6B8CFF`;
+- LCD/цифровая индикация: холодный светлый cyan на глубоком тёмном дисплее;
+- тени: аккуратные, контролируемые, не грязные и не чрезмерно глубокие.
+
+Режим по умолчанию — MINIMAL / restrained lighting: большая часть glow выключена. Свечение должно быть отдельным, дозированным слоем и включаться только для active/hover/focus/status states. Не заливай все рамки ярким свечением. Не меняй акцент на фиолетовый, розовый или красный. Красный/янтарный/зелёный допускаются только для соответствующих danger/warning/success сигналов.
+
+Типографика:
+- UI: Segoe UI, semibold;
+- цифровые показания и технические значения: Consolas;
+- компактные uppercase labels, равномерный tracking;
+- надписи не должны быть зашиты в графику ручек/кнопок, если их текст динамический или привязан к параметру. Текст лучше оставить живым JUCE text layer.
+
+======================================================================
+4. ТОЧНАЯ КОМПОЗИЦИЯ ГЛАВНОГО ОКНА
+======================================================================
+
+Не переделывай утверждённый макет. Не меняй его layout, последовательность зон, пропорции, размеры элементов, баланс пустот и визуальную иерархию. Главный редактор в кодовой базе имеет исходный размер 1024×700 px, адаптивные пределы 900×640 — 1600×1100 px. Финальный референсный preview показывай при 1024×700 px.
+
+Главная оболочка организована как премиальная трёхзонная консоль:
+
+A. HEADER / TOP BAR
+- брендовый wordmark `PPGU`;
+- подпись `L3XTOWN AUDIO LAB`;
+- кнопка `IMPORT GUITAR`;
+- кнопка `AUTOCHORDS`;
+- кнопки `AUTO SOUND HUNTER`, `CURATOR`, `ABOUT` в disabled-виде, поскольку в текущем REV.20 они намеренно отключены;
+- кнопка `SETTINGS`;
+- кнопка `SKIN` / Skin Gallery;
+- ровная металлическая рамка заголовка, аккуратные разделители и маленькие состояния.
+
+B. LEFT ZONE — FACTORY PRESET BROWSER
+- заголовок/верхняя рамка секции как в макете;
+- ComboBox `FACTORY PRESET CATALOG`;
+- category selector: `ALL PRESETS`, `MELODY`, `PATTERN`;
+- поле `SEARCH PRESETS...`;
+- список/панель preset browser;
+- состояния selection, hover, keyboard focus, disabled, empty/no match;
+- не изображай фальшивые 500 готовых playable presets: каталог в коде частичный, поэтому не зашивай ложное число в artwork. Не рисуй неподтверждённые названия пресетов как реальные данные.
+
+C. CENTER ZONE — PLAYING CORE / INSTRUMENT CONTROLS
+- две и только две основные музыкальные области/режима: `MELODY` и `PATTERN`;
+- не вводи третий основной режим;
+- главная группа из 9 rotary controls, расположение по фактическому макету и текущей трёхколоночной сетке редактора;
+- подписи главных регуляторов строго такие:
+  1. `GAIN`     → APVTS ID `ampGain`
+  2. `TREBLE`   → APVTS ID `eqHigh`
+  3. `MID`      → APVTS ID `eqMid`
+  4. `BASS`     → APVTS ID `eqLow`
+  5. `VELOCITY` → APVTS ID `velocity`
+  6. `DYNAMICS` → APVTS ID `dynamics`
+  7. `SWING`    → APVTS ID `swing`
+  8. `HUMANIZE` → APVTS ID `humanize`
+  9. `ACCENT`   → APVTS ID `accent`
+- каждый регулятор должен выглядеть как реальный высококлассный аппаратный компонент: отдельный корпус, rim, центр, pointer, шкала/markings, controlled highlight, тень и опциональный glow;
+- значение выводится отдельным текстовым/цифровым слоем, не зашивать динамические числа в PNG;
+- не добавляй декоративные неработающие ручки. Каждый визуальный knob соответствует ровно одному существующему параметру.
+- режимы MELODY/PATTERN должны иметь чёткое selected/unselected состояние. `PATTERN` открывает вспомогательную маршрутизацию секций, но не становится отдельным третьим режимом.
+
+D. RIGHT ZONE — AMP & TONE / FX CHAIN
+Заголовки: `AMP & TONE` и `FX CHAIN`.
+Главный фиксированный список из ровно 7 кнопок/переключателей:
+1. `COMPRESSOR` → `compressorOn`
+2. `EQ` → `eqOn`
+3. `DISTORTION` → `distortionOn`
+4. `CHORUS` → `chorusOn`
+5. `DELAY` → `delayOn`
+6. `REVERB` → `reverbOn`
+7. `CABINET IR` → `cabinetOn`
+
+Каждая кнопка — отдельный визуальный элемент, её ON/OFF state обязателен. Переход по клику открывает соответствующую группу параметров FX EDIT. Не добавляй восьмую кнопку в главный FX CHAIN: `FLANGER` существует как отдельная редактируемая группа внутри FX EDIT, но не входит в этот фиксированный список из семи главных переключателей.
+
+E. LOWER PERFORMANCE STRIP / KEYBOARD
+- широкая панель статуса/производительности;
+- реальный performance display показывает `LIVE HARMONY`, chord text, `SCALE / KEY`, `NOTES HELD`;
+- цифровое/информационное оформление не должно изображать неподтверждённые показатели CPU/RAM, если их нет в реальном UI;
+- MIDI-клавиатура горизонтальная, диапазон MIDI note 36–84 (49 клавиш);
+- отдельные white keys, black keys, separators, hover key, pressed/key-down overlay;
+- клавиатура остаётся читаемой при любом состоянии.
+
+F. FOOTER / STATUS
+- статус библиотеки: `NO LIBRARY LOADED / LOAD A LICENSED SFZ INSTRUMENT` или реальный динамический статус;
+- визуально показать место для статуса загрузки SFZ, но не подменять status текст статической картинкой;
+- индикаторы только тогда, когда соответствуют реальному состоянию.
+
+G. ОБЯЗАТЕЛЬНЫЙ КОНТРАКТ 27 ПОЛЬЗОВАТЕЛЬСКИХ UI-КОНТРОЛОВ
+В `SKIN/Skin_053/theme.json` зафиксирован закрытый UI control map. Сохрани все 27 user-facing elements без удаления и переименования:
+- `preset_browser`;
+- `mode_selector`;
+- `knob01`, `knob02`, `knob03`, `knob04`, `knob05`, `knob06`, `knob07`, `knob08`, `knob09`;
+- `fx_switch01`, `fx_switch02`, `fx_switch03`, `fx_switch04`, `fx_switch05`, `fx_switch06`, `fx_switch07`;
+- `midi_keyboard`;
+- `LCD_display`;
+- `LED_indicator`;
+- `SKIN_button`;
+- `Import_Guitar`;
+- `Auto_Discover`;
+- `Curator`;
+- `Settings`;
+- `About`.
+
+`sync_selector` присутствует в theme metadata как служебный элемент/поле совместимости, но не является 28-м новым пользовательским контролом. Сохрани его привязку и визуальное место только в соответствии с утверждённым референсом и реальной реализацией. Не добавляй новых control IDs.
+
+`Auto_Discover`, `Curator` и `About` должны иметь корректную визуальную DISABLED семантику, пока backend в REV.20 не реализован. `LCD_display` и `LED_indicator` — отдельные самостоятельные активы с состояниями; нельзя заменять их текстовым скриншотом или декоративной фальш-индикацией.
+
+======================================================================
+5. ВСПОМОГАТЕЛЬНЫЕ ОКНА — ПОЛНЫЙ НАБОР АССЕТОВ
+======================================================================
+
+Сделай отдельные панели и контролы для каждого реально существующего вспомогательного окна. Это отдельные asset groups; не встраивай все окна одновременно в главную консоль.
+
+5.1 IMPORT GUITAR / LICENSED GUITAR LIBRARY
+- заголовок `LICENSED GUITAR LIBRARY`;
+- описание/информационная область загрузки SFZ и связанных WAV;
+- основная кнопка `LOAD SFZ`;
+- status field: No SFZ loaded / Loading SFZ in background / successful load / error;
+- состояния кнопки normal, hover, pressed, disabled;
+- отдельные status states: idle, loading, success, warning, error;
+- не добавляй несуществующие folder import, ZIP import, browser, mapping editor или auto-convert controls как будто они уже доступны.
+
+5.2 FX EDIT
+- окно/панель с заголовком `NEON STAGE / FX EDIT`;
+- effect selector;
+- кнопка `POWER` с ON/OFF/hover/pressed/disabled;
+- область `PROCESS RESPONSE / VISUAL GUIDE` — только визуальный граф/индикатор, не ложный аудиоспектроанализатор;
+- текст состояния `Controls are attached to the existing APVTS parameters.`
+- отдельные контролы по группам:
+  COMPRESSOR: THRESHOLD, RATIO, ATTACK, RELEASE, AMOUNT.
+  EQ: LOW, MID, HIGH, LOW FREQ, MID FREQ, MID Q, HIGH FREQ.
+  DISTORTION: DRIVE, TONE, MIX.
+  CHORUS: RATE, DEPTH, MIX.
+  FLANGER: RATE, DEPTH, FEEDBACK, MIX.
+  DELAY: TIME, FEEDBACK, MIX.
+  REVERB: ROOM, DAMPING, MIX.
+  CABINET IR: MIX, LOW CUT, HIGH CUT.
+- rotary controls должны иметь единый hardware language, но подходящую шкалу под каждый тип значения;
+- графика должна оставлять место для живых значений JUCE.
+
+5.3 PATTERN / SONG SECTION ROUTING
+- заголовок `PATTERN / SONG SECTION ROUTING`;
+- dropdown `SONG SECTION`: INTRO, VERSE, CHORUS, BRIDGE, OUTRO;
+- dropdown `RHYTHM CATALOG` с Pattern 1…Pattern 8;
+- кнопки `PREVIEW`, `APPLY`, `CANCEL`;
+- status/info area;
+- не рисуй waveform/clip timeline, если этого нет в утверждённом макете и текущем UI.
+
+5.4 AUTOCHORDS / HARMONY SETUP
+- заголовок `AUTOCHORDS / HARMONY SETUP`;
+- state warning в точном смысле: `SETUP ONLY — MIDI CHORD GENERATION / CUSTOM MODE / PREVIEW ENGINE NOT CONNECTED`;
+- кнопка `AUTOCHORDS OFF` должна выглядеть OFF/disabled, не изображай активный генератор аккордов;
+- selector `KEY`: C, C#, D, D#, E, F, F#, G, G#, A, A#, B;
+- selector `SCALE / QUALITY`: Chromatic, Major, Minor;
+- selector `RHYTHM PATTERN SLOT`: Pattern 1…Pattern 8;
+- это auxiliary window внутри PATTERN, не третий главный режим.
+
+5.5 WORKSPACE SETTINGS
+- заголовок `WORKSPACE SETTINGS`;
+- `AUXILIARY PANEL SCALE`, range 0.5x–1.5x;
+- `SPACE BETWEEN PANELS`, range 0–32 px;
+- кнопка `RESTORE NEON STAGE DEFAULT`;
+- кнопка `OPEN SKIN GALLERY`.
+
+5.6 VISUAL SKIN GALLERY
+- заголовок `VISUAL SKIN GALLERY`;
+- поле Search;
+- filter: `ALL SKINS`, `FAVORITES ONLY`;
+- count label;
+- theme cards и preview thumbnail placeholders;
+- кнопки `PREVIEW`, `FAVORITE`, `APPLY`, `CANCEL`;
+- только утверждённые 16 оболочек, не добавляй 17-ю тему и не меняй названия/stable IDs.
+
+======================================================================
+6. ЗАКРЫТЫЙ ПЕРЕЧЕНЬ 16 SKIN — НЕ МЕНЯТЬ
+======================================================================
+
+1. SKIN-1  — NEON STAGE DEFAULT — `skin-053` (текущий полный production asset pack).
+2. SKIN-2  — OBSIDIAN GOLD — `skin-103`.
+3. SKIN-3  — CARBON FORGE — `skin-104`.
+4. SKIN-4  — MIDNIGHT CRIMSON — `skin-105`.
+5. SKIN-5  — ARCTIC PLATINUM — `skin-106`.
+6. SKIN-6  — VIOLET NOIR — `skin-107`.
+7. SKIN-7  — TITANIUM STORM — `skin-108`.
+8. SKIN-8  — EMERALD CIRCUIT — `skin-109`.
+9. SKIN-9  — SOLAR FLARE — `skin-110`.
+10. SKIN-10 — DEEP OCEAN — `skin-111`.
+11. SKIN-11 — ROSE CHROME — `skin-112`.
+12. SKIN-12 — DESERT AMBER — `skin-113`.
+13. SKIN-13 — GLACIER TEAL — `skin-114`.
+14. SKIN-14 — PHANTOM GRAPHITE — `skin-115`.
+15. SKIN-15 — ULTRAVIOLET DRIVE — `skin-116`.
+16. SKIN-16 — VOLCANIC STEEL — `skin-117`.
+
+В этом задании полностью отрисовывается SKIN-1. Остальные 15 имён и IDs только фиксируются в manifests/metadata для будущих совместимых наборов. Не делай их цветовые варианты внутри одного SKIN-1 экспорта. Каждая дополнительная тема в дальнейшем должна иметь собственную оригинальную художественную идентичность, но сохранять неизменные функциональные controls/layout/bindings.
+
+======================================================================
+7. ОБЯЗАТЕЛЬНЫЙ ПЕРЕЧЕНЬ ФАЙЛОВ-АССЕТОВ
+======================================================================
+
+Создай отдельные файлы, а не одну большую картинку. Каждый перечисленный компонент должен быть самостоятельно доступен для скачивания и повторного использования.
+
+A. BACKGROUNDS / MATERIALS
+- `PPGU_SKIN053_BG_MAIN_1024x700.png` — основной фон приложения, без контролов и текста.
+- `PPGU_SKIN053_BG_GRAPHITE_TEXTURE.png` — бесшовная/повторяемая фактура тёмного графита.
+- `PPGU_SKIN053_BG_ANODIZED_METAL.png` — фактура анодированного металла.
+- `PPGU_SKIN053_BG_BRUSHED_METAL.png` — умеренная brushed metal фактура.
+- `PPGU_SKIN053_BG_LCD_DARK.png` — фон LCD.
+- `PPGU_SKIN053_BG_CONTROL_RECESSED.png` — утопленная контрольная поверхность.
+
+B. MAIN SHELL / PANEL FRAMES
+- `PPGU_SKIN053_PANEL_HEADER.png`
+- `PPGU_SKIN053_PANEL_PRESET_BROWSER.png`
+- `PPGU_SKIN053_PANEL_PLAYING_CORE.png`
+- `PPGU_SKIN053_PANEL_AMP_FX_RACK.png`
+- `PPGU_SKIN053_PANEL_PERFORMANCE_STRIP.png`
+- `PPGU_SKIN053_PANEL_MIDI_KEYBOARD_BAY.png`
+- `PPGU_SKIN053_PANEL_STATUS_FOOTER.png`
+- `PPGU_SKIN053_PANEL_IMPORT_GUITAR.png`
+- `PPGU_SKIN053_PANEL_FX_EDIT.png`
+- `PPGU_SKIN053_PANEL_PATTERN_ROUTING.png`
+- `PPGU_SKIN053_PANEL_AUTOCHORDS.png`
+- `PPGU_SKIN053_PANEL_WORKSPACE_SETTINGS.png`
+- `PPGU_SKIN053_PANEL_SKIN_GALLERY.png`
+- `PPGU_SKIN053_PANEL_DIALOG_BASE.png`
+- `PPGU_SKIN053_PANEL_DIALOG_WARNING.png`
+- `PPGU_SKIN053_PANEL_DIALOG_ERROR.png`
+
+Для панелей делай пригодные к масштабированию 9-slice рамки: corners, edges, center fill должны быть согласованы. Не встраивай динамический текст и live controls в общие panel PNG.
+
+C. BUTTONS — EACH STATE AS ITS OWN FILE
+Для каждого типа, где состояние применимо, создай NORMAL, HOVER, PRESSED, ACTIVE/ON, DISABLED, FOCUS. Не объединяй состояния в одну картинку. Текст/лейбл обычно отдельный runtime layer.
+- `PPGU_SKIN053_BTN_PRIMARY_*`
+- `PPGU_SKIN053_BTN_SECONDARY_*`
+- `PPGU_SKIN053_BTN_IMPORT_GUITAR_*`
+- `PPGU_SKIN053_BTN_LOAD_SFZ_*`
+- `PPGU_SKIN053_BTN_MELODY_*`
+- `PPGU_SKIN053_BTN_PATTERN_*`
+- `PPGU_SKIN053_BTN_AUTOCHORDS_*`
+- `PPGU_SKIN053_BTN_SETTINGS_*`
+- `PPGU_SKIN053_BTN_SKIN_GALLERY_*`
+- `PPGU_SKIN053_BTN_PREVIEW_*`
+- `PPGU_SKIN053_BTN_APPLY_*`
+- `PPGU_SKIN053_BTN_CANCEL_*`
+- `PPGU_SKIN053_BTN_FAVORITE_*`
+- `PPGU_SKIN053_BTN_RESTORE_DEFAULT_*`
+- `PPGU_SKIN053_BTN_OPEN_GALLERY_*`
+- `PPGU_SKIN053_BTN_POWER_*`
+- `PPGU_SKIN053_BTN_DISABLED_FEATURE_*` (Auto Sound Hunter / Curator / About — visibly unavailable)
+
+D. SEVEN MAIN FX SWITCHES — EACH WITH ON/OFF STATES
+- `PPGU_SKIN053_FX_COMPRESSOR_ON.png` / `_OFF.png`
+- `PPGU_SKIN053_FX_EQ_ON.png` / `_OFF.png`
+- `PPGU_SKIN053_FX_DISTORTION_ON.png` / `_OFF.png`
+- `PPGU_SKIN053_FX_CHORUS_ON.png` / `_OFF.png`
+- `PPGU_SKIN053_FX_DELAY_ON.png` / `_OFF.png`
+- `PPGU_SKIN053_FX_REVERB_ON.png` / `_OFF.png`
+- `PPGU_SKIN053_FX_CABINET_IR_ON.png` / `_OFF.png`
+Для этих семи также создай hover/pressed/disabled варианты. FLANGER assets делай для FX EDIT selector/group отдельно, не добавляй Flanger в главный список из семи переключателей.
+
+E. NINE MAIN ROTARY CONTROLS
+Создай каждый регулятор как отдельный компонент, не девять ручек на одном листе:
+- `PPGU_SKIN053_KNOB_GAIN_BASE.png`, `..._RIM.png`, `..._FACE.png`, `..._POINTER.png`, `..._SCALE.png`, `..._GLOW.png`;
+- те же файлы для `TREBLE`, `MID`, `BASS`, `VELOCITY`, `DYNAMICS`, `SWING`, `HUMANIZE`, `ACCENT`.
+Каждая деталь отдельная PNG RGBA или SVG. Динамический указатель может поворачиваться в коде. Дополнительно сделай `PPGU_SKIN053_SPRITE_KNOBS_ROTATION.png` с равномерными кадрами поворота и документированными координатами кадров, если generator способен обеспечить геометрически точный спрайт-лист. Если не способен, не подменяй качественные отдельные слои кривым sprite sheet: оставь layered assets и укажи ограничение в manifest.
+
+F. FX EDIT ROTARY CONTROLS
+Для каждой группы из раздела 5.2 создай универсальный размер knob и необходимые отличия шкал (frequency, time, ratio, threshold, mix, drive, rate, depth, feedback, room, damping, cutoff). Не делай каждый FX knob уникальным по стилю: единый industrial family, меняется лишь scale/markings/label. Для значений оставить прозрачное место под динамический текст.
+
+G. SWITCHES / TOGGLES / LEDS
+- generic horizontal toggle ON/OFF;
+- compact toggle ON/OFF;
+- power switch ON/OFF;
+- LED round / square: OFF, ON, GLOW, WARNING, ERROR, SUCCESS, DISABLED;
+- отдельные круглые indicator lamps и их overlays;
+- маленькие status LEDs для library, midi activity и selected state — без выдуманных backend-функций.
+
+H. DISPLAYS / METERS
+- LCD field empty, active, warning, error;
+- numeric display frame без зашитого числа;
+- scale markings/line ticks;
+- live harmony display frame;
+- notes-held area;
+- scale/key area;
+- horizontal meter background/fill/clip marker — только если соответствует текущим UI данным;
+- small signal/status indicator elements.
+Не рисуй CPU/RAM/latency/voice counters как фактическую телеметрию, если такого реального отображения в макете/коде нет.
+
+I. MIDI KEYBOARD ASSETS
+- отдельная белая клавиша idle/hover/pressed;
+- отдельная чёрная клавиша idle/hover/pressed;
+- разделитель клавиш;
+- active-note overlay;
+- keyboard bay panel;
+- края и внутренние rail детали.
+Создай также контрольный preview 49 клавиш (MIDI 36–84), но в основном паке каждая клавиша и состояние должна присутствовать отдельно.
+
+J. ICONS — INDIVIDUAL SVG FILES
+Минимальный список:
+`IMPORT`, `GUITAR`, `SFZ`, `WAV`, `PRESET`, `SEARCH`, `MELODY`, `PATTERN`, `AUTOCHORDS`, `SETTINGS`, `SKIN`, `FAVORITE`, `PREVIEW`, `APPLY`, `CANCEL`, `POWER`, `COMPRESSOR`, `EQ`, `DISTORTION`, `CHORUS`, `FLANGER`, `DELAY`, `REVERB`, `CABINET`, `KEYBOARD`, `MIDI`, `HARMONY`, `NOTES`, `LIBRARY`, `WARNING`, `ERROR`, `SUCCESS`, `INFO`, `CLOSE`, `MINIMIZE`, `MAXIMIZE`, `ARROW_DOWN`, `ARROW_LEFT`, `ARROW_RIGHT`, `CHEVRON`, `STAR`.
+Размерные варианты: 16×16, 24×24, 32×32, 48×48 px. Иконки — единая геометрическая семья, SVG path, прозрачность. Не используй сторонние copyrighted brand logos.
+
+K. HARDWARE DETAILS / FRAMES
+- metallic corner plates;
+- screws/fasteners;
+- beveled edge strips;
+- thin separators;
+- recessed slots;
+- vent slots;
+- subtle brushed-metal inserts;
+- panel grips/rails;
+- small accent trims;
+- focus outlines;
+- drag/resize handle, если присутствует в макете.
+Каждая деталь самостоятельная и не должна спорить с читаемостью.
+
+L. SPRITE SHEETS
+Создай отдельно sprite sheets для:
+1) button state atlas;
+2) FX toggle states;
+3) LED states;
+4) rotary knob rotation frames (только при точной геометрии);
+5) MIDI keyboard key states (если реально удобно для интеграции);
+6) meter segments/indicator movement;
+7) small UI icon atlas.
+
+Строгие требования к каждому sprite sheet:
+- одна сетка с фиксированным количеством columns/rows;
+- каждая ячейка одинакового размера;
+- все элементы по центру ячейки;
+- никаких рамок/полей/подписей/номеров ячеек внутри картинки;
+- фон прозрачный RGBA;
+- никаких частично обрезанных бликов, теней или glow за пределами ячейки;
+- в манифесте указать sheet width/height, cell width/height, rows, columns, total frames, frame order, FPS и назначение;
+- дополнительно экспортировать каждый frame отдельным PNG с суффиксом `_FRAME_001`, `_FRAME_002` и т.д.
+
+======================================================================
+8. ТЕХНИЧЕСКИЕ ТРЕБОВАНИЯ К ФАЙЛАМ
+======================================================================
+
+Форматы:
+- PNG RGBA, 8-bit/channel, alpha transparency — основной формат для bitmap assets.
+- SVG — иконки, простые формы, тонкие линии, рамки, scalable outlines. SVG должен быть локальным/self-contained: без внешних URL, ссылок на шрифты, скриптов, внешних изображений и небезопасных XML конструкций.
+- Дополнительно WebP допускается только для необязательных preview/texture files; не заменяет PNG RGBA там, где нужен alpha и runtime compatibility.
+- Не использовать JPEG для прозрачных элементов.
+
+Целевые размеры:
+- главный preview: 1024×700 px;
+- исходная рабочая геометрия приложения: 1024×700 px;
+- минимальное окно: 900×640 px;
+- максимальная рабочая область: 1600×1100 px;
+- стандартные иконки: 16/24/32/48 px;
+- главные rotary: 128×128 или 160×160 px минимум, предпочтительно 192×192 px для source masters;
+- маленькие LED: 16×16 / 24×24 px;
+- main button plate ориентируй по макету и сохраняй отдельный clean plate без текста;
+- panel frames готовить под 9-slice scaling.
+
+Ключевой принцип: каждый asset должен быть самостоятельным. Нельзя выдавать только один PNG, на котором сразу собраны фон, все панели, все ручки, надписи и кнопки. Коллажи допустимы только как отдельные contact sheets/previews, но не вместо исходных раздельных компонентов.
+
+Для каждого bitmap:
+- корректный alpha channel;
+- прозрачная область действительно прозрачная, а не чёрная/шахматная нарисованная подложка;
+- без белого matte/halo fringe по краям;
+- без случайных пикселей/артефактов;
+- реальный цвет соответствует точной палитре;
+- без некорректного crop;
+- края и glow не обрезаны.
+
+Для SVG:
+- корректный XML;
+- viewBox соответствует размерам;
+- path/stroke чистые;
+- нет внешних зависимостей;
+- иконка центрирована и оптически сбалансирована.
+
+======================================================================
+9. ТЕКСТ, ЛОГОТИПЫ И ДИНАМИЧЕСКИЕ ДАННЫЕ
+======================================================================
+
+Все надписи должны быть орфографически точными и совпадать с указанными названиями. Не добавляй случайные надписи, псевдотехнический текст, бессмысленные числа, случайные логотипы или копирайт чужих производителей.
+
+Предпочтительно:
+- поставлять чистые кнопочные пластины без текста;
+- иконки поставлять отдельно;
+- реальные подписи/числа/значения/имена пресетов/статусы выводятся JUCE text labels и не запекаются в текстуры;
+- если нужен preview с текстом, создай отдельный presentation mockup, не заменяющий clean asset.
+
+Единственный бренд: `PPGU` и `L3XTOWN AUDIO LAB`. Не добавляй Blink-182, Fender, Gibson, Marshall, Neural DSP, NI или другие чужие логотипы. Если в макете присутствует гитарный визуал, используй оригинальное нейтральное изображение/иллюстрацию электрогитары без имитации конкретной copyrighted album cover или торговой марки.
+
+======================================================================
+10. СОСТОЯНИЯ КАЖДОГО КОНТРОЛА
+======================================================================
+
+Для каждого интерактивного типа, когда это применимо, нужны отдельные визуальные состояния:
+- NORMAL / IDLE;
+- HOVER;
+- PRESSED;
+- ACTIVE / ON;
+- INACTIVE / OFF;
+- FOCUSED;
+- DISABLED;
+- LOADING;
+- SUCCESS;
+- WARNING;
+- ERROR.
+
+Не создавай все состояния для каждого элемента механически: используй только логически применимые. Но ни один основной интерактивный элемент не должен остаться без хотя бы NORMAL и DISABLED/ACTIVE, если его поведение предполагает эти состояния.
+
+Визуальное состояние должно быть различимо не только по цвету: используй положение, контраст, обводку, inset/outset, яркость и визуальную глубину. Не делай hover/pressed/disabled трудно различимыми.
+
+======================================================================
+11. СТРУКТУРА ВЫХОДНОЙ ПАПКИ
+======================================================================
+
+Верни полный production pack со следующей структурой (допустимо добавить подкаталоги, но не удалять обязательные):
+
+`PPGU_REV20_NEON_STAGE_ASSETS/`
+  `README_ASSET_PACK_RU.md`
+  `ASSET_MANIFEST.json`
+  `ASSET_OPEN_ISSUES.md`
+  `previews/`
+    `MAIN_INTERFACE_PREVIEW_1024x700.png`
+    `MAIN_INTERFACE_PREVIEW_1600x1100.png`
+    `ASSET_CONTACT_SHEET_BUTTONS.png`
+    `ASSET_CONTACT_SHEET_KNOBS.png`
+    `ASSET_CONTACT_SHEET_PANELS.png`
+    `ASSET_CONTACT_SHEET_ICONS.png`
+    `ASSET_CONTACT_SHEET_AUX_WINDOWS.png`
+  `backgrounds/`
+  `panels/`
+    `main/`
+    `import_guitar/`
+    `fx_edit/`
+    `pattern_routing/`
+    `autochords/`
+    `settings/`
+    `skin_gallery/`
+    `dialogs/`
+  `buttons/`
+    `primary/`
+    `secondary/`
+    `navigation/`
+    `mode/`
+    `actions/`
+    `disabled/`
+  `knobs/`
+    `main/`
+    `fx_edit/`
+    `layers/`
+    `frames/`
+  `switches/`
+  `leds/`
+  `displays/`
+  `meters/`
+  `keyboard/`
+  `icons/`
+    `16/`
+    `24/`
+    `32/`
+    `48/`
+  `hardware/`
+  `sprites/`
+    `buttons/`
+    `switches/`
+    `leds/`
+    `knobs/`
+    `keyboard/`
+    `meters/`
+    `icons/`
+  `svg/`
+    `texture/`
+    `bezel/`
+    `crest/`
+    `icons/`
+  `source/` (если инструмент может отдать layered source/export metadata; не помещай сюда закрытые шрифты или чужие ресурсы)
+
+Кроме всего каталога обязательно предоставь:
+1) ZIP-архив всего пакета;
+2) каждый PNG/SVG отдельно доступный для скачивания;
+3) contact sheets только для обзора;
+4) `ASSET_MANIFEST.json` со списком абсолютно всех файлов;
+5) `README_ASSET_PACK_RU.md` с назначением файлов и способом их применения;
+6) список файлов, которые не удалось сделать, с причиной. Не объявляй неполный пакет полным.
+
+======================================================================
+12. ASSET_MANIFEST.JSON — ОБЯЗАТЕЛЬНАЯ СХЕМА
+======================================================================
+
+Для каждого файла внеси минимум:
+- asset_id;
+- filename (relative path);
+- theme_id (`skin-053`);
+- theme_name (`NEON STAGE DEFAULT`);
+- category;
+- subcategory;
+- component_name;
+- state;
+- width;
+- height;
+- format;
+- color_mode;
+- alpha_transparency;
+- intended_usage;
+- control_label (если применимо);
+- apvts_parameter_id (только если это реальный существующий параметр; иначе null);
+- sprite_sheet (если применимо);
+- frame_width / frame_height / rows / columns / frames_total / fps / frame_order (если применимо);
+- nine_slice_insets (для panel frames, если применимо);
+- scaling_policy;
+- source_reference;
+- validation_status.
+
+Манифест должен быть валидным JSON UTF-8 без комментариев, без повторяющихся asset_id и без ссылок на несуществующие файлы. `states` могут быть объектом с конкретными путями к файлам каждого состояния. Если используешь объект `states`, каждый путь должен реально существовать.
+
+Добавь map `ui_control_bindings`, где сохраняются только фактические привязки. Минимально укажи 9 главных rotary и 7 главных FX switches, перечисленные выше. Для вспомогательных FX controls используй точные ID из `Source/PluginProcessor.cpp`. Не создавай новые APVTS IDs и не переписывай старые.
+
+======================================================================
+13. КОНТРОЛЬ КАЧЕСТВА — ПЕРЕД ВЫДАЧЕЙ
+======================================================================
+
+Проведи визуальную и техническую проверку всего пакета:
+- каждый ожидаемый asset отдельным файлом существует;
+- нет случайных дублей;
+- все PNG открываются и имеют корректный RGBA/alpha;
+- прозрачность не подменена чёрным/белым фоном;
+- все SVG валидны и самодостаточны;
+- sprite sheets имеют одинаковые ячейки и корректный порядок кадров;
+- размеры соответствуют manifest;
+- файлы названы строго и однозначно;
+- active/hover/pressed/off/disabled states визуально согласованы;
+- все цвета соответствуют SKIN-1 palette;
+- нет обрезанных glow/тени/краёв;
+- нет псевдотекста, случайных чисел, поддельных логотипов;
+- все элементы сохраняют точную композицию mockup;
+- весь комплект остаётся читаемым в масштабе 100%, 125% и 150%;
+- главный интерфейс визуально соответствует 1024×700 и сохраняет пропорции при увеличении;
+- не создаются новые UI controls, новые skin IDs или новые музыкальные режимы.
+
+Если возможно, создай `tools/validate_asset_pack.py`, который проверяет наличие файлов, размеры, формат, alpha, manifest consistency, sprite geometry и duplicate hashes. Сам скрипт должен работать локально без сетевых запросов и не менять исходные картинки.
+
+======================================================================
+14. ЧТО СЧИТАЕТСЯ ЗАПРЕЩЁННЫМ РЕЗУЛЬТАТОМ
+======================================================================
+
+ЗАПРЕЩЕНО:
+- выдать один screenshot/mockup вместо библиотеки;
+- выдать только contact sheet;
+- объединить несколько контролов в PNG, из которого нельзя извлечь каждый отдельно;
+- изменить утверждённую композицию главного окна;
+- сделать новые ручки, которые не имеют соответствующих реальных параметров;
+- добавить третий главный режим;
+- добавить восьмой главный FX toggle;
+- изобразить AUTO SOUND HUNTER, CURATOR, ABOUT или AutoChords генератор как рабочий backend, если в текущем коде они выключены/не реализованы;
+- добавить ложные CPU/RAM meter, voice activity, waveform analyzer или иные неподтверждённые приборы;
+- подменить PPGU Skin-1 фиолетовой темой другого проекта;
+- изменить APVTS IDs, поведение MIDI, DSP, sampler, preset logic или audio engine;
+- использовать чужие логотипы/персонажей/обложки/торговые марки;
+- оставить alpha matte или фальшивую прозрачность;
+- объявить неподготовленные/отсутствующие файлы готовыми.
+
+======================================================================
+15. ПОРЯДОК ПРОИЗВОДСТВА — ДЕЛАТЬ ПО ПАРТИЯМ
+======================================================================
+
+Чтобы каждый элемент можно было скачать отдельно, не пытайся уместить весь набор в один ответ или одну общую картинку. Создавай пакет последовательно:
+
+BATCH 01 — главный фон, главный shell, все основные panel frames и main interface preview.
+BATCH 02 — 9 главных rotary controls: отдельные base/rim/face/pointer/scale/glow files и их previews.
+BATCH 03 — 7 главных FX switches, все button states и power controls.
+BATCH 04 — preset browser, search, category selectors, mode controls, import/settings/skin gallery buttons.
+BATCH 05 — performance display, LCD, LEDs, meters и MIDI keyboard assets.
+BATCH 06 — полный FX EDIT набор для всех восьми групп, включая FLANGER в FX EDIT.
+BATCH 07 — auxiliary windows: Import Guitar, Pattern Routing, AutoChords, Workspace Settings, Skin Gallery, dialogs.
+BATCH 08 — SVG icon library, metal hardware details, bezel/texture/crest layers.
+BATCH 09 — sprite sheets + отдельные extracted frame PNGs.
+BATCH 10 — финальный manifest, README, validation report, contact sheets и ZIP.
+
+После каждой партии:
+- выдай ссылки на каждый готовый PNG/SVG отдельно;
+- выдай общий ZIP партии;
+- обнови ASSET_MANIFEST.json;
+- укажи точное количество созданных файлов;
+- перечисли отсутствующие элементы;
+- не начинай следующую партию так, чтобы пользователь потерял возможность скачать предыдущие результаты.
+
+======================================================================
+16. ФИНАЛЬНЫЙ КРИТЕРИЙ ГОТОВНОСТИ
+======================================================================
+
+Работа считается завершённой только когда получен полный отдельный комплект файлов для всех реально предусмотренных частей SKIN-1, а не только картинка главного окна. Должны существовать раздельные изображения каждого control, каждой кнопки и её состояний, каждого switch/LED, каждой панели, всех необходимых иконок, материалов и спрайтов. Все файлы должны соответствовать утверждённому макету и быть перечислены в manifest.
+
+Итоговый пакет должен быть пригоден для передачи разработчику JUCE/C++ и последующей точечной интеграции в существующий проект без изменения музыкальной логики, параметров, MIDI, DSP или APVTS.
+
+**Главное правило: СНАЧАЛА ТОЧНОЕ СООТВЕТСТВИЕ УТВЕРЖДЁННОМУ NEON STAGE DEFAULT MOCKUP, ЗАТЕМ ПРЕМИАЛЬНОЕ КАЧЕСТВО, ЗАТЕМ РАЗДЕЛЬНЫЙ ЭКСПОРТ КАЖДОГО АССЕТА. НИКАКОГО САМОСТОЯТЕЛЬНОГО РЕДИЗАЙНА.**
