@@ -120,6 +120,19 @@ def fetch_release_zip(repo: str, tag: str, match: str, dest: Path):
     dest.write_bytes(data)
     return assets[0]["name"]
 
+def select_repository_license_path(names: list[str], expected_filename: str) -> str:
+    """Select the repository-root-most expected license from a source archive."""
+    candidates = [
+        name for name in names
+        if safe_member(name) and PurePosixPath(name).name.lower() == expected_filename.lower()
+    ]
+    if not candidates:
+        raise RuntimeError(f"required license file {expected_filename} missing")
+    # GitHub zipballs contain <repo>-<sha>/LICENSE at the repository root plus
+    # nested package LICENSE files. Choose the shortest path deterministically.
+    return sorted(candidates, key=lambda name: (len(PurePosixPath(name).parts), len(name), name))[0]
+
+
 def existing_hashes(samples: Path):
     found=set()
     if samples.exists():
@@ -163,10 +176,8 @@ def main():
             # Read the exact repository license file from the downloaded archive.
             with zipfile.ZipFile(archive) as z:
                 names=[n for n in z.namelist() if safe_member(n)]
-                license_paths=[n for n in names if PurePosixPath(n).name.lower()==s["license_file"].lower()]
-                if not license_paths:
-                    raise RuntimeError(f"{sid}: required license file {s['license_file']} missing")
-                license_text=z.read(license_paths[0]).decode("utf-8","replace")
+                license_path = select_repository_license_path(names, s["license_file"])
+                license_text=z.read(license_path).decode("utf-8","replace")
                 if not license_ok(license_text,s["license"]):
                     raise RuntimeError(f"{sid}: license text does not verify expected {s['license']}; skipped")
                 source_dir=run_root/sid

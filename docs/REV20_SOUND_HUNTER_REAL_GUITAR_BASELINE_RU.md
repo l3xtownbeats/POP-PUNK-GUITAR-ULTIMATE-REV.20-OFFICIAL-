@@ -60,3 +60,8 @@ This prevents an ordinary code push from silently starting a large external samp
 ## 7. Legal boundary
 
 Only libraries whose actual licensing permits bundle/redistribution into the plugin may be shipped. Proprietary sound libraries remain tonal/playability references, not copy sources.
+
+
+## 2026-11-20 — acquisition workflow diagnostic
+
+Target run 44722586113 proved the discovery and three regression test suites pass, but the first real source download stopped on the Meta Open Sound zipball containing multiple LICENSE files. The importer has now been corrected to use the repository-root-most LICENSE and a regression test covers the nested-license case. A fresh manual acquisition run is still required; no audio payload is considered acquired until that run uploads a verified artifact and registry.

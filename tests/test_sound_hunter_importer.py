@@ -18,6 +18,15 @@ class SoundHunterRegressionTests(unittest.TestCase):
         result = subprocess.run([sys.executable, str(MODULE_PATH), "--help"], capture_output=True, text=True, check=True)
         self.assertNotIn("--max-library-gb", result.stdout)
 
+    def test_repository_license_selector_uses_root_most_license(self):
+        names = [
+            "Meta-open-sound-abc/LICENSE",
+            "Meta-open-sound-abc/some/subpackage/LICENSE",
+            "Meta-open-sound-abc/docs/LICENSE",
+        ]
+        selected = sound_hunter.select_repository_license_path(names, "LICENSE")
+        self.assertEqual(selected, "Meta-open-sound-abc/LICENSE")
+
     def test_release_assets_use_separate_directory(self):
         source = Path("/tmp/run/meta-open-sound-steel")
         target = sound_hunter.release_asset_target(

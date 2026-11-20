@@ -163,3 +163,10 @@ The Windows VST3 workflow now runs official pluginval Windows 1.0.4 at strictnes
 - Copied planning baseline contains 300 candidate preset/sample bindings (150+150), READY=0. This does not count toward the 500 playable presets.
 - No completed source Sound Hunter run was found in the inspected source Actions history. No source-run PASS is inherited.
 - CTest is extended from 16 to 19 with Sound Hunter importer, soundbank policy and artifact-splitter contracts; exact target CI after this port is required.
+
+
+## Sound Hunter acquisition diagnostic and correction
+
+- Run 44722586113 on SHA 9ed8a44bf09fc7344bc68df039608b95cda9959e failed at the first real source: Meta Open Sound archive contained five LICENSE files while the importer required exactly one. All three regression test groups before acquisition passed (12 + 1 + 5 tests).
+- Corrected license selection to use the repository-root-most LICENSE path and added a regression test. Acquisition is now explicit opt-in via workflow_dispatch input `acquire_samples` in the single canonical workflow `rev20-sound-hunter-import.yml`.
+- No source audio payload is claimed acquired yet. The corrected importer requires a new manual acquisition run before audio can enter the product evidence chain.

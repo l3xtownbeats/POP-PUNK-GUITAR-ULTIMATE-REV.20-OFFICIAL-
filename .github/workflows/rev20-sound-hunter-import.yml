@@ -1,18 +1,13 @@
 name: REV.20 Sound Hunter — real guitar library acquisition
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "SoundHunter/**"
-      - "tests/test_sound_hunter_importer.py"
-      - "tests/test_audit_soundbank_policy.py"
-      - "tests/test_artifact_splitter.py"
-      - "tools/audit_soundbank.py"
-      - "tools/split_artifact.py"
-      - ".github/workflows/rev20-sound-hunter-import.yml"
   workflow_dispatch:
+    inputs:
+      acquire_samples:
+        description: "Download/verify/import approved real-recorded guitar sources"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -28,7 +23,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ github.token }}
     steps:
-      - name: Checkout approved source catalog and importer
+      - name: Checkout exact REV.20 main
         uses: actions/checkout@v4
 
       - name: Set up Python 3.11
@@ -45,10 +40,12 @@ jobs:
           python3 tests/test_audit_soundbank_policy.py
           python3 tests/test_artifact_splitter.py
 
-      - name: Download and verify real guitar audio (CC0-1.0 source allowlist)
+      - name: Download and verify real guitar audio (explicit opt-in)
+        if: ${{ inputs.acquire_samples }}
         run: python3 SoundHunter/sound_hunter_real_guitars.py
 
       - name: Package additive Sound Hunter import
+        if: ${{ inputs.acquire_samples }}
         run: |
           zip -qr "$RUNNER_TEMP/PPGU_REAL_GUITAR_SAMPLES.zip" Samples/SoundHunterImports
           python3 tools/split_artifact.py split \
@@ -63,6 +60,7 @@ jobs:
           rm -f "$RUNNER_TEMP/PPGU_REAL_GUITAR_SAMPLES.zip"
 
       - name: Upload verified real-guitar sample payload and provenance
+        if: ${{ inputs.acquire_samples }}
         uses: actions/upload-artifact@v4
         with:
           name: PPGU-REV20-REAL-GUITAR-SAMPLES

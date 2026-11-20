@@ -186,3 +186,8 @@ Run [44722128778](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.2
 
 ## 2026-11-20 — Sound Hunter pipeline reconciliation
 Source main contains a real-recorded-guitar acquisition tool, catalog and manual workflow. The importer verifies actual license text, release SHA256SUMS, LFS payload SHA-256, file sizes, safe paths and duplicate-content suppression. The target workflow is manual-only with an explicit acquire_samples boolean. The copied 300-entry binding plan remains planning-only and READY=0. No completed source Sound Hunter run was found, so no sample payload is claimed acquired.
+
+
+## 2026-11-20 — Sound Hunter CI diagnostic / correction
+
+Workflow 44722586113 (SHA 9ed8a44...) executed the imported Sound Hunter pipeline. Discovery and all regression contracts passed, then the real download phase stopped because the Meta Open Sound repository archive contained multiple LICENSE files. The importer treated that structure as ambiguous and exited. This was corrected by selecting the repository-root-most LICENSE deterministically and adding a regression test for nested LICENSE files. The acquisition workflow is now manual opt-in; a fresh run is required for real audio acquisition.

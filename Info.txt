@@ -150,3 +150,10 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Added manual workflow .github/workflows/rev20-sound-hunter-real-guitar.yml. It never auto-downloads samples; acquire_samples=false only runs discovery/tests, while true explicitly performs acquisition and SHA/license verification.
 - Source review found no completed Sound Hunter workflow run, so no sample payload or playable preset count is claimed. Current copied planning baseline has READY=0 entries.
 - Product policy reconciliation: source "unlimited" means no hard maximum; REV.20 BASIC is 15 GB minimum/included and EXPANDED is optional +15 GB initial.
+
+
+## 2026-11-20 — Sound Hunter acquisition fix after target CI run 44722586113
+- The first target Sound Hunter acquisition run failed for a source-archive structure reason, not because the CC0 license itself failed: Meta Open Sound zipball contained multiple LICENSE files, while the importer required exactly one.
+- Corrected `SoundHunter/sound_hunter_real_guitars.py` to choose the repository-root-most expected license deterministically (shortest path) and added a regression test for nested LICENSE files.
+- Consolidated acquisition workflow to `.github/workflows/rev20-sound-hunter-import.yml` with `workflow_dispatch` and explicit `acquire_samples` input. An ordinary push no longer starts a large sample acquisition job.
+- Previous run 44722586113 therefore remains recorded as FAILED / infrastructure-contract defect fixed; it is not evidence of an acquired sample payload. A fresh manual run is required to acquire audio.

@@ -100,3 +100,10 @@ The Windows VST3 workflow now locates the built bundle and invokes the official 
 
 ## Sound Hunter selective transfer (2026-11-20)
 Transferred from source main: SoundHunter importer/catalog/production notes, importer/policy/splitter tests, soundbank audit, bounded artifact splitter and a REV.20-named 300-entry sample-binding planning baseline. The source pipeline verifies actual license text, release SHA256SUMS, LFS payload SHA-256, safe paths and duplicates. The target workflow is manual-only with explicit acquire_samples. No Sound Hunter payload is declared acquired or playable until a real target artifact and listening/runtime QA exist.
+
+
+## Sound Hunter acquisition defect correction (2026-11-20)
+
+- Target run 44722586113 exposed an importer assumption: GitHub zipballs can contain multiple LICENSE files. The importer previously required exactly one and stopped before admitting any audio.
+- Selectively corrected the importer to select the root-most expected LICENSE by path depth. Added a regression test and changed the canonical target workflow to workflow_dispatch with explicit acquire_samples.
+- The failed run remains historical evidence of the defect; it is not evidence of sample acquisition.
