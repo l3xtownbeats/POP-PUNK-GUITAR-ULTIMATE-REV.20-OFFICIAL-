@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   windows-x64-vst3:
@@ -43,6 +43,18 @@ jobs:
       - name: Generate canonical NEON STAGE sprite atlases
         shell: pwsh
         run: python tools/generate_neon_stage_spritesheets.py
+
+      - name: Commit generated NEON STAGE sprite atlases to the source tree
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SKIN/Skin_053/assets/spritesheets/*.png SKIN/Skin_053/assets/spritesheets/neon_stage_spritesheet_manifest.json
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "Add generated NEON STAGE sprite atlases"
+            git push origin HEAD:main
+          }
 
       - name: Checkout JUCE 7.0.12
         shell: pwsh
