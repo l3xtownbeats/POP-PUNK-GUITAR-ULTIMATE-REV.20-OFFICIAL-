@@ -793,9 +793,21 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
             || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("frames_panels", "").toString(),
                                    1024, 1024, candidate.framesPanelsSpriteSheet, error)
             || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("icons", "").toString(),
-                                   1024, 1024, candidate.iconsSpriteSheet, error))
+                                   1024, 1024, candidate.iconsSpriteSheet, error)
+            || !loadSafePngArtwork(themeRoot, "assets/background/main.png",
+                                   2560, 1440, candidate.backgroundArtwork, error)
+            || !loadSafePngArtwork(themeRoot, "assets/textures/material.png",
+                                   1024, 1024, candidate.materialArtwork, error)
+            || !loadSafePngArtwork(themeRoot, "assets/fx_layers/stage_glow.png",
+                                   800, 450, candidate.stageGlowArtwork, error)
+            || !loadSafePngArtwork(themeRoot, "assets/fx_layers/edge_highlight.png",
+                                   800, 450, candidate.edgeHighlightArtwork, error)
+            || !loadSafePngArtwork(themeRoot, "assets/fx_layers/specular.png",
+                                   800, 450, candidate.specularArtwork, error)
+            || !loadSafePngArtwork(themeRoot, "assets/fx_layers/shadow.png",
+                                   800, 450, candidate.shadowArtwork, error))
         {
-            lastError = error.isNotEmpty() ? error : "NEON STAGE sprite atlas manifest is incomplete";
+            lastError = error.isNotEmpty() ? error : "NEON STAGE sprite atlas or premium artwork manifest is incomplete";
             resetToDefault();
             return false;
         }
