@@ -119,10 +119,59 @@ def main() -> int:
                    if p.is_dir() and p.name.startswith("Skin_")}
     if actual_dirs != expected_dirs:
         raise SystemExit(f"FAIL: only approved 16 theme directories may exist; found {sorted(actual_dirs)}")
+    # NEON STAGE DEFAULT's dedicated sprite atlas package is validated
+    # independently from the other 15 skins; the registry remains exactly 16.
+    atlas_dir = SKIN / "Skin_053" / "assets" / "spritesheets"
+    atlas_names = (
+        "neon_stage_controls_spritesheet.png",
+        "neon_stage_meters_sliders_sheet.png",
+        "neon_stage_frames_panels_sheet.png",
+        "neon_stage_icons_sheet.png",
+    )
+    for atlas_name in atlas_names:
+        atlas_path = atlas_dir / atlas_name
+        if not atlas_path.is_file():
+            raise SystemExit(f"FAIL: missing NEON STAGE sprite atlas: {atlas_path}")
+        validate_png(atlas_path, (1024, 1024))
+    atlas_manifest_path = atlas_dir / "neon_stage_spritesheet_manifest.json"
+    if not atlas_manifest_path.is_file():
+        raise SystemExit("FAIL: missing NEON STAGE sprite atlas manifest")
+    atlas_manifest = json.loads(atlas_manifest_path.read_text(encoding="utf-8"))
+    expected_palette = {
+        "background": "#05070E",
+        "metal_border": "#00D2FF",
+        "glow_cyan": "#00E5FF",
+        "glow_blue": "#0048FF",
+        "accent_magenta": "#FF007F",
+    }
+    if atlas_manifest.get("project") != "NEON_STAGE_MANAGER_3_0" \\
+            or atlas_manifest.get("theme") != "NEON_STAGE_DEFAULT_SKIN_1" \\
+            or atlas_manifest.get("canvas") != [1024, 1024] \\
+            or atlas_manifest.get("base_palette") != expected_palette:
+        raise SystemExit("FAIL: NEON STAGE sprite atlas manifest identity/palette mismatch")
+    sheets = atlas_manifest.get("sheets", {})
+    if set(sheets) != set(atlas_names):
+        raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly four sheets")
+    controls = sheets["neon_stage_controls_spritesheet.png"]["elements"]
+    if controls.get("knobs", {}).get("frames") != 8 \\
+            or controls.get("knobs", {}).get("size") != [100, 100] \\
+            or controls.get("knobs", {}).get("row_y") != [120, 220]:
+        raise SystemExit("FAIL: NEON STAGE rotary frame geometry mismatch")
+    if controls.get("toggle_switch", {}).get("states", {}).get("OFF", {}).get("bbox") != [65, 430, 465, 600] \\
+            or controls.get("toggle_switch", {}).get("states", {}).get("ON", {}).get("bbox") != [535, 430, 935, 600]:
+        raise SystemExit("FAIL: NEON STAGE toggle switch atlas bounds mismatch")
+    if set(controls.get("buttons", {}).get("states", {})) != {"normal", "hover", "pressed", "active"}:
+        raise SystemExit("FAIL: NEON STAGE button state atlas is incomplete")
+    if sheets["neon_stage_meters_sliders_sheet.png"]["elements"].get("vu_meters", {}).get("levels_count") != 8:
+        raise SystemExit("FAIL: NEON STAGE VU meter must contain exactly eight levels")
+    if len(sheets["neon_stage_icons_sheet.png"]["elements"].get("fx_icons", [])) != 7 \\
+            or len(sheets["neon_stage_icons_sheet.png"]["elements"].get("nav_icons", [])) != 10:
+        raise SystemExit("FAIL: NEON STAGE icon atlas must contain 7 FX and 10 navigation icons")
+
     expected_ready = [item[2] for item in EXPECTED]
     if ready != expected_ready:
         raise SystemExit(f"FAIL: all 16 approved themes must be runtime-ready after exact-SHA SVG decode/package validation; got {ready}")
-    print("PASS: exactly 16 named runtime-ready themes; all 32 preview/hero PNG dimensions and CRCs; all 48 SVG layers; all 21-token/28-entry manifests; no extra theme directories.")
+    print("PASS: exactly 16 runtime-ready themes; all theme artwork/SVGs; four 1024x1024 NEON STAGE sprite atlases and exact atlas geometry; no extra theme directories.")
     return 0
 
 if __name__ == "__main__":
