@@ -56,6 +56,8 @@ private:
     PPGUThemeManager themeManager;
     std::unique_ptr<PPGUMultiWindowWorkspace> auxiliaryWorkspace;
     std::unique_ptr<PPGUPerformanceDisplay> performanceDisplay;
+    // Native approved-layout components; concrete UI classes stay private to the .cpp.
+    std::unique_ptr<juce::Component> chordDiagram, mainFxEdit;
     PPGUPremiumLookAndFeel premiumLookAndFeel;
     juce::ApplicationProperties uiProperties;
     bool uiSettingsReady = false;
