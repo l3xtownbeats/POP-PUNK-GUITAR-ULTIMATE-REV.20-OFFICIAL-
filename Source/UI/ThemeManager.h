@@ -47,6 +47,14 @@ public:
         juce::Image textureArtwork;
         juce::Image bezelArtwork;
         juce::Image crestArtwork;
+        // High-resolution Skin-1 stage stack. These images are decoded only while
+        // the visual theme is loaded on the message thread; audio code never sees them.
+        juce::Image backgroundArtwork;
+        juce::Image materialArtwork;
+        juce::Image stageGlowArtwork;
+        juce::Image edgeHighlightArtwork;
+        juce::Image specularArtwork;
+        juce::Image shadowArtwork;
         // Optional NEON STAGE sprite atlases. Only SKIN-1 supplies these;
         // other approved themes continue using the shared vector fallback.
         juce::Image controlsSpriteSheet;
