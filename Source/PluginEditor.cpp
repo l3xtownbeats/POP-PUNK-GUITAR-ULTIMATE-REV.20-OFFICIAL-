@@ -1324,6 +1324,7 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
                                                float sliderPos, float minSliderPos, float maxSliderPos,
                                                juce::Slider::SliderStyle style, juce::Slider& slider)
 {
+    juce::ignoreUnused(minSliderPos, maxSliderPos, slider);
     if (style != juce::Slider::LinearHorizontal || !palette.metersSlidersSpriteSheet.isValid())
     {
         juce::LookAndFeel_V4::drawLinearSlider(g, x, y, width, height,
