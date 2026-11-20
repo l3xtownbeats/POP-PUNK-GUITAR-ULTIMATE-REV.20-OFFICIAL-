@@ -31,7 +31,7 @@ def sha256(path: Path) -> str:
 
 def png_dimensions(path: Path) -> tuple[int, int]:
     with path.open("rb") as stream:
-        if stream.read(8) != b"\\x89PNG\\r\\n\\x1a\\n":
+        if stream.read(8) != b"\x89PNG\r\n\x1a\n":
             raise AssertionError(f"not a PNG file: {path}")
         stream.read(8)
         return struct.unpack(">II", stream.read(8))
