@@ -47,6 +47,12 @@ public:
         juce::Image textureArtwork;
         juce::Image bezelArtwork;
         juce::Image crestArtwork;
+        // Optional NEON STAGE sprite atlases. Only SKIN-1 supplies these;
+        // other approved themes continue using the shared vector fallback.
+        juce::Image controlsSpriteSheet;
+        juce::Image metersSlidersSpriteSheet;
+        juce::Image framesPanelsSpriteSheet;
+        juce::Image iconsSpriteSheet;
         // Compatibility aliases used by the existing editor shell.
         juce::Colour canvas { 0xff080b14 };
         juce::Colour canvasInset { 0xff0c1422 };
