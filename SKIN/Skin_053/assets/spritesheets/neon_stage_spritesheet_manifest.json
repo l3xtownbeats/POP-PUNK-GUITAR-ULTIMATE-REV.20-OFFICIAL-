@@ -1,0 +1,747 @@
+{
+  "schemaVersion": "1.0.0",
+  "project": "NEON_STAGE_MANAGER_3_0",
+  "theme": "NEON_STAGE_DEFAULT_SKIN_1",
+  "canvas": [
+    1024,
+    1024
+  ],
+  "base_palette": {
+    "background": "#05070E",
+    "metal_border": "#00D2FF",
+    "glow_cyan": "#00E5FF",
+    "glow_blue": "#0048FF",
+    "accent_magenta": "#FF007F"
+  },
+  "sheets": {
+    "neon_stage_controls_spritesheet.png": {
+      "resolution": [
+        1024,
+        1024
+      ],
+      "elements": {
+        "knobs": {
+          "type": "rotary",
+          "frames": 8,
+          "angle_step_deg": 45,
+          "size": [
+            100,
+            100
+          ],
+          "row_y": [
+            120,
+            220
+          ],
+          "frames_bbox": [
+            {
+              "frame": 0,
+              "angle_deg": 0,
+              "bbox": [
+                65,
+                120,
+                165,
+                220
+              ]
+            },
+            {
+              "frame": 1,
+              "angle_deg": 45,
+              "bbox": [
+                175,
+                120,
+                275,
+                220
+              ]
+            },
+            {
+              "frame": 2,
+              "angle_deg": 90,
+              "bbox": [
+                285,
+                120,
+                385,
+                220
+              ]
+            },
+            {
+              "frame": 3,
+              "angle_deg": 135,
+              "bbox": [
+                395,
+                120,
+                495,
+                220
+              ]
+            },
+            {
+              "frame": 4,
+              "angle_deg": 180,
+              "bbox": [
+                65,
+                220,
+                165,
+                320
+              ]
+            },
+            {
+              "frame": 5,
+              "angle_deg": 225,
+              "bbox": [
+                175,
+                220,
+                275,
+                320
+              ]
+            },
+            {
+              "frame": 6,
+              "angle_deg": 270,
+              "bbox": [
+                285,
+                220,
+                385,
+                320
+              ]
+            },
+            {
+              "frame": 7,
+              "angle_deg": 315,
+              "bbox": [
+                395,
+                220,
+                495,
+                320
+              ]
+            }
+          ]
+        },
+        "toggle_switch": {
+          "states": {
+            "OFF": {
+              "bbox": [
+                65,
+                430,
+                465,
+                600
+              ]
+            },
+            "ON": {
+              "bbox": [
+                535,
+                430,
+                935,
+                600
+              ]
+            }
+          }
+        },
+        "buttons": {
+          "states": {
+            "normal": {
+              "bbox": [
+                25,
+                690,
+                250,
+                815
+              ]
+            },
+            "hover": {
+              "bbox": [
+                265,
+                690,
+                490,
+                815
+              ]
+            },
+            "pressed": {
+              "bbox": [
+                505,
+                690,
+                730,
+                815
+              ]
+            },
+            "active": {
+              "bbox": [
+                745,
+                690,
+                970,
+                815
+              ]
+            }
+          }
+        }
+      }
+    },
+    "neon_stage_meters_sliders_sheet.png": {
+      "resolution": [
+        1024,
+        1024
+      ],
+      "elements": {
+        "vu_meters": {
+          "type": "vertical_led",
+          "levels_count": 8,
+          "bbox_area": [
+            30,
+            25,
+            970,
+            350
+          ],
+          "instances": [
+            {
+              "meter": 1,
+              "bbox": [
+                43,
+                34,
+                125,
+                320
+              ],
+              "segments": 8,
+              "active_segments": 1
+            },
+            {
+              "meter": 2,
+              "bbox": [
+                160,
+                34,
+                242,
+                320
+              ],
+              "segments": 8,
+              "active_segments": 2
+            },
+            {
+              "meter": 3,
+              "bbox": [
+                277,
+                34,
+                359,
+                320
+              ],
+              "segments": 8,
+              "active_segments": 3
+            },
+            {
+              "meter": 4,
+              "bbox": [
+                394,
+                34,
+                476,
+                320
+              ],
+              "segments": 8,
+              "active_segments": 4
+            },
+            {
+              "meter": 5,
+              "bbox": [
+                511,
+                34,
+                593,
+                320
+              ],
+              "segments": 8,
+              "active_segments": 5
+            },
+            {
+              "meter": 6,
+              "bbox": [
+                628,
+                34,
+                710,
+                320
+              ],
+              "segments": 8,
+              "active_segments": 6
+            },
+            {
+              "meter": 7,
+              "bbox": [
+                745,
+                34,
+                827,
+                320
+              ],
+              "segments": 8,
+              "active_segments": 7
+            },
+            {
+              "meter": 8,
+              "bbox": [
+                862,
+                34,
+                944,
+                320
+              ],
+              "segments": 8,
+              "active_segments": 8
+            }
+          ]
+        },
+        "sliders": {
+          "types": [
+            "long_slider",
+            "short_slider"
+          ],
+          "bbox_area": [
+            30,
+            380,
+            970,
+            760
+          ],
+          "instances": {
+            "long_slider": {
+              "bbox": [
+                60,
+                445,
+                880,
+                467
+              ],
+              "thumb_center": [
+                568,
+                456
+              ]
+            },
+            "short_slider": {
+              "bbox": [
+                60,
+                570,
+                450,
+                592
+              ],
+              "thumb_center": [
+                301,
+                581
+              ]
+            }
+          }
+        },
+        "status_leds": {
+          "round": {
+            "states": [
+              "off",
+              "cyan",
+              "blue",
+              "magenta"
+            ],
+            "row_y": [
+              810,
+              920
+            ],
+            "instances": {
+              "off": {
+                "bbox": [
+                  90,
+                  810,
+                  130,
+                  850
+                ]
+              },
+              "cyan": {
+                "bbox": [
+                  300,
+                  810,
+                  340,
+                  850
+                ]
+              },
+              "blue": {
+                "bbox": [
+                  510,
+                  810,
+                  550,
+                  850
+                ]
+              },
+              "magenta": {
+                "bbox": [
+                  720,
+                  810,
+                  760,
+                  850
+                ]
+              }
+            }
+          },
+          "square": {
+            "states": [
+              "off",
+              "cyan",
+              "blue",
+              "magenta"
+            ],
+            "row_y": [
+              810,
+              920
+            ],
+            "instances": {
+              "off": {
+                "bbox": [
+                  90,
+                  920,
+                  130,
+                  960
+                ]
+              },
+              "cyan": {
+                "bbox": [
+                  300,
+                  920,
+                  340,
+                  960
+                ]
+              },
+              "blue": {
+                "bbox": [
+                  510,
+                  920,
+                  550,
+                  960
+                ]
+              },
+              "magenta": {
+                "bbox": [
+                  720,
+                  920,
+                  760,
+                  960
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "neon_stage_frames_panels_sheet.png": {
+      "resolution": [
+        1024,
+        1024
+      ],
+      "elements": {
+        "9_slice_corners": {
+          "top_left": {
+            "bbox": [
+              30,
+              60,
+              122,
+              152
+            ]
+          },
+          "top_right": {
+            "bbox": [
+              160,
+              60,
+              252,
+              152
+            ]
+          },
+          "bottom_left": {
+            "bbox": [
+              290,
+              60,
+              382,
+              152
+            ]
+          },
+          "bottom_right": {
+            "bbox": [
+              420,
+              60,
+              512,
+              152
+            ]
+          }
+        },
+        "borders": {
+          "top_border": {
+            "bbox": [
+              30,
+              230,
+              470,
+              252
+            ]
+          },
+          "bottom_border": {
+            "bbox": [
+              30,
+              270,
+              470,
+              292
+            ]
+          },
+          "left_border": {
+            "bbox": [
+              510,
+              220,
+              532,
+              400
+            ]
+          },
+          "right_border": {
+            "bbox": [
+              570,
+              220,
+              592,
+              400
+            ]
+          }
+        },
+        "dividers": {
+          "horizontal_thin": {
+            "bbox": [
+              30,
+              470,
+              450,
+              474
+            ],
+            "stroke_px": 2
+          },
+          "horizontal_thick": {
+            "bbox": [
+              30,
+              510,
+              450,
+              518
+            ],
+            "stroke_px": 5
+          },
+          "vertical_thin": {
+            "bbox": [
+              500,
+              460,
+              504,
+              560
+            ],
+            "stroke_px": 2
+          },
+          "vertical_thick": {
+            "bbox": [
+              550,
+              460,
+              558,
+              560
+            ],
+            "stroke_px": 5
+          }
+        },
+        "header_bars": {
+          "standard_header": {
+            "bbox": [
+              30,
+              650,
+              480,
+              710
+            ]
+          },
+          "compact_header": {
+            "bbox": [
+              520,
+              650,
+              970,
+              700
+            ]
+          }
+        },
+        "display_bg": {
+          "bbox": [
+            30,
+            785,
+            970,
+            990
+          ],
+          "grid": true,
+          "tint": "dark_translucent_cyan"
+        }
+      }
+    },
+    "neon_stage_icons_sheet.png": {
+      "resolution": [
+        1024,
+        1024
+      ],
+      "elements": {
+        "fx_icons": [
+          "wave",
+          "eq",
+          "distortion",
+          "chorus",
+          "delay",
+          "reverb",
+          "cabinet"
+        ],
+        "nav_icons": [
+          "crown",
+          "power",
+          "settings",
+          "info",
+          "folder",
+          "search",
+          "guitar",
+          "antenna",
+          "palette",
+          "play"
+        ],
+        "icons": {
+          "wave": {
+            "category": "fx",
+            "bbox": [
+              32,
+              75,
+              176,
+              219
+            ]
+          },
+          "eq": {
+            "category": "fx",
+            "bbox": [
+              196,
+              75,
+              340,
+              219
+            ]
+          },
+          "distortion": {
+            "category": "fx",
+            "bbox": [
+              360,
+              75,
+              504,
+              219
+            ]
+          },
+          "chorus": {
+            "category": "fx",
+            "bbox": [
+              524,
+              75,
+              668,
+              219
+            ]
+          },
+          "delay": {
+            "category": "fx",
+            "bbox": [
+              688,
+              75,
+              832,
+              219
+            ]
+          },
+          "reverb": {
+            "category": "fx",
+            "bbox": [
+              852,
+              75,
+              996,
+              219
+            ]
+          },
+          "cabinet": {
+            "category": "fx",
+            "bbox": [
+              32,
+              360,
+              176,
+              504
+            ]
+          },
+          "crown": {
+            "category": "nav",
+            "bbox": [
+              196,
+              360,
+              340,
+              504
+            ]
+          },
+          "power": {
+            "category": "nav",
+            "bbox": [
+              360,
+              360,
+              504,
+              504
+            ]
+          },
+          "settings": {
+            "category": "nav",
+            "bbox": [
+              524,
+              360,
+              668,
+              504
+            ]
+          },
+          "info": {
+            "category": "nav",
+            "bbox": [
+              688,
+              360,
+              832,
+              504
+            ]
+          },
+          "folder": {
+            "category": "nav",
+            "bbox": [
+              852,
+              360,
+              996,
+              504
+            ]
+          },
+          "search": {
+            "category": "nav",
+            "bbox": [
+              32,
+              645,
+              176,
+              789
+            ]
+          },
+          "guitar": {
+            "category": "nav",
+            "bbox": [
+              196,
+              645,
+              340,
+              789
+            ]
+          },
+          "antenna": {
+            "category": "nav",
+            "bbox": [
+              360,
+              645,
+              504,
+              789
+            ]
+          },
+          "palette": {
+            "category": "nav",
+            "bbox": [
+              524,
+              645,
+              668,
+              789
+            ]
+          },
+          "play": {
+            "category": "nav",
+            "bbox": [
+              688,
+              645,
+              832,
+              789
+            ]
+          }
+        },
+        "cell_size": [
+          144,
+          144
+        ]
+      }
+    }
+  }
+}
