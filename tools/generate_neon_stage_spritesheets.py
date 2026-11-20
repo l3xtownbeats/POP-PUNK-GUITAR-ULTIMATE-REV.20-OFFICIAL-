@@ -163,14 +163,15 @@ def slider(name,x,y,w):
     d=ImageDraw.Draw(im)
     d.text((x,y-24),name.upper(),font=font(9,True),fill=rgba(P["dim"]))
     d.rounded_rectangle((x,y,x+w,y+22),radius=9,fill=rgba("#07101B"),outline=rgba("#405A70"),width=2)
-    d.rounded_rectangle((x+5,y+7,x+int(w*.62),y+15),radius=4,fill=rgba(P["glow_blue"]))
-    cx=x+int(w*.62)
-    im=add_glow(im,lambda dd,c:dd.ellipse((cx-17,y-8,cx+17,y+30),outline=c,width=4),P["glow_cyan"],6)
-    d=ImageDraw.Draw(im)
-    d.ellipse((cx-12,y-7,cx+12,y+29),fill=rgba("#19334A"),outline=rgba(P["glow_cyan"]),width=3)
-    slider_boxes[name]={"bbox":[x,y,x+w,y+22],"thumb_center":[cx,y+11]}
+    slider_boxes[name]={"track_bbox":[x,y,x+w,y+22]}
 slider("long_slider",60,445,820)
 slider("short_slider",60,570,390)
+# Reusable cyan thumb sprite; JUCE positions it dynamically at the live value.
+thumb_box=[910,640,942,672]
+im=add_glow(im,lambda dd,c:dd.ellipse(thumb_box,outline=c,width=4),P["glow_cyan"],6)
+d=ImageDraw.Draw(im)
+d.ellipse(thumb_box,fill=rgba("#19334A"),outline=rgba(P["glow_cyan"]),width=3)
+slider_boxes["thumb"]={"bbox":thumb_box}
 label(ImageDraw.Draw(im),(30,755,970,780),"STATUS LEDS / ROUND + SQUARE",P["text"],12)
 led_states=["off","cyan","blue","magenta"]
 led_colors={"off":"#344354","cyan":P["glow_cyan"],"blue":P["glow_blue"],"magenta":P["accent_magenta"]}
