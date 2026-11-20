@@ -157,6 +157,7 @@ def main() -> int:
         raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly four sheets")
     controls = sheets["neon_stage_controls_spritesheet.png"]["elements"]
     if controls.get("knobs", {}).get("frames") != 8 \
+            or controls.get("knobs", {}).get("angle_step_deg") != 45 \
             or controls.get("knobs", {}).get("size") != [100, 100] \
             or controls.get("knobs", {}).get("row_y") != [120, 220]:
         raise SystemExit("FAIL: NEON STAGE rotary frame geometry mismatch")
