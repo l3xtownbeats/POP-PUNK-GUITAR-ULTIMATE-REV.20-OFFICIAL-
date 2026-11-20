@@ -176,23 +176,25 @@ label(ImageDraw.Draw(im),(30,755,970,780),"STATUS LEDS / ROUND + SQUARE",P["text
 led_states=["off","cyan","blue","magenta"]
 led_colors={"off":"#344354","cyan":P["glow_cyan"],"blue":P["glow_blue"],"magenta":P["accent_magenta"]}
 led_boxes={"round":{},"square":{}}
-for shape,y in (("round",810),("square",920)):
-    for i,state in enumerate(led_states):
-        x=90+i*210
-        col=led_colors[state]
-        if state!="off":
+for shape,x_start in (("round",50),("square",570)):
+    for y in (810,920):
+        row_key=str(y)
+        led_boxes[shape][row_key]={}
+        for i,state in enumerate(led_states):
+            x=x_start+i*110
+            col=led_colors[state]
+            if state!="off":
+                if shape=="round":
+                    im=add_glow(im,lambda dd,c:dd.ellipse((x-10,y-10,x+50,y+50),outline=c,width=4),col,6)
+                else:
+                    im=add_glow(im,lambda dd,c:dd.rounded_rectangle((x-10,y-10,x+50,y+50),radius=8,outline=c,width=4),col,6)
+            d=ImageDraw.Draw(im)
             if shape=="round":
-                im=add_glow(im,lambda dd,c:dd.ellipse((x-10,y-10,x+50,y+50),outline=c,width=4),col,6)
+                d.ellipse((x,y,x+40,y+40),fill=rgba(col),outline=rgba("#D7F7FF"),width=2)
             else:
-                im=add_glow(im,lambda dd,c:dd.rounded_rectangle((x-10,y-10,x+50,y+50),radius=8,outline=c,width=4),col,6)
-        d=ImageDraw.Draw(im)
-        if shape=="round":
-            d.ellipse((x,y,x+40,y+40),fill=rgba(col),outline=rgba("#D7F7FF"),width=2)
-            led_boxes[shape][state]={"bbox":[x,y,x+40,y+40]}
-        else:
-            d.rounded_rectangle((x,y,x+40,y+40),radius=5,fill=rgba(col),outline=rgba("#D7F7FF"),width=2)
-            led_boxes[shape][state]={"bbox":[x,y,x+40,y+40]}
-        d.text((x-5,y+46),state.upper(),font=font(8,True),fill=rgba(P["dim"]))
+                d.rounded_rectangle((x,y,x+40,y+40),radius=5,fill=rgba(col),outline=rgba("#D7F7FF"),width=2)
+            led_boxes[shape][row_key][state]={"bbox":[x,y,x+40,y+40]}
+            d.text((x-5,y+46),state.upper(),font=font(8,True),fill=rgba(P["dim"]))
 save(im,"neon_stage_meters_sliders_sheet.png")
 manifest["sheets"]["neon_stage_meters_sliders_sheet.png"]={
  "resolution":[1024,1024],
