@@ -1075,7 +1075,8 @@ public:
         effectSelector.setBounds(top.removeFromLeft(230).reduced(2, 4));
         powerButton.setBounds(top.removeFromLeft(110).reduced(2, 4));
         graphCaption.setBounds(top);
-        const int graphHeight = getHeight() >= 600 ? 140 : (getHeight() >= 500 ? 90 : 0);
+        const int graphHeight = getHeight() >= 600 ? 140
+            : (getHeight() >= 390 ? 90 : (getHeight() >= 300 ? 54 : 0));
         graphCaption.setVisible(graphHeight > 0);
         if (graphHeight > 0)
         {
@@ -1966,7 +1967,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
         };
         addAndMakeVisible(b);
     }
-    ampTitle.setText("AMP & TONE", juce::dontSendNotification);
+    ampTitle.setText("AMP / PERFORMANCE", juce::dontSendNotification);
     fxTitle.setText("FX CHAIN", juce::dontSendNotification);
     playbackTitle.setText("PLAYBACK", juce::dontSendNotification);
     for (auto* l : { &ampTitle, &fxTitle, &playbackTitle }) {
@@ -2199,7 +2200,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
 
     // This legacy heading is retained for compatibility but is represented by
     // the horizontal seven-switch bar above.
-    fxTitle.setVisible(true);
+    fxTitle.setVisible(false); // The bar title is painted by the shared panel chrome.
     playbackTitle.setVisible(false);
 }
 
