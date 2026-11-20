@@ -31,6 +31,7 @@ The complete approved set is exactly 16 premium graphical shells: **SKIN-1 / NEO
 - `docs/REV20_DECISION_TIMELINE_RU.md` — chronological decision/source history.
 - `docs/REV20_ENGINEERING_WORKSTREAM_REGISTER_RU.md` — M1–M13 source PR audit and selective integration order.
 - `docs/REV20_FUNCTIONAL_GAP_AUDIT_RU.md` — actual code-level UI, preset, Engine and Import Sounds gaps.
+- `docs/REV20_SOUND_HUNTER_REAL_GUITAR_BASELINE_RU.md` — real-recorded guitar acquisition, licensing, SHA-256 and preset-binding baseline.
 - `docs/REV20_FL20_ACCEPTANCE_CHECKLIST_RU.md` — manual Windows 10 / FL Studio 20 host acceptance.
 - `docs/REV20_LIBRARY_TIERS_RU.md` and `assets/library/library_tiers.json` — BASIC/EXPANDED specification.
 - `docs/REV20_LIBRARY_MANAGER_APPROVED_REQUIREMENTS.md` — complete approved Library Manager workflow and acceptance requirements.

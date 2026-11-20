@@ -155,3 +155,11 @@ The Windows VST3 workflow now runs official pluginval Windows 1.0.4 at strictnes
 - Run 44722128778 failed with GitHub HTTP 403 rate limit exceeded at the first unauthenticated repo metadata request. No audio payload or sample package was created.
 - The importer now adds the Actions job's read-only `GITHUB_TOKEN` to GitHub API requests and Git LFS batch requests. The Ubuntu workflow passes `github.token`; tests cover both token-enabled and public/no-token header cases.
 - Importer, policy and artifact splitter test suites passed on the first run; re-run the acquisition workflow on the updated main SHA before claiming any source acquisition.
+
+
+## Sound Hunter / real-recorded guitar acquisition pipeline
+- Ported source-main acquisition and validation tooling into REV.20. Pipeline present; audio payload not claimed acquired.
+- Manual workflow rev20-sound-hunter-real-guitar.yml defaults to non-acquiring mode; actual acquisition requires explicit workflow dispatch input.
+- Copied planning baseline contains 300 candidate preset/sample bindings (150+150), READY=0. This does not count toward the 500 playable presets.
+- No completed source Sound Hunter run was found in the inspected source Actions history. No source-run PASS is inherited.
+- CTest is extended from 16 to 19 with Sound Hunter importer, soundbank policy and artifact-splitter contracts; exact target CI after this port is required.

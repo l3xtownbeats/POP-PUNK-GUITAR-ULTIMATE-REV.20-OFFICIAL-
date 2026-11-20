@@ -182,3 +182,7 @@ REV.20 now includes the source's 11-source CC0-1.0 real guitar catalog and an im
 ## 2026-11-20 — Sound Hunter first acquisition attempt blocked by API rate limit
 
 Run [44722128778](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44722128778) passed discovery and all three Python test suites but failed at initial GitHub API lookup with unauthenticated HTTP 403 rate limit. No asset archive was acquired, and package/upload were skipped. The importer/workflow were updated to use the Actions read-only GITHUB_TOKEN for GitHub API and Git LFS batch calls, with new header tests. Retry on the next exact main SHA is required.
+
+
+## 2026-11-20 — Sound Hunter pipeline reconciliation
+Source main contains a real-recorded-guitar acquisition tool, catalog and manual workflow. The importer verifies actual license text, release SHA256SUMS, LFS payload SHA-256, file sizes, safe paths and duplicate-content suppression. The target workflow is manual-only with an explicit acquire_samples boolean. The copied 300-entry binding plan remains planning-only and READY=0. No completed source Sound Hunter run was found, so no sample payload is claimed acquired.

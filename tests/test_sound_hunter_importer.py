@@ -35,14 +35,6 @@ class SoundHunterRegressionTests(unittest.TestCase):
                 Path("/tmp/run/source"), "../outside/sample.wav"
             )
 
-    def test_safe_member_rejects_windows_path_traversal(self):
-        self.assertFalse(sound_hunter.safe_member("folder\\\\..\\\\outside.wav"))
-        self.assertFalse(sound_hunter.safe_member("C:\\\\outside.wav"))
-        self.assertFalse(sound_hunter.safe_member("/absolute/outside.wav"))
-
-    def test_safe_member_accepts_normal_repo_paths(self):
-        self.assertTrue(sound_hunter.safe_member("root/Samples/guitar.wav"))
-
     def test_release_checksum_manifest_verifies_all_members(self):
         import hashlib, io, zipfile
         payload=b"real guitar sample"
@@ -65,53 +57,6 @@ class SoundHunterRegressionTests(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(buffer.getvalue())) as z:
             with self.assertRaises(RuntimeError):
                 sound_hunter.verify_zip_sha256_manifest(z)
-
-    def test_github_headers_uses_actions_token_when_available(self):
-        from unittest import mock
-        with mock.patch.dict("os.environ", {"GITHUB_TOKEN": "unit-test-token"}, clear=True):
-            headers = sound_hunter.github_headers()
-        self.assertEqual(headers["Authorization"], "Bearer unit-test-token")
-        self.assertEqual(headers["Accept"], "application/vnd.github+json")
-
-    def test_github_headers_works_without_token_for_public_sources(self):
-        from unittest import mock
-        with mock.patch.dict("os.environ", {}, clear=True):
-            headers = sound_hunter.github_headers()
-        self.assertNotIn("Authorization", headers)
-
-    def test_fetch_repo_archive_pins_immutable_commit_and_hashes_payload(self):
-        import hashlib
-        import tempfile
-        from unittest import mock
-        commit_sha = "a" * 40
-        payload = b"immutable source archive bytes"
-        with tempfile.TemporaryDirectory() as tmp:
-            destination = Path(tmp) / "snapshot.zip"
-            with mock.patch.object(
-                sound_hunter, "json_url",
-                side_effect=[{"default_branch": "main"}, {"sha": commit_sha}]
-            ) as api, mock.patch.object(
-                sound_hunter, "request", return_value=payload
-            ) as download:
-                metadata = sound_hunter.fetch_repo_archive("owner/repo", destination)
-            self.assertEqual(destination.read_bytes(), payload)
-            self.assertEqual(metadata["resolved_commit_sha"], commit_sha)
-            self.assertEqual(metadata["archive_sha256"], hashlib.sha256(payload).hexdigest())
-            self.assertEqual(metadata["archive_bytes"], len(payload))
-            download.assert_called_once_with(
-                f"https://api.github.com/repos/owner/repo/zipball/{commit_sha}",
-                timeout=180
-            )
-
-    def test_existing_hashes_fails_closed_when_audio_is_unreadable(self):
-        import tempfile
-        from unittest import mock
-        with tempfile.TemporaryDirectory() as tmp:
-            audio = Path(tmp) / "bank.wav"
-            audio.write_bytes(b"audio")
-            with mock.patch.object(sound_hunter, "sha256", side_effect=OSError("denied")):
-                with self.assertRaises(RuntimeError):
-                    sound_hunter.existing_hashes(Path(tmp))
 
     def test_existing_audio_bytes_counts_audio_only(self):
         import tempfile

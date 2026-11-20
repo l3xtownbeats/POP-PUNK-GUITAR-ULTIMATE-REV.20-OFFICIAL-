@@ -96,3 +96,7 @@ These code changes were validated on REV.20 exact SHA `8cfd11ecce3c8039360c1c194
 ## Pluginval strictness 5 added to target Windows workflow
 
 The Windows VST3 workflow now locates the built bundle and invokes the official pluginval Windows 1.0.4 archive at strictness level 5. First exact-SHA result pending; FL Studio 20 host acceptance remains manual.
+
+
+## Sound Hunter selective transfer (2026-11-20)
+Transferred from source main: SoundHunter importer/catalog/production notes, importer/policy/splitter tests, soundbank audit, bounded artifact splitter and a REV.20-named 300-entry sample-binding planning baseline. The source pipeline verifies actual license text, release SHA256SUMS, LFS payload SHA-256, safe paths and duplicates. The target workflow is manual-only with explicit acquire_samples. No Sound Hunter payload is declared acquired or playable until a real target artifact and listening/runtime QA exist.

@@ -143,3 +143,10 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - The three Sound Hunter tests completed successfully before acquisition. No package artifact was generated and no new sample payload was accepted into the library.
 - Updated importer request helper to attach the job-scoped `GITHUB_TOKEN` (or `GH_TOKEN`) as Bearer authorization to API requests; the workflow now explicitly exposes `github.token` with read-only contents permission. Git LFS batch requests use the same auth header.
 - Added tests for authenticated and unauthenticated public-request header construction. A new acquisition run is required. Do not mark the library acquisition pass until it finishes and registry/payload are inspected.
+
+
+## 2026-11-20 — SOUND HUNTER / REAL-RECORDED GUITAR PIPELINE PORTED
+- Ported the current source-main real-guitar acquisition pipeline into REV.20: SoundHunter, source catalog, importer policy tests, soundbank audit, bounded artifact splitter and 300-entry preset/sample candidate binding plan.
+- Added manual workflow .github/workflows/rev20-sound-hunter-real-guitar.yml. It never auto-downloads samples; acquire_samples=false only runs discovery/tests, while true explicitly performs acquisition and SHA/license verification.
+- Source review found no completed Sound Hunter workflow run, so no sample payload or playable preset count is claimed. Current copied planning baseline has READY=0 entries.
+- Product policy reconciliation: source "unlimited" means no hard maximum; REV.20 BASIC is 15 GB minimum/included and EXPANDED is optional +15 GB initial.

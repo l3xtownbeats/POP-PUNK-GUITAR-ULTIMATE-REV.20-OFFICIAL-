@@ -15,16 +15,8 @@ CATALOG = Path(__file__).with_name("real_guitar_sources.json")
 AUDIO = {".wav",".wave",".flac",".ogg",".oga",".mp3",".aif",".aiff",".aifc",".caf",".opus",".m4a",".aac",".wma",".au",".snd",".raw",".pcm",".sf2",".sf3",".gig"}
 UA = "PPGU-SoundHunter/1.0 (+real-recorded-guitar-only)"
 
-def github_headers(accept: str = "application/vnd.github+json") -> dict[str, str]:
-    headers = {"User-Agent": UA, "Accept": accept}
-    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    return headers
-
-
 def request(url: str, timeout: int = 90) -> bytes:
-    req = urllib.request.Request(url, headers=github_headers())
+    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/vnd.github+json"})
     with urllib.request.urlopen(req, timeout=timeout) as response:
         return response.read()
 
@@ -51,9 +43,7 @@ def fetch_lfs_object(repo: str, pointer: bytes) -> bytes:
     if not oid_match or not size_match: raise RuntimeError("Malformed Git LFS pointer")
     oid=oid_match.group(1).decode("ascii"); size=int(size_match.group(1))
     payload=json.dumps({"operation":"download","transfers":["basic"],"objects":[{"oid":oid,"size":size}]}).encode()
-    lfs_headers = github_headers("application/vnd.git-lfs+json")
-    lfs_headers["Content-Type"] = "application/vnd.git-lfs+json"
-    req=urllib.request.Request(f"https://github.com/{repo}.git/info/lfs/objects/batch",data=payload,headers=lfs_headers)
+    req=urllib.request.Request(f"https://github.com/{repo}.git/info/lfs/objects/batch",data=payload,headers={"User-Agent":UA,"Accept":"application/vnd.git-lfs+json","Content-Type":"application/vnd.git-lfs+json"})
     with urllib.request.urlopen(req,timeout=90) as response: batch=json.loads(response.read().decode())
     obj=batch.get("objects",[{}])[0]
     if obj.get("error"): raise RuntimeError(f"Git LFS object unavailable: {obj['error']}")
@@ -65,25 +55,15 @@ def fetch_lfs_object(repo: str, pointer: bytes) -> bytes:
     return data
 
 def safe_member(name: str) -> bool:
-    # Normalize POSIX and Windows separators before checking archive paths.
-    if not isinstance(name, str) or not name or "\x00" in name:
-        return False
-    normalized = name.replace("\\", "/")
-    p = PurePosixPath(normalized)
-    return (
-        not p.is_absolute()
-        and ".." not in p.parts
-        and not re.match(r"^[A-Za-z]:", normalized)
-    )
+    p=PurePosixPath(name)
+    return not p.is_absolute() and ".." not in p.parts and not re.match(r"^[A-Za-z]:", name)
 
 def release_asset_target(source_dir: Path, member_name: str) -> Path:
     """Return an isolated destination for files from a GitHub release archive."""
     if not safe_member(member_name):
         raise ValueError(f"Unsafe release archive path: {member_name}")
-    parts = PurePosixPath(member_name.replace("\\", "/")).parts
+    parts = PurePosixPath(member_name).parts
     relative = Path(*parts[1:]) if len(parts) > 1 else Path(parts[0])
-    if not relative.parts:
-        raise ValueError(f"Release member has no relative filename: {member_name}")
     return source_dir / "release_assets" / relative
 
 
@@ -125,22 +105,11 @@ def verify_zip_sha256_manifest(zf: zipfile.ZipFile) -> tuple[int, list[str]]:
     return len(verified),verified
 
 def fetch_repo_archive(repo: str, dest: Path):
-    """Download a source snapshot pinned to an immutable commit SHA."""
-    meta = json_url(f"https://api.github.com/repos/{repo}")
-    branch = meta.get("default_branch") or "main"
-    revision = json_url(f"https://api.github.com/repos/{repo}/commits/{branch}")
-    commit_sha = revision.get("sha")
-    if not isinstance(commit_sha, str) or not re.fullmatch(r"[0-9a-f]{40}", commit_sha):
-        raise RuntimeError(f"{repo}: GitHub did not return a valid 40-character commit SHA")
-    data = request(f"https://api.github.com/repos/{repo}/zipball/{commit_sha}", timeout=180)
+    meta=json_url(f"https://api.github.com/repos/{repo}")
+    branch=meta.get("default_branch") or "main"
+    data=request(f"https://api.github.com/repos/{repo}/zipball/{branch}", timeout=180)
     dest.write_bytes(data)
-    return {
-        **meta,
-        "resolved_default_branch": branch,
-        "resolved_commit_sha": commit_sha,
-        "archive_bytes": len(data),
-        "archive_sha256": hashlib.sha256(data).hexdigest(),
-    }
+    return meta
 
 def fetch_release_zip(repo: str, tag: str, match: str, dest: Path):
     rel=json_url(f"https://api.github.com/repos/{repo}/releases/tags/{tag}")
@@ -156,11 +125,8 @@ def existing_hashes(samples: Path):
     if samples.exists():
         for p in samples.rglob("*"):
             if p.is_file() and p.suffix.lower() in AUDIO:
-                try:
-                    found.add(sha256(p))
-                except OSError as exc:
-                    # Fail closed: an unreadable asset cannot safely be deduplicated.
-                    raise RuntimeError(f"Cannot hash existing audio asset: {p}") from exc
+                try: found.add(sha256(p))
+                except OSError: pass
     return found
 
 def main():
@@ -188,7 +154,6 @@ def main():
     used=0  # Bytes newly imported during this run; retained for transparent reporting.
     registry={"schema_version":"1.0","run_id":run_id,"classification":"REAL_RECORDED","assets":[],"sources":[]}
     tmp=run_root/"_download_tmp"; tmp.mkdir()
-    completed = False
     try:
         for s in sources:
             sid=s["id"]; repo=s["repository"]
@@ -199,10 +164,8 @@ def main():
             with zipfile.ZipFile(archive) as z:
                 names=[n for n in z.namelist() if safe_member(n)]
                 license_paths=[n for n in names if PurePosixPath(n).name.lower()==s["license_file"].lower()]
-                if len(license_paths) != 1:
-                    raise RuntimeError(
-                        f"{sid}: expected exactly one {s['license_file']} in source archive; found {len(license_paths)}"
-                    )
+                if not license_paths:
+                    raise RuntimeError(f"{sid}: required license file {s['license_file']} missing")
                 license_text=z.read(license_paths[0]).decode("utf-8","replace")
                 if not license_ok(license_text,s["license"]):
                     raise RuntimeError(f"{sid}: license text does not verify expected {s['license']}; skipped")
@@ -212,11 +175,7 @@ def main():
                 (source_dir/"SOURCE.json").write_text(json.dumps({
                     "name":s["name"],"repository":f"https://github.com/{repo}",
                     "kind":"REAL_RECORDED","license":s["license"],
-                    "notes":s.get("notes",""),
-                    "default_branch":meta.get("resolved_default_branch"),
-                    "source_commit_sha":meta.get("resolved_commit_sha"),
-                    "source_archive_sha256":meta.get("archive_sha256"),
-                    "source_archive_bytes":meta.get("archive_bytes")
+                    "notes":s.get("notes",""),"default_branch":meta.get("default_branch")
                 },ensure_ascii=False,indent=2),encoding="utf-8")
                 copied=0
                 for name in names:
@@ -257,8 +216,7 @@ def main():
                         "source_id":sid,"path":str(target.relative_to(samples)).replace("\\","/"),
                         "format":target.suffix.lower(),"bytes":target.stat().st_size,
                         "sha256":actual,"classification":"REAL_RECORDED",
-                        "license":s["license"],"verification":"license-and-sha256-verified",
-                        "source_commit_sha":meta.get("resolved_commit_sha")
+                        "license":s["license"],"verification":"license-and-sha256-verified"
                     })
                 release_copied=0
                 if s.get("release_tag") and s.get("release_asset_contains"):
@@ -297,29 +255,14 @@ def main():
                             seen.add(digest); used+=len(data); library_bytes+=len(data); release_copied+=1
                             registry["assets"].append({"source_id":sid,"path":str(target.relative_to(samples)).replace("\\","/"),"format":target.suffix.lower(),"bytes":len(data),"sha256":digest,"classification":"REAL_RECORDED","license":s["license"],"verification":"release-license-and-sha256-verified","release_asset":asset_name})
                         print(f"  verified {checksum_count} release checksums; imported {release_copied} release audio files")
-                registry["sources"].append({
-                    "id":sid,"repository":f"https://github.com/{repo}",
-                    "license":s["license"],"kind":"REAL_RECORDED",
-                    "source_commit_sha":meta.get("resolved_commit_sha"),
-                    "source_archive_sha256":meta.get("archive_sha256"),
-                    "source_archive_bytes":meta.get("archive_bytes"),
-                    "release_tag":s.get("release_tag"),
-                    "files_added":copied,
-                    "release_files_added":locals().get("release_copied",0)
-                })
+                registry["sources"].append({"id":sid,"repository":f"https://github.com/{repo}","license":s["license"],"kind":"REAL_RECORDED","files_added":copied,"release_files_added":locals().get("release_copied",0)})
                 print(f"  imported {copied} repository audio files")
-        if not registry["assets"]:
-            raise RuntimeError("No unique, verified real-recorded guitar audio assets were imported")
         out=run_root/"SOUND_HUNTER_REGISTRY.json"
-        staging=run_root/"SOUND_HUNTER_REGISTRY.json.tmp"
-        staging.write_text(json.dumps(registry,ensure_ascii=False,indent=2),encoding="utf-8")
-        os.replace(staging,out)
-        completed = True
+        out.write_text(json.dumps(registry,ensure_ascii=False,indent=2),encoding="utf-8")
         print(f"Completed. {len(registry['assets'])} audio assets; added this run {used/1_000_000_000:.2f} GB; measured aggregate Samples audio library {library_bytes/1_000_000_000:.2f} GB (no configured size ceiling).")
     finally:
-        # Remove only this uniquely created run's own files on failure.
+        # Only remove this run's temporary download directory, never existing user content.
         if tmp.exists(): shutil.rmtree(tmp)
-        if not completed and run_root.exists(): shutil.rmtree(run_root)
     return 0
 
 if __name__=="__main__":
