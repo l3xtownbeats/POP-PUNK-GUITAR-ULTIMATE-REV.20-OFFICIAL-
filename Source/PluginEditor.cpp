@@ -1384,6 +1384,20 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         g.drawImageWithin(*stateImage, x + (w - diameter) / 2,
                           y + (h - diameter) / 2, diameter, diameter,
                           juce::RectanglePlacement::centred);
+        // Keep the parameter position continuously visible over the authored
+        // housing artwork; the state PNG controls finish, not parameter value.
+        const auto angle = start + pos * (end - start) - juce::MathConstants<float>::halfPi;
+        const auto cx = static_cast<float>(x + w / 2);
+        const auto cy = static_cast<float>(y + h / 2);
+        const auto radius = static_cast<float>(diameter) * 0.39f;
+        juce::Path indicator;
+        indicator.startNewSubPath(cx - std::cos(angle) * radius * 0.38f,
+                                  cy - std::sin(angle) * radius * 0.38f);
+        indicator.lineTo(cx + std::cos(angle) * radius,
+                         cy + std::sin(angle) * radius);
+        g.setColour(palette.token("accent").withAlpha(slider.isEnabled() ? 0.98f : 0.35f));
+        g.strokePath(indicator, juce::PathStrokeType(2.2f, juce::PathStrokeType::curved,
+                                                     juce::PathStrokeType::rounded));
         return;
     }
     if (palette.controlsSpriteSheet.isValid())
