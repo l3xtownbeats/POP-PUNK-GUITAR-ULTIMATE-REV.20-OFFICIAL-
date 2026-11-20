@@ -1436,13 +1436,22 @@ public:
         title.setFont(makeThemeFont(palette, 20.0f, false, true));
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
         addAndMakeVisible(title);
-        stateLabel.setText("SETUP ONLY — MIDI CHORD GENERATION / CUSTOM MODE / PREVIEW ENGINE NOT CONNECTED", juce::dontSendNotification);
-        stateLabel.setColour(juce::Label::textColourId, palette.token("warning"));
+        stateLabel.setText("PATTERN MODE ONLY: ONE HELD NOTE EXPANDS TO A SCALE-BASED TRIAD. MELODY MODE REMAINS SINGLE-NOTE.",
+                            juce::dontSendNotification);
+        stateLabel.setColour(juce::Label::textColourId, palette.token("success"));
         addAndMakeVisible(stateLabel);
-        offButton.setButtonText("AUTOCHORDS OFF");
-        offButton.setEnabled(false);
-        offButton.setTooltip("The AutoChords MIDI-generation engine is not implemented yet.");
+        offButton.setButtonText("AUTOCHORDS  /  ON-OFF");
+        offButton.setClickingTogglesState(true);
+        offButton.setEnabled(true);
+        offButton.setTooltip("Toggle single-note to diatonic-triad generation in PATTERN mode. MELODY mode is unchanged.");
+        offButton.setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
+        offButton.setColour(juce::TextButton::textColourOnId, palette.token("window_bg"));
+        if (auto* parameter = apvts.getRawParameterValue("singleMidiNoteAsChordRoot"))
+            offButton.setToggleState(parameter->load(std::memory_order_relaxed) > 0.5f,
+                                     juce::dontSendNotification);
         addAndMakeVisible(offButton);
+        autoChordAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
+            apvts, "singleMidiNoteAsChordRoot", offButton);
 
         keyBox.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }, 1);
         modeBox.addItemList({ "Chromatic", "Major", "Minor" }, 1);
@@ -1477,6 +1486,8 @@ public:
             label->setColour(juce::Label::textColourId, palette.token("text_secondary"));
         offButton.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
         offButton.setColour(juce::TextButton::textColourOffId, palette.token("text_primary"));
+        offButton.setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
+        offButton.setColour(juce::TextButton::textColourOnId, palette.token("window_bg"));
         for (auto* box : { &keyBox, &modeBox, &patternBox })
         {
             box->setColour(juce::ComboBox::backgroundColourId, palette.token("control_bg"));
@@ -1523,6 +1534,7 @@ private:
     juce::TextButton offButton;
     juce::ComboBox keyBox, modeBox, patternBox;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> keyAttachment, modeAttachment, patternAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> autoChordAttachment;
 };
 }
 
@@ -1903,9 +1915,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     autoChordsButton.onClick = [this] { openAutoChordsPanel(); };
     addAndMakeVisible(autoChordsButton);
 
-    // Honest REV.18 entry points: no discovery, curator or About backend exists yet.
-    // Keep them visible and theme-aware, but disabled rather than simulating functionality.
-    for (auto* unavailable : { &autoSoundHunterButton, &curatorButton, &aboutButton })
+    // Local discovery and curation remain gated until their safe backends are ready.
+    for (auto* unavailable : { &autoSoundHunterButton, &curatorButton })
     {
         unavailable->setEnabled(false);
         unavailable->setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("lowlight"));
@@ -1914,7 +1925,23 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     }
     autoSoundHunterButton.setTooltip("AUTO SOUND HUNTER is not implemented yet. No search or auto-import action is available.");
     curatorButton.setTooltip("CURATOR is not implemented yet. No asset is marked approved.");
-    aboutButton.setTooltip("ABOUT is intentionally disabled until its approved production content is implemented.");
+
+    aboutButton.setEnabled(true);
+    aboutButton.setTooltip("Plugin version, format and runtime information.");
+    aboutButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
+    aboutButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
+    aboutButton.onClick = [this]
+    {
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::MessageBoxIconType::NoIcon,
+            "ABOUT  /  POP PUNK GUITAR ULTIMATE",
+            juce::String(JucePlugin_Name) + "\nVersion 4.0.0"
+            + "\nVST3 Instrument  /  Windows x64"
+            + "\n\nNEON STAGE interface, MIDI guitar performance, pattern playback and built-in effects."
+            + "\n\nAudio sample rate and buffer size are controlled by the host DAW."
+            + "\n\nSample libraries remain user-managed; use only content whose licence permits your use.");
+    };
+    addAndMakeVisible(aboutButton);
     statusLabel.setText("NO LIBRARY LOADED  /  LOAD A LICENSED SFZ INSTRUMENT", juce::dontSendNotification);
     const auto savedSfzPath = processor.getCurrentSfzFilePath();
     if (savedSfzPath.isNotEmpty())
@@ -2523,7 +2550,8 @@ void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette()
  for(auto* b:{&presetBox,&categoryBox,&modeBox,&startModeBox}){b->setColour(juce::ComboBox::backgroundColourId,p.token("control_bg"));b->setColour(juce::ComboBox::textColourId,p.token("text_primary"));b->setColour(juce::ComboBox::outlineColourId,p.token("control_border"));b->setColour(juce::ComboBox::arrowColourId,p.token("accent"));}
  presetSearch.setColour(juce::TextEditor::backgroundColourId,p.token("control_bg"));presetSearch.setColour(juce::TextEditor::textColourId,p.token("text_primary"));presetSearch.setColour(juce::TextEditor::outlineColourId,p.token("control_border"));presetSearch.setColour(juce::TextEditor::focusedOutlineColourId,p.token("highlight"));presetSearch.setColour(juce::TextEditor::highlightColourId,p.token("accent").withAlpha(.3f));
  loadButton.setColour(juce::TextButton::buttonColourId,p.token("accent"));loadButton.setColour(juce::TextButton::textColourOffId,p.token("window_bg"));settingsButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));settingsButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));skinButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setTooltip("Active skin: "+p.name+"  /  Ctrl+K");
- for (auto* unavailable : { &autoSoundHunterButton, &curatorButton, &aboutButton }) { unavailable->setColour(juce::TextButton::buttonColourId,p.token("lowlight")); unavailable->setColour(juce::TextButton::textColourOffId,p.token("text_disabled")); unavailable->setEnabled(false); }
+ for (auto* unavailable : { &autoSoundHunterButton, &curatorButton }) { unavailable->setColour(juce::TextButton::buttonColourId,p.token("lowlight")); unavailable->setColour(juce::TextButton::textColourOffId,p.token("text_disabled")); unavailable->setEnabled(false); }
+ aboutButton.setEnabled(true); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));
  for(auto* b:{&melodyTab,&patternTab}){b->setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b->setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b->setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b->setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
  for(auto& s:knobs){s.setColour(juce::Slider::rotarySliderFillColourId,p.token("accent"));s.setColour(juce::Slider::rotarySliderOutlineColourId,p.token("control_border"));s.setColour(juce::Slider::thumbColourId,p.token("text_primary"));s.setColour(juce::Slider::textBoxTextColourId,p.token("text_primary"));}
  for(auto& l:knobLabels){l.setFont(makeThemeFont(p,9.5f,false,true));l.setColour(juce::Label::textColourId,p.token("text_secondary"));}

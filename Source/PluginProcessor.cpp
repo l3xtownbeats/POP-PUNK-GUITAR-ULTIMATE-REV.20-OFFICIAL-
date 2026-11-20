@@ -2,6 +2,7 @@
 #include "PluginEditor.h"
 #include "Performance/ChordTransitionTimeline.h"
 #include "Performance/ChordTransitionPolicy.h"
+#include "Performance/AutoChordGenerator.h"
 #include <cmath>
 #include <algorithm>
 #include <tuple>
@@ -465,6 +466,12 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
         const double quantizeGridBeats = quantizeChoice == 0 ? 0.25 : 0.125;
         const bool startOnFirstChord = parameters.getRawParameterValue("startOnFirstChord")->load(std::memory_order_relaxed) > 0.5f;
         const double ppqPerSample = patternTransportClock.bpm / (60.0 * currentSampleRate);
+        const bool autoChordsEnabled = parameters.getRawParameterValue("singleMidiNoteAsChordRoot")
+            ->load(std::memory_order_relaxed) > 0.5f;
+        const int scaleRoot = juce::jlimit(0, 11,
+            static_cast<int>(parameters.getRawParameterValue("scaleRoot")->load(std::memory_order_relaxed)));
+        const int scaleMode = juce::jlimit(0, 2,
+            static_cast<int>(parameters.getRawParameterValue("scaleMode")->load(std::memory_order_relaxed)));
 
         auto readChord = [&]()
         {
@@ -479,6 +486,15 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
                         notes[static_cast<size_t>(count++)] = note;
                         channel = ch + 1;
                     }
+            // AutoChords runs only in PATTERN mode and only for one held root.
+            // Melody mode above remains a strict one-key / one-note instrument.
+            if (count == 1 && autoChordsEnabled)
+            {
+                const auto generated = ppgu::performance::generateDiatonicTriad(
+                    notes[0], scaleRoot, scaleMode);
+                notes = generated.notes;
+                count = generated.count;
+            }
             return std::make_tuple(notes, count, channel);
         };
 

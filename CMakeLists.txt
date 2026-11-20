@@ -123,6 +123,10 @@ ppgu_add_test(ppgu_panel_contracts tests/AuxiliaryPanelLayoutTests.cpp)
 target_sources(ppgu_panel_contracts PRIVATE Source/UI/AuxiliaryPanelLayout.cpp)
 target_include_directories(ppgu_panel_contracts PRIVATE Source/UI)
 
+# AutoChords: bounded scale-aware MIDI root-to-triad mapping.
+ppgu_add_test(ppgu_autochord_contracts tests/AutoChordGeneratorTests.cpp)
+target_include_directories(ppgu_autochord_contracts PRIVATE Source)
+
 # Gallery Preview/Apply/Cancel draft-state contract; no APVTS or skin ID changes.
 ppgu_add_test(ppgu_skin_gallery_selection_contracts tests/SkinGallerySelectionTests.cpp)
 target_include_directories(ppgu_skin_gallery_selection_contracts PRIVATE Source)
