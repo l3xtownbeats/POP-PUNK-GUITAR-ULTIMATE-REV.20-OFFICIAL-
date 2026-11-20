@@ -119,9 +119,10 @@ def main() -> int:
                    if p.is_dir() and p.name.startswith("Skin_")}
     if actual_dirs != expected_dirs:
         raise SystemExit(f"FAIL: only approved 16 theme directories may exist; found {sorted(actual_dirs)}")
-    if ready != ["skin-053"]:
-        raise SystemExit(f"FAIL: only SKIN-1 is currently runtime-ready; got {ready}")
-    print("PASS: exact 16 named themes; all 32 preview/hero PNG dimensions and CRCs; SVG layers and 21-token/28-entry manifests verified; only SKIN-1 runtime-ready.")
+    expected_ready = [item[2] for item in EXPECTED]
+    if ready != expected_ready:
+        raise SystemExit(f"FAIL: all 16 approved themes must be runtime-ready after exact-SHA SVG decode/package validation; got {ready}")
+    print("PASS: exactly 16 named runtime-ready themes; all 32 preview/hero PNG dimensions and CRCs; all 48 SVG layers; all 21-token/28-entry manifests; no extra theme directories.")
     return 0
 
 if __name__ == "__main__":

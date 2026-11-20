@@ -62,4 +62,11 @@ From source PR #58, the following artwork-only code was integrated into current 
 - `tests/ThemeManagerTests.cpp`: exact-SHA regression test now decodes all 3 SVG assets for every one of the 16 theme manifests.
 - `tools/package_active_skins.py`: stages exactly the 16 active themes and five required assets each; adapted to REV.20 registry `defaultStableId` key. Windows workflow uploads the .vst3 bundle plus matching `Skins/` pack.
 
-These code changes are present, but their exact target commit Windows build/CTest/asset/package validation has not yet returned a completed passing result. `runtimeReady` flags remain unchanged pending that evidence. No APVTS/DSP/MIDI/sampler/audio callback changes are intended.
+These code changes were validated on REV.20 exact SHA `8cfd11ecce3c8039360c1c194be5251e716c9015`: Windows x64 VST3 build, full CTest, all 16 ThemeManager SVG decodes, PNG/registry validation and 16-only package staging passed (run `44717722638`). All 16 registry entries are now `runtimeReady=true`; FL Studio 20 host acceptance and pluginval remain pending. No APVTS/DSP/MIDI/sampler/audio callback changes were intended.
+
+
+## PageCache publish rollback correction from source PR #2 (2026-11-20)
+
+- Selectively integrated only the corrected PageCacheSlots::publish() state handling and regression coverage.
+- After the worker's slot and PageKey are confirmed, invalid channels/frames cause a CAS rollback loading→empty for that reservation. Mismatched/stale PageKeys return false without touching the active reservation.
+- Current REV.20 build/CTest for this correctness patch is still pending; do not inherit source PR results as target evidence.

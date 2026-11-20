@@ -104,3 +104,11 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Gallery batch/family filters were removed. Only ALL SKINS and FAVORITES ONLY remain; card labels use logical SKIN ordinals, not stable IDs. Existing Preview/Apply/Cancel and favorite actions are preserved.
 - `tests/ThemeManagerTests.cpp` now attempts ThemeManager loading and all three SVG decodes for every one of the 16 theme manifests, including the 15 previously design-only entries. This new exact-REV.20 test has not yet passed in CI; do not set SKIN-2…16 runtimeReady until the updated exact-SHA validation succeeds.
 - `tools/package_active_skins.py` and the Windows workflow now stage and upload exactly 16 folders plus preview/hero/texture/bezel/crest alongside the VST3; the script was adapted to REV.20's `defaultStableId` schema key.
+
+
+## 2026-11-20 — REV.20 exact-SHA runtime validation for all 16 skins: SUCCESS
+- Workflow [44717722638](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44717722638), exact target SHA `8cfd11ecce3c8039360c1c194be5251e716c9015`, completed SUCCESS.
+- Passed: Windows 2022 x64 configure, VST3 build and C++ targets, full CTest, exact 16-entry/name/ordinal/stable-ID registry audit, all 32 preview/hero PNG dimension + CRC checks, all 48 SVG artwork file checks, ThemeManager load + texture/bezel/crest decode across every one of the 16 theme manifests, 16-only skin staging beside VST3 and combined artifact upload.
+- Artifact: `PPGU-REV20-Windows-x64-VST3`, ID `14621145514`, 5,855,768 bytes, digest `sha256:e1dead01c61d7ace25362bc4c76dc55a03280ada746f9c242c39841d406ff006`.
+- Following this verified loader/package gate, all 16 registry entries are marked `runtimeReady=true` and selectable in the REV.20 skin gallery. This is not FL Studio 20 host acceptance or pluginval.
+- Selectively ported source PR #2 page-cache correction: invalid decoded page geometry releases only the reservation with the exact current PageKey; a stale mismatched worker key cannot clear another live load. Added CTest coverage. Target exact-SHA rerun pending.

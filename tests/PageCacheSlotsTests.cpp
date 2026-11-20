@@ -116,6 +116,24 @@ int main()
     if (cache.tryAcquire({ 1234, 999 }, lease))
         return 1;
 
+    // An invalid decoded page must release the slot only when the worker still
+    // owns the matching reservation. A stale key cannot cancel another load.
+    std::size_t rejected = 99;
+    if (!cache.tryBeginLoad({ 77, 4 }, rejected))
+        return 1;
+    if (cache.publish(rejected, { 77, 4 }, 0, 8)
+        || cache.state(rejected) != PageCacheSlots::State::empty)
+        return 1;
+    if (!cache.tryBeginLoad({ 77, 4 }, rejected))
+        return 1;
+    cache.cancelLoad(rejected);
+
+    if (!cache.tryBeginLoad({ 88, 5 }, rejected))
+        return 1;
+    if (cache.publish(rejected, { 88, 6 }, 1, 8)
+        || cache.state(rejected) != PageCacheSlots::State::loading)
+        return 1;
+    cache.cancelLoad(rejected);
 
     // A sample page is shared by concurrent voices. Each reader pins the same
     // slot independently; the worker must not evict it until every lease ends.

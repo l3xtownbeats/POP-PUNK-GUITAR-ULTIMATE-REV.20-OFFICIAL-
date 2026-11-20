@@ -43,7 +43,7 @@
 - No fake controls, hidden extra themes, legacy theme batches or accidental duplicate gallery entries.
 - Source CI evidence does not make skins HOST-VERIFIED in REV.20. Runtime loader, 16-only package, preview/apply/cancel/persistence, hot-swap, ECO/memory behaviour, DPI 100/125/150%, pluginval strictness 5 and FL Studio 20 checks must pass against the exact REV.20 SHA before marking all 16 runtime-ready.
 
-**Current REV.20 asset state:** all 16 names/manifests are defined; 30 additional PNGs (15 preview + 15 hero) are included; 45 SVG material foundations are available for SKIN-2…SKIN-16. The source pack passed the strict audit. REV.20 exact-SHA runtime and host acceptance remain a separate gate.
+**Current REV.20 asset/runtime state:** all 16 names/manifests are defined; all 30 additional PNGs are included; all 48 SVG texture/bezel/crest layers decode in the REV.20 ThemeManager test; exact-SHA Windows x64 build, full CTest, PNG/registry validation and 16-only package staging passed on SHA `8cfd11ecce3c8039360c1c194be5251e716c9015` (run `44717722638`). All 16 skins are runtime-ready/selectable. FL Studio 20 host acceptance, pluginval strictness 5, DPI/hot-swap and performance acceptance remain separate.
 
 
 ## 2026-11-19 — Global premium-quality standard (newest approval)
@@ -54,4 +54,9 @@ NEON STAGE is the quality and premium-finish benchmark for all 15 additional the
 
 The 2026-11-19 approved OBSIDIAN direction is premium/luxury: deep obsidian, graphite, satin black metal, brushed/polished metal, refined typography, precise control surfaces and restrained metallic highlights. No acid-neon palette, loud saturated glow or cyberpunk/gamer styling. The current logical name OBSIDIAN GOLD remains unchanged; the approved distinction is its visual identity, not a new theme slot.
 
-These are design approvals, not runtime acceptance. Preserve the 27-control parity, nine rotary bindings, seven approved FX bypass IDs and all real UI/functionality restrictions.
+These are design approvals with runtime readiness separately verified on REV.20. Preserve the 27-control parity, nine rotary bindings, seven approved FX bypass IDs and all real UI/functionality restrictions.
+
+
+## Runtime gate passed — 2026-11-20
+
+All 16 approved shells are now selectable in REV.20. Exact target workflow 44717722638 passed Windows x64 VST3 build, full CTest, ThemeManager load and three SVG-layer decode for all themes, all 32 PNG CRC/dimension checks, registry validation and 16-only package staging. Only manual host and release gates remain.

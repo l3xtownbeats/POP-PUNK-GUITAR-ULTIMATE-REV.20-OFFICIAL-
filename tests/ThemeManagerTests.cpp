@@ -103,7 +103,7 @@ int main()
         }
     }
     expect(ordinals.size() == 16, "all 16 logical ordinals are present");
-    expect(runtimeReadyCount == 1, "only SKIN-1 is currently runtime-ready");
+    expect(runtimeReadyCount == 16, "all 16 approved skins are runtime-ready after exact-SHA REV.20 validation");
 
     const auto neon = skinRoot.getChildFile("Skin_053").getChildFile("theme.json");
     const bool loaded = neon.existsAsFile() && manager.loadFromFile(neon);

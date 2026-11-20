@@ -342,12 +342,12 @@
     "layoutChanges": false,
     "audioChanges": false
   },
-  "designStatus": "ARTWORK_AND_MANIFEST_UPDATED_RUNTIME_VALIDATION_PENDING",
+  "designStatus": "REV20_RUNTIME_READY_CI_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
   "notes": [
     "[IDENTITY-RULE] SKIN-1 = NEON STAGE DEFAULT = skin-053/Skin_053. Stable asset ID and index 53 are preserved.",
     "Default display mode is MINIMALISM; premium glow/effects are opt-in only.",
     "All control IDs and grid metadata are preserved from the REV18 canonical source.",
     "Visual-only change: no APVTS, DSP, sampler, MIDI, preset or audio callback changes.",
-    "Existing PNG preview/hero binaries are retained pending visual inspection and the REV18 artwork acceptance checks."
+    "NEON STAGE DEFAULT / SKIN-1 is the canonical default and reset target. REV.20 exact SHA 8cfd11ecce3c8039360c1c194be5251e716c9015 passed Windows x64 VST3 build, full CTest, this theme's texture/bezel/crest SVG decoding, PNG CRC/dimension validation and 16-only package staging (workflow 44717722638). Runtime-ready/selectable in REV.20. FL Studio 20 host acceptance and pluginval remain pending."
   ]
 }

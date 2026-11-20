@@ -91,3 +91,8 @@ Windows 10 x64; VST3 x64; FL Studio 20 x64. CMake + JUCE 7.0.12 + C++20 в им�
 - No disk I/O, blocking, or unbounded allocation in the audio callback. Keep provenance, redistribution clearance, SHA-256 and license records. Exact duplicates are measured by SHA-256; potential acoustic duplicates require review.
 - Never pad content with duplicates or lower-quality samples to hit a size number. Any sample replacement must preserve or improve note coverage, velocity layers, round-robin, articulations, technical quality, mix readiness and legal rights, with listening/objective evidence and atomic mapping/checksum updates.
 - Current delivery status is NOT COMPLETE: the JSON contract and tests specify the requirement; neither the 15 GB payload nor the 500 playable presets is claimed delivered.
+
+
+## 11. PageCache publish rollback — target correctness patch
+
+Invalid page geometry during a worker publish must not strand an empty cache slot in the loading state. REV.20 now verifies the slot's current PageKey before attempting a compare-exchange from loading to empty. A stale worker with another PageKey cannot cancel the current reservation. Regression tests cover invalid geometry rollback and stale-key rejection. Exact-SHA target Windows build/CTest must pass after the patch commit.

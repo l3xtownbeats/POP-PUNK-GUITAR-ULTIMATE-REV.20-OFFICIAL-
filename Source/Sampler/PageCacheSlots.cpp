@@ -82,8 +82,7 @@ float* PageCacheSlots::writableData(std::size_t slot) noexcept
 bool PageCacheSlots::publish(std::size_t slot, PageKey key,
                              std::uint32_t channels, std::uint32_t frames) noexcept
 {
-    if (!isValid() || slot >= slotCount || channels == 0
-        || channels > channelLimit || frames == 0 || frames > framesPerPage)
+    if (!isValid() || slot >= slotCount)
         return false;
 
     auto& target = slots[slot];
@@ -91,6 +90,17 @@ bool PageCacheSlots::publish(std::size_t slot, PageKey key,
         || target.sampleId.load(std::memory_order_relaxed) != key.sampleId
         || target.pageIndex.load(std::memory_order_relaxed) != key.pageIndex)
         return false;
+
+    // A failed decode/invalid page must not strand the slot in loading state.
+    // Roll back only when this worker still owns the exact key reservation;
+    // a stale worker with a mismatched key must not cancel another request.
+    if (channels == 0 || channels > channelLimit || frames == 0 || frames > framesPerPage)
+    {
+        auto expected = loadingAccess;
+        (void) target.access.compare_exchange_strong(expected, emptyAccess,
+            std::memory_order_release, std::memory_order_relaxed);
+        return false;
+    }
 
     target.channels.store(channels, std::memory_order_relaxed);
     target.frames.store(frames, std::memory_order_relaxed);

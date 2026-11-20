@@ -96,5 +96,19 @@ Static validation utilities and focused contract tests may be used for engineeri
 
 - Imported the safe SVG asset loader and reference-counted palette artwork from the source PR #58 work branch, preserving the REV.20 default label `NEON STAGE DEFAULT` and current 16-theme identity mapping.
 - Main editor, auxiliary panels, gallery, Pattern/AutoChords, performance and floating workspace now draw the selected skin's texture/bezel/crest layers. Gallery shows only ALL SKINS and FAVORITES ONLY. Existing preview/apply/cancel workflow and favorite persistence remain.
-- Added ThemeManager test decoding all three SVG layers for each of the 16 manifests. Existing runtimeReady registry flags remain unchanged (only SKIN-1 true) until this exact REV.20 test and package workflow pass.
-- Added 16-only package staging and included the matching SKIN directory in the VST3 artifact. The latest exact-SHA run is pending; no runtime acceptance claim is made yet.
+- Added ThemeManager test decoding all three SVG layers for each of the 16 manifests. Exact-SHA workflow 44717722638 passed the Windows build, full CTest, all 16 SVG decodes and 16-only package stage; all registry runtimeReady flags are now true.
+- Added 16-only package staging and included the matching SKIN directory in the VST3 artifact. Exact-SHA workflow 44717722638 passed; artifact 14621145514 has digest e1dead01c61d7ace25362bc4c76dc55a03280ada746f9c242c39841d406ff006. FL Studio 20 host acceptance, pluginval and DPI/performance gates remain open.
+
+
+## Exact target CI: all 16 premium skins runtime-ready
+
+- Workflow [44717722638](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44717722638), SHA `8cfd11ecce3c8039360c1c194be5251e716c9015`: SUCCESS.
+- Windows x64 VST3 build: PASS; full CTest: PASS; ThemeManager manifest load and three SVG layer decodes for all 16 themes: PASS; 32 PNG dimension/CRC and exact registry validation: PASS; 16-only package staging and combined VST3/Skins artifact upload: PASS.
+- Artifact ID `14621145514`, size 5,855,768 bytes, SHA-256 `e1dead01c61d7ace25362bc4c76dc55a03280ada746f9c242c39841d406ff006`.
+- All 16 themes are now selectable in the REV.20 gallery (`runtimeReady=true`). This does not claim manual FL Studio 20 host acceptance or pluginval strictness 5.
+
+## PageCache publish rollback — selectively ported from source PR #2
+
+- Exact-key rollback fix and regression cases have been added to the next target integration commit.
+- Invalid page geometry now returns the matching loading reservation to empty only after confirming that the slot still contains the same PageKey. A stale worker with a mismatched key must not reset a newer reservation.
+- Await exact-SHA Windows build/CTest after this current patch is pushed.

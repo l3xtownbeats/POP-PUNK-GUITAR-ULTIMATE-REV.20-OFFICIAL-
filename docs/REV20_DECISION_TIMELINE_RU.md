@@ -149,3 +149,12 @@ Source commits `9dc719bc4929516c00a00c3b5025859328812d2f`, `d3c26c39eafd432440bf
 - OBSIDIAN SKIN-2 is specifically a premium/luxury blackened-metal theme with restrained metallic highlights; no acid neon, saturated glow or gamer/cyberpunk treatment.
 
 This 2026-11-19 direction is newer than the initial PR #58 theme concept notes and is now carried as an explicit quality requirement in REV.20. It does not change the fixed 16 theme names or stable ID mapping.
+
+
+## 2026-11-20 — REV.20 exact-SHA runtime verification of all 16 skins
+
+Run [44717722638](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44717722638) on SHA `8cfd11ecce3c8039360c1c194be5251e716c9015`: SUCCESS for Windows x64 VST3 build, full CTest, exact 16-skin registry, all preview/hero PNG CRC/dimensions, ThemeManager load and all 48 SVG-layer decodes, 16-only sibling package staging and combined artifact upload. Artifact `14621145514`, SHA-256 `e1dead01c61d7ace25362bc4c76dc55a03280ada746f9c242c39841d406ff006`. All 16 skins are runtimeReady in REV.20. FL Studio 20 host acceptance and pluginval strictness 5 remain separate release gates.
+
+## 2026-11-20 — PageCache publish rollback from source PR #2 ported
+
+REV.20 selectively ports the exact-key rollback fix and regression tests. Invalid page geometry releases only the slot reservation whose PageKey still matches; stale/mismatched worker operations cannot cancel a newer reservation. The target build/CTest for this patch is still pending.

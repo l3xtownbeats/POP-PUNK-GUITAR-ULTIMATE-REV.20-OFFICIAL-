@@ -32,6 +32,7 @@ The canonical visual shell and default theme is **SKIN-1 / NEON STAGE DEFAULT / 
 - `docs/REV20_LIBRARY_TIERS_RU.md` — BASIC/EXPANDED distribution, automatic library management and legal/quality gates.
 - `docs/REV20_LIBRARY_MANAGER_APPROVED_REQUIREMENTS.md` — the complete approved scan/classify/physical distribution and VST3 compatibility acceptance contract.
 - `docs/REV20_SKIN_APPROVAL_STANDARD_RU.md` — latest premium-quality/identity guardrails from the 2026-11-19 user confirmation.
+- `docs/REV20_ENGINEERING_WORKSTREAM_REGISTER_RU.md` — M1–M13 source PR audit, verified foundations, WIP gaps and safe integration order.
 - `docs/REV20_MIGRATION_MANIFEST.md` — migration scope, retained work and exclusions.
 - `docs/DEVELOPMENT_STATUS.md` — evidence-based implementation and readiness status.
 - `Source/` — VST3 processor, editor, sampler, pattern and auxiliary UI source.

@@ -5,7 +5,7 @@
   "totalSkins": 16,
   "defaultLogicalSkin": "SKIN-1",
   "defaultStableId": "skin-053",
-  "runtimePolicy": "Only runtimeReady=true themes are selectable. Design-only entries remain registered but are not presented as complete runtime themes.",
+  "runtimePolicy": "All 16 themes are selectable after REV.20 exact-SHA Windows build, CTest, SVG decode, PNG CRC/dimension validation and 16-only package staging pass. FL Studio 20 host acceptance and pluginval remain separate release gates.",
   "themes": [
     {
       "ordinal": 1,
@@ -15,7 +15,7 @@
       "index": 53,
       "path": "Skin_053/theme.json",
       "runtimeReady": true,
-      "status": "CANONICAL_DEFAULT_ARTWORK_PRESENT; REV20_EXACT_SHA_RUNTIME_AUDIT_PENDING",
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_053/assets/preview.png",
       "hero": "Skin_053/assets/hero.png"
     },
@@ -26,8 +26,8 @@
       "id": "skin-103",
       "index": 103,
       "path": "Skin_103/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_103/assets/preview.png",
       "hero": "Skin_103/assets/hero.png"
     },
@@ -38,8 +38,8 @@
       "id": "skin-104",
       "index": 104,
       "path": "Skin_104/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_104/assets/preview.png",
       "hero": "Skin_104/assets/hero.png"
     },
@@ -50,8 +50,8 @@
       "id": "skin-105",
       "index": 105,
       "path": "Skin_105/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_105/assets/preview.png",
       "hero": "Skin_105/assets/hero.png"
     },
@@ -62,8 +62,8 @@
       "id": "skin-106",
       "index": 106,
       "path": "Skin_106/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_106/assets/preview.png",
       "hero": "Skin_106/assets/hero.png"
     },
@@ -74,8 +74,8 @@
       "id": "skin-107",
       "index": 107,
       "path": "Skin_107/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_107/assets/preview.png",
       "hero": "Skin_107/assets/hero.png"
     },
@@ -86,8 +86,8 @@
       "id": "skin-108",
       "index": 108,
       "path": "Skin_108/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_108/assets/preview.png",
       "hero": "Skin_108/assets/hero.png"
     },
@@ -98,8 +98,8 @@
       "id": "skin-109",
       "index": 109,
       "path": "Skin_109/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_109/assets/preview.png",
       "hero": "Skin_109/assets/hero.png"
     },
@@ -110,8 +110,8 @@
       "id": "skin-110",
       "index": 110,
       "path": "Skin_110/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_110/assets/preview.png",
       "hero": "Skin_110/assets/hero.png"
     },
@@ -122,8 +122,8 @@
       "id": "skin-111",
       "index": 111,
       "path": "Skin_111/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_111/assets/preview.png",
       "hero": "Skin_111/assets/hero.png"
     },
@@ -134,8 +134,8 @@
       "id": "skin-112",
       "index": 112,
       "path": "Skin_112/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_112/assets/preview.png",
       "hero": "Skin_112/assets/hero.png"
     },
@@ -146,8 +146,8 @@
       "id": "skin-113",
       "index": 113,
       "path": "Skin_113/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_113/assets/preview.png",
       "hero": "Skin_113/assets/hero.png"
     },
@@ -158,8 +158,8 @@
       "id": "skin-114",
       "index": 114,
       "path": "Skin_114/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_114/assets/preview.png",
       "hero": "Skin_114/assets/hero.png"
     },
@@ -170,8 +170,8 @@
       "id": "skin-115",
       "index": 115,
       "path": "Skin_115/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_115/assets/preview.png",
       "hero": "Skin_115/assets/hero.png"
     },
@@ -182,8 +182,8 @@
       "id": "skin-116",
       "index": 116,
       "path": "Skin_116/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_116/assets/preview.png",
       "hero": "Skin_116/assets/hero.png"
     },
@@ -194,8 +194,8 @@
       "id": "skin-117",
       "index": 117,
       "path": "Skin_117/theme.json",
-      "runtimeReady": false,
-      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "runtimeReady": true,
+      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_117/assets/preview.png",
       "hero": "Skin_117/assets/hero.png"
     }
@@ -206,6 +206,8 @@
     "sourceSha": "10e590c8a3fdfed90cc7ae05e0ff74d8875ac88a",
     "artworkWorkflowRun": 43835887953,
     "windowsBuildAndCTestRun": 43835886032,
-    "status": "SOURCE_ARTWORK_AUDIT_AND_WINDOWS_BUILD_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING"
+    "status": "REV20_EXACT_SHA_WINDOWS_BUILD_CTEST_ALL_16_SVG_DECODE_PNG_REGISTRY_AND_16_ONLY_PACKAGE_PASS; FL20_HOST_AND_PLUGINVAL_PENDING",
+    "rev20VerifiedSha": "8cfd11ecce3c8039360c1c194be5251e716c9015",
+    "rev20WorkflowRun": 44717722638
   }
 }
