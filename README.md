@@ -27,7 +27,8 @@ The canonical visual shell and default theme is **SKIN-1 / NEON STAGE DEFAULT / 
 ## Repository map
 
 - `Info.txt` — single canonical project journal and locked decisions.
-- `docs/REV20_ACCEPTED_BASELINE_RU.md` — consolidated approved product baseline.
+- `docs/REV20_ACCEPTED_BASELINE_RU.md` — consolidated approved product baseline and complete 16-name shell table.
+- `docs/REV20_DECISION_TIMELINE_RU.md` — dated decision/provenance timeline from PR #43 through the 2026-11-20 final baseline.
 - `docs/REV20_MIGRATION_MANIFEST.md` — migration scope, retained work and exclusions.
 - `docs/DEVELOPMENT_STATUS.md` — evidence-based implementation and readiness status.
 - `Source/` — VST3 processor, editor, sampler, pattern and auxiliary UI source.
@@ -42,6 +43,6 @@ The core target is 500 playable factory presets: 250 MELODY and 250 PATTERN, all
 
 ## Build and acceptance
 
-The source uses CMake, JUCE 7.0.12 and C++20. The REV.20 Windows validation workflow is manual and gated on the BASIC LIBRARY and 500 core factory preset milestones. A successful build, full tests, pluginval, package integrity and FL Studio 20 acceptance must be recorded against the exact REV.20 commit. No release package is declared approved here.
+The source uses CMake, JUCE 7.0.12 and C++20. `.github/workflows/rev20-windows-vst3-skin-validation.yml` validates the exact pushed `main` SHA on Windows x64: configure, VST3 build, full CTest and the 16-skin asset/registry validator. Its first run on the current update must complete successfully before claiming REV.20 build verification. Pluginval strictness 5, package integrity, performance/DPI checks and FL Studio 20 host acceptance remain separate gates. No release package is declared approved here.
 
 **All future project work belongs only in this repository, on `main`.**

@@ -74,10 +74,13 @@ int main()
             }
             else
             {
-                expect(!manifest.getChildFile("assets/preview.png").existsAsFile(),
-                       id + " is gated until PNG preview is present");
-                expect(!manifest.getChildFile("assets/hero.png").existsAsFile(),
-                       id + " is gated until PNG hero is present");
+                // Artwork may be complete while the theme remains gated from runtime selection.
+                expect(manifest.getChildFile("assets/preview.png").existsAsFile(),
+                       id + " preview artwork is present while runtime remains gated");
+                expect(manifest.getChildFile("assets/hero.png").existsAsFile(),
+                       id + " hero artwork is present while runtime remains gated");
+                expect(entry.getProperty("runtimeReady", true) == false,
+                       id + " is not selectable before REV.20 runtime acceptance");
             }
         }
     }

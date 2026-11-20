@@ -2,6 +2,8 @@
 """Validate REV.20's exact 16-theme registry without accepting legacy skins."""
 from __future__ import annotations
 import json
+import struct
+import zlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +26,43 @@ EXPECTED = [
     ("SKIN-15", "ULTRAVIOLET DRIVE", "skin-116", 116, "Skin_116"),
     ("SKIN-16", "VOLCANIC STEEL", "skin-117", 117, "Skin_117"),
 ]
+
+def validate_png(path: Path, expected_size: tuple[int, int]) -> None:
+    data = path.read_bytes()
+    if not data.startswith(b"\\x89PNG\\r\\n\\x1a\\n"):
+        raise SystemExit(f"FAIL: invalid PNG signature: {path}")
+    offset = 8
+    dimensions = None
+    saw_iend = False
+    while offset < len(data):
+        if offset + 12 > len(data):
+            raise SystemExit(f"FAIL: truncated PNG chunk: {path}")
+        length = struct.unpack(">I", data[offset:offset + 4])[0]
+        end = offset + 12 + length
+        if end > len(data):
+            raise SystemExit(f"FAIL: PNG chunk exceeds file size: {path}")
+        chunk_type = data[offset + 4:offset + 8]
+        chunk_data = data[offset + 8:offset + 8 + length]
+        stored_crc = struct.unpack(">I", data[offset + 8 + length:end])[0]
+        actual_crc = zlib.crc32(data[offset + 4:offset + 8 + length]) & 0xFFFFFFFF
+        if stored_crc != actual_crc:
+            raise SystemExit(f"FAIL: PNG CRC mismatch in {chunk_type!r}: {path}")
+        if chunk_type == b"IHDR":
+            if length != 13:
+                raise SystemExit(f"FAIL: invalid PNG IHDR length: {path}")
+            dimensions = struct.unpack(">II", chunk_data[:8])
+        if chunk_type == b"IEND":
+            if length != 0:
+                raise SystemExit(f"FAIL: invalid PNG IEND: {path}")
+            saw_iend = True
+            offset = end
+            break
+        offset = end
+    if not saw_iend or offset != len(data):
+        raise SystemExit(f"FAIL: incomplete PNG or trailing data: {path}")
+    if dimensions != expected_size:
+        raise SystemExit(f"FAIL: PNG dimensions {dimensions!r}, expected {expected_size!r}: {path}")
+
 
 def main() -> int:
     registry = json.loads((SKIN / "theme_manifest.json").read_text(encoding="utf-8"))
@@ -51,12 +90,28 @@ def main() -> int:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         if manifest.get("id") != stable_id or manifest.get("index") != index:
             raise SystemExit(f"FAIL: manifest stable identity mismatch for {label}")
+        if manifest.get("name") != name:
+            raise SystemExit(f"FAIL: manifest name mismatch for {label}")
+        if len(manifest.get("palette", {})) != 21:
+            raise SystemExit(f"FAIL: {label} must define exactly 21 palette tokens")
+        if len(manifest.get("controls", {})) != 28:
+            raise SystemExit(f"FAIL: {label} must retain 27 controls plus sync_selector metadata")
+        assets = manifest.get("assets", {})
+        for key, size in (("preview", (360, 240)), ("hero", (800, 450))):
+            relative = entry.get(key)
+            expected_relative = f"{folder}/assets/{key}.png"
+            if relative != expected_relative or assets.get(key) != f"assets/{key}.png":
+                raise SystemExit(f"FAIL: invalid {key} path for {label}")
+            asset_path = SKIN / relative
+            if not asset_path.is_file():
+                raise SystemExit(f"FAIL: {label} lacks artwork {key}: {asset_path}")
+            validate_png(asset_path, size)
+        for key in ("texture", "bezel", "crest"):
+            relative_svg = assets.get(key)
+            if not relative_svg or not (manifest_path.parent / relative_svg).is_file():
+                raise SystemExit(f"FAIL: {label} lacks SVG layer {key}")
         if entry.get("runtimeReady") is True:
             ready.append(stable_id)
-            assets = manifest.get("assets", {})
-            for key in ("preview", "hero"):
-                if not (manifest_path.parent / assets.get(key, "")).is_file():
-                    raise SystemExit(f"FAIL: runtime-ready theme {label} lacks {key}")
         elif entry.get("runtimeReady") is not False:
             raise SystemExit(f"FAIL: runtimeReady must be explicit for {label}")
     expected_dirs = {entry[4] for entry in EXPECTED}
@@ -66,7 +121,7 @@ def main() -> int:
         raise SystemExit(f"FAIL: only approved 16 theme directories may exist; found {sorted(actual_dirs)}")
     if ready != ["skin-053"]:
         raise SystemExit(f"FAIL: only SKIN-1 is currently runtime-ready; got {ready}")
-    print("PASS: exact 16-theme registry; SKIN-1 is NEON STAGE DEFAULT; 15 design shells remain gated.")
+    print("PASS: exact 16 named themes; all 32 preview/hero PNG dimensions and CRCs; SVG layers and 21-token/28-entry manifests verified; only SKIN-1 runtime-ready.")
     return 0
 
 if __name__ == "__main__":

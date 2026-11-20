@@ -58,6 +58,7 @@ Static validation utilities and focused contract tests may be used for engineeri
 ## CI
 
 - The pre-existing `library-manager-tests.yml` workflow is retained unchanged.
-- `vst3-build.yml` is added as a manual workflow with explicit readiness inputs for the BASIC LIBRARY and all 500 core presets.
+- `.github/workflows/rev20-windows-vst3-skin-validation.yml` is the REV.20 Windows x64 workflow. It checks out the exact `main` commit, installs JUCE 7.0.12, configures/builds VST3, runs full CTest, validates the exact 16 named skins including every preview/hero PNG CRC/dimension, and uploads the VST3 artifact.
+- This workflow was added in the current consolidation sequence; its exact latest-SHA run is pending until a completed Actions result is observed.
+- `pluginval` strictness 5, package distribution checks, DPI 100/125/150% and FL Studio 20 host acceptance are not covered by this initial CI job and remain explicit release gates.
 - The one-time consolidation workflow and importer were removed after the migration commit.
-- No REV.20 VST3 build/test result is claimed by this status page.

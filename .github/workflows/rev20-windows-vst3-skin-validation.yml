@@ -1,0 +1,58 @@
+name: REV.20 Windows x64 VST3 and 16-skin validation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "CMakeLists.txt"
+      - "Source/**"
+      - "tests/**"
+      - "SKIN/**"
+      - "tools/validate_skin_registry_16.py"
+      - ".github/workflows/rev20-windows-vst3-skin-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-x64-vst3:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact REV.20 main commit
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Checkout JUCE 7.0.12
+        shell: pwsh
+        run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure Windows x64
+        shell: pwsh
+        run: cmake -S . -B build -A x64
+
+      - name: Build VST3 and all C++ contract tests
+        shell: pwsh
+        run: cmake --build build --config Release --parallel
+
+      - name: Run full CTest suite
+        shell: pwsh
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Validate exactly 16 named graphical skins and all artwork assets
+        shell: pwsh
+        run: python tools/validate_skin_registry_16.py
+
+      - name: Upload REV.20 Windows x64 VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-REV20-Windows-x64-VST3
+          path: build/PPGU_artefacts/Release/VST3/*.vst3
+          if-no-files-found: error
+          retention-days: 14

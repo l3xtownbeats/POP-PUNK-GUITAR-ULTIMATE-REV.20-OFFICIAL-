@@ -36,7 +36,8 @@
 - The latest inspected REV.19 workflow run (#2241, SHA `2df2a566b489198bd3ec646bdf6c78deef8c8f06`) failed. That run is not evidence for the selected source HEAD or REV.20.
 - A historical REV.18 interim CI package passed at SHA `877a0c8d96dc6ef3bdd620f8af0a75a79fa067ec`; FL Studio 20 manual host acceptance was explicitly not run.
 - The REV.20 migration workflow passed, but that workflow copied files and pushed a commit; it did not compile the plugin or execute the VST3 regression suite.
-- Therefore imported code is PRESENT; a successful REV.20 build, full CTest, pluginval, package audit and FL Studio 20 host acceptance remain unverified.
+- A dedicated `.github/workflows/rev20-windows-vst3-skin-validation.yml` has now been added for exact-main-SHA Windows x64 configure/build, full CTest, 16-skin PNG/SVG/registry validation and VST3 artifact upload. The latest run must be checked before claiming it passed.
+- `pluginval` strictness 5, final package distribution, DPI and FL Studio 20 host acceptance remain separate release gates.
 
 ## Migration policy
 
