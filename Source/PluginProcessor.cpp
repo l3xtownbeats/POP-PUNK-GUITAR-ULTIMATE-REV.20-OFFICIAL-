@@ -912,6 +912,20 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
     const float outputDb = juce::jlimit(-24.0f, 12.0f,
         parameters.getRawParameterValue("output")->load(std::memory_order_relaxed));
     buffer.applyGain(masterGain * juce::Decibels::decibelsToGain(outputDb));
+
+    // Publish post-gain output peaks for the message-thread VU meter.
+    // The audio callback performs only bounded reads and atomic stores.
+    for (int channel = 0; channel < 2; ++channel)
+    {
+        float peak = 0.0f;
+        if (channel < buffer.getNumChannels())
+        {
+            const auto* data = buffer.getReadPointer(channel);
+            for (int sample = 0; sample < samples; ++sample)
+                peak = juce::jmax(peak, std::abs(data[sample]));
+        }
+        outputPeakMeters[static_cast<size_t>(channel)].store(peak, std::memory_order_relaxed);
+    }
 }
 
 juce::AudioProcessorEditor* PopPunkGuitarUltimateAudioProcessor::createEditor()
