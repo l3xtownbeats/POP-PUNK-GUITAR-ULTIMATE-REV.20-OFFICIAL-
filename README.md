@@ -6,6 +6,10 @@
 
 **NEON STAGE DEFAULT · MELODY · PATTERN**
 
+<img src="01%20INTERFACE%20%20NEON%20STAGE%20DEFAULT%20.png" alt="POP PUNK GUITAR ULTIMATE — NEON STAGE DEFAULT main plugin interface" width="100%">
+
+<sub>APPROVED MAIN INTERFACE · NEON STAGE DEFAULT · SKIN-1</sub>
+
 </div>
 
 REV.20 is the single canonical home for all continuing development. Approved decisions, preserved implementation, engineering work, tests, assets, sample inventories and future validation evidence are maintained here.
