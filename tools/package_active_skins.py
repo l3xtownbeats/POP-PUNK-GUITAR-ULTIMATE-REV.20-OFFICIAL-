@@ -149,6 +149,39 @@ def main() -> int:
             for relative in premium_runtime_layers:
                 copy_one(root, output, (Path(folder) / relative).as_posix())
 
+            # Ship the complete authored control-state library for Skin-1.
+            # The manifest is the single source of truth for IDs, states and paths.
+            control_manifest_rel = "assets/controls/control_states_manifest.json"
+            copy_one(root, output, (Path(folder) / control_manifest_rel).as_posix())
+            control_manifest_path = safe_source(root, (Path(folder) / control_manifest_rel).as_posix())
+            control_manifest = json.loads(control_manifest_path.read_text(encoding="utf-8"))
+            expected_states = {"default", "hover", "pressed", "disabled", "dragged"}
+            control_ids = control_manifest.get("controlIds", [])
+            states = control_manifest.get("states", [])
+            records = control_manifest.get("records", [])
+            if (control_manifest.get("schemaVersion") != "1.0.0"
+                    or control_manifest.get("skinId") != "skin-053"
+                    or len(control_ids) != 27 or len(set(control_ids)) != 27
+                    or set(states) != expected_states or len(states) != 5
+                    or len(records) != len(control_ids) * len(expected_states)):
+                raise SystemExit("NEON STAGE DEFAULT: invalid control-state manifest contract")
+            seen_control_states = set()
+            for record in records:
+                control_id = record.get("controlId")
+                state = record.get("state")
+                runtime_rel = record.get("runtime")
+                if (control_id not in control_ids or state not in expected_states
+                        or not isinstance(runtime_rel, str)
+                        or not runtime_rel.startswith("assets/controls/")):
+                    raise SystemExit("NEON STAGE DEFAULT: unsafe or unknown control-state record")
+                key = (control_id, state)
+                if key in seen_control_states:
+                    raise SystemExit(f"NEON STAGE DEFAULT: duplicate control-state record {key}")
+                seen_control_states.add(key)
+                copy_one(root, output, (Path(folder) / runtime_rel).as_posix())
+            if len(seen_control_states) != 135:
+                raise SystemExit("NEON STAGE DEFAULT: control-state manifest is incomplete")
+
         if entry.get("preview") != (Path(folder) / assets["preview"]).as_posix():
             raise SystemExit(f"{name}: registry preview path mismatch")
         if entry.get("hero") != (Path(folder) / assets["hero"]).as_posix():

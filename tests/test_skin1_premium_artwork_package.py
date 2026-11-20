@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import struct
 import subprocess
 import sys
@@ -72,6 +73,39 @@ def main() -> int:
                 raise AssertionError(f"unexpected staged dimensions for {relative}")
             if sha256(original) != sha256(staged):
                 raise AssertionError(f"staged artwork changed bytes: {relative}")
+
+        # Every control/state image is shipped exactly as authored and remains Skin-1-only.
+        control_manifest_path = source_skin / "assets" / "controls" / "control_states_manifest.json"
+        control_manifest = json.loads(control_manifest_path.read_text(encoding="utf-8"))
+        expected_states = {"default", "hover", "pressed", "disabled", "dragged"}
+        control_ids = control_manifest["controlIds"]
+        records = control_manifest["records"]
+        if len(control_ids) != 27 or len(set(control_ids)) != 27:
+            raise AssertionError("expected 27 unique Skin-1 control IDs")
+        if set(control_manifest["states"]) != expected_states or len(records) != 135:
+            raise AssertionError("expected five states for each Skin-1 control")
+        seen = set()
+        for record in records:
+            key = (record["controlId"], record["state"])
+            if key in seen or key[0] not in control_ids or key[1] not in expected_states:
+                raise AssertionError(f"duplicate or invalid control state: {key}")
+            seen.add(key)
+            relative = record["runtime"]
+            original = source_skin / relative
+            staged = staged_skin / relative
+            if not original.is_file() or not staged.is_file():
+                raise AssertionError(f"missing control-state asset: {relative}")
+            if png_dimensions(original) != (256, 256) or png_dimensions(staged) != (256, 256):
+                raise AssertionError(f"unexpected control-state dimensions: {relative}")
+            if sha256(original) != sha256(staged):
+                raise AssertionError(f"control-state asset changed during staging: {relative}")
+        if len(seen) != 135:
+            raise AssertionError(f"expected 135 unique control states, found {len(seen)}")
+        staged_controls_manifest = staged_skin / "assets" / "controls" / "control_states_manifest.json"
+        if not staged_controls_manifest.is_file():
+            raise AssertionError("control-state manifest was not packaged")
+        if (staged_root / "Skin_103" / "assets" / "controls").exists():
+            raise AssertionError("Skin-2 must not receive Skin-1 control artwork")
 
         skin_folders = sorted(
             path.name for path in staged_root.iterdir()
