@@ -696,7 +696,7 @@ private:
             {
                 if (safeThis != nullptr) safeThis->finishScan(std::move(report));
             });
-        }, false);
+        });
     }
 
     void finishScan(ppgu::library::ScanReport report)
