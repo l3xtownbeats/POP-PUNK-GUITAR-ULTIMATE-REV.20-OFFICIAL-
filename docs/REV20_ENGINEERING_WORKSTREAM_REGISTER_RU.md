@@ -122,3 +122,33 @@
 - PR #15 MELODY scale-snap behavior conflicts with AutoChords-in-PATTERN-only rule.
 - Old 10/20/50/102 theme galleries, skin-001 remaps and NEON FORGE rename conflict with the 16-theme immutable identity contract.
 - PR #54 whole merge conflicts with NEON STAGE DEFAULT and legacy theme count; only safely separable UI behaviour may be reviewed separately.
+
+
+## 7. Additional source-main DSP work ported selectively
+
+### Live AMP TONE / EQ frequency / compressor amount wiring
+
+Source main commits 7ec945b73f0cb94de1e2d77ea10595ec88f93a12 and 8e51fa5d2acd0dbd7f2cdb115c85da337df49e43 added live DSP use of the existing parameters:
+
+- eqLowFreq / eqHighFreq now control the low/high one-pole crossover frequencies instead of fixed 250 Hz / 2500 Hz cutoffs.
+- The AMP TONE parameter controls an independent high-band tilt and remains active when the 3-band EQ is bypassed.
+- EQ bypass uses unity band gains rather than bypassing the independent AMP TONE stage.
+- Compressor Amount is snapshotted once per audio block, outside the sample loop, and controls dry/processed gain blend rather than always applying 100% compression.
+- Source test tests/test_fx_dsp_parameter_wiring.py guards declarations, DSP consumption and the no-per-sample APVTS atomic read.
+
+These existing APVTS IDs are already present in REV.20. The DSP block and its wiring test were selectively ported into REV.20 and registered as a CTest target. This code requires a new exact-SHA Windows build/CTest result; until then status is PORTED, TARGET TEST PENDING. No new APVTS IDs are introduced.
+
+### NEON STAGE approved mockup source of truth
+
+Source commit 8f097e00b426b1dee8d74c9be4394575ea655cd0 records the approved NEON STAGE main screenshot (01) as the binding visual source. References 02–07 specify AutoChords, FX EDIT and floating/multi-window states. The SVG banner is branding only and must never replace the actual interface reference. REV.20 README header uses the PNG reference, and the six supporting image references exist in the target repo.
+
+
+### REV.20 target verification update — 2026-11-20
+
+- PR #2 PageCache rollback fix is now **REV.20 CI PASS** on exact SHA `974c5877d1a0375100539d2513329a38feb84871`, workflow 44719521911; full CTest 15/15 passed including the new exact-key rollback tests.
+- The next staged task is the live AMP TONE / EQ crossover / compressor Amount DSP slice. It has been ported in code and guarded by a Python test registered in CTest, but awaits the next target exact-SHA build/CTest.
+
+
+### Live DSP parameter wiring — ported into REV.20
+
+The source-main DSP block implementing live EQ crossover frequencies, independent AMP TONE high-band tilt and Compressor Amount dry/processed blend is now present in REV.20. A Python CTest guard is registered as `ppgu_fx_dsp_parameter_wiring`. Existing APVTS IDs are unchanged. Target verification remains pending; expected CTest total is 16 after this new target.

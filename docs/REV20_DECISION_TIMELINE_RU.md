@@ -158,3 +158,13 @@ Run [44717722638](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.2
 ## 2026-11-20 — PageCache publish rollback from source PR #2 ported
 
 REV.20 selectively ports the exact-key rollback fix and regression tests. Invalid page geometry releases only the slot reservation whose PageKey still matches; stale/mismatched worker operations cannot cancel a newer reservation. The target build/CTest for this patch is still pending.
+
+
+## 2026-11-20 — PageCache correction passes on exact REV.20 target
+
+Run [44719521911](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44719521911) on SHA `974c5877d1a0375100539d2513329a38feb84871` completed SUCCESS: Windows x64 configure/build, full CTest 15/15, 16-skin exact registry/PNG/SVG validation, 16-only package and artifact upload. PageCache invalid-geometry rollback and stale-key regression were included in the passing target suite. Artifact `14620284899`, SHA-256 `59b87d1caaa6aaf3b72b89edce6fd2311c23d673960b0c5459658e1a1aab0f30`.
+
+
+## 2026-11-20 — live AMP TONE / EQ Frequency / Compressor Amount DSP slice
+
+Selective port from source main: eqLowFreq/eqHighFreq now control crossover cutoff; AMP TONE independently tilts high band and remains active when 3-band EQ is bypassed; Compressor Amount is block-snapshotted outside the sample loop and blends dry/processed gain. Existing APVTS IDs retained. Added `tests/test_fx_dsp_parameter_wiring.py` and CTest registration. Previous target commit `974c5877...` passed 15/15 tests; this addition raises the suite to 16 and requires the next exact-SHA Windows run.

@@ -112,3 +112,18 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Artifact: `PPGU-REV20-Windows-x64-VST3`, ID `14621145514`, 5,855,768 bytes, digest `sha256:e1dead01c61d7ace25362bc4c76dc55a03280ada746f9c242c39841d406ff006`.
 - Following this verified loader/package gate, all 16 registry entries are marked `runtimeReady=true` and selectable in the REV.20 skin gallery. This is not FL Studio 20 host acceptance or pluginval.
 - Selectively ported source PR #2 page-cache correction: invalid decoded page geometry releases only the reservation with the exact current PageKey; a stale mismatched worker key cannot clear another live load. Added CTest coverage. Target exact-SHA rerun pending.
+
+
+## 2026-11-20 — PAGE CACHE CORRECTION GREEN ON EXACT REV.20 SHA
+- Workflow [44719521911](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44719521911) on target SHA `974c5877d1a0375100539d2513329a38feb84871` completed SUCCESS.
+- Windows 2022 x64 configure, VST3 and all C++ test targets: PASS.
+- Full CTest: 15/15 PASS. The PageCache invalid-page rollback and stale-PageKey regression cases passed on REV.20.
+- Exact 16-skin validator: PASS. Package staging: exactly 16 registry-referenced shells, five artwork assets each, legacy/unregistered folders excluded. Combined VST3+Skins artifact uploaded.
+- Artifact `PPGU-REV20-Windows-x64-VST3`, ID `14620284899`, size 5,857,503 bytes, SHA-256 `59b87d1caaa6aaf3b72b89edce6fd2311c23d673960b0c5459658e1a1aab0f30`.
+- Separately prepared DSP improvements from source main (live EQ cutoff, AMP TONE tilt, compressor amount blend) are being added next, with a new CTest guard. They have not yet passed a REV.20 exact-SHA test.
+
+
+## 2026-11-20 — selective DSP port included in next target revision
+- The latest source-main AMP TONE / EQ crossover / compressor amount implementation is now selectively ported in `Source/PluginProcessor.cpp` with a dedicated test `tests/test_fx_dsp_parameter_wiring.py` registered in CTest.
+- Existing APVTS IDs only: `eqLowFreq`, `eqHighFreq`, `tone`, `compressorAmount`; no new IDs. EQ cutoffs are live; AMP TONE is independent of EQ bypass; compressor amount is snapshotted once per block outside the sample loop and blends processed/dry gain.
+- Previous target SHA 974c5877… has already passed 15/15 CTest including PageCache correction. The new DSP test increases target CTest count to 16; run the new exact SHA before marking DSP wiring VERIFIED.

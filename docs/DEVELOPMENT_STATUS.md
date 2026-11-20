@@ -112,3 +112,21 @@ Static validation utilities and focused contract tests may be used for engineeri
 - Exact-key rollback fix and regression cases have been added to the next target integration commit.
 - Invalid page geometry now returns the matching loading reservation to empty only after confirming that the slot still contains the same PageKey. A stale worker with a mismatched key must not reset a newer reservation.
 - Await exact-SHA Windows build/CTest after this current patch is pushed.
+
+
+## PageCache publish rollback — target exact-SHA verified
+
+Workflow [44719521911](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44719521911) on `974c5877d1a0375100539d2513329a38feb84871` completed SUCCESS. Windows x64 VST3 build, full CTest 15/15, exact 16-skin validator, 16-only package staging and artifact upload all passed. This run includes the PageCache invalid geometry rollback and stale PageKey regression tests.
+
+Artifact ID `14620284899`, size 5,857,503 bytes, SHA-256 `59b87d1caaa6aaf3b72b89edce6fd2311c23d673960b0c5459658e1a1aab0f30`.
+
+## Next code slice — live AMP TONE / EQ Frequency / Compressor Amount
+
+Selective source-main DSP patch and automated CTest guard are staged for the next commit. They add no APVTS IDs. New target build/CTest is required; do not mark this slice verified until it passes.
+
+
+## DSP parameter wiring — PORTED, exact-SHA validation pending
+
+- Live eqLowFreq / eqHighFreq crossover, AMP TONE high-band tilt, and compressorAmount dry/processed blend have been added to the existing processor DSP block.
+- New Python test checks parameter declaration + consumption and that compressor Amount is not loaded inside the per-sample loop; registered with CTest. Expected CTest count is now 16.
+- Previous commit 974c5877… remains green at 15/15 including PageCache fix; the new DSP patch requires its own successful exact-SHA build and 16/16 CTest run.

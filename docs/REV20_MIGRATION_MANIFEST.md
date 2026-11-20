@@ -70,3 +70,17 @@ These code changes were validated on REV.20 exact SHA `8cfd11ecce3c8039360c1c194
 - Selectively integrated only the corrected PageCacheSlots::publish() state handling and regression coverage.
 - After the worker's slot and PageKey are confirmed, invalid channels/frames cause a CAS rollback loading→empty for that reservation. Mismatched/stale PageKeys return false without touching the active reservation.
 - Current REV.20 build/CTest for this correctness patch is still pending; do not inherit source PR results as target evidence.
+
+
+## PageCache rollback exact-SHA evidence — 2026-11-20
+
+- Workflow [44719521911](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44719521911), SHA `974c5877d1a0375100539d2513329a38feb84871`: SUCCESS.
+- The new invalid-page-geometry and stale-worker-PageKey rollback regression cases passed as part of full CTest (15/15). Windows VST3 build, 16-skin validation, exact 16-only package staging and artifact upload also passed.
+- Artifact 14620284899 / SHA-256 `59b87d1caaa6aaf3b72b89edce6fd2311c23d673960b0c5459658e1a1aab0f30`.
+
+
+## Live AMP TONE / EQ / compressor DSP correction — 2026-11-20
+
+- Source-main DSP behavior is now selectively ported into REV.20 `Source/PluginProcessor.cpp`.
+- Existing `eqLowFreq` / `eqHighFreq` APVTS values now drive EQ cutoffs; `tone` applies independent high-band tilt; EQ bypass leaves this tone stage active; `compressorAmount` controls dry/processed blend and is loaded once per block, outside the per-sample loop.
+- New Python wiring test is registered with CTest; exact target build/test is pending after this code commit. No APVTS IDs were added or renamed.
