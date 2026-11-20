@@ -103,7 +103,7 @@ for state,box in toggle_boxes.items():
     im=add_glow(im,lambda d,c:d.rounded_rectangle((x1+9,y1+36,x2-9,y2-36),radius=64,outline=c,width=7),glow,8)
     d=ImageDraw.Draw(im)
     d.rounded_rectangle((x1+9,y1+36,x2-9,y2-36),radius=64,fill=rgba("#07111E"),outline=rgba(P["metal_border"] if is_on else "#53677A"),width=3)
-    label(d,(x1+35,y1+60,x1+130,y1+110),state, P["text"] if is_on else P["dim"],22)
+    # State text is supplied by the live JUCE button label, not baked into the atlas.
     cx=x2-105 if is_on else x1+105
     d.ellipse((cx-52,y1+33,cx+52,y1+137),fill=rgba("#263B50"),outline=rgba("#D7F7FF"),width=3)
     d.ellipse((cx-40,y1+45,cx+40,y1+125),fill=rgba(P["glow_cyan"] if is_on else "#586C80"),outline=rgba(P["metal_border"]),width=2)
