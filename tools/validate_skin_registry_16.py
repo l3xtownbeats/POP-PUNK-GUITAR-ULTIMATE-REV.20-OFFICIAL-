@@ -163,8 +163,18 @@ def main() -> int:
     if controls.get("toggle_switch", {}).get("states", {}).get("OFF", {}).get("bbox") != [65, 430, 465, 600] \
             or controls.get("toggle_switch", {}).get("states", {}).get("ON", {}).get("bbox") != [535, 430, 935, 600]:
         raise SystemExit("FAIL: NEON STAGE toggle switch atlas bounds mismatch")
-    if set(controls.get("buttons", {}).get("states", {})) != {"normal", "hover", "pressed", "active"}:
-        raise SystemExit("FAIL: NEON STAGE button state atlas is incomplete")
+    expected_buttons = {
+        "normal": [25, 690, 250, 815],
+        "hover": [265, 690, 490, 815],
+        "pressed": [505, 690, 730, 815],
+        "active": [745, 690, 970, 815],
+    }
+    actual_buttons = {
+        key: value.get("bbox")
+        for key, value in controls.get("buttons", {}).get("states", {}).items()
+    }
+    if actual_buttons != expected_buttons:
+        raise SystemExit("FAIL: NEON STAGE button state atlas bounds mismatch")
     if sheets["neon_stage_meters_sliders_sheet.png"]["elements"].get("vu_meters", {}).get("levels_count") != 8:
         raise SystemExit("FAIL: NEON STAGE VU meter must contain exactly eight levels")
     if len(sheets["neon_stage_icons_sheet.png"]["elements"].get("fx_icons", [])) != 7 \
