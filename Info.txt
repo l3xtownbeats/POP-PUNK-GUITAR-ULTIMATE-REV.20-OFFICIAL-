@@ -58,3 +58,9 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Updated library baseline: BASIC 15 GB included + EXPANDED +15 GB optional (initial combined total 30 GB); the 500 core presets (250 MELODY + 250 PATTERN) must work from BASIC alone. PATTERN presets are distributed across PATTERN windows/sections/functions, not one flat list.
 - A dedicated `.github/workflows/rev20-windows-vst3-skin-validation.yml` now runs on relevant `main` pushes: exact-SHA Windows x64 configure/build, full CTest, 16-skin asset/registry validator and VST3 artifact upload. Its first run on this update must be observed before declaring REV.20 build verified.
 - Following gates: pluginval strictness 5, 100/125/150% DPI, 150 ms/ECO/memory checks and FL Studio 20 preview/apply/cancel/persistence/audio-state checks. Until those host/runtime gates pass, SKIN-2…16 are artwork-approved and source-CI-verified, not host-verified in REV.20.
+
+
+## 2026-11-20 — REV.20 exact-SHA Windows build diagnostic 001
+- Workflow [44707491026](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44707491026) on SHA `38796efe971847cd7b3d9f843995ed3e45f3c8de`: Windows runner allocation, checkout, Python setup, JUCE 7.0.12 checkout and CMake configure all passed.
+- VST3 build stage failed in `tests/ThemeManagerTests.cpp`: JUCE `var == false` comparison was ambiguous (C2666). Product/editor sources compiled in the processor-pattern test target; final overall build did not pass, and CTest/artifact upload were skipped.
+- Corrected the assertion to use explicit boolean conversion and corrected the PNG signature bytes in the strict asset validator. New exact-SHA run is required; do not count the failed run as a successful build.

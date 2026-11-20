@@ -29,7 +29,7 @@ EXPECTED = [
 
 def validate_png(path: Path, expected_size: tuple[int, int]) -> None:
     data = path.read_bytes()
-    if not data.startswith(b"\\x89PNG\\r\\n\\x1a\\n"):
+    if not data.startswith(b"\x89PNG\r\n\x1a\n"):
         raise SystemExit(f"FAIL: invalid PNG signature: {path}")
     offset = 8
     dimensions = None

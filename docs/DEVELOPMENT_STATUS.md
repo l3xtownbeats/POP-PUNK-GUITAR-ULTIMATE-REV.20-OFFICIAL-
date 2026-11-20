@@ -62,3 +62,10 @@ Static validation utilities and focused contract tests may be used for engineeri
 - This workflow was added in the current consolidation sequence; its exact latest-SHA run is pending until a completed Actions result is observed.
 - `pluginval` strictness 5, package distribution checks, DPI 100/125/150% and FL Studio 20 host acceptance are not covered by this initial CI job and remain explicit release gates.
 - The one-time consolidation workflow and importer were removed after the migration commit.
+
+
+## Latest exact-SHA diagnostic (2026-11-20)
+
+- Run [44707491026](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44707491026) on SHA `38796efe971847cd7b3d9f843995ed3e45f3c8de`: Windows runner and CMake configure passed; build failed on ambiguous JUCE `var == false` in the newly expanded ThemeManager test. CTest, skin validator and VST3 upload were skipped.
+- Fixed the test to explicitly convert `runtimeReady` to bool. Fixed the strict PNG signature parser to compare the real PNG signature bytes. These changes are being pushed and require a new Windows run.
+- No successful REV.20 VST3 build/CTest is claimed yet.

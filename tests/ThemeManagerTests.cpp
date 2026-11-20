@@ -79,7 +79,7 @@ int main()
                        id + " preview artwork is present while runtime remains gated");
                 expect(manifest.getChildFile("assets/hero.png").existsAsFile(),
                        id + " hero artwork is present while runtime remains gated");
-                expect(entry.getProperty("runtimeReady", true) == false,
+                expect(!static_cast<bool>(entry.getProperty("runtimeReady", true)),
                        id + " is not selectable before REV.20 runtime acceptance");
             }
         }
