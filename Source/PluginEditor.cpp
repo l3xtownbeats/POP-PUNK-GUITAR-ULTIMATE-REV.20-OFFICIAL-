@@ -2,6 +2,7 @@
 #include "UI/SkinGallerySelection.h"
 #include "PluginEditor.h"
 #include "PPGUData.h"
+#include "UI/PPGUControlState.h"
 
 #include <algorithm>
 #include <cmath>
@@ -1154,7 +1155,7 @@ private:
     juce::TextButton preview, apply, cancel;
 };
 
-class PPGUChordDiagram final : public juce::Component
+class PPGUChordDiagram final : public juce::Component, public PPGUThemeAwarePanel
 {
 public:
     PPGUChordDiagram() = default;
@@ -1162,6 +1163,20 @@ public:
     void setPalette(const PPGUThemeManager::Palette& value)
     {
         palette = value;
+        repaint();
+    }
+
+    void setThemePalette(const PPGUThemeManager::Palette& value) override
+    {
+        setPalette(value);
+    }
+
+    // fret values: -1 = muted, 0 = open, 1..4 = fretted within this diagram.
+    void setVoicing(const juce::String& name, const std::array<int, 6>& positions)
+    {
+        chordName = name.isNotEmpty() ? name : "UNNAMED";
+        for (size_t i = 0; i < frets.size(); ++i)
+            frets[i] = juce::jlimit(-1, 4, positions[i]);
         repaint();
     }
 
@@ -1179,7 +1194,7 @@ public:
         g.drawText("REFERENCE VOICING", heading.removeFromTop(15), juce::Justification::centredLeft);
         g.setColour(palette.token("accent"));
         g.setFont(makeThemeFont(palette, 11.0f, false, true));
-        g.drawText("A MAJ  /  EXAMPLE", heading.removeFromTop(17), juce::Justification::centredLeft);
+        g.drawText(chordName, heading.removeFromTop(17), juce::Justification::centredLeft);
 
         const auto grid = getLocalBounds().reduced(20, 42);
         if (grid.getWidth() < 40 || grid.getHeight() < 35)
@@ -1187,7 +1202,6 @@ public:
 
         constexpr int stringCount = 6;
         constexpr int fretCount = 4;
-        constexpr std::array<int, stringCount> frets { 0, 0, 2, 2, 2, 0 };
         const float dx = static_cast<float>(grid.getWidth()) / static_cast<float>(stringCount - 1);
         const float dy = static_cast<float>(grid.getHeight()) / static_cast<float>(fretCount);
 
@@ -1212,12 +1226,19 @@ public:
             g.drawLine(x, y1, x, y2, 1.15f);
 
             const int fret = frets[static_cast<size_t>(stringIndex)];
-            if (fret == 0)
+            if (fret < 0)
+            {
+                g.setColour(palette.token("danger"));
+                g.setFont(makeThemeFont(palette, 9.0f, false, true));
+                g.drawText("X", juce::Rectangle<int>(juce::roundToInt(x - 5.0f),
+                    juce::roundToInt(y1 - 15.0f), 10, 12), juce::Justification::centred);
+            }
+            else if (fret == 0)
             {
                 g.setColour(palette.token("text_secondary"));
                 g.drawEllipse(x - 3.0f, y1 - 9.0f, 6.0f, 6.0f, 1.0f);
             }
-            else if (fret > 0 && fret <= fretCount)
+            else if (fret <= fretCount)
             {
                 const float y = y1 + (static_cast<float>(fret) - 0.5f) * dy;
                 g.setColour(palette.token("accent_glow").withAlpha(0.28f));
@@ -1232,6 +1253,8 @@ public:
 
 private:
     PPGUThemeManager::Palette palette;
+    juce::String chordName { "A MAJ  /  REFERENCE" };
+    std::array<int, 6> frets {{ 0, 0, 2, 2, 2, 0 }};
 };
 
 class PPGUAutoChordsPanel final : public juce::Component, public PPGUThemeAwarePanel
