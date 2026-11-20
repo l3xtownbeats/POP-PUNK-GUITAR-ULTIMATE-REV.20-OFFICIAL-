@@ -15,6 +15,9 @@
 - SFZ text is not parsed in this phase; WAV content is not classified musically.
 - Filename, extension and hash do not prove guitar identity, technique, musical quality, ownership or distribution rights.
 - This is a local inventory tool, not an AI sound classifier or licence verifier.
+- SHA-256 uses JUCE Cryptography and is capped at 128 MiB per file / 512 MiB per scan; files over budget remain inventoried with a hash-skipped status.
+
+Settings also shows read-only host telemetry: active sample rate, last processed block size and prepared maximum block size. The DAW remains the only place to change buffer settings.
 
 ## Curator
 Curator remains disabled. It needs persistent review metadata, provenance, manual musical review and explicit licence evidence before factory promotion. The scanner never sets `LICENSE_APPROVED`.
