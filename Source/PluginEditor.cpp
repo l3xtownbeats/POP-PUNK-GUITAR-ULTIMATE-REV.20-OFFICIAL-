@@ -940,8 +940,8 @@ private:
 class PPGUFXEditPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
 public:
-    explicit PPGUFXEditPanel(juce::AudioProcessorValueTreeState& state, int initialEffect)
-        : apvts(state)
+    explicit PPGUFXEditPanel(PopPunkGuitarUltimateAudioProcessor& source, int initialEffect)
+        : apvts(source.parameters), outputMeter(source)
     {
         groups = {
             { "COMPRESSOR", "compressorOn", { { "THRESHOLD", "compressorThreshold" }, { "RATIO", "compressorRatio" }, { "ATTACK", "compressorAttack" }, { "RELEASE", "compressorRelease" }, { "AMOUNT", "compressorAmount" } } },
@@ -974,6 +974,7 @@ public:
         status.setText("Controls are attached to the existing APVTS parameters.", juce::dontSendNotification);
         status.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(status);
+        addAndMakeVisible(outputMeter);
 
         for (size_t groupIndex = 0; groupIndex < groups.size(); ++groupIndex)
         {
@@ -1010,6 +1011,7 @@ public:
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
         graphCaption.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         status.setColour(juce::Label::textColourId, palette.token("text_secondary"));
+        outputMeter.setPalette(palette);
         effectSelector.setColour(juce::ComboBox::backgroundColourId, palette.token("control_bg"));
         effectSelector.setColour(juce::ComboBox::textColourId, palette.token("text_primary"));
         effectSelector.setColour(juce::ComboBox::outlineColourId, palette.token("control_border"));
@@ -1029,6 +1031,13 @@ public:
             control.slider->setColour(juce::Slider::textBoxOutlineColourId, palette.token("control_border"));
         }
         repaint();
+    }
+
+    void setSelectedGroup(int index)
+    {
+        selectedGroup = juce::jlimit(0, static_cast<int>(groups.size()) - 1, index);
+        effectSelector.setSelectedId(selectedGroup + 1, juce::dontSendNotification);
+        selectGroup(selectedGroup);
     }
 
     void paint(juce::Graphics& g) override
@@ -1068,9 +1077,18 @@ public:
         graphCaption.setBounds(top);
         const int graphHeight = getHeight() >= 600 ? 140 : (getHeight() >= 500 ? 90 : 0);
         graphCaption.setVisible(graphHeight > 0);
-        graphArea = graphHeight > 0
-            ? area.removeFromBottom(graphHeight).reduced(4, 8)
-            : juce::Rectangle<int>{};
+        if (graphHeight > 0)
+        {
+            auto graphAndMeter = area.removeFromBottom(graphHeight).reduced(4, 8);
+            outputMeter.setBounds(graphAndMeter.removeFromRight(62));
+            graphArea = graphAndMeter;
+        }
+        else
+        {
+            graphArea = {};
+            outputMeter.setBounds({});
+        }
+        outputMeter.setVisible(graphHeight > 0);
         status.setBounds(area.removeFromBottom(24));
         area.removeFromBottom(8);
         const int visibleCount = static_cast<int>(std::count_if(controls.begin(), controls.end(),
@@ -1124,6 +1142,7 @@ private:
     }
     PPGUThemeManager::Palette palette;
     juce::AudioProcessorValueTreeState& apvts;
+    PPGUOutputMeter outputMeter;
     std::vector<Group> groups;
     std::vector<Control> controls;
     juce::Label title, graphCaption, status;
