@@ -16,6 +16,12 @@ The Skin-1 editor canvas now composites the existing local artwork in this order
 
 The full stack is drawn only on the main Skin-1 canvas. Floating panels continue to use their existing compact surfaces so the full-screen layers are not repeatedly redrawn into child windows.
 
+## Gallery preview and remaining artwork gate
+
+- The Skin-1 gallery card now uses `assets/background/main.png` instead of the legacy green `assets/preview.png` placeholder.
+- `assets/hero.png` is still a legacy placeholder and is not treated as final premium hero artwork.
+- The large `Meshy_AI_*` PNG sheets from `SKINS-THEME-` are not copied into this phase: their binary payloads were not available through the repository connector for visual inspection and checksum/license review. The reference JPEGs are composite UI mockups, not isolated production controls.
+
 ## Runtime and package contract
 
 - All PNG files are loaded from the local theme directory by `PPGUThemeManager` on the UI/message thread.
