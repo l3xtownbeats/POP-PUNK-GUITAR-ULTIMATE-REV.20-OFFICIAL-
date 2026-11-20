@@ -1,6 +1,17 @@
 name: NEON STAGE native integration CI
 
 on:
+  push:
+    branches:
+      - feat/neon-stage-manager-3-native-integration
+    paths:
+      - "CMakeLists.txt"
+      - "Source/**"
+      - "tests/**"
+      - "SKIN/**"
+      - "tools/package_active_skins.py"
+      - "tools/validate_skin_registry_16.py"
+      - ".github/workflows/neon-stage-native-ci.yml"
   pull_request:
     branches:
       - main
