@@ -811,6 +811,96 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
             resetToDefault();
             return false;
         }
+
+        const auto controlManifestFile = themeRoot.getChildFile("assets/controls/control_states_manifest.json");
+        if (!controlManifestFile.existsAsFile() || !controlManifestFile.isAChildOf(themeRoot)
+            || controlManifestFile.isSymbolicLink()
+            || controlManifestFile.getSize() <= 0 || controlManifestFile.getSize() > 512 * 1024)
+        {
+            lastError = "NEON STAGE control-state manifest is missing or unsafe";
+            resetToDefault();
+            return false;
+        }
+        const auto controlManifest = juce::JSON::parse(controlManifestFile.loadFileAsString());
+        const auto statesVar = controlManifest.getProperty("states", juce::var());
+        const auto idsVar = controlManifest.getProperty("controlIds", juce::var());
+        const auto recordsVar = controlManifest.getProperty("records", juce::var());
+        const auto* states = statesVar.getArray();
+        const auto* ids = idsVar.getArray();
+        const auto* records = recordsVar.getArray();
+        const juce::StringArray requiredStates { "default", "hover", "pressed", "disabled", "dragged" };
+        juce::StringArray requiredIds {
+            "preset_browser", "mode_selector", "knob01", "knob02", "knob03",
+            "knob04", "knob05", "knob06", "knob07", "knob08", "knob09",
+            "fx_switch01", "fx_switch02", "fx_switch03", "fx_switch04",
+            "fx_switch05", "fx_switch06", "fx_switch07", "midi_keyboard",
+            "LCD_display", "LED_indicator", "SKIN_button", "Import_Guitar",
+            "Auto_Discover", "Curator", "Settings", "About"
+        };
+        if (controlManifest.getProperty("schemaVersion", "").toString() != "1.0.0"
+            || controlManifest.getProperty("skinId", "").toString() != "skin-053"
+            || states == nullptr || ids == nullptr || records == nullptr
+            || states->size() != 5 || ids->size() != 27 || records->size() != 135)
+        {
+            lastError = "NEON STAGE control-state manifest has an invalid schema or record count";
+            resetToDefault();
+            return false;
+        }
+        juce::StringArray actualStates, actualIds;
+        for (const auto& value : *states) actualStates.add(value.toString());
+        for (const auto& value : *ids) actualIds.add(value.toString());
+        actualStates.sort(false);
+        requiredStates.sort(false);
+        actualIds.sort(false);
+        requiredIds.sort(false);
+        if (actualStates != requiredStates || actualIds != requiredIds)
+        {
+            lastError = "NEON STAGE control-state manifest IDs/states do not match the approved contract";
+            resetToDefault();
+            return false;
+        }
+
+        std::map<std::string, juce::Image> decodedControlStates;
+        for (const auto& record : *records)
+        {
+            const auto controlId = record.getProperty("controlId", "").toString();
+            const auto state = record.getProperty("state", "").toString();
+            const auto relativePath = record.getProperty("runtime", "").toString();
+            if (!actualIds.contains(controlId) || !requiredStates.contains(state)
+                || !relativePath.startsWith("assets/controls/"))
+            {
+                lastError = "NEON STAGE control-state record contains an unknown ID, state or path";
+                resetToDefault();
+                return false;
+            }
+            const auto key = (controlId + "|" + state).toStdString();
+            if (decodedControlStates.find(key) != decodedControlStates.end())
+            {
+                lastError = "NEON STAGE control-state manifest contains a duplicate record";
+                resetToDefault();
+                return false;
+            }
+            juce::Image decoded;
+            if (!loadSafePngArtwork(themeRoot, relativePath, 256, 256, decoded, error))
+            {
+                lastError = error.isNotEmpty() ? error : "NEON STAGE control-state image failed validation";
+                resetToDefault();
+                return false;
+            }
+            decodedControlStates.emplace(key, decoded.rescaled(128, 128, juce::Graphics::highResamplingQuality));
+        }
+        if (decodedControlStates.size() != 135)
+        {
+            lastError = "NEON STAGE control-state image set is incomplete";
+            resetToDefault();
+            return false;
+        }
+        candidate.controlStateArtwork = std::move(decodedControlStates);
+        {
+            lastError = error.isNotEmpty() ? error : "NEON STAGE sprite atlas or premium artwork manifest is incomplete";
+            resetToDefault();
+            return false;
+        }
     }
 
     activePalette = std::move(candidate);
