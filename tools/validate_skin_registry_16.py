@@ -134,6 +134,9 @@ def main() -> int:
             raise SystemExit(f"FAIL: missing NEON STAGE sprite atlas: {atlas_path}")
         validate_png(atlas_path, (1024, 1024))
     atlas_manifest_path = atlas_dir / "neon_stage_spritesheet_manifest.json"
+    default_theme = json.loads((SKIN / "Skin_053" / "theme.json").read_text(encoding="utf-8"))
+    if default_theme.get("assets", {}).get("spriteSheetManifest") != "assets/spritesheets/neon_stage_spritesheet_manifest.json":
+        raise SystemExit("FAIL: NEON STAGE theme manifest does not reference the atlas manifest")
     if not atlas_manifest_path.is_file():
         raise SystemExit("FAIL: missing NEON STAGE sprite atlas manifest")
     atlas_manifest = json.loads(atlas_manifest_path.read_text(encoding="utf-8"))
