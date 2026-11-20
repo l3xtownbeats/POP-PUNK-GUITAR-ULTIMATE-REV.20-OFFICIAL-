@@ -35,6 +35,7 @@ public:
 private:
     void chooseSfzFile(juce::Label* panelStatus = nullptr, juce::Button* panelLoadButton = nullptr);
     void openImportGuitarPanel();
+    void openAutoSoundHunterPanel();
     void openFxEditPanel(int selectedEffect);
     void openAutoChordsPanel();
     void openPatternSectionPanel();

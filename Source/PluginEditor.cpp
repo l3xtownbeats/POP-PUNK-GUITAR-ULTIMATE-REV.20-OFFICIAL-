@@ -574,6 +574,173 @@ private:
     juce::TextButton restoreButton, galleryButton;
 };
 
+// Read-only local sample inventory. It does not infer musical role or licence approval.
+class PPGULibraryDiscoveryPanel final : public juce::Component, public PPGUThemeAwarePanel
+{
+public:
+    PPGULibraryDiscoveryPanel()
+    {
+        title.setText("AUTO SOUND HUNTER  /  LOCAL INVENTORY", juce::dontSendNotification);
+        addAndMakeVisible(title);
+        description.setText("Read-only WAV/SFZ scan. No source files are modified; every candidate remains unreviewed.",
+                            juce::dontSendNotification);
+        addAndMakeVisible(description);
+        rootLabel.setText("Select a local sample folder.", juce::dontSendNotification);
+        addAndMakeVisible(rootLabel);
+        chooseButton.setButtonText("CHOOSE FOLDER");
+        scanButton.setButtonText("SCAN (READ ONLY)");
+        addAndMakeVisible(chooseButton);
+        addAndMakeVisible(scanButton);
+        status.setText("No scan has been run.", juce::dontSendNotification);
+        addAndMakeVisible(status);
+        results.setMultiLine(true);
+        results.setReadOnly(true);
+        results.setScrollbarsShown(true);
+        results.setReturnKeyStartsNewLine(false);
+        results.setTextToShowWhenEmpty("WAV/SFZ candidates will appear here.", palette.token("text_secondary"));
+        addAndMakeVisible(results);
+        chooseButton.onClick = [this] { chooseRoot(); };
+        scanButton.onClick = [this] { startScan(); };
+        setThemePalette(palette);
+    }
+
+    ~PPGULibraryDiscoveryPanel() override { scanPool.removeAllJobs(true, -1); }
+
+    void setThemePalette(const PPGUThemeManager::Palette& value) override
+    {
+        palette = value;
+        title.setFont(makeThemeFont(palette, 17.0f, false, true));
+        description.setFont(makeThemeFont(palette, 10.0f));
+        rootLabel.setFont(makeThemeFont(palette, 9.5f));
+        status.setFont(makeThemeFont(palette, 10.0f, false, true));
+        title.setColour(juce::Label::textColourId, palette.token("text_primary"));
+        description.setColour(juce::Label::textColourId, palette.token("text_secondary"));
+        rootLabel.setColour(juce::Label::textColourId, palette.token("lcd_text"));
+        status.setColour(juce::Label::textColourId, palette.token("accent"));
+        results.setColour(juce::TextEditor::backgroundColourId, palette.token("lcd_bg"));
+        results.setColour(juce::TextEditor::textColourId, palette.token("text_primary"));
+        results.setColour(juce::TextEditor::outlineColourId, palette.token("control_border"));
+        chooseButton.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
+        chooseButton.setColour(juce::TextButton::textColourOffId, palette.token("text_primary"));
+        scanButton.setColour(juce::TextButton::buttonColourId, palette.token("accent"));
+        scanButton.setColour(juce::TextButton::textColourOffId, palette.token("window_bg"));
+        repaint();
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.30f, 0.025f);
+        g.setColour(palette.token("control_border"));
+        g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(8.0f), 9.0f, 1.0f);
+    }
+
+    void resized() override
+    {
+        auto area = getLocalBounds().reduced(18);
+        title.setBounds(area.removeFromTop(30));
+        description.setBounds(area.removeFromTop(36));
+        area.removeFromTop(8);
+        rootLabel.setBounds(area.removeFromTop(26));
+        auto actions = area.removeFromTop(38);
+        chooseButton.setBounds(actions.removeFromLeft(150));
+        actions.removeFromLeft(10);
+        scanButton.setBounds(actions.removeFromLeft(165));
+        area.removeFromTop(8);
+        status.setBounds(area.removeFromTop(26));
+        area.removeFromTop(5);
+        results.setBounds(area);
+    }
+
+private:
+    void chooseRoot()
+    {
+        folderChooser = std::make_unique<juce::FileChooser>(
+            "Choose a local sample folder", juce::File::getSpecialLocation(
+                juce::File::userHomeDirectory), juce::String(), true);
+        juce::Component::SafePointer<PPGULibraryDiscoveryPanel> safeThis(this);
+        folderChooser->launchAsync(
+            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories,
+            [safeThis](const juce::FileChooser& chooser)
+            {
+                if (safeThis == nullptr) return;
+                const auto selected = chooser.getResult();
+                if (selected.isDirectory() && !selected.isSymbolicLink())
+                {
+                    safeThis->root = selected;
+                    safeThis->rootLabel.setText(selected.getFullPathName(), juce::dontSendNotification);
+                    safeThis->status.setText("Folder selected. Press SCAN (READ ONLY).", juce::dontSendNotification);
+                    safeThis->results.clear();
+                }
+            });
+    }
+
+    void startScan()
+    {
+        if (!root.isDirectory())
+        {
+            status.setText("Choose an existing local folder first.", juce::dontSendNotification);
+            return;
+        }
+        chooseButton.setEnabled(false);
+        scanButton.setEnabled(false);
+        status.setText("Scanning local WAV/SFZ inventory on a worker thread...", juce::dontSendNotification);
+        results.clear();
+        const auto scanRoot = root;
+        juce::Component::SafePointer<PPGULibraryDiscoveryPanel> safeThis(this);
+        scanPool.addJob([safeThis, scanRoot]()
+        {
+            auto report = ppgu::library::LibraryDiscovery::scan(scanRoot);
+            juce::MessageManager::callAsync([safeThis, report = std::move(report)]() mutable
+            {
+                if (safeThis != nullptr) safeThis->finishScan(std::move(report));
+            });
+        }, false);
+    }
+
+    void finishScan(ppgu::library::ScanReport report)
+    {
+        chooseButton.setEnabled(true);
+        scanButton.setEnabled(true);
+        if (report.error.isNotEmpty())
+        {
+            status.setText("SCAN FAILED  /  " + report.error, juce::dontSendNotification);
+            return;
+        }
+        juce::String output;
+        const int displayCount = juce::jmin(250, static_cast<int>(report.candidates.size()));
+        for (int i = 0; i < displayCount; ++i)
+        {
+            const auto& item = report.candidates[static_cast<size_t>(i)];
+            const auto megabytes = static_cast<double>(item.fileBytes) / (1024.0 * 1024.0);
+            output << item.assetType << "  /  " << juce::String(megabytes, 2) << " MB\n"
+                   << item.relativePath << "\n"
+                   << "SHA-256: " << item.sha256 << "\n"
+                   << "Container: " << item.containerStatus
+                   << "  |  Review: " << item.reviewStatus
+                   << "  |  Licence: " << item.licenseStatus << "\n\n";
+        }
+        if (report.candidates.empty()) output = "No WAV/SFZ candidates were found under the selected folder.";
+        if (report.candidates.size() > static_cast<size_t>(displayCount))
+            output << "\nDisplay capped at " << displayCount << " items; inventory contains "
+                   << static_cast<int>(report.candidates.size()) << ".\n";
+        if (report.truncated)
+            output << "\nSCAN LIMIT REACHED — inventory is incomplete. Narrow the folder and scan again.\n";
+        results.setText(output, juce::dontSendNotification);
+        status.setText("Visited " + juce::String(static_cast<juce::int64>(report.entriesVisited))
+            + " entries  /  " + juce::String(static_cast<int>(report.candidates.size()))
+            + " WAV/SFZ candidates  /  ALL UNREVIEWED", juce::dontSendNotification);
+    }
+
+    PPGUThemeManager::Palette palette;
+    juce::File root;
+    juce::ThreadPool scanPool { 1 };
+    std::unique_ptr<juce::FileChooser> folderChooser;
+    juce::Label title, description, rootLabel, status;
+    juce::TextButton chooseButton, scanButton;
+    juce::TextEditor results;
+};
+
 // Import panel delegates to the existing asynchronous SFZ loader and reports its real result.
 class PPGUImportGuitarPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
@@ -1915,16 +2082,18 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     autoChordsButton.onClick = [this] { openAutoChordsPanel(); };
     addAndMakeVisible(autoChordsButton);
 
-    // Local discovery and curation remain gated until their safe backends are ready.
-    for (auto* unavailable : { &autoSoundHunterButton, &curatorButton })
-    {
-        unavailable->setEnabled(false);
-        unavailable->setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("lowlight"));
-        unavailable->setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_disabled"));
-        addAndMakeVisible(*unavailable);
-    }
-    autoSoundHunterButton.setTooltip("AUTO SOUND HUNTER is not implemented yet. No search or auto-import action is available.");
-    curatorButton.setTooltip("CURATOR is not implemented yet. No asset is marked approved.");
+    autoSoundHunterButton.setEnabled(true);
+    autoSoundHunterButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
+    autoSoundHunterButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
+    autoSoundHunterButton.setTooltip("Read-only local WAV/SFZ discovery. No import or licence approval.");
+    autoSoundHunterButton.onClick = [this] { openAutoSoundHunterPanel(); };
+    addAndMakeVisible(autoSoundHunterButton);
+
+    curatorButton.setEnabled(false);
+    curatorButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("lowlight"));
+    curatorButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_disabled"));
+    curatorButton.setTooltip("CURATOR remains gated until persistent, licence-aware review and approval is implemented.");
+    addAndMakeVisible(curatorButton);
 
     aboutButton.setEnabled(true);
     aboutButton.setTooltip("Plugin version, format and runtime information.");
@@ -2550,7 +2719,8 @@ void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette()
  for(auto* b:{&presetBox,&categoryBox,&modeBox,&startModeBox}){b->setColour(juce::ComboBox::backgroundColourId,p.token("control_bg"));b->setColour(juce::ComboBox::textColourId,p.token("text_primary"));b->setColour(juce::ComboBox::outlineColourId,p.token("control_border"));b->setColour(juce::ComboBox::arrowColourId,p.token("accent"));}
  presetSearch.setColour(juce::TextEditor::backgroundColourId,p.token("control_bg"));presetSearch.setColour(juce::TextEditor::textColourId,p.token("text_primary"));presetSearch.setColour(juce::TextEditor::outlineColourId,p.token("control_border"));presetSearch.setColour(juce::TextEditor::focusedOutlineColourId,p.token("highlight"));presetSearch.setColour(juce::TextEditor::highlightColourId,p.token("accent").withAlpha(.3f));
  loadButton.setColour(juce::TextButton::buttonColourId,p.token("accent"));loadButton.setColour(juce::TextButton::textColourOffId,p.token("window_bg"));settingsButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));settingsButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));skinButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setTooltip("Active skin: "+p.name+"  /  Ctrl+K");
- for (auto* unavailable : { &autoSoundHunterButton, &curatorButton }) { unavailable->setColour(juce::TextButton::buttonColourId,p.token("lowlight")); unavailable->setColour(juce::TextButton::textColourOffId,p.token("text_disabled")); unavailable->setEnabled(false); }
+  autoSoundHunterButton.setEnabled(true); autoSoundHunterButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated")); autoSoundHunterButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));
+  curatorButton.setEnabled(false); curatorButton.setColour(juce::TextButton::buttonColourId,p.token("lowlight")); curatorButton.setColour(juce::TextButton::textColourOffId,p.token("text_disabled"));
  aboutButton.setEnabled(true); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));
  for(auto* b:{&melodyTab,&patternTab}){b->setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b->setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b->setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b->setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
  for(auto& s:knobs){s.setColour(juce::Slider::rotarySliderFillColourId,p.token("accent"));s.setColour(juce::Slider::rotarySliderOutlineColourId,p.token("control_border"));s.setColour(juce::Slider::thumbColourId,p.token("text_primary"));s.setColour(juce::Slider::textBoxTextColourId,p.token("text_primary"));}
@@ -2670,6 +2840,26 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openAutoChordsPanel()
         spec.desired = { 900, 620 };
         spec.minimum = { 560, 420 };
         spec.content = std::make_unique<PPGUAutoChordsPanel>(processor.parameters);
+        if (!auxiliaryWorkspace->openPanel(std::move(spec)))
+            return;
+    }
+    auxiliaryWorkspace->setVisible(true);
+    auxiliaryWorkspace->toFront(false);
+}
+
+void PopPunkGuitarUltimateAudioProcessorEditor::openAutoSoundHunterPanel()
+{
+    if (auxiliaryWorkspace == nullptr)
+        return;
+    constexpr int discoveryPanelId = 2104;
+    if (!auxiliaryWorkspace->isPanelOpen(discoveryPanelId))
+    {
+        PPGUMultiWindowWorkspace::PanelSpec spec;
+        spec.id = discoveryPanelId;
+        spec.title = "AUTO SOUND HUNTER  /  LOCAL DISCOVERY";
+        spec.desired = { 820, 660 };
+        spec.minimum = { 500, 380 };
+        spec.content = std::make_unique<PPGULibraryDiscoveryPanel>();
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }

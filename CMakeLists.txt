@@ -74,6 +74,7 @@ target_sources(PPGU PRIVATE
     Source/UI/ThemeManager.cpp
     Source/UI/AuxiliaryPanelLayout.cpp
     Source/UI/PPGUMultiWindowWorkspace.cpp
+    Source/UI/PPGULibraryDiscovery.cpp
     Source/UI/PPGUStageSpriteSheet.cpp
     Source/UI/PPGUDiscoveryRadar.cpp)
 target_include_directories(PPGU PRIVATE Source Source/Sampler Source/Performance Source/UI)
@@ -126,6 +127,21 @@ target_include_directories(ppgu_panel_contracts PRIVATE Source/UI)
 # AutoChords: bounded scale-aware MIDI root-to-triad mapping.
 ppgu_add_test(ppgu_autochord_contracts tests/AutoChordGeneratorTests.cpp)
 target_include_directories(ppgu_autochord_contracts PRIVATE Source)
+
+# Read-only local WAV/SFZ discovery contract.
+juce_add_console_app(ppgu_library_discovery_contracts
+    PRODUCT_NAME "PPGU Library Discovery Contract Tests"
+    NEEDS_WEB_BROWSER FALSE
+    NEEDS_CURL FALSE)
+target_sources(ppgu_library_discovery_contracts PRIVATE
+    tests/LibraryDiscoveryTests.cpp
+    Source/UI/PPGULibraryDiscovery.cpp)
+add_test(NAME ppgu_library_discovery_contracts COMMAND ppgu_library_discovery_contracts)
+set_tests_properties(ppgu_library_discovery_contracts PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+target_include_directories(ppgu_library_discovery_contracts PRIVATE Source Source/UI)
+target_compile_definitions(ppgu_library_discovery_contracts PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
+target_link_libraries(ppgu_library_discovery_contracts PRIVATE juce::juce_core)
+juce_generate_juce_header(ppgu_library_discovery_contracts)
 
 # Gallery Preview/Apply/Cancel draft-state contract; no APVTS or skin ID changes.
 ppgu_add_test(ppgu_skin_gallery_selection_contracts tests/SkinGallerySelectionTests.cpp)
