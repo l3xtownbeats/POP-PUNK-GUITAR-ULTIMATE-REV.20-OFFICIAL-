@@ -1962,8 +1962,11 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
         b.setComponentID("fx_switch" + juce::String(static_cast<int>(i + 1)).paddedLeft('0', 2));
         b.onClick = [this, i]
         {
+            // The detail editor keeps FLANGER as an optional processor page,
+            // while the approved primary chain remains seven items.
+            static constexpr std::array<int, 7> detailGroups {{ 0, 1, 2, 3, 5, 6, 7 }};
             if (auto* panel = dynamic_cast<PPGUFXEditPanel*>(mainFxEdit.get()))
-                panel->setSelectedGroup(static_cast<int>(i));
+                panel->setSelectedGroup(detailGroups[i]);
         };
         addAndMakeVisible(b);
     }
