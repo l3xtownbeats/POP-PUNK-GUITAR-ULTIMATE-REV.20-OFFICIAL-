@@ -2133,6 +2133,10 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openSkinGalleryPanel()
             const auto assets = root.getProperty("assets", juce::var());
             auto previewRelative = assets.getProperty("preview", juce::var()).toString();
             if (previewRelative.isEmpty()) previewRelative = "assets/preview.png";
+            // Skin-1's legacy preview.png is a placeholder. Use its real high-resolution
+            // stage background in the gallery until dedicated hero/preview art is supplied.
+            if (candidate.getPalette().id == "skin-053")
+                previewRelative = "assets/background/main.png";
             if (!previewRelative.startsWith("/") && !previewRelative.contains(".."))
             {
                 const auto candidatePreview = manifest.getParentDirectory().getChildFile(previewRelative);
