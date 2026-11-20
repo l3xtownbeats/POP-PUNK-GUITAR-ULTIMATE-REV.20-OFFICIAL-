@@ -82,6 +82,7 @@ target_compile_definitions(PPGU PUBLIC ${PPGU_JUCE_DEFINITIONS})
 target_link_libraries(PPGU PRIVATE
     ppgu_sampler
     PPGUData
+    juce::juce_cryptography
     juce::juce_audio_utils
     juce::juce_dsp
     juce::juce_audio_formats
@@ -140,7 +141,7 @@ add_test(NAME ppgu_library_discovery_contracts COMMAND ppgu_library_discovery_co
 set_tests_properties(ppgu_library_discovery_contracts PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 target_include_directories(ppgu_library_discovery_contracts PRIVATE Source Source/UI)
 target_compile_definitions(ppgu_library_discovery_contracts PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
-target_link_libraries(ppgu_library_discovery_contracts PRIVATE juce::juce_core)
+target_link_libraries(ppgu_library_discovery_contracts PRIVATE juce::juce_core juce::juce_cryptography)
 juce_generate_juce_header(ppgu_library_discovery_contracts)
 
 # Gallery Preview/Apply/Cancel draft-state contract; no APVTS or skin ID changes.
