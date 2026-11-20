@@ -11,6 +11,7 @@ on:
       - "SKIN/**"
       - "tools/package_active_skins.py"
       - "tools/validate_skin_registry_16.py"
+      - "docs/**"
       - ".github/workflows/neon-stage-native-ci.yml"
   pull_request:
     branches:
@@ -22,6 +23,7 @@ on:
       - "SKIN/**"
       - "tools/package_active_skins.py"
       - "tools/validate_skin_registry_16.py"
+      - "docs/**"
       - ".github/workflows/neon-stage-native-ci.yml"
 
 permissions:
