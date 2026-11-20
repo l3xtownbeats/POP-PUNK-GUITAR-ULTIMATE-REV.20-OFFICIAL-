@@ -292,27 +292,27 @@
           ],
           "instances": {
             "long_slider": {
-              "bbox": [
+              "track_bbox": [
                 60,
                 445,
                 880,
                 467
-              ],
-              "thumb_center": [
-                568,
-                456
               ]
             },
             "short_slider": {
-              "bbox": [
+              "track_bbox": [
                 60,
                 570,
                 450,
                 592
-              ],
-              "thumb_center": [
-                301,
-                581
+              ]
+            },
+            "thumb": {
+              "bbox": [
+                910,
+                640,
+                942,
+                672
               ]
             }
           }
