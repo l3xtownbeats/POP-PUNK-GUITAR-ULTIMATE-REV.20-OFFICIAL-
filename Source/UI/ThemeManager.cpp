@@ -896,11 +896,6 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
             return false;
         }
         candidate.controlStateArtwork = std::move(decodedControlStates);
-        {
-            lastError = error.isNotEmpty() ? error : "NEON STAGE sprite atlas or premium artwork manifest is incomplete";
-            resetToDefault();
-            return false;
-        }
     }
 
     activePalette = std::move(candidate);
