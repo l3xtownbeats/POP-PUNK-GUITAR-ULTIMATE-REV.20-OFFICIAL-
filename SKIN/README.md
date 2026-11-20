@@ -1,10 +1,46 @@
-# REV.20 — 16 approved graphical shells
+# REV.20 — EXACTLY 16 APPROVED PREMIUM GRAPHICAL SHELLS
 
-Exactly 16 logical themes are approved: SKIN-1 through SKIN-16.
-SKIN-1 is NEON STAGE DEFAULT (skin-053). SKIN-2..SKIN-16 are the only other approved shells (skin-103..skin-117). No other theme batches or directories belong to the product.
+**Locked product count: 16 total. No more and no less.**
 
-Logical ordinals 1..16 are separate from immutable IDs/indices 53 and 103..117. Never renumber stable identities.
+- **SKIN-1 — NEON STAGE DEFAULT** is the principal/default shell and the visual identity of the plugin.
+- **SKIN-2 through SKIN-16** are the only 15 additional approved premium shells.
+- All 16 names and identities are fixed. Do not generate replacement names, extra themes, legacy galleries or 50/102-theme packs.
+- Logical ordinals 1…16 are separate from immutable source IDs/indices.
 
-Only runtimeReady=true entries may be selected. At consolidation, SKIN-1 has PNG preview/hero assets. SKIN-2..SKIN-16 have approved manifests and distinct SVG foundations; their PNG preview/hero and runtime verification remain pending.
+| Logical ordinal | Approved name | Stable ID | Stable index | Artwork assets in REV.20 |
+|---:|---|---|---:|---|
+| SKIN-1 | NEON STAGE DEFAULT | `skin-053` | 53 | Preview + hero + SVG layers |
+| SKIN-2 | OBSIDIAN GOLD | `skin-103` | 103 | Preview + hero + SVG layers |
+| SKIN-3 | CARBON FORGE | `skin-104` | 104 | Preview + hero + SVG layers |
+| SKIN-4 | MIDNIGHT CRIMSON | `skin-105` | 105 | Preview + hero + SVG layers |
+| SKIN-5 | ARCTIC PLATINUM | `skin-106` | 106 | Preview + hero + SVG layers |
+| SKIN-6 | VIOLET NOIR | `skin-107` | 107 | Preview + hero + SVG layers |
+| SKIN-7 | TITANIUM STORM | `skin-108` | 108 | Preview + hero + SVG layers |
+| SKIN-8 | EMERALD CIRCUIT | `skin-109` | 109 | Preview + hero + SVG layers |
+| SKIN-9 | SOLAR FLARE | `skin-110` | 110 | Preview + hero + SVG layers |
+| SKIN-10 | DEEP OCEAN | `skin-111` | 111 | Preview + hero + SVG layers |
+| SKIN-11 | ROSE CHROME | `skin-112` | 112 | Preview + hero + SVG layers |
+| SKIN-12 | DESERT AMBER | `skin-113` | 113 | Preview + hero + SVG layers |
+| SKIN-13 | GLACIER TEAL | `skin-114` | 114 | Preview + hero + SVG layers |
+| SKIN-14 | PHANTOM GRAPHITE | `skin-115` | 115 | Preview + hero + SVG layers |
+| SKIN-15 | ULTRAVIOLET DRIVE | `skin-116` | 116 | Preview + hero + SVG layers |
+| SKIN-16 | VOLCANIC STEEL | `skin-117` | 117 | Preview + hero + SVG layers |
 
-Themes are visual-only and cannot change APVTS IDs, controls, MIDI, sampler, DSP, presets or audio callback behaviour.
+## Design basis and provenance
+
+- PR #43 (merged 2026-11-15) is the source integration checkpoint for NEON STAGE DEFAULT / SKIN-1 / `skin-053`.
+- The completed 16-theme artwork source is draft PR #58, branch `work/approved-16-skins-completion`, source SHA `10e590c8a3fdfed90cc7ae05e0ff74d8875ac88a`.
+- Every additional theme has its own individual art direction, 21-token palette and three distinct SVG foundations: texture, bezel and crest.
+- The source artwork workflow passed strict checks for the exact 16-theme registry and all artwork assets. All 15 preview images were visually reviewed; ARCTIC PLATINUM / GLACIER TEAL and VIOLET NOIR / ULTRAVIOLET DRIVE were specifically differentiated.
+- Source Windows x64 build and full CTest passed on the same source SHA, together with strict 16-skin asset/registry validation and 16-only package staging. This is source-branch evidence, not REV.20 exact-SHA host acceptance.
+
+## Runtime and safety contract
+
+- Only these 16 skins may appear in the product gallery. Logical labels are SKIN-1…SKIN-16.
+- Stable IDs/indices must never be parsed as logical ordinal numbers.
+- Theme changes are visual-only. Preserve the 27 required control IDs, seven approved FX bypass IDs, APVTS, DSP, sampler, MIDI, presets, functional geometry and audio callback.
+- Preserve the shared NEON STAGE component language and the same control semantics across all 16.
+- No fake controls, hidden extra themes, legacy theme batches or accidental duplicate gallery entries.
+- Source CI evidence does not make skins HOST-VERIFIED in REV.20. Runtime loader, 16-only package, preview/apply/cancel/persistence, hot-swap, ECO/memory behaviour, DPI 100/125/150%, pluginval strictness 5 and FL Studio 20 checks must pass against the exact REV.20 SHA before marking all 16 runtime-ready.
+
+**Current REV.20 asset state:** all 16 names/manifests are defined; 30 additional PNGs (15 preview + 15 hero) are included; 45 SVG material foundations are available for SKIN-2…SKIN-16. The source pack passed the strict audit. REV.20 exact-SHA runtime and host acceptance remain a separate gate.

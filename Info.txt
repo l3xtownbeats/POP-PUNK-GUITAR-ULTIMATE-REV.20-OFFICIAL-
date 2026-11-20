@@ -15,6 +15,7 @@
 - Главные режимы только два: MELODY и PATTERN.
 - AUTOCHORDS — дополнительное окно внутри PATTERN, не третий главный режим.
 - В обоих режимах MIDI-клавиша запускает один конкретный mapped note/event clip, а не полный LOOP/RIFF/phrase. Whole-take/phrase preview — отдельное действие в браузере.
+- Factory bank: ровно 500 базовых presets как целевая комплектация — 250 MELODY + 250 PATTERN. PATTERN-каталог обязательно распределяется по своим окнам/разделам/функциям; запрещён один плоский список из 250 элементов. Каталог может расширяться сверх базовых 500.
 - Один общий Sample Engine; WAV/SFZ, voice allocation, velocity mapping, background streaming/page cache и bounded queues.
 - Задачи файловой системы, сканирование, hashing и загрузка выполняются вне audio callback.
 - Утверждённый визуальный эталон: NEON STAGE DEFAULT / SKIN-1 / stable ID skin-053.
@@ -25,12 +26,12 @@
 ## 3. Ровно 16 графических оболочек
 Единственный активный набор: SKIN-1…SKIN-16. SKIN-1 — NEON STAGE DEFAULT (skin-053 / index 53). Остальные утверждённые оболочки имеют stable IDs skin-103…skin-117 (indices 103…117). Вся старая и экспериментальная коллекция тем вне этих 16 исключена.
 
-SKIN-1 имеет PNG/manifest assets. SKIN-2…SKIN-16 имеют утверждённые theme manifests и SVG foundations; PNG preview/hero и runtime validation ещё pending. Эти темы остаются в registry как design-only и не показываются как selectable runtime themes до runtimeReady=true.
+Для всех 16 утверждённых тем определены названия, ordinal и immutable stable ID. SKIN-1 / NEON STAGE DEFAULT имеет основной artwork pack; SKIN-2…SKIN-16 имеют индивидуальные manifests, SVG texture/bezel/crest и по два PNG (preview 360×240 + hero 800×450). Все 30 PNG перенесены из проверенной ветки work/approved-16-skins-completion. Source strict audit, registry contract, Windows x64 build и полный CTest прошли на source SHA 10e590c8a3fdfed90cc7ae05e0ff74d8875ac88a; это не заменяет отдельный exact-SHA REV.20 runtime/host acceptance. В REV.20 дополнительные темы остаются runtime-gated до собственной проверки.
 
 ## 4. Sound library и factory bank
 - В REV.20 сохранены L3XTOWN inventory: 393 source path records, 387 unique SHA-256 audio contents, 6 exact duplicate-content pairs; оригинальные WAV остаются на исходном хранении.
 - Filename/folder routing provisional; audio-content review и local copy preflight остаются открытыми.
-- BASIC LIBRARY target: 10–12 GB. EXPANDED LIBRARY target: примерно 40 GB и необязательна для core presets.
+- BASIC LIBRARY: 15 GB, включена в стандартный продукт. EXPANDED ADD-ON: +15 GB; начальный совокупный объём 30 GB (15 + 15), дополнительная библиотека необязательна для core presets и может расти без продуктового лимита.
 - Core factory target: 500 playable presets — 250 MELODY + 250 PATTERN, все usable из BASIC LIBRARY.
 - Перенесённый factory_bank_300.json — partial authored catalog (150+150), не 500-предметный deliverable и не proof playable.
 - Для каждого sample обязательны source/provenance, redistribution clearance, SHA-256, valid mapping и human listening evidence.
@@ -45,3 +46,14 @@ Source engineering HEAD REV.19: 7b540ff9cddbc2b0327c83611b49e222bce51d2b.
 Destination main before migration: 2aeffd1c594232a933e9e5577ffad4efb6877263.
 Migration commit: 2bd623a666090d4ef017296f52fdb568808a227b.
 Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Studio 20 acceptance are not yet recorded.
+
+
+## 7. 2026-11-20 — USER CONFIRMATION / PREMIUM 16-SKIN ASSET SYNC
+- Пользователь повторно подтвердил и утвердил окончательное количество: ВСЕГО 16 графических оболочек, включая главную NEON STAGE DEFAULT / SKIN-1 и ровно 15 дополнительных SKIN-2…SKIN-16. Это закрытый базовый набор; любые темы вне его не являются продуктом.
+- Все 16 названий уже определены и зафиксированы в таблице `docs/REV20_ACCEPTED_BASELINE_RU.md`, реестре `SKIN/theme_manifest.json` и `SKIN/approved_theme_sequence.json`. Stable ID/index не совпадает с логическим ordinal: skin-053/53 для SKIN-1, skin-103…skin-117 для SKIN-2…16.
+- Основание дизайна SKIN-1: PR #43 в исходном 4.0-репозитории, merged 2026-11-15. PR #43 явно фиксирует NEON STAGE DEFAULT = SKIN-1 = skin-053 и visual-only ограничения; merge был visual integration checkpoint, не full release acceptance.
+- Источник premium-графики SKIN-2…SKIN-16: draft PR #58, branch `work/approved-16-skins-completion`, source SHA `10e590c8a3fdfed90cc7ae05e0ff74d8875ac88a`. Для 15 тем имеется 45 SVG foundations и 30 PNG preview/hero assets. 15 preview PNG были визуально просмотрены; похожие пары ARCTIC PLATINUM / GLACIER TEAL и VIOLET NOIR / ULTRAVIOLET DRIVE специально разведены по мотиву.
+- Source CI на том же SHA: artwork/strict audit run [43835887953](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-4.0-VST-L3XTOWN-/actions/runs/43835887953) SUCCESS; Windows x64 build + full CTest + 16-skin registry + 16-only package run [43835886032](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-4.0-VST-L3XTOWN-/actions/runs/43835886032) SUCCESS; uploaded artifact `PPGU-Windows-x64-VST3-REV19-16-SKINS`. These are source-branch results, not REV.20 exact-SHA or FL Studio 20 acceptance.
+- PR #58 remains a draft/open PR in the source repository. REV.20 selectively adopts the approved 30 raster artwork files and documentation/registry facts; it does not merge the source branch wholesale.
+- Updated library baseline: BASIC 15 GB included + EXPANDED +15 GB optional (initial combined total 30 GB); the 500 core presets (250 MELODY + 250 PATTERN) must work from BASIC alone. PATTERN presets are distributed across PATTERN windows/sections/functions, not one flat list.
+- Next verification gate in REV.20: run strict theme asset/registry/package validation, Windows x64 build and full CTest on the exact updated main SHA; then pluginval strictness 5, 100/125/150% DPI and FL Studio 20 preview/apply/cancel/persistence/audio-state checks. Until then SKIN-2…16 are artwork-approved and source-CI-verified, not host-verified in REV.20.

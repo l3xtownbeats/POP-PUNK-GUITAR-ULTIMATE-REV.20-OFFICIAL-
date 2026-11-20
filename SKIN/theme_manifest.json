@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "product": "POP PUNK GUITAR ULTIMATE",
-  "contract": "REV.20 approved 16-theme visual shell registry",
+  "contract": "REV.20 locked factory set: exactly 16 named premium graphical shells",
   "totalSkins": 16,
   "defaultLogicalSkin": "SKIN-1",
   "defaultStableId": "skin-053",
@@ -15,7 +15,7 @@
       "index": 53,
       "path": "Skin_053/theme.json",
       "runtimeReady": true,
-      "status": "RUNTIME_ASSETS_PRESENT_SOURCE_AUDIT_PENDING",
+      "status": "CANONICAL_DEFAULT_ARTWORK_PRESENT; REV20_EXACT_SHA_RUNTIME_AUDIT_PENDING",
       "preview": "Skin_053/assets/preview.png",
       "hero": "Skin_053/assets/hero.png"
     },
@@ -27,9 +27,9 @@
       "index": 103,
       "path": "Skin_103/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_103/assets/preview.png",
+      "hero": "Skin_103/assets/hero.png"
     },
     {
       "ordinal": 3,
@@ -39,9 +39,9 @@
       "index": 104,
       "path": "Skin_104/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_104/assets/preview.png",
+      "hero": "Skin_104/assets/hero.png"
     },
     {
       "ordinal": 4,
@@ -51,9 +51,9 @@
       "index": 105,
       "path": "Skin_105/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_105/assets/preview.png",
+      "hero": "Skin_105/assets/hero.png"
     },
     {
       "ordinal": 5,
@@ -63,9 +63,9 @@
       "index": 106,
       "path": "Skin_106/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_106/assets/preview.png",
+      "hero": "Skin_106/assets/hero.png"
     },
     {
       "ordinal": 6,
@@ -75,9 +75,9 @@
       "index": 107,
       "path": "Skin_107/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_107/assets/preview.png",
+      "hero": "Skin_107/assets/hero.png"
     },
     {
       "ordinal": 7,
@@ -87,9 +87,9 @@
       "index": 108,
       "path": "Skin_108/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_108/assets/preview.png",
+      "hero": "Skin_108/assets/hero.png"
     },
     {
       "ordinal": 8,
@@ -99,9 +99,9 @@
       "index": 109,
       "path": "Skin_109/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_109/assets/preview.png",
+      "hero": "Skin_109/assets/hero.png"
     },
     {
       "ordinal": 9,
@@ -111,9 +111,9 @@
       "index": 110,
       "path": "Skin_110/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_110/assets/preview.png",
+      "hero": "Skin_110/assets/hero.png"
     },
     {
       "ordinal": 10,
@@ -123,9 +123,9 @@
       "index": 111,
       "path": "Skin_111/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_111/assets/preview.png",
+      "hero": "Skin_111/assets/hero.png"
     },
     {
       "ordinal": 11,
@@ -135,9 +135,9 @@
       "index": 112,
       "path": "Skin_112/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_112/assets/preview.png",
+      "hero": "Skin_112/assets/hero.png"
     },
     {
       "ordinal": 12,
@@ -147,9 +147,9 @@
       "index": 113,
       "path": "Skin_113/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_113/assets/preview.png",
+      "hero": "Skin_113/assets/hero.png"
     },
     {
       "ordinal": 13,
@@ -159,9 +159,9 @@
       "index": 114,
       "path": "Skin_114/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_114/assets/preview.png",
+      "hero": "Skin_114/assets/hero.png"
     },
     {
       "ordinal": 14,
@@ -171,9 +171,9 @@
       "index": 115,
       "path": "Skin_115/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_115/assets/preview.png",
+      "hero": "Skin_115/assets/hero.png"
     },
     {
       "ordinal": 15,
@@ -183,9 +183,9 @@
       "index": 116,
       "path": "Skin_116/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_116/assets/preview.png",
+      "hero": "Skin_116/assets/hero.png"
     },
     {
       "ordinal": 16,
@@ -195,9 +195,17 @@
       "index": 117,
       "path": "Skin_117/theme.json",
       "runtimeReady": false,
-      "status": "APPROVED_DESIGN_SPEC_VECTOR_ASSETS_PRESENT_PNG_AND_RUNTIME_VALIDATION_PENDING",
-      "preview": null,
-      "hero": null
+      "status": "PREMIUM_ARTWORK_AND_SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING",
+      "preview": "Skin_117/assets/preview.png",
+      "hero": "Skin_117/assets/hero.png"
     }
-  ]
+  ],
+  "artworkEvidence": {
+    "sourceRepository": "l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-4.0-VST-L3XTOWN-",
+    "sourceBranch": "work/approved-16-skins-completion",
+    "sourceSha": "10e590c8a3fdfed90cc7ae05e0ff74d8875ac88a",
+    "artworkWorkflowRun": 43835887953,
+    "windowsBuildAndCTestRun": 43835886032,
+    "status": "SOURCE_ARTWORK_AUDIT_AND_WINDOWS_BUILD_PASS; REV20_RUNTIME_HOST_ACCEPTANCE_PENDING"
+  }
 }

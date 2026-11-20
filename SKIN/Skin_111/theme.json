@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "id": "skin-111",
   "index": 111,
-  "name": "SKIN-10 — DEEP OCEAN",
+  "name": "DEEP OCEAN",
   "family": "special",
   "layout": "STUDIO_CONSOLE",
   "description": "DEEP OCEAN: premium PPGU visual theme. midnight navy / luminous marine blue. Preserves canonical NEON STAGE component language and existing control map.",
@@ -342,14 +342,16 @@
     "layoutChanges": false,
     "audioChanges": false
   },
-  "designStatus": "SPEC_AND_DISTINCT_SVG_ASSETS_CREATED_PNG_AND_RUNTIME_VALIDATION_PENDING",
+  "designStatus": "APPROVED_NAMED_PREMIUM_GRAPHIC_SHELL; PREVIEW_HERO_AND_SVG_ASSETS_PRESENT; SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_ACCEPTANCE_PENDING",
   "notes": [
     "Concept selected under user's delegated direction on 2026-11-15. Logical SKIN-10; stable identity skin-111 / index 111.",
     "Legacy IDs and indices 1–102 are preserved.",
     "Shared NEON STAGE design language and inherited control map retained; visual-only tokens/materials.",
     "No APVTS, control IDs, layout geometry, DSP, audio, MIDI, sampler or preset behavior changes.",
-    "PNG preview 360x240 and hero 800x450, G1–G4, registry/runtime integration and host validation pending.",
-    "Distinct texture.svg, bezel.svg and crest.svg assets are present. PNG preview/hero, G1-G4, runtime registration and host validation remain pending."
+    "Approved product identity is fixed: SKIN-10 / DEEP OCEAN / skin-111.",
+    "Premium artwork is present in REV.20: assets/preview.png (360x240), assets/hero.png (800x450), plus this theme's SVG texture/bezel/crest foundations.",
+    "Source artwork asset audit and Windows x64 build/full CTest passed on source SHA 10e590c8a3fdfed90cc7ae05e0ff74d8875ac88a; REV.20 exact-SHA runtime, package and FL Studio 20 acceptance remain pending.",
+    "Visual-only shell: do not modify APVTS, DSP, MIDI, the 27-control contract, seven FX bypass IDs, sampler, preset semantics or functional layout."
   ],
   "ordinal": 10
 }

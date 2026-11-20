@@ -44,7 +44,7 @@ Logical ordinal 1..16 отделён от immutable ID/index: `skin-053` (53), �
 | SKIN-15 | ULTRAVIOLET DRIVE | skin-116 | 116 |
 | SKIN-16 | VOLCANIC STEEL | skin-117 | 117 |
 
-Статус ресурсов на переносе: SKIN-1 имеет PNG/manifest assets. SKIN-2…SKIN-16 содержат утверждённые theme manifests и distinct SVG foundations; preview/hero PNG и runtime verification ещё не завершены. Такие темы сохраняются в registry как design-only и не показываются как selectable runtime themes до `runtimeReady=true`.
+Статус ресурсов: для SKIN-1…SKIN-16 имеются утверждённые manifests и индивидуальные имена. Для SKIN-2…SKIN-16 включены 45 SVG material layers (texture/bezel/crest) и 30 PNG artwork assets (preview 360×240 + hero 800×450); source strict asset audit и 16-entry registry contract прошли. Windows x64 build и full CTest также прошли на source branch SHA `10e590c8a3fdfed90cc7ae05e0ff74d8875ac88a`. REV.20 exact-SHA runtime loader/package, pluginval, DPI and FL Studio 20 acceptance остаются отдельными gates. До их прохождения дополнительные оболочки считаются artwork-approved, но не HOST-VERIFIED.
 
 Все оболочки меняют только визуальную подачу. Запрещено менять APVTS IDs, семантику контролов, MIDI, presets, sampler, DSP, audio callback или функциональную геометрию.
 
@@ -64,7 +64,7 @@ FX scope включает reverb, chorus, flanger, delay, distortion и суще
 
 ## 6. Factory presets и sample rights
 
-Цель — 500 playable factory presets: 250 MELODY + 250 PATTERN, все работают на BASIC LIBRARY 10–12 GB без зависимости от EXPANDED LIBRARY (~40 GB). Каталог 300 definitions, перенесённый из инженерной базы, является частичной заготовкой 150+150, не выполнением цели 500 и не доказательством playability.
+Цель — 500 playable factory presets: 250 MELODY + 250 PATTERN, все работают на включённой BASIC LIBRARY 15 GB без зависимости от EXPANDED. EXPANDED ADD-ON добавляет ещё 15 GB (начальный combined total 30 GB) и может расширяться без продуктового лимита. Все 250 PATTERN presets распределяются по окнам/разделам/функциям PATTERN, а не показываются одним плоским списком. Каталог 300 definitions, перенесённый из инженерной базы, является частичной заготовкой 150+150, не выполнением цели 500 и не доказательством playability.
 
 Для каждого sound asset нужны source/provenance, точная лицензия, SHA-256, корректный mapping, technical check и human listening review. В plugin bundle попадают только CC0/public domain или лицензии/письменные разрешения, которые прямо допускают redistribution/embedding исходных сэмплов в сторонний виртуальный инструмент. Session Guitarist/Kontakt и другие проприетарные библиотеки — только tonal/playability references, не источники для копирования.
 

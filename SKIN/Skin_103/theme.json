@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "id": "skin-103",
   "index": 103,
-  "name": "SKIN-2 — OBSIDIAN GOLD",
+  "name": "OBSIDIAN GOLD",
   "family": "special",
   "layout": "STUDIO_CONSOLE",
   "description": "OBSIDIAN GOLD: approved sequential PPGU visual theme. black obsidian glass / brushed champagne gold. Preserves the canonical shared component language and existing control map.",
@@ -342,13 +342,16 @@
     "layoutChanges": false,
     "audioChanges": false
   },
-  "designStatus": "APPROVED_THEME_SPEC_VECTOR_ARTWORK_PENDING_PNG_AND_RUNTIME_VALIDATION",
+  "designStatus": "APPROVED_NAMED_PREMIUM_GRAPHIC_SHELL; PREVIEW_HERO_AND_SVG_ASSETS_PRESENT; SOURCE_STRICT_AUDIT_PASS; REV20_RUNTIME_ACCEPTANCE_PENDING",
   "notes": [
     "Approved concept recorded 2026-11-15. Logical sequence is SKIN-2; stable registry identity is skin-103 / index 103.",
     "Existing legacy theme IDs and indices are preserved; no renumbering or overwriting.",
     "Shared NEON STAGE design-system component language is retained; this theme changes visual tokens/materials only.",
     "No APVTS, control IDs, layout geometry, DSP, audio, MIDI, sampler or preset behavior changes.",
-    "PNG preview.png and hero.png artwork plus G1-G4/package/runtime validation are pending."
+    "Approved product identity is fixed: SKIN-2 / OBSIDIAN GOLD / skin-103.",
+    "Premium artwork is present in REV.20: assets/preview.png (360x240), assets/hero.png (800x450), plus this theme's SVG texture/bezel/crest foundations.",
+    "Source artwork asset audit and Windows x64 build/full CTest passed on source SHA 10e590c8a3fdfed90cc7ae05e0ff74d8875ac88a; REV.20 exact-SHA runtime, package and FL Studio 20 acceptance remain pending.",
+    "Visual-only shell: do not modify APVTS, DSP, MIDI, the 27-control contract, seven FX bypass IDs, sampler, preset semantics or functional layout."
   ],
   "ordinal": 2
 }

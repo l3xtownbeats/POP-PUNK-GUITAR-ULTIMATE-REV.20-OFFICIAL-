@@ -22,7 +22,7 @@ Both modes follow the approved one-key/one-note-event rule: each ordinary MIDI k
 
 ## Visual identity
 
-The canonical runtime theme is **SKIN-1 / NEON STAGE DEFAULT / `skin-053`**. The product has exactly 16 logical graphical shells, SKIN-1 through SKIN-16. The other 15 approved shells are registered design work; they are not advertised as runtime-ready until their complete assets and runtime checks pass. No legacy skin batches or additional themes are part of REV.20.
+The canonical visual shell and default theme is **SKIN-1 / NEON STAGE DEFAULT / `skin-053`**. The complete approved set is exactly 16 named premium graphical shells: SKIN-1 through SKIN-16. All 15 additional shells have individual manifests, vector material layers and preview/hero artwork. Their artwork asset pack has passed strict source-branch validation; enabling them in the REV.20 runtime remains gated on REV.20 exact-SHA build and host acceptance. No legacy skin batches or additional themes are part of the product.
 
 ## Repository map
 
@@ -38,7 +38,7 @@ The canonical runtime theme is **SKIN-1 / NEON STAGE DEFAULT / `skin-053`**. The
 
 ## Sound library and presets
 
-The core target is 500 playable factory presets: 250 MELODY and 250 PATTERN, all dependent only on BASIC LIBRARY (10–12 GB). The imported 300-entry catalog is a partial 150+150 definition set, not 500 finished/playable presets. All shipped sample content must have explicit redistribution/embedding rights, provenance and SHA-256 evidence.
+The core target is 500 playable factory presets: 250 MELODY and 250 PATTERN, all usable from the included 15 GB BASIC LIBRARY. The initial EXPANDED add-on contributes another 15 GB (30 GB combined at the initial tier) and may grow without a product-imposed ceiling. The 250 PATTERN presets must be organized by the PATTERN workspace's sections/windows/functions, not dumped into one flat 250-item screen. The imported 300-entry catalog is a partial 150+150 definition set, not 500 finished/playable presets. All shipped sample content must have explicit redistribution/embedding rights, provenance and SHA-256 evidence.
 
 ## Build and acceptance
 
