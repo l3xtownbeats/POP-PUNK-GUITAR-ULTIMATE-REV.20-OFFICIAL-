@@ -1,0 +1,25 @@
+{
+  "buttons": {
+    "fx_chain": {
+      "base_size": {"width": 140, "height": 60},
+      "states": ["normal", "hover", "pressed", "active", "disabled"],
+      "modules": [
+        {"id": "compressor", "color": "#00E5FF"},
+        {"id": "eq", "color": "#00C3FF"},
+        {"id": "distortion", "color": "#FF9900"},
+        {"id": "chorus", "color": "#0066FF"},
+        {"id": "delay", "color": "#CC00FF"},
+        {"id": "reverb", "color": "#00FF66"},
+        {"id": "cabinet_ir", "color": "#FFAA00"}
+      ]
+    },
+    "power_button": {
+      "base_size": {"width": 80, "height": 80},
+      "states": ["off", "on"]
+    },
+    "top_bar_utilities": {
+      "base_size": {"width": 90, "height": 60},
+      "items": ["skin", "import_guitar", "auto_discover", "settings", "close"]
+    }
+  }
+}

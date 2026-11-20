@@ -1,0 +1,68 @@
+{
+  "project": "NEON_STAGE_MANAGER_3.0",
+  "design_system": {
+    "color_palette": {
+      "bg_dark": "#0a0c14",
+      "panel_bg": "#10141f",
+      "metal_border": "#2c3345",
+      "neon_cyan": "#00d0ff",
+      "neon_purple": "#b52aff",
+      "neon_blue_glow": "rgba(0, 208, 255, 0.45)",
+      "text_primary": "#ffffff",
+      "text_secondary": "#8a96aa"
+    },
+    "knob_style": {
+      "diameter_px": 56,
+      "rotation_min_deg": -135,
+      "rotation_max_deg": 135,
+      "glow_radius": 8
+    }
+  },
+  "components": {
+    "icons": {
+      "source_file": "Icons/neon_stage_icons_sheet.png",
+      "grid": { "cols": 5, "rows": 3, "cell_size": [190, 190] },
+      "items": {
+        "power": { "col": 0, "row": 0 },
+        "compressor": { "col": 1, "row": 0 },
+        "eq": { "col": 2, "row": 0 },
+        "distortion": { "col": 3, "row": 0 },
+        "chorus": { "col": 4, "row": 0 },
+        "delay": { "col": 0, "row": 1 },
+        "reverb": { "col": 1, "row": 1 },
+        "cabinet": { "col": 2, "row": 1 },
+        "guitar": { "col": 3, "row": 1 },
+        "skins": { "col": 4, "row": 1 },
+        "import_guitar": { "col": 0, "row": 2 },
+        "settings": { "col": 1, "row": 2 },
+        "information": { "col": 2, "row": 2 },
+        "crown": { "col": 3, "row": 2 }
+      }
+    },
+    "buttons": {
+      "fx_button": {
+        "dimensions": { "width": 100, "height": 48 },
+        "border_radius": 6,
+        "states": {
+          "normal": { "bg": "#151a27", "border": "#1f273b", "glow": null },
+          "hover": { "bg": "#1a2235", "border": "#00d0ff", "glow": "#00d0ff33" },
+          "pressed": { "bg": "#0f1420", "border": "#00d0ff", "glow": "#00d0ff66" },
+          "active": { "bg": "#122038", "border": "#00d0ff", "glow": "#00d0ff99", "indicator": "active" }
+        }
+      }
+    },
+    "knobs": {
+      "main_metal_knob": {
+        "size": [56, 56],
+        "cap_color": "radial-gradient(#4a5368, #181d28)",
+        "indicator_notch": "#ffffff",
+        "surround_led_arc": {
+          "track_color": "#181d2a",
+          "active_color": "#00d0ff",
+          "start_angle": 135,
+          "end_angle": 405
+        }
+      }
+    }
+  }
+}

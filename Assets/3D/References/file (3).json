@@ -1,0 +1,93 @@
+{
+  "project": "NEON_STAGE_MANAGER_3_0",
+  "version": "3.0.0",
+  "design_language": "Skeumorphic_Dark_Titanium_Cyan_Neon",
+  "color_tokens": {
+    "PRIMARY_CYAN": "#00E5FF",
+    "DEEP_BLUE": "#0055FF",
+    "ACCENT_MAGENTA": "#E000FF",
+    "CHASSIS_BG": "#060913",
+    "TITANIUM_RIM": "#3A455A",
+    "LED_GREEN": "#00FF66",
+    "LED_RED": "#FF2244",
+    "LED_AMBER": "#FF9900"
+  },
+  "asset_groups": {
+    "icons": {
+      "file": "neon_stage_ui_icons_set.png",
+      "grid": { "cols": 7, "rows": 3, "cell_width": 256, "cell_height": 256 },
+      "items": {
+        "fx_compressor": { "col": 0, "row": 0 },
+        "fx_eq": { "col": 1, "row": 0 },
+        "fx_distortion": { "col": 2, "row": 0 },
+        "fx_chorus": { "col": 3, "row": 0 },
+        "fx_delay": { "col": 4, "row": 0 },
+        "fx_reverb": { "col": 5, "row": 0 },
+        "fx_cabinet": { "col": 6, "row": 0 },
+        "sys_crown": { "col": 0, "row": 1 },
+        "sys_skins": { "col": 1, "row": 1 },
+        "sys_guitar": { "col": 2, "row": 1 },
+        "sys_autodiscover": { "col": 3, "row": 1 },
+        "sys_curator": { "col": 4, "row": 1 },
+        "sys_settings": { "col": 5, "row": 1 },
+        "sys_about": { "col": 6, "row": 1 },
+        "ctrl_power": { "col": 0, "row": 2 },
+        "ctrl_melody": { "col": 1, "row": 2 },
+        "ctrl_pattern": { "col": 2, "row": 2 },
+        "ctrl_punk_group": { "col": 3, "row": 2 },
+        "ctrl_search": { "col": 4, "row": 2 },
+        "window_minimize": { "col": 5, "row": 2 },
+        "window_close": { "col": 6, "row": 2 }
+      }
+    },
+    "buttons": {
+      "file": "neon_stage_buttons_and_switches.png",
+      "fx_button_states": {
+        "states": ["normal", "hover", "pressed", "active", "disabled"],
+        "row_rect": [30, 40, 1860, 240]
+      },
+      "toggles": {
+        "toggle_on": { "rect": [40, 800, 240, 100] },
+        "toggle_off": { "rect": [310, 800, 240, 100] }
+      },
+      "led_indicators": {
+        "green_on": { "center": [1330, 850], "radius": 40 },
+        "red_error": { "center": [1460, 850], "radius": 40 },
+        "cyan_active": { "center": [1590, 850], "radius": 40 },
+        "gray_off": { "center": [1720, 850], "radius": 40 }
+      }
+    },
+    "knobs_and_meters": {
+      "file": "neon_stage_knobs_and_meters.png",
+      "rotary_knob_spritesheet": {
+        "frames_count": 5,
+        "rect": [20, 40, 1050, 220],
+        "frame_width": 210,
+        "frame_height": 210,
+        "angle_range": [-135, 135]
+      },
+      "level_meters": {
+        "gain_reduction": { "rect": [790, 580, 100, 360], "scale_min": -30, "scale_max": 0 },
+        "output_level": { "rect": [980, 580, 100, 360], "scale_min": -60, "scale_max": 0 }
+      },
+      "sliders": {
+        "track_rect": [30, 390, 600, 45],
+        "thumb_rect": [660, 375, 80, 80]
+      }
+    },
+    "panels": {
+      "file": "neon_stage_frames_and_panels.png",
+      "chassis_main": { "rect": [30, 25, 1140, 490] },
+      "panel_fx_edit": { "rect": [1210, 25, 660, 300] },
+      "panel_amp_tone": { "rect": [1210, 480, 660, 210] },
+      "nine_slice": {
+        "corner_tl": [30, 535, 110, 110],
+        "corner_tr": [165, 535, 110, 110],
+        "corner_bl": [30, 660, 110, 110],
+        "corner_br": [165, 660, 110, 110],
+        "h_border": [310, 535, 620, 60],
+        "v_border": [955, 535, 60, 250]
+      }
+    }
+  }
+}

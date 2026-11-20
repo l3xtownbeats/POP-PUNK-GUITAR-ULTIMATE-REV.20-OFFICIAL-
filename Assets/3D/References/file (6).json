@@ -1,0 +1,33 @@
+{
+  "meters": {
+    "master_vu_meter": {
+      "type": "stereo_segmented_bar",
+      "channels": ["L", "R"],
+      "states_count": 8,
+      "scale_db": [0, -6, -12, -18, -24],
+      "color_zones": {
+        "normal": "#00FF66",
+        "warning": "#FFCC00",
+        "clip": "#FF3333"
+      }
+    },
+    "gain_reduction_meter": {
+      "type": "mono_bar_inverted",
+      "states_count": 4,
+      "scale_db": [0, -6, -12, -24],
+      "color": "#00E5FF"
+    },
+    "radar_animation": {
+      "frame_width": 100,
+      "frame_height": 100,
+      "frames_total": 8,
+      "fps": 12,
+      "loop": true
+    },
+    "led_indicators": {
+      "size": {"width": 24, "height": 24},
+      "types": ["licensed", "midi", "warning", "error"],
+      "states": ["off", "on", "pulsing"]
+    }
+  }
+}
