@@ -1,0 +1,74 @@
+name: REV.20 Sound Hunter — real guitar library acquisition
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "SoundHunter/**"
+      - "tests/test_sound_hunter_importer.py"
+      - "tests/test_audit_soundbank_policy.py"
+      - "tests/test_artifact_splitter.py"
+      - "tools/audit_soundbank.py"
+      - "tools/split_artifact.py"
+      - ".github/workflows/rev20-sound-hunter-import.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rev20-sound-hunter-import
+  cancel-in-progress: false
+
+jobs:
+  discover-and-import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout approved source catalog and importer
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: List approved real-recorded guitar sources
+        run: python3 SoundHunter/sound_hunter_real_guitars.py --discover-only
+
+      - name: Test Sound Hunter, policy and split-artifact integrity
+        run: |
+          python3 tests/test_sound_hunter_importer.py
+          python3 tests/test_audit_soundbank_policy.py
+          python3 tests/test_artifact_splitter.py
+
+      - name: Download and verify real guitar audio (CC0-1.0 source allowlist)
+        run: python3 SoundHunter/sound_hunter_real_guitars.py
+
+      - name: Package additive Sound Hunter import
+        run: |
+          zip -qr "$RUNNER_TEMP/PPGU_REAL_GUITAR_SAMPLES.zip" Samples/SoundHunterImports
+          python3 tools/split_artifact.py split \
+            --input "$RUNNER_TEMP/PPGU_REAL_GUITAR_SAMPLES.zip" \
+            --output-dir "$RUNNER_TEMP" \
+            --prefix PPGU_REAL_GUITAR_SAMPLES \
+            --part-size-mb 1800
+          python3 tools/split_artifact.py verify \
+            --manifest "$RUNNER_TEMP/PPGU_REAL_GUITAR_SAMPLES_PARTS_MANIFEST.json"
+          find Samples/SoundHunterImports -name SOUND_HUNTER_REGISTRY.json -print -quit | while read registry; do cp "$registry" "$RUNNER_TEMP/SOUND_HUNTER_REGISTRY.json"; done
+          test -s "$RUNNER_TEMP/SOUND_HUNTER_REGISTRY.json"
+          rm -f "$RUNNER_TEMP/PPGU_REAL_GUITAR_SAMPLES.zip"
+
+      - name: Upload verified real-guitar sample payload and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-REV20-REAL-GUITAR-SAMPLES
+          path: |
+            ${{ runner.temp }}/PPGU_REAL_GUITAR_SAMPLES.part-*
+            ${{ runner.temp }}/PPGU_REAL_GUITAR_SAMPLES_PARTS_SHA256SUMS.txt
+            ${{ runner.temp }}/PPGU_REAL_GUITAR_SAMPLES_PARTS_MANIFEST.json
+            ${{ runner.temp }}/SOUND_HUNTER_REGISTRY.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30

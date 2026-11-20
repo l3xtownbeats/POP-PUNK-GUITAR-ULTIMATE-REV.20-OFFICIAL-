@@ -190,6 +190,15 @@ add_test(NAME ppgu_sample_library_audit_path_contract
 add_test(NAME ppgu_fx_dsp_parameter_wiring
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_fx_dsp_parameter_wiring.py)
 
+add_test(NAME ppgu_sound_hunter_import_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_sound_hunter_importer.py)
+
+add_test(NAME ppgu_soundbank_policy_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_audit_soundbank_policy.py)
+
+add_test(NAME ppgu_artifact_splitter_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_artifact_splitter.py)
+
 # The orphaned root-level OverlayManager/SecureSkinImport test files are not
 # registered: their corresponding production headers and implementations are
 # absent from this REV.17 tree. They remain explicit implementation blockers,

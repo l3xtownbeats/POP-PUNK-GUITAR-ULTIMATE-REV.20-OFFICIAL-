@@ -34,6 +34,7 @@ The complete approved set is exactly 16 premium graphical shells: **SKIN-1 / NEO
 - `docs/REV20_FL20_ACCEPTANCE_CHECKLIST_RU.md` — manual Windows 10 / FL Studio 20 host acceptance.
 - `docs/REV20_LIBRARY_TIERS_RU.md` and `assets/library/library_tiers.json` — BASIC/EXPANDED specification.
 - `docs/REV20_LIBRARY_MANAGER_APPROVED_REQUIREMENTS.md` — complete approved Library Manager workflow and acceptance requirements.
+- `SoundHunter/` and `.github/workflows/rev20-sound-hunter-import.yml` — pinned, checksum-verified CC0 real-guitar acquisition workflow; payload size/quality gate remains separate.
 - `docs/REV20_SKIN_APPROVAL_STANDARD_RU.md` — premium visual-quality rules for all 16 shells.
 - `docs/REV20_MIGRATION_MANIFEST.md` — selected transfers and excluded legacy material.
 - `docs/DEVELOPMENT_STATUS.md` — evidence-based implementation/readiness matrix.
@@ -50,6 +51,6 @@ The core target is **500 playable factory presets: 250 MELODY + 250 PATTERN**. A
 
 Workflow [44719521911](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44719521911) passed on exact SHA `974c5877d1a0375100539d2513329a38feb84871`: Windows x64 configure/build, VST3, CTest 15/15, 16-skin validator, 16-only package stage and upload. Artifact ID `14620284899`, SHA-256 `59b87d1caaa6aaf3b72b89edce6fd2311c23d673960b0c5459658e1a1aab0f30`.
 
-A subsequent DSP patch for live AMP TONE, EQ crossover frequencies and compressor amount is being added with its own regression test; its target exact-SHA run must pass separately. Pluginval strictness 5, manual FL Studio 20 host acceptance, DPI/performance, full preset service and licensed audio delivery remain open. No release package is declared approved.
+A subsequent DSP patch for live AMP TONE, EQ crossover frequencies and compressor amount is being added with its own regression test; its target exact-SHA run must pass separately. Pluginval strictness 5 is now part of the Windows workflow but its first run on the new SHA is pending. Manual FL Studio 20 host acceptance, DPI/performance, full preset service and actual licensed audio delivery remain open. No release package is declared approved.
 
 **All future project work belongs only in this repository, on `main`.**

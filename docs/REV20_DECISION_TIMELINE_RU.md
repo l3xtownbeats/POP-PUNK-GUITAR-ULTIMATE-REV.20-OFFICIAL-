@@ -168,3 +168,12 @@ Run [44719521911](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.2
 ## 2026-11-20 — live AMP TONE / EQ Frequency / Compressor Amount DSP slice
 
 Selective port from source main: eqLowFreq/eqHighFreq now control crossover cutoff; AMP TONE independently tilts high band and remains active when 3-band EQ is bypassed; Compressor Amount is block-snapshotted outside the sample loop and blends dry/processed gain. Existing APVTS IDs retained. Added `tests/test_fx_dsp_parameter_wiring.py` and CTest registration. Previous target commit `974c5877...` passed 15/15 tests; this addition raises the suite to 16 and requires the next exact-SHA Windows run.
+
+
+## 2026-11-20 — AMP TONE / EQ / Compressor DSP slice validated in REV.20
+
+Workflow [44721066388](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44721066388) on exact SHA `7ea16a30f8abaaae6edf8f0c4e58814864cf4fc2` completed SUCCESS: Windows x64 VST3 build, full CTest 16/16, 16-skin validator, 16-only package staging and artifact upload. The new `ppgu_fx_dsp_parameter_wiring` test passed. Artifact `14622101740`, SHA-256 `086eba4ad405db45d2674603d07bfbbe3d083091e4d9638f7806494e623858b4`.
+
+## 2026-11-20 — Sound Hunter acquisition pipeline staged
+
+REV.20 now includes the source's 11-source CC0-1.0 real guitar catalog and an importer improved for source SHA pinning, archive digests, fail-closed existing hashes, cross-platform ZIP path safety and per-run rollback. A separate Ubuntu workflow executes the acquisition and produces a split, checksum-verified artifact with a provenance registry. First acquisition run and measured payload size remain pending; this does not yet satisfy the 15 GB BASIC or 500 playable preset gate.

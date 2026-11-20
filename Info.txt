@@ -127,3 +127,12 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - The latest source-main AMP TONE / EQ crossover / compressor amount implementation is now selectively ported in `Source/PluginProcessor.cpp` with a dedicated test `tests/test_fx_dsp_parameter_wiring.py` registered in CTest.
 - Existing APVTS IDs only: `eqLowFreq`, `eqHighFreq`, `tone`, `compressorAmount`; no new IDs. EQ cutoffs are live; AMP TONE is independent of EQ bypass; compressor amount is snapshotted once per block outside the sample loop and blends processed/dry gain.
 - Previous target SHA 974c5877… has already passed 15/15 CTest including PageCache correction. The new DSP test increases target CTest count to 16; run the new exact SHA before marking DSP wiring VERIFIED.
+
+
+## 2026-11-20 — LIVE EQ/TONE/COMPRESSOR DSP VERIFIED; SOUND HUNTER PIPELINE ADDED
+- Workflow [44721066388](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44721066388), exact SHA `7ea16a30f8abaaae6edf8f0c4e58814864cf4fc2`, SUCCESS. Windows x64 VST3 build, full CTest **16/16**, exact 16-skin artwork validation, 16-only skin staging and VST3+Skins artifact upload passed.
+- The 16th test `ppgu_fx_dsp_parameter_wiring` passed: live EQ cutoff frequency, AMP TONE independent high tilt, compressor amount dry/processed blend, and no compressor APVTS atomic load in the per-sample loop.
+- Artifact ID `14622101740`, size 5,857,762 bytes, SHA-256 `086eba4ad405db45d2674603d07bfbbe3d083091e4d9638f7806494e623858b4`.
+- Added Sound Hunter import subsystem from the source CC0-1.0 allowlist, with immutable source commit pinning, archive SHA-256, strict existing-file hash handling, Windows/POSIX archive path traversal prevention, atomic registry write and rollback of only the current failed run directory. This is a new acquisition toolchain, not yet proof that audio payload has been downloaded or meets BASIC 15 GB.
+- Added a separate Ubuntu workflow to discover/import CC0 real guitar samples, run import/policy/splitter tests, split/verify package parts and upload payload plus provenance. The first acquisition run is triggered by this commit; its measured size and contents must be inspected before treating any files as BASIC library.
+- CTest now includes Sound Hunter importer safety, soundbank policy and artifact splitter tests (expected total 19). The Windows workflow also adds pluginval strictness 5 using the pinned official pluginval 1.0.4 Windows release; its first run is still pending.

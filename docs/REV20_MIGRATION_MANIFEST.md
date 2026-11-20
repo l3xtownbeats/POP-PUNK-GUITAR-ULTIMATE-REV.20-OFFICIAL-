@@ -84,3 +84,15 @@ These code changes were validated on REV.20 exact SHA `8cfd11ecce3c8039360c1c194
 - Source-main DSP behavior is now selectively ported into REV.20 `Source/PluginProcessor.cpp`.
 - Existing `eqLowFreq` / `eqHighFreq` APVTS values now drive EQ cutoffs; `tone` applies independent high-band tilt; EQ bypass leaves this tone stage active; `compressorAmount` controls dry/processed blend and is loaded once per block, outside the per-sample loop.
 - New Python wiring test is registered with CTest; exact target build/test is pending after this code commit. No APVTS IDs were added or renamed.
+
+
+## Sound Hunter real-guitar acquisition subsystem imported (2026-11-20)
+
+- Selectively imported the 11-entry CC0-1.0 catalog and the acquisition/splitter/audit tools from source main.
+- Improved the importer to pin each repository snapshot to an immutable commit SHA, record archive SHA-256/bytes, validate both POSIX and Windows archive paths, fail closed when an existing audio file cannot be hashed, atomically write registry metadata and remove only the current failed run folder on error.
+- Added Python regression tests for path safety and hash fail-closed behaviour, plus soundbank policy and split-artifact tests; registered all three with CTest.
+- Added a separate Ubuntu workflow that fetches verified sources, splits/checksums the payload and uploads the registry and sample artifact. Actual acquisition, measured unique audio size, and human quality/mapping verification remain pending.
+
+## Pluginval strictness 5 added to target Windows workflow
+
+The Windows VST3 workflow now locates the built bundle and invokes the official pluginval Windows 1.0.4 archive at strictness level 5. First exact-SHA result pending; FL Studio 20 host acceptance remains manual.

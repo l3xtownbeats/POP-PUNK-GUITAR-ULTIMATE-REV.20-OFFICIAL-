@@ -130,3 +130,21 @@ Selective source-main DSP patch and automated CTest guard are staged for the nex
 - Live eqLowFreq / eqHighFreq crossover, AMP TONE high-band tilt, and compressorAmount dry/processed blend have been added to the existing processor DSP block.
 - New Python test checks parameter declaration + consumption and that compressor Amount is not loaded inside the per-sample loop; registered with CTest. Expected CTest count is now 16.
 - Previous commit 974c5877… remains green at 15/15 including PageCache fix; the new DSP patch requires its own successful exact-SHA build and 16/16 CTest run.
+
+
+## Live DSP control wiring — target exact-SHA PASS
+
+Workflow [44721066388](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44721066388), SHA `7ea16a30f8abaaae6edf8f0c4e58814864cf4fc2`, completed SUCCESS: Windows x64 VST3 build, full CTest 16/16, all-16 skin validation, 16-only package staging and artifact upload. The new `ppgu_fx_dsp_parameter_wiring` test passed. EQ crossover frequencies and AMP TONE now have live DSP effect, and compressor Amount controls the processed/dry blend with its parameter read once per block.
+
+Artifact ID `14622101740`, SHA-256 `086eba4ad405db45d2674603d07bfbbe3d083091e4d9638f7806494e623858b4`.
+
+## Sound Hunter CC0 acquisition subsystem — added; payload gate pending
+
+- Added pinned-source repository archive acquisition, SHA-256 provenance, safe archive member validation, fail-closed existing library hashing and current-run rollback on failure.
+- Added importer regression tests, soundbank policy audit and split-artifact integrity tests. These are registered in CTest; target suite is now expected to contain 19 tests.
+- Added independent Ubuntu workflow `.github/workflows/rev20-sound-hunter-import.yml` to fetch allowlisted CC0-1.0 real guitar sources and upload split payload + registry/provenance. The artifact, measured unique size, license records and mappings must be audited before any content is promoted to BASIC/EXPANDED.
+- The new workflow's first actual acquisition run is pending. No payload size or 500 playable preset completion is claimed.
+
+## CI pluginval update
+
+The Windows VST3 workflow now runs official pluginval Windows 1.0.4 at strictness level 5 after CTest, skin validation and package staging. Pass/fail is pending on the new target SHA. Manual FL Studio 20 remains separate.
