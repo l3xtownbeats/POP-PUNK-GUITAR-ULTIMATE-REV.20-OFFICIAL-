@@ -11,6 +11,7 @@ on:
       - "SKIN/**"
       - "assets/library/**"
       - "tools/validate_skin_registry_16.py"
+      - "tools/generate_neon_stage_spritesheets.py"
       - "tools/validate_library_tiers.py"
       - "SoundHunter/**"
       - "tools/audit_soundbank.py"
@@ -34,6 +35,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Install sprite atlas generator dependency
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Generate canonical NEON STAGE sprite atlases
+        shell: pwsh
+        run: python tools/generate_neon_stage_spritesheets.py
 
       - name: Checkout JUCE 7.0.12
         shell: pwsh
