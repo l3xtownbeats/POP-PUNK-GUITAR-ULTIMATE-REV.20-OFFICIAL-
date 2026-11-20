@@ -1,0 +1,848 @@
+{
+  "schema_version": 2,
+  "project": "POP PUNK GUITAR LIBRARY MANAGER ULTIMATE",
+  "profiles": [
+    {
+      "profile_id": "punk_rock_guitars_priority_001",
+      "display_name": "PUNK ROCK GUITARS™",
+      "priority": 1,
+      "scan_order": 1,
+      "status": "REGISTERED_PENDING_LOCAL_SCAN",
+      "source_location": null,
+      "source_location_note": "Resolve the actual folder or archive on the user's PC at first local scan. Do not assume a path or that source audio is present in this repository.",
+      "scan_policy": {
+        "preserve_originals": true,
+        "read_only_source_scan": true,
+        "extract_to_staging_only": true,
+        "require_review_before_factory": true,
+        "require_license_review_before_redistribution": true,
+        "do_not_auto_promote_to_factory": true
+      },
+      "analysis_targets": [
+        "single_notes",
+        "one_shots",
+        "open_strings",
+        "power_chords",
+        "open_chords",
+        "chord_progressions",
+        "palm_mute",
+        "downstroke_patterns",
+        "upstroke_patterns",
+        "alternate_strumming",
+        "rhythm_patterns",
+        "articulation_patterns",
+        "short_riffs",
+        "multi_bar_riffs",
+        "loops",
+        "intros",
+        "verse_parts",
+        "chorus_parts",
+        "bridges",
+        "fills",
+        "transitions",
+        "slides",
+        "harmonics",
+        "sustains",
+        "guitar_fx",
+        "whole_take_references",
+        "lead_guitar_lines",
+        "lead_guitar_phrases",
+        "lead_single_note_runs",
+        "palm_muted_single_notes",
+        "palm_muted_chord_hits",
+        "palm_muted_rhythm_patterns",
+        "open_and_muted_mixed_patterns",
+        "guitar_one_shots",
+        "complete_guitar_loops",
+        "loop_phrase_segments",
+        "loop_rhythm_segments",
+        "lead_fills",
+        "bends",
+        "vibrato",
+        "pick_scrapes",
+        "feedback",
+        "swells"
+      ],
+      "sound_character_tags": [
+        "acoustic",
+        "clean",
+        "crunch",
+        "overdrive",
+        "distortion",
+        "high_gain",
+        "ambient",
+        "lo_fi",
+        "unknown",
+        "lead_guitar",
+        "rhythm_guitar",
+        "palm_muted",
+        "open",
+        "mixed_muted_open"
+      ],
+      "musical_metadata": [
+        "tempo_bpm_with_confidence",
+        "meter_with_confidence",
+        "key_with_confidence",
+        "note_or_chord_estimates_with_confidence",
+        "articulation",
+        "phrase_length_bars_if_reliable",
+        "source_start_end_time",
+        "source_sample_rate",
+        "source_channels",
+        "source_bit_depth"
+      ],
+      "plugin_mapping": {
+        "purpose": "Build source material candidates for POP PUNK GUITAR ULTIMATE factory presets and sub-presets.",
+        "style_references_are_tags_not_identity_claims": true,
+        "allow_one_asset_in_multiple_preset_categories": true,
+        "store_audio_asset_once_and_link_categories_in_metadata": true,
+        "plugin_loads_selected_derived_clip_not_entire_source_recording": true,
+        "parent_loop_and_child_clip_relationships_must_be_preserved": true
+      },
+      "output_policy": {
+        "preferred_audio_format": "WAV",
+        "encoding": "PCM",
+        "default_bit_depth": 24,
+        "sample_rate_policy": "Preserve source rate unless an explicitly approved conversion is required.",
+        "retain_original_phrase_context": true,
+        "staging_directory": "LibraryManager/staging",
+        "factory_destination": "Samples/FACTORY",
+        "multi_resolution_extraction": {
+          "enabled": true,
+          "strategy": "Create linked candidate levels from each source; do not choose only one segmentation size.",
+          "levels": [
+            {
+              "id": "whole_take",
+              "purpose": "Keep full performance as reference."
+            },
+            {
+              "id": "musical_phrase",
+              "purpose": "Extract coherent riffs, loops, progressions and multi-bar phrases."
+            },
+            {
+              "id": "rhythm_or_articulation_pattern",
+              "purpose": "Extract useful rhythmic passages, palm-mute patterns, strumming and chord-hit sequences."
+            },
+            {
+              "id": "note_or_chord_event",
+              "purpose": "Extract individual notes, chord hits, slides and harmonics when boundaries are reliable."
+            },
+            {
+              "id": "micro_event",
+              "purpose": "Detect attacks for analysis; do not publish automatically without review."
+            }
+          ],
+          "loop_decomposition": {
+            "enabled": true,
+            "create_parent_loop_asset": true,
+            "create_child_note_and_chord_candidates": true,
+            "create_child_rhythm_and_phrase_candidates": true,
+            "preserve_parent_child_timing_and_source_offsets": true,
+            "do_not_discard_original_loop_after_child_extraction": true
+          },
+          "boundary_rules": [
+            "Use onset detection as evidence, not as the sole segmentation rule.",
+            "Prefer musical boundaries, beat/bar alignment and phrase coherence when confidence supports them.",
+            "Preserve natural attack and decay; handle boundaries to avoid clicks.",
+            "Do not split a chord or sustained note in the middle merely because its waveform changes.",
+            "Do not split a coherent riff into isolated notes by default; retain both phrase and optional child events.",
+            "Keep uncertain boundaries as review candidates with confidence and editable start/end markers.",
+            "Detect repetitions and suggest representative takes while retaining meaningful performance variations."
+          ]
+        },
+        "plugin_asset_rule": "Each approved preset assignment points to a specific derived WAV clip or deliberately selected phrase/loop. The plugin must not play the full source recording unless explicitly selected as the asset."
+      },
+      "provenance_required": [
+        "asset_id",
+        "parent_asset_id",
+        "source_relative_path",
+        "source_sha256",
+        "source_start_sample",
+        "source_end_sample",
+        "source_start_seconds",
+        "source_end_seconds",
+        "derived_clip_sha256",
+        "extractor_name_and_version",
+        "classification_and_confidence",
+        "review_status",
+        "license_status"
+      ],
+      "factory_approval_requirements": [
+        "audio_preview_reviewed",
+        "clip_boundaries_checked",
+        "classification_reviewed",
+        "duplicate_check_completed",
+        "license_allows_intended_use_and_distribution"
+      ],
+      "content_analysis": {
+        "required_content_families": [
+          {
+            "id": "one_shots",
+            "label": "One-shots",
+            "inspect": "Detect and catalogue every useful isolated hit or short playable sound; preserve attack, body and natural decay."
+          },
+          {
+            "id": "loops",
+            "label": "Loops",
+            "inspect": "Identify complete musical loops and retain each parent loop while creating linked phrase and event candidates."
+          },
+          {
+            "id": "lead_guitar",
+            "label": "Lead Guitar",
+            "inspect": "Identify lead lines, melodic phrases, single-note runs, hooks, fills, bends, slides, vibrato, harmonics and sustained lead notes."
+          },
+          {
+            "id": "palm_muted",
+            "label": "Palm-muted guitar",
+            "inspect": "Distinguish palm-muted single notes, chord hits, repeated-note patterns, tight rhythmic parts and mixed muted/open passages."
+          },
+          {
+            "id": "rhythm_guitar",
+            "label": "Rhythm Guitar",
+            "inspect": "Identify downstrokes, upstrokes, alternate strumming, chugging, open chords, power chords, syncopation and full rhythm passages."
+          },
+          {
+            "id": "chords_and_progressions",
+            "label": "Chords and progressions",
+            "inspect": "Identify individual chord hits, chord changes, progressions and coherent multi-bar chord parts without destroying their musical context."
+          },
+          {
+            "id": "transitions_and_fx",
+            "label": "Transitions and guitar FX",
+            "inspect": "Identify slides, swells, pick scrapes, feedback, harmonics, noise effects, transitions, endings and fills."
+          }
+        ],
+        "articulation_detail": [
+          "palm_muted",
+          "fully_open",
+          "partially_muted",
+          "downstroke",
+          "upstroke",
+          "alternate_picking",
+          "chugging",
+          "staccato",
+          "sustain",
+          "slide",
+          "bend",
+          "vibrato",
+          "harmonic",
+          "pick_attack",
+          "feedback",
+          "scrape",
+          "unknown"
+        ],
+        "content_relationship_rules": [
+          "Classify each useful item by both content family and musical role; a single asset may carry multiple verified tags.",
+          "Keep one-shot, loop, lead-guitar and palm-muted material as distinct searchable classifications; do not merge them into a generic guitar category.",
+          "For every detected loop, retain the full parent loop and create linked phrase, rhythm-pattern, chord-event and note-event candidates only where boundaries are reliable.",
+          "For lead-guitar recordings, preserve complete melodic lines and coherent phrases as well as optional individual note candidates.",
+          "For palm-muted material, distinguish muted notes/chords from open or mixed articulation passages.",
+          "Record classification confidence and require listening review when the class or articulation is uncertain.",
+          "Do not infer musical key, tempo, chord identity or articulation solely from a filename; analyse audio and retain confidence/unknown when uncertain."
+        ]
+      },
+      "style_taxonomy": {
+        "rule": "Treat genre and subgenre as searchable style tags with confidence, not as claims of artist/song identity. One asset may have multiple verified style tags.",
+        "styles": [
+          "pop_punk",
+          "punk_rock",
+          "skate_punk",
+          "melodic_punk",
+          "hardcore_punk",
+          "post_hardcore",
+          "alternative_rock",
+          "emo",
+          "emo_pop",
+          "indie_rock",
+          "power_pop",
+          "garage_rock",
+          " grunge",
+          "hard_rock",
+          "metal",
+          "metalcore",
+          "easycore",
+          "punk_metal",
+          "acoustic_punk",
+          "acoustic_rock",
+          "ambient_rock",
+          "post_rock",
+          "surf_rock",
+          " 기타_unknown"
+        ],
+        "era_and_production_tags": [
+          "1990s_punk",
+          "2000s_pop_punk",
+          "modern_pop_punk",
+          "raw_live",
+          "studio_tight",
+          "lo_fi",
+          "polished",
+          "wide_double_tracked",
+          "high_gain_wall",
+          "dry_tight"
+        ]
+      },
+      "chord_analysis": {
+        "detect_with_confidence": [
+          "power_chords",
+          "open_chords",
+          "barre_chords",
+          "sus2",
+          "sus4",
+          "major",
+          "minor",
+          "major7",
+          "minor7",
+          "dominant7",
+          "add9",
+          "sus",
+          "diminished",
+          "augmented",
+          "octaves",
+          "dyads",
+          "single_note",
+          "chord_inversion",
+          "slash_chord",
+          "chord_progression",
+          "partial_chord",
+          "muted_chord"
+        ],
+        "metadata": [
+          "root_note_estimate",
+          "chord_quality_estimate",
+          "voicing_or_inversion_if_reliable",
+          "lowest_and_highest_pitch",
+          "string_set_if_reliable",
+          "chord_change_timestamps",
+          "progression_sequence",
+          "confidence",
+          "review_status"
+        ],
+        "rule": "Never force a chord label when the audio is ambiguous, distorted, layered or incomplete; retain unknown/ambiguous and offer listening review."
+      },
+      "performance_techniques": {
+        "picking": [
+          "downstroke",
+          "upstroke",
+          "alternate_picking",
+          "economy_picking",
+          "tremolo_picking",
+          "palm_muting",
+          "half_muting",
+          "open_picking",
+          "chugging",
+          "staccato",
+          "legato",
+          "hybrid_picking",
+          "fingerpicking"
+        ],
+        "rhythm_and_strumming": [
+          "straight_eighths",
+          "straight_sixteenths",
+          "downstroke_eighths",
+          "downstroke_sixteenths",
+          "upstroke_strumming",
+          "alternate_strumming",
+          "syncopation",
+          "gallop",
+          "triplet_feel",
+          "swing_feel",
+          "stop_start",
+          "chord_stabs",
+          "sustained_chords",
+          "arpeggiated_chords"
+        ],
+        "lead_and_expression": [
+          "hammer_on",
+          "pull_off",
+          "slide_up",
+          "slide_down",
+          "bend",
+          "pre_bend",
+          "release_bend",
+          "vibrato",
+          "trill",
+          "harmonics_natural",
+          "harmonics_artificial",
+          "pinch_harmonic",
+          "tapping",
+          "whammy_bar",
+          "string_noise",
+          "pick_scrape",
+          "feedback",
+          "volume_swell"
+        ],
+        "muting_and_release": [
+          "palm_mute_light",
+          "palm_mute_medium",
+          "palm_mute_heavy",
+          "left_hand_mute",
+          "dead_note",
+          "choked_note",
+          "muted_chord",
+          "open_to_muted_transition",
+          "muted_to_open_transition"
+        ],
+        "rule": "Technique labels require audio evidence or explicit trustworthy source metadata; store confidence and review status. Do not infer technique solely from filenames."
+      },
+      "effects_and_tone_tags": {
+        "tone": [
+          "acoustic",
+          "clean",
+          "edge_of_breakup",
+          "crunch",
+          "overdrive",
+          "distortion",
+          "high_gain",
+          "fuzz",
+          "ambient",
+          "lo_fi",
+          "direct_injection",
+          "amp_simulated",
+          "unknown"
+        ],
+        "effects": [
+          "chorus",
+          "flanger",
+          "phaser",
+          "delay",
+          "slapback_delay",
+          "reverb",
+          "tremolo",
+          "vibrato_effect",
+          "wah",
+          "filter",
+          "octave",
+          "pitch_shift",
+          "bitcrush",
+          "compression",
+          "noise_gate",
+          "eq",
+          "unknown"
+        ],
+        "rule": "Separate recorded source tone/effects from plugin processing suggestions. A detected or tagged effect is not automatically proof of the exact hardware or plugin used."
+      }
+    },
+    {
+      "profile_id": "future_loops_mosh_punk_guitar_riff_priority_002",
+      "display_name": "Future Loops - Mosh Punk Guitar Riff",
+      "priority": 2,
+      "scan_order": 2,
+      "status": "REGISTERED_PENDING_LOCAL_SCAN",
+      "source_location": null,
+      "source_location_note": "Resolve the actual folder or archive on the user's PC at first local scan. Do not assume a path or that source audio is present in this repository.",
+      "scan_policy": {
+        "preserve_originals": true,
+        "read_only_source_scan": true,
+        "extract_to_staging_only": true,
+        "require_review_before_factory": true,
+        "require_license_review_before_redistribution": true,
+        "do_not_auto_promote_to_factory": true
+      },
+      "analysis_targets": [
+        "single_notes",
+        "one_shots",
+        "open_strings",
+        "power_chords",
+        "open_chords",
+        "chord_progressions",
+        "palm_mute",
+        "downstroke_patterns",
+        "upstroke_patterns",
+        "alternate_strumming",
+        "rhythm_patterns",
+        "articulation_patterns",
+        "short_riffs",
+        "multi_bar_riffs",
+        "loops",
+        "intros",
+        "verse_parts",
+        "chorus_parts",
+        "bridges",
+        "fills",
+        "transitions",
+        "slides",
+        "harmonics",
+        "sustains",
+        "guitar_fx",
+        "whole_take_references",
+        "lead_guitar_lines",
+        "lead_guitar_phrases",
+        "lead_single_note_runs",
+        "palm_muted_single_notes",
+        "palm_muted_chord_hits",
+        "palm_muted_rhythm_patterns",
+        "open_and_muted_mixed_patterns",
+        "guitar_one_shots",
+        "complete_guitar_loops",
+        "loop_phrase_segments",
+        "loop_rhythm_segments",
+        "lead_fills",
+        "bends",
+        "vibrato",
+        "pick_scrapes",
+        "feedback",
+        "swells"
+      ],
+      "sound_character_tags": [
+        "acoustic",
+        "clean",
+        "crunch",
+        "overdrive",
+        "distortion",
+        "high_gain",
+        "ambient",
+        "lo_fi",
+        "unknown",
+        "lead_guitar",
+        "rhythm_guitar",
+        "palm_muted",
+        "open",
+        "mixed_muted_open"
+      ],
+      "musical_metadata": [
+        "tempo_bpm_with_confidence",
+        "meter_with_confidence",
+        "key_with_confidence",
+        "note_or_chord_estimates_with_confidence",
+        "articulation",
+        "phrase_length_bars_if_reliable",
+        "source_start_end_time",
+        "source_sample_rate",
+        "source_channels",
+        "source_bit_depth"
+      ],
+      "plugin_mapping": {
+        "purpose": "Build source material candidates for POP PUNK GUITAR ULTIMATE factory presets and sub-presets.",
+        "style_references_are_tags_not_identity_claims": true,
+        "allow_one_asset_in_multiple_preset_categories": true,
+        "store_audio_asset_once_and_link_categories_in_metadata": true,
+        "plugin_loads_selected_derived_clip_not_entire_source_recording": true,
+        "parent_loop_and_child_clip_relationships_must_be_preserved": true
+      },
+      "output_policy": {
+        "preferred_audio_format": "WAV",
+        "encoding": "PCM",
+        "default_bit_depth": 24,
+        "sample_rate_policy": "Preserve source rate unless an explicitly approved conversion is required.",
+        "retain_original_phrase_context": true,
+        "staging_directory": "LibraryManager/staging",
+        "factory_destination": "Samples/FACTORY",
+        "multi_resolution_extraction": {
+          "enabled": true,
+          "strategy": "Create linked candidate levels from each source; do not choose only one segmentation size.",
+          "levels": [
+            {
+              "id": "whole_take",
+              "purpose": "Keep full performance as reference."
+            },
+            {
+              "id": "musical_phrase",
+              "purpose": "Extract coherent riffs, loops, progressions and multi-bar phrases."
+            },
+            {
+              "id": "rhythm_or_articulation_pattern",
+              "purpose": "Extract useful rhythmic passages, palm-mute patterns, strumming and chord-hit sequences."
+            },
+            {
+              "id": "note_or_chord_event",
+              "purpose": "Extract individual notes, chord hits, slides and harmonics when boundaries are reliable."
+            },
+            {
+              "id": "micro_event",
+              "purpose": "Detect attacks for analysis; do not publish automatically without review."
+            }
+          ],
+          "loop_decomposition": {
+            "enabled": true,
+            "create_parent_loop_asset": true,
+            "create_child_note_and_chord_candidates": true,
+            "create_child_rhythm_and_phrase_candidates": true,
+            "preserve_parent_child_timing_and_source_offsets": true,
+            "do_not_discard_original_loop_after_child_extraction": true
+          },
+          "boundary_rules": [
+            "Use onset detection as evidence, not as the sole segmentation rule.",
+            "Prefer musical boundaries, beat/bar alignment and phrase coherence when confidence supports them.",
+            "Preserve natural attack and decay; handle boundaries to avoid clicks.",
+            "Do not split a chord or sustained note in the middle merely because its waveform changes.",
+            "Do not split a coherent riff into isolated notes by default; retain both phrase and optional child events.",
+            "Keep uncertain boundaries as review candidates with confidence and editable start/end markers.",
+            "Detect repetitions and suggest representative takes while retaining meaningful performance variations."
+          ]
+        },
+        "plugin_asset_rule": "Each approved preset assignment points to a specific derived WAV clip or deliberately selected phrase/loop. The plugin must not play the full source recording unless explicitly selected as the asset."
+      },
+      "provenance_required": [
+        "asset_id",
+        "parent_asset_id",
+        "source_relative_path",
+        "source_sha256",
+        "source_start_sample",
+        "source_end_sample",
+        "source_start_seconds",
+        "source_end_seconds",
+        "derived_clip_sha256",
+        "extractor_name_and_version",
+        "classification_and_confidence",
+        "review_status",
+        "license_status"
+      ],
+      "factory_approval_requirements": [
+        "audio_preview_reviewed",
+        "clip_boundaries_checked",
+        "classification_reviewed",
+        "duplicate_check_completed",
+        "license_allows_intended_use_and_distribution"
+      ],
+      "content_analysis": {
+        "required_content_families": [
+          {
+            "id": "one_shots",
+            "label": "One-shots",
+            "inspect": "Detect and catalogue every useful isolated hit or short playable sound; preserve attack, body and natural decay."
+          },
+          {
+            "id": "loops",
+            "label": "Loops",
+            "inspect": "Identify complete musical loops and retain each parent loop while creating linked phrase and event candidates."
+          },
+          {
+            "id": "lead_guitar",
+            "label": "Lead Guitar",
+            "inspect": "Identify lead lines, melodic phrases, single-note runs, hooks, fills, bends, slides, vibrato, harmonics and sustained lead notes."
+          },
+          {
+            "id": "palm_muted",
+            "label": "Palm-muted guitar",
+            "inspect": "Distinguish palm-muted single notes, chord hits, repeated-note patterns, tight rhythmic parts and mixed muted/open passages."
+          },
+          {
+            "id": "rhythm_guitar",
+            "label": "Rhythm Guitar",
+            "inspect": "Identify downstrokes, upstrokes, alternate strumming, chugging, open chords, power chords, syncopation and full rhythm passages."
+          },
+          {
+            "id": "chords_and_progressions",
+            "label": "Chords and progressions",
+            "inspect": "Identify individual chord hits, chord changes, progressions and coherent multi-bar chord parts without destroying their musical context."
+          },
+          {
+            "id": "transitions_and_fx",
+            "label": "Transitions and guitar FX",
+            "inspect": "Identify slides, swells, pick scrapes, feedback, harmonics, noise effects, transitions, endings and fills."
+          }
+        ],
+        "articulation_detail": [
+          "palm_muted",
+          "fully_open",
+          "partially_muted",
+          "downstroke",
+          "upstroke",
+          "alternate_picking",
+          "chugging",
+          "staccato",
+          "sustain",
+          "slide",
+          "bend",
+          "vibrato",
+          "harmonic",
+          "pick_attack",
+          "feedback",
+          "scrape",
+          "unknown"
+        ],
+        "content_relationship_rules": [
+          "Classify each useful item by both content family and musical role; a single asset may carry multiple verified tags.",
+          "Keep one-shot, loop, lead-guitar and palm-muted material as distinct searchable classifications; do not merge them into a generic guitar category.",
+          "For every detected loop, retain the full parent loop and create linked phrase, rhythm-pattern, chord-event and note-event candidates only where boundaries are reliable.",
+          "For lead-guitar recordings, preserve complete melodic lines and coherent phrases as well as optional individual note candidates.",
+          "For palm-muted material, distinguish muted notes/chords from open or mixed articulation passages.",
+          "Record classification confidence and require listening review when the class or articulation is uncertain.",
+          "Do not infer musical key, tempo, chord identity or articulation solely from a filename; analyse audio and retain confidence/unknown when uncertain."
+        ]
+      },
+      "style_taxonomy": {
+        "rule": "Treat genre and subgenre as searchable style tags with confidence, not as claims of artist/song identity. One asset may have multiple verified style tags.",
+        "styles": [
+          "pop_punk",
+          "punk_rock",
+          "skate_punk",
+          "melodic_punk",
+          "hardcore_punk",
+          "post_hardcore",
+          "alternative_rock",
+          "emo",
+          "emo_pop",
+          "indie_rock",
+          "power_pop",
+          "garage_rock",
+          " grunge",
+          "hard_rock",
+          "metal",
+          "metalcore",
+          "easycore",
+          "punk_metal",
+          "acoustic_punk",
+          "acoustic_rock",
+          "ambient_rock",
+          "post_rock",
+          "surf_rock",
+          " 기타_unknown"
+        ],
+        "era_and_production_tags": [
+          "1990s_punk",
+          "2000s_pop_punk",
+          "modern_pop_punk",
+          "raw_live",
+          "studio_tight",
+          "lo_fi",
+          "polished",
+          "wide_double_tracked",
+          "high_gain_wall",
+          "dry_tight"
+        ]
+      },
+      "chord_analysis": {
+        "detect_with_confidence": [
+          "power_chords",
+          "open_chords",
+          "barre_chords",
+          "sus2",
+          "sus4",
+          "major",
+          "minor",
+          "major7",
+          "minor7",
+          "dominant7",
+          "add9",
+          "sus",
+          "diminished",
+          "augmented",
+          "octaves",
+          "dyads",
+          "single_note",
+          "chord_inversion",
+          "slash_chord",
+          "chord_progression",
+          "partial_chord",
+          "muted_chord"
+        ],
+        "metadata": [
+          "root_note_estimate",
+          "chord_quality_estimate",
+          "voicing_or_inversion_if_reliable",
+          "lowest_and_highest_pitch",
+          "string_set_if_reliable",
+          "chord_change_timestamps",
+          "progression_sequence",
+          "confidence",
+          "review_status"
+        ],
+        "rule": "Never force a chord label when the audio is ambiguous, distorted, layered or incomplete; retain unknown/ambiguous and offer listening review."
+      },
+      "performance_techniques": {
+        "picking": [
+          "downstroke",
+          "upstroke",
+          "alternate_picking",
+          "economy_picking",
+          "tremolo_picking",
+          "palm_muting",
+          "half_muting",
+          "open_picking",
+          "chugging",
+          "staccato",
+          "legato",
+          "hybrid_picking",
+          "fingerpicking"
+        ],
+        "rhythm_and_strumming": [
+          "straight_eighths",
+          "straight_sixteenths",
+          "downstroke_eighths",
+          "downstroke_sixteenths",
+          "upstroke_strumming",
+          "alternate_strumming",
+          "syncopation",
+          "gallop",
+          "triplet_feel",
+          "swing_feel",
+          "stop_start",
+          "chord_stabs",
+          "sustained_chords",
+          "arpeggiated_chords"
+        ],
+        "lead_and_expression": [
+          "hammer_on",
+          "pull_off",
+          "slide_up",
+          "slide_down",
+          "bend",
+          "pre_bend",
+          "release_bend",
+          "vibrato",
+          "trill",
+          "harmonics_natural",
+          "harmonics_artificial",
+          "pinch_harmonic",
+          "tapping",
+          "whammy_bar",
+          "string_noise",
+          "pick_scrape",
+          "feedback",
+          "volume_swell"
+        ],
+        "muting_and_release": [
+          "palm_mute_light",
+          "palm_mute_medium",
+          "palm_mute_heavy",
+          "left_hand_mute",
+          "dead_note",
+          "choked_note",
+          "muted_chord",
+          "open_to_muted_transition",
+          "muted_to_open_transition"
+        ],
+        "rule": "Technique labels require audio evidence or explicit trustworthy source metadata; store confidence and review status. Do not infer technique solely from filenames."
+      },
+      "effects_and_tone_tags": {
+        "tone": [
+          "acoustic",
+          "clean",
+          "edge_of_breakup",
+          "crunch",
+          "overdrive",
+          "distortion",
+          "high_gain",
+          "fuzz",
+          "ambient",
+          "lo_fi",
+          "direct_injection",
+          "amp_simulated",
+          "unknown"
+        ],
+        "effects": [
+          "chorus",
+          "flanger",
+          "phaser",
+          "delay",
+          "slapback_delay",
+          "reverb",
+          "tremolo",
+          "vibrato_effect",
+          "wah",
+          "filter",
+          "octave",
+          "pitch_shift",
+          "bitcrush",
+          "compression",
+          "noise_gate",
+          "eq",
+          "unknown"
+        ],
+        "rule": "Separate recorded source tone/effects from plugin processing suggestions. A detected or tagged effect is not automatically proof of the exact hardware or plugin used."
+      }
+    }
+  ]
+}

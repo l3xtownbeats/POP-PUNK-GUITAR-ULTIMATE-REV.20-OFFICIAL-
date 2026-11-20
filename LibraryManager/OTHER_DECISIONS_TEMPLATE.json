@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "decisions": {
+    "C:/FULL/PATH/TO/Samples/Import Sample Guitar/example.wav": {
+      "route_to_other": true,
+      "sha256": "PASTE_THE_EXACT_SHA256_FROM_other_audit.csv",
+      "reason": "Human-reviewed reason why this asset belongs in OTHER"
+    }
+  }
+}
