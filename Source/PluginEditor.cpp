@@ -1328,12 +1328,24 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         // Atlas state boxes are authored at 225x125; JUCE draws the button's
         // text/icon afterwards, so labels remain live and accessible.
         int sourceX = 25;
-        if (down) sourceX = 505;
+        int sourceY = 690;
+        int sourceWidth = 225;
+        int sourceHeight = 125;
+        if (button.getClickingTogglesState())
+        {
+            // FX bypass and power controls use the dedicated OFF/ON switch art.
+            sourceX = button.getToggleState() ? 535 : 65;
+            sourceY = 430;
+            sourceWidth = 400;
+            sourceHeight = 170;
+        }
+        else if (down) sourceX = 505;
         else if (button.getToggleState()) sourceX = 745;
         else if (hovered) sourceX = 265;
         const auto bounds = button.getLocalBounds();
         g.drawImage(palette.controlsSpriteSheet, bounds.getX(), bounds.getY(),
-                    bounds.getWidth(), bounds.getHeight(), sourceX, 690, 225, 125);
+                    bounds.getWidth(), bounds.getHeight(), sourceX, sourceY,
+                    sourceWidth, sourceHeight);
         return;
     }
 
