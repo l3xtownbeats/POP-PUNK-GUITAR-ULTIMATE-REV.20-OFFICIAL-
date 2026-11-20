@@ -65,3 +65,8 @@ Only libraries whose actual licensing permits bundle/redistribution into the plu
 ## 2026-11-20 — acquisition workflow diagnostic
 
 Target run 44722586113 proved the discovery and three regression test suites pass, but the first real source download stopped on the Meta Open Sound zipball containing multiple LICENSE files. The importer has now been corrected to use the repository-root-most LICENSE and a regression test covers the nested-license case. A fresh manual acquisition run is still required; no audio payload is considered acquired until that run uploads a verified artifact and registry.
+
+
+## Automated engineering baseline now green
+
+The imported Sound Hunter regression contracts are part of the 19/19 target CTest pass on SHA `10b05a0117366cf33afeb194b3c28456f30fef80`. This validates the importer/policy/splitter contracts, not the existence of a 15 GB BASIC payload. A separate real acquisition artifact (run 44728326148, 2.97 GB) is already preserved as provenance.

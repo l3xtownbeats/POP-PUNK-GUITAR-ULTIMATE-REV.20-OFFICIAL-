@@ -191,3 +191,10 @@ Source main contains a real-recorded-guitar acquisition tool, catalog and manual
 ## 2026-11-20 — Sound Hunter CI diagnostic / correction
 
 Workflow 44722586113 (SHA 9ed8a44...) executed the imported Sound Hunter pipeline. Discovery and all regression contracts passed, then the real download phase stopped because the Meta Open Sound repository archive contained multiple LICENSE files. The importer treated that structure as ambiguous and exited. This was corrected by selecting the repository-root-most LICENSE deterministically and adding a regression test for nested LICENSE files. The acquisition workflow is now manual opt-in; a fresh run is required for real audio acquisition.
+
+
+## 2026-11-20 — final current automated target baseline
+
+Workflow 44729083554 on exact SHA `10b05a0117366cf33afeb194b3c28456f30fef80` completed SUCCESS. It passed Windows x64 VST3 build, full 19/19 CTest, exact 16-theme validator, 16-only package staging and pluginval strictness 5. Artifact 14625308194 / SHA-256 `72e31eb39e36301c2f3dfa070e9ef277c6d5a360d2907db12f4e4a25e219e864`.
+
+This is the latest automated baseline. Host/manual and content gates remain separate.

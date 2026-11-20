@@ -170,3 +170,17 @@ The Windows VST3 workflow now runs official pluginval Windows 1.0.4 at strictnes
 - Run 44722586113 on SHA 9ed8a44bf09fc7344bc68df039608b95cda9959e failed at the first real source: Meta Open Sound archive contained five LICENSE files while the importer required exactly one. All three regression test groups before acquisition passed (12 + 1 + 5 tests).
 - Corrected license selection to use the repository-root-most LICENSE path and added a regression test. Acquisition is now explicit opt-in via workflow_dispatch input `acquire_samples` in the single canonical workflow `rev20-sound-hunter-import.yml`.
 - No source audio payload is claimed acquired yet. The corrected importer requires a new manual acquisition run before audio can enter the product evidence chain.
+
+
+## Latest exact-SHA green baseline — 2026-11-20
+
+**SHA:** `10b05a0117366cf33afeb194b3c28456f30fef80`  
+**Workflow:** [44729083554](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44729083554)
+
+- Windows x64 configure/build/VST3: PASS.
+- Full CTest: **19/19 PASS** (including PageCache rollback, live DSP parameter wiring, Sound Hunter importer, soundbank policy and artifact splitter contracts).
+- Exact 16-skin validator and 16-only package staging: PASS.
+- pluginval strictness 5: PASS.
+- Artifact ID 14625308194, SHA-256 72e31eb39e36301c2f3dfa070e9ef277c6d5a360d2907db12f4e4a25e219e864.
+
+This is the strongest current automated engineering evidence. It still does not close manual FL Studio 20 host acceptance or the content-delivery gates for BASIC 15 GB / 500 playable factory presets.

@@ -157,3 +157,13 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Corrected `SoundHunter/sound_hunter_real_guitars.py` to choose the repository-root-most expected license deterministically (shortest path) and added a regression test for nested LICENSE files.
 - Consolidated acquisition workflow to `.github/workflows/rev20-sound-hunter-import.yml` with `workflow_dispatch` and explicit `acquire_samples` input. An ordinary push no longer starts a large sample acquisition job.
 - Previous run 44722586113 therefore remains recorded as FAILED / infrastructure-contract defect fixed; it is not evidence of an acquired sample payload. A fresh manual run is required to acquire audio.
+
+
+## 2026-11-20 — GREEN REV.20 ENGINEERING BASELINE
+- Latest target SHA: `10b05a0117366cf33afeb194b3c28456f30fef80`.
+- Windows 2022 x64 build: PASS; full CTest: **19/19 PASS**.
+- Exact skin validator: PASS for 16 named runtime-ready themes, 32 PNG CRC/dimensions, 48 SVG layers, 21 palette tokens and 28 control-map entries per skin.
+- 16-only skin package staging: PASS.
+- Pluginval strictness level 5: PASS. Logs show scan, cold/warm open, editor, audio processing, state, automation, parameter, VST3 validator and bus checks all completed successfully.
+- Artifact: `PPGU-REV20-Windows-x64-VST3`, ID `14625308194`, 5,857,765 bytes, SHA-256 `72e31eb39e36301c2f3dfa070e9ef277c6d5a360d2907db12f4e4a25e219e864`, expires 2026-12-04.
+- Remaining manual/release gates: FL Studio 20 host acceptance on Windows 10; full GUI/reference parity including Playing Core hero display; DPI 100/125/150%; 150 ms hot-swap/ECO/memory/performance observation; 15 GB BASIC payload completion; all 500 playable presets.

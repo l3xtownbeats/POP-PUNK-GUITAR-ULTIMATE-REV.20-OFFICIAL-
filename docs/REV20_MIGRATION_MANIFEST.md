@@ -107,3 +107,10 @@ Transferred from source main: SoundHunter importer/catalog/production notes, imp
 - Target run 44722586113 exposed an importer assumption: GitHub zipballs can contain multiple LICENSE files. The importer previously required exactly one and stopped before admitting any audio.
 - Selectively corrected the importer to select the root-most expected LICENSE by path depth. Added a regression test and changed the canonical target workflow to workflow_dispatch with explicit acquire_samples.
 - The failed run remains historical evidence of the defect; it is not evidence of sample acquisition.
+
+
+## Current target evidence — 2026-11-20
+
+- Exact SHA `10b05a0117366cf33afeb194b3c28456f30fef80` passed Windows x64 build, 19/19 CTest, exact 16-skin validator, 16-only package stage and pluginval Strictness 5 (run 44729083554).
+- Latest artifact ID 14625308194, size 5,857,765 bytes, digest 72e31eb39e36301c2f3dfa070e9ef277c6d5a360d2907db12f4e4a25e219e864.
+- This automated baseline is not a substitute for FL Studio 20 host acceptance.
