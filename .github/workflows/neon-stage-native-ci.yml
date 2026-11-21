@@ -73,3 +73,39 @@ jobs:
       - name: Stage runtime skin pack in build directory
         shell: pwsh
         run: python tools/package_active_skins.py --root SKIN --output build/PPGU_artefacts/Release/VST3/Skins
+
+      - name: Locate VST3 bundle
+        id: vst3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $plugin = Get-ChildItem build -Directory -Recurse -Filter '*.vst3' | Select-Object -First 1
+          if (-not $plugin) { throw 'VST3 bundle not found after successful build.' }
+          "path=$($plugin.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Run pluginval strictness level 5
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'pluginval_Windows.zip'
+          $toolDir = Join-Path $env:RUNNER_TEMP 'pluginval'
+          Invoke-WebRequest -Uri 'https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_Windows.zip' -OutFile $archive -TimeoutSec 180
+          Expand-Archive -LiteralPath $archive -DestinationPath $toolDir -Force
+          $validator = Get-ChildItem -LiteralPath $toolDir -Recurse -File -Filter 'pluginval.exe' | Select-Object -First 1
+          if (-not $validator) { throw 'pluginval.exe was not found in the official Windows release archive.' }
+          $pluginPath = "${{ steps.vst3.outputs.path }}"
+          $arguments = @('--strictness-level', '5', ('"{0}"' -f $pluginPath))
+          $validationProcess = Start-Process -FilePath $validator.FullName -ArgumentList $arguments -NoNewWindow -Wait -PassThru
+          if ($validationProcess.ExitCode -ne 0) {
+            throw "pluginval strictness level 5 failed with exit code $($validationProcess.ExitCode)."
+          }
+
+      - name: Upload NEON STAGE VST3 and matching skin pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-NEON-STAGE-Windows-x64-VST3
+          path: |
+            build/PPGU_artefacts/Release/VST3/*.vst3
+            build/PPGU_artefacts/Release/VST3/Skins/**
+          if-no-files-found: error
+          retention-days: 14
