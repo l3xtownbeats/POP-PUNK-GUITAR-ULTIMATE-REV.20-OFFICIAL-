@@ -41,6 +41,8 @@ public:
     void setPanelScale(float scale);
     void setPersistenceProperties(juce::PropertiesFile* properties);
     void setThemePalette(const PPGUThemeManager::Palette& palette);
+    // Advances subtle chrome illumination and repaints only animated child controls.
+    void setAnimationPhase(float phase);
     void setSurfaceColours(juce::Colour background,
                            juce::Colour panel,
                            juce::Colour border,
