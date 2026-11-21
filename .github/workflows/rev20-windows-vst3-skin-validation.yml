@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+      - work/neon-stage-cover-parity
+  pull_request:
+    branches:
+      - main
     paths:
       - "CMakeLists.txt"
       - "Source/**"
@@ -60,7 +64,8 @@ jobs:
             git commit -m "Refresh generated NEON STAGE sprite atlases"
             git fetch origin main
             git rebase origin/main
-            git push origin HEAD:main
+            $targetBranch = if ($env:GITHUB_HEAD_REF) { $env:GITHUB_HEAD_REF } else { $env:GITHUB_REF_NAME }
+            git push origin "HEAD:$targetBranch"
           } else {
             Write-Host "Generated NEON STAGE sprite atlases match the committed source files."
           }
