@@ -1,0 +1,1225 @@
+{
+  "schemaVersion": "1.0.0",
+  "themeId": "skin-053",
+  "themeName": "NEON STAGE PREMIUM",
+  "controlCount": 27,
+  "statesPerControl": 5,
+  "expectedStateSlots": 135,
+  "controls": [
+    {
+      "id": "preset_browser",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/preset_browser/default.png",
+          "runtime2xPath": "runtime/2x/controls/preset_browser/default.png",
+          "runtime4xPath": "runtime/4x/controls/preset_browser/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/preset_browser/hover.png",
+          "runtime2xPath": "runtime/2x/controls/preset_browser/hover.png",
+          "runtime4xPath": "runtime/4x/controls/preset_browser/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/preset_browser/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/preset_browser/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/preset_browser/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/preset_browser/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/preset_browser/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/preset_browser/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/preset_browser/active.png",
+          "runtime2xPath": "runtime/2x/controls/preset_browser/active.png",
+          "runtime4xPath": "runtime/4x/controls/preset_browser/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "mode_selector",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/mode_selector/default.png",
+          "runtime2xPath": "runtime/2x/controls/mode_selector/default.png",
+          "runtime4xPath": "runtime/4x/controls/mode_selector/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/mode_selector/hover.png",
+          "runtime2xPath": "runtime/2x/controls/mode_selector/hover.png",
+          "runtime4xPath": "runtime/4x/controls/mode_selector/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/mode_selector/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/mode_selector/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/mode_selector/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/mode_selector/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/mode_selector/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/mode_selector/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/mode_selector/active.png",
+          "runtime2xPath": "runtime/2x/controls/mode_selector/active.png",
+          "runtime4xPath": "runtime/4x/controls/mode_selector/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "SKIN_button",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/SKIN_button/default.png",
+          "runtime2xPath": "runtime/2x/controls/SKIN_button/default.png",
+          "runtime4xPath": "runtime/4x/controls/SKIN_button/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/SKIN_button/hover.png",
+          "runtime2xPath": "runtime/2x/controls/SKIN_button/hover.png",
+          "runtime4xPath": "runtime/4x/controls/SKIN_button/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/SKIN_button/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/SKIN_button/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/SKIN_button/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/SKIN_button/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/SKIN_button/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/SKIN_button/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/SKIN_button/active.png",
+          "runtime2xPath": "runtime/2x/controls/SKIN_button/active.png",
+          "runtime4xPath": "runtime/4x/controls/SKIN_button/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "LCD_display",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/LCD_display/default.png",
+          "runtime2xPath": "runtime/2x/controls/LCD_display/default.png",
+          "runtime4xPath": "runtime/4x/controls/LCD_display/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/LCD_display/hover.png",
+          "runtime2xPath": "runtime/2x/controls/LCD_display/hover.png",
+          "runtime4xPath": "runtime/4x/controls/LCD_display/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/LCD_display/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/LCD_display/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/LCD_display/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/LCD_display/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/LCD_display/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/LCD_display/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/LCD_display/active.png",
+          "runtime2xPath": "runtime/2x/controls/LCD_display/active.png",
+          "runtime4xPath": "runtime/4x/controls/LCD_display/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "LED_indicator",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/LED_indicator/default.png",
+          "runtime2xPath": "runtime/2x/controls/LED_indicator/default.png",
+          "runtime4xPath": "runtime/4x/controls/LED_indicator/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/LED_indicator/hover.png",
+          "runtime2xPath": "runtime/2x/controls/LED_indicator/hover.png",
+          "runtime4xPath": "runtime/4x/controls/LED_indicator/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/LED_indicator/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/LED_indicator/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/LED_indicator/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/LED_indicator/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/LED_indicator/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/LED_indicator/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/LED_indicator/active.png",
+          "runtime2xPath": "runtime/2x/controls/LED_indicator/active.png",
+          "runtime4xPath": "runtime/4x/controls/LED_indicator/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "Import_Guitar",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/Import_Guitar/default.png",
+          "runtime2xPath": "runtime/2x/controls/Import_Guitar/default.png",
+          "runtime4xPath": "runtime/4x/controls/Import_Guitar/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/Import_Guitar/hover.png",
+          "runtime2xPath": "runtime/2x/controls/Import_Guitar/hover.png",
+          "runtime4xPath": "runtime/4x/controls/Import_Guitar/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/Import_Guitar/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/Import_Guitar/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/Import_Guitar/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/Import_Guitar/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/Import_Guitar/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/Import_Guitar/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/Import_Guitar/active.png",
+          "runtime2xPath": "runtime/2x/controls/Import_Guitar/active.png",
+          "runtime4xPath": "runtime/4x/controls/Import_Guitar/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "knob01",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/knob01/default.png",
+          "runtime2xPath": "runtime/2x/controls/knob01/default.png",
+          "runtime4xPath": "runtime/4x/controls/knob01/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/knob01/hover.png",
+          "runtime2xPath": "runtime/2x/controls/knob01/hover.png",
+          "runtime4xPath": "runtime/4x/controls/knob01/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/knob01/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/knob01/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/knob01/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/knob01/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/knob01/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/knob01/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/knob01/active.png",
+          "runtime2xPath": "runtime/2x/controls/knob01/active.png",
+          "runtime4xPath": "runtime/4x/controls/knob01/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "knob02",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/knob02/default.png",
+          "runtime2xPath": "runtime/2x/controls/knob02/default.png",
+          "runtime4xPath": "runtime/4x/controls/knob02/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/knob02/hover.png",
+          "runtime2xPath": "runtime/2x/controls/knob02/hover.png",
+          "runtime4xPath": "runtime/4x/controls/knob02/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/knob02/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/knob02/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/knob02/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/knob02/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/knob02/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/knob02/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/knob02/active.png",
+          "runtime2xPath": "runtime/2x/controls/knob02/active.png",
+          "runtime4xPath": "runtime/4x/controls/knob02/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "knob03",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/knob03/default.png",
+          "runtime2xPath": "runtime/2x/controls/knob03/default.png",
+          "runtime4xPath": "runtime/4x/controls/knob03/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/knob03/hover.png",
+          "runtime2xPath": "runtime/2x/controls/knob03/hover.png",
+          "runtime4xPath": "runtime/4x/controls/knob03/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/knob03/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/knob03/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/knob03/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/knob03/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/knob03/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/knob03/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/knob03/active.png",
+          "runtime2xPath": "runtime/2x/controls/knob03/active.png",
+          "runtime4xPath": "runtime/4x/controls/knob03/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "knob04",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/knob04/default.png",
+          "runtime2xPath": "runtime/2x/controls/knob04/default.png",
+          "runtime4xPath": "runtime/4x/controls/knob04/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/knob04/hover.png",
+          "runtime2xPath": "runtime/2x/controls/knob04/hover.png",
+          "runtime4xPath": "runtime/4x/controls/knob04/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/knob04/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/knob04/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/knob04/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/knob04/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/knob04/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/knob04/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/knob04/active.png",
+          "runtime2xPath": "runtime/2x/controls/knob04/active.png",
+          "runtime4xPath": "runtime/4x/controls/knob04/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "knob05",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/knob05/default.png",
+          "runtime2xPath": "runtime/2x/controls/knob05/default.png",
+          "runtime4xPath": "runtime/4x/controls/knob05/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/knob05/hover.png",
+          "runtime2xPath": "runtime/2x/controls/knob05/hover.png",
+          "runtime4xPath": "runtime/4x/controls/knob05/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/knob05/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/knob05/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/knob05/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/knob05/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/knob05/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/knob05/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/knob05/active.png",
+          "runtime2xPath": "runtime/2x/controls/knob05/active.png",
+          "runtime4xPath": "runtime/4x/controls/knob05/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "knob06",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/knob06/default.png",
+          "runtime2xPath": "runtime/2x/controls/knob06/default.png",
+          "runtime4xPath": "runtime/4x/controls/knob06/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/knob06/hover.png",
+          "runtime2xPath": "runtime/2x/controls/knob06/hover.png",
+          "runtime4xPath": "runtime/4x/controls/knob06/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/knob06/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/knob06/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/knob06/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/knob06/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/knob06/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/knob06/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/knob06/active.png",
+          "runtime2xPath": "runtime/2x/controls/knob06/active.png",
+          "runtime4xPath": "runtime/4x/controls/knob06/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "knob07",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/knob07/default.png",
+          "runtime2xPath": "runtime/2x/controls/knob07/default.png",
+          "runtime4xPath": "runtime/4x/controls/knob07/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/knob07/hover.png",
+          "runtime2xPath": "runtime/2x/controls/knob07/hover.png",
+          "runtime4xPath": "runtime/4x/controls/knob07/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/knob07/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/knob07/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/knob07/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/knob07/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/knob07/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/knob07/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/knob07/active.png",
+          "runtime2xPath": "runtime/2x/controls/knob07/active.png",
+          "runtime4xPath": "runtime/4x/controls/knob07/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "knob08",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/knob08/default.png",
+          "runtime2xPath": "runtime/2x/controls/knob08/default.png",
+          "runtime4xPath": "runtime/4x/controls/knob08/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/knob08/hover.png",
+          "runtime2xPath": "runtime/2x/controls/knob08/hover.png",
+          "runtime4xPath": "runtime/4x/controls/knob08/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/knob08/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/knob08/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/knob08/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/knob08/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/knob08/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/knob08/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/knob08/active.png",
+          "runtime2xPath": "runtime/2x/controls/knob08/active.png",
+          "runtime4xPath": "runtime/4x/controls/knob08/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "knob09",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/knob09/default.png",
+          "runtime2xPath": "runtime/2x/controls/knob09/default.png",
+          "runtime4xPath": "runtime/4x/controls/knob09/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/knob09/hover.png",
+          "runtime2xPath": "runtime/2x/controls/knob09/hover.png",
+          "runtime4xPath": "runtime/4x/controls/knob09/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/knob09/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/knob09/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/knob09/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/knob09/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/knob09/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/knob09/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/knob09/active.png",
+          "runtime2xPath": "runtime/2x/controls/knob09/active.png",
+          "runtime4xPath": "runtime/4x/controls/knob09/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "fx_switch01",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch01/default.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch01/default.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch01/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch01/hover.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch01/hover.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch01/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch01/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch01/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch01/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch01/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch01/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch01/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch01/active.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch01/active.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch01/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "fx_switch02",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch02/default.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch02/default.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch02/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch02/hover.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch02/hover.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch02/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch02/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch02/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch02/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch02/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch02/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch02/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch02/active.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch02/active.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch02/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "fx_switch03",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch03/default.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch03/default.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch03/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch03/hover.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch03/hover.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch03/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch03/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch03/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch03/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch03/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch03/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch03/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch03/active.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch03/active.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch03/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "fx_switch04",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch04/default.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch04/default.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch04/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch04/hover.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch04/hover.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch04/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch04/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch04/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch04/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch04/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch04/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch04/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch04/active.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch04/active.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch04/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "fx_switch05",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch05/default.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch05/default.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch05/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch05/hover.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch05/hover.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch05/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch05/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch05/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch05/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch05/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch05/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch05/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch05/active.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch05/active.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch05/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "fx_switch06",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch06/default.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch06/default.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch06/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch06/hover.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch06/hover.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch06/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch06/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch06/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch06/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch06/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch06/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch06/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch06/active.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch06/active.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch06/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "fx_switch07",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch07/default.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch07/default.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch07/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch07/hover.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch07/hover.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch07/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch07/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch07/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch07/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch07/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch07/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch07/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/fx_switch07/active.png",
+          "runtime2xPath": "runtime/2x/controls/fx_switch07/active.png",
+          "runtime4xPath": "runtime/4x/controls/fx_switch07/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "midi_keyboard",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/midi_keyboard/default.png",
+          "runtime2xPath": "runtime/2x/controls/midi_keyboard/default.png",
+          "runtime4xPath": "runtime/4x/controls/midi_keyboard/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/midi_keyboard/hover.png",
+          "runtime2xPath": "runtime/2x/controls/midi_keyboard/hover.png",
+          "runtime4xPath": "runtime/4x/controls/midi_keyboard/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/midi_keyboard/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/midi_keyboard/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/midi_keyboard/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/midi_keyboard/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/midi_keyboard/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/midi_keyboard/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/midi_keyboard/active.png",
+          "runtime2xPath": "runtime/2x/controls/midi_keyboard/active.png",
+          "runtime4xPath": "runtime/4x/controls/midi_keyboard/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "Auto_Discover",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/Auto_Discover/default.png",
+          "runtime2xPath": "runtime/2x/controls/Auto_Discover/default.png",
+          "runtime4xPath": "runtime/4x/controls/Auto_Discover/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/Auto_Discover/hover.png",
+          "runtime2xPath": "runtime/2x/controls/Auto_Discover/hover.png",
+          "runtime4xPath": "runtime/4x/controls/Auto_Discover/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/Auto_Discover/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/Auto_Discover/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/Auto_Discover/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/Auto_Discover/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/Auto_Discover/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/Auto_Discover/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/Auto_Discover/active.png",
+          "runtime2xPath": "runtime/2x/controls/Auto_Discover/active.png",
+          "runtime4xPath": "runtime/4x/controls/Auto_Discover/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "Curator",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/Curator/default.png",
+          "runtime2xPath": "runtime/2x/controls/Curator/default.png",
+          "runtime4xPath": "runtime/4x/controls/Curator/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/Curator/hover.png",
+          "runtime2xPath": "runtime/2x/controls/Curator/hover.png",
+          "runtime4xPath": "runtime/4x/controls/Curator/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/Curator/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/Curator/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/Curator/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/Curator/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/Curator/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/Curator/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/Curator/active.png",
+          "runtime2xPath": "runtime/2x/controls/Curator/active.png",
+          "runtime4xPath": "runtime/4x/controls/Curator/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "Settings",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/Settings/default.png",
+          "runtime2xPath": "runtime/2x/controls/Settings/default.png",
+          "runtime4xPath": "runtime/4x/controls/Settings/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/Settings/hover.png",
+          "runtime2xPath": "runtime/2x/controls/Settings/hover.png",
+          "runtime4xPath": "runtime/4x/controls/Settings/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/Settings/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/Settings/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/Settings/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/Settings/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/Settings/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/Settings/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/Settings/active.png",
+          "runtime2xPath": "runtime/2x/controls/Settings/active.png",
+          "runtime4xPath": "runtime/4x/controls/Settings/active.png",
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "id": "About",
+      "states": [
+        {
+          "state": "default",
+          "status": "planned",
+          "masterPath": "master/controls/About/default.png",
+          "runtime2xPath": "runtime/2x/controls/About/default.png",
+          "runtime4xPath": "runtime/4x/controls/About/default.png",
+          "sha256": null
+        },
+        {
+          "state": "hover",
+          "status": "planned",
+          "masterPath": "master/controls/About/hover.png",
+          "runtime2xPath": "runtime/2x/controls/About/hover.png",
+          "runtime4xPath": "runtime/4x/controls/About/hover.png",
+          "sha256": null
+        },
+        {
+          "state": "pressed",
+          "status": "planned",
+          "masterPath": "master/controls/About/pressed.png",
+          "runtime2xPath": "runtime/2x/controls/About/pressed.png",
+          "runtime4xPath": "runtime/4x/controls/About/pressed.png",
+          "sha256": null
+        },
+        {
+          "state": "disabled",
+          "status": "planned",
+          "masterPath": "master/controls/About/disabled.png",
+          "runtime2xPath": "runtime/2x/controls/About/disabled.png",
+          "runtime4xPath": "runtime/4x/controls/About/disabled.png",
+          "sha256": null
+        },
+        {
+          "state": "active",
+          "status": "planned",
+          "masterPath": "master/controls/About/active.png",
+          "runtime2xPath": "runtime/2x/controls/About/active.png",
+          "runtime4xPath": "runtime/4x/controls/About/active.png",
+          "sha256": null
+        }
+      ]
+    }
+  ]
+}
