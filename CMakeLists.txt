@@ -203,6 +203,9 @@ add_test(NAME ppgu_processor_pattern_tests COMMAND ppgu_processor_pattern_tests)
 add_test(NAME ppgu_skin1_premium_artwork_package_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_skin1_premium_artwork_package.py)
 
+add_test(NAME ppgu_neon_stage_cover_layout_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_neon_stage_cover_layout_contract.py)
+
 add_test(NAME ppgu_sound_asset_registry_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/TestSoundAssetRegistry.py)
 
