@@ -1,5 +1,8 @@
 #include "ThemeManager.h"
+#include <array>
 #include <iostream>
+#include <utility>
+#include <vector>
 #include <set>
 #include <string>
 
