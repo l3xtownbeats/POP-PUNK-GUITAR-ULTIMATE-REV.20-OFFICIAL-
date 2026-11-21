@@ -227,3 +227,13 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Добавлен `tests/test_neon_stage_workspace_settings_contract.py` и регистрация `ppgu_neon_stage_workspace_settings_contract` в CTest.
 - Это исправление согласованности настроек и runtime, а не подтверждение визуального pixel parity или измеренной производительности.
 - Изменения внесены только в `work/neon-stage-cover-parity`; `main` не изменялась.
+
+
+## 2026-11-21 — NEON STAGE PNG CONTROL FOCUS FEEDBACK
+- Сверен контракт состояний: пять индивидуально отрисованных PNG-состояний (default, hover, pressed, disabled, dragged) не заменяют отдельное состояние клавиатурного фокуса.
+- Для PNG-backed rotary controls добавлено независимое кольцо keyboard focus; стрелка регулятора по-прежнему следует реальному значению APVTS.
+- Для PNG-backed buttons добавлена независимая focus-обводка поверх текущей графики. Она не меняет ON/OFF toggle и не подменяет источник состояния APVTS.
+- Добавлен tests/test_neon_stage_focus_state_contract.py и регистрация ppgu_neon_stage_focus_state_contract в CTest.
+- Уточнён комментарий ThemeManager.h: artwork загружается как проверенные локальные PNG; SVG runtime decoder ранее удалён.
+- Focus feedback реализован векторной обводкой поверх существующих PNG. Это не заявка на наличие отдельных авторских PNG-файлов focus/active; производство этих отдельных состояний остаётся отдельной задачей asset pipeline.
+- Не менялись DSP, sampler, MIDI scheduler, APVTS IDs/ranges, preset data и аудиопоток. Изменения только в work/neon-stage-cover-parity; main не изменялась.
