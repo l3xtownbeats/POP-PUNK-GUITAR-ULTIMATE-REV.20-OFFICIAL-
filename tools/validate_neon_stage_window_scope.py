@@ -130,7 +130,7 @@ def main() -> int:
     missing_panels = [name for name in required_panel_assets if not (ASSETS / "panels" / name).is_file()]
     if missing_panels:
         pending.append(f"Window-specific production panel artwork missing: {len(missing_panels)}/{len(required_panel_assets)} panels")
-    art_manifest = read_json(ASSETS / "artwork_manifest.json")
+    art_manifest = read_json(ASSETS / "asset_manifest.json")
     hero = next((r for r in art_manifest.get("records", []) if r.get("path") == "assets/hero.png"), None)
     if hero and hero.get("sha256") == "dcdb2acdcdc01c76c62883ecd542356e6ba6106b0edd0544d74456bae56120f8":
         pending.append("Playing Core hero is the preserved legacy placeholder; exact approved guitar artwork still required.")
