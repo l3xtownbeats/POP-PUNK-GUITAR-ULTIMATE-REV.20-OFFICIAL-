@@ -51,7 +51,11 @@ jobs:
         shell: pwsh
         run: python -m pip install --disable-pip-version-check Pillow
 
-      - name: Generate canonical NEON STAGE sprite atlases\n        shell: pwsh\n        run: python tools/generate_neon_stage_spritesheets.py\n\n      - name: Checkout JUCE 7.0.12
+      - name: Generate canonical NEON STAGE sprite atlases
+        shell: pwsh
+        run: python tools/generate_neon_stage_spritesheets.py
+
+      - name: Checkout JUCE 7.0.12
         shell: pwsh
         run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
 
