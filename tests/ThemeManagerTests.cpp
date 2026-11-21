@@ -78,19 +78,29 @@ int main()
                 expect(artworkCandidate.getPalette().crestArtwork.isValid(), id + " crest SVG decoded");
                 if (id == "skin-053")
                 {
-                    expect(artworkCandidate.getPalette().controlsSpriteSheet.isValid(),
-                           "NEON STAGE controls sprite atlas decoded");
-                    expect(artworkCandidate.getPalette().metersSlidersSpriteSheet.isValid(),
-                           "NEON STAGE meters/sliders atlas decoded");
-                    expect(artworkCandidate.getPalette().framesPanelsSpriteSheet.isValid(),
-                           "NEON STAGE frames/panels atlas decoded");
-                    expect(artworkCandidate.getPalette().iconsSpriteSheet.isValid(),
-                           "NEON STAGE icon atlas decoded");
                     const auto& skinOne = artworkCandidate.getPalette();
+                    expect(!skinOne.controlsSpriteSheet.isValid(),
+                           "Legacy prototype controls atlas is not loaded");
+                    expect(!skinOne.metersSlidersSpriteSheet.isValid(),
+                           "Legacy prototype meters/sliders atlas is not loaded");
+                    expect(!skinOne.framesPanelsSpriteSheet.isValid(),
+                           "Legacy prototype frames/panels atlas is not loaded");
+                    expect(!skinOne.iconsSpriteSheet.isValid(),
+                           "Legacy prototype icon atlas is not loaded");
+                    expect(skinOne.controlStateArtwork.size() == 135,
+                           "All 27 controls decode their five individually authored runtime states");
+                    expect(skinOne.findControlArtwork("knob01", "default") != nullptr,
+                           "Main rotary artwork is available by control ID/state");
+                    expect(skinOne.findControlArtwork("fx_switch07", "pressed") != nullptr,
+                           "Seventh main FX switch artwork is available by control ID/state");
+                    expect(skinOne.findControlArtwork("Import_Guitar", "hover") != nullptr,
+                           "Import Guitar header artwork is available by control ID/state");
+                    expect(skinOne.findControlArtwork("About", "disabled") != nullptr,
+                           "Disabled About artwork is available by control ID/state");
                     expect(skinOne.heroArtwork.isValid()
                                && skinOne.heroArtwork.getWidth() == 800
                                && skinOne.heroArtwork.getHeight() == 450,
-                           "NEON STAGE reference-matched guitar hero artwork decoded");
+                           "NEON STAGE hero PNG decoded; visual reference parity remains a separate acceptance gate");
                     expect(skinOne.backgroundArtwork.isValid()
                                && skinOne.backgroundArtwork.getWidth() == 2560
                                && skinOne.backgroundArtwork.getHeight() == 1440,
