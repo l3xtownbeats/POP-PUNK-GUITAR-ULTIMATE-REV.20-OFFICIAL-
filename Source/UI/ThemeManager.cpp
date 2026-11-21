@@ -729,34 +729,63 @@ juce::Colour PPGUThemeManager::Palette::token(const juce::String& key) const noe
 
 bool PPGUThemeManager::loadFromJson(const juce::String& jsonText)
 {
+    // Manifests are user-provided files. Bound parsing work before constructing
+    // a JUCE var tree, and reject empty/oversized input deterministically.
+    constexpr int maximumManifestCharacters = 1024 * 1024;
+    if (jsonText.isEmpty() || jsonText.length() > maximumManifestCharacters)
+    {
+        lastError = jsonText.isEmpty()
+            ? "Theme manifest is empty"
+            : "Theme manifest exceeds the 1 MiB parsing limit";
+        resetToDefault();
+        return false;
+    }
+
     const auto root = juce::JSON::parse(jsonText);
     Palette candidate;
     juce::String error;
 
     if (!validateManifest(root, candidate, error))
     {
-        lastError = error.isNotEmpty() ? error : "Theme manifest validation failed";
+        lastError = error.isNotEmpty() ? error : "Theme manifest is invalid JSON or failed validation";
         resetToDefault();
         return false;
     }
 
-    activePalette = candidate;
+    activePalette = std::move(candidate);
     lastError.clear();
     return true;
 }
 
 bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
 {
-    if (!manifestFile.existsAsFile())
+    // Do not follow a manifest symlink: theme manifests must be regular files
+    // inside the selected skin package, not pointers to arbitrary user files.
+    if (!manifestFile.existsAsFile() || manifestFile.isDirectory()
+        || manifestFile.isSymbolicLink())
     {
-        lastError = "Theme manifest file does not exist";
+        lastError = "Theme manifest is missing, not a regular file, or is a symbolic link";
+        resetToDefault();
+        return false;
+    }
+
+    constexpr juce::int64 maximumManifestBytes = 1024 * 1024;
+    const auto manifestSize = manifestFile.getSize();
+    if (manifestSize <= 0 || manifestSize > maximumManifestBytes)
+    {
+        lastError = "Theme manifest is empty or exceeds the 1 MiB file limit";
         resetToDefault();
         return false;
     }
 
     const auto jsonText = manifestFile.loadFileAsString();
-    if (!loadFromJson(jsonText))
+    if (jsonText.isEmpty() || !loadFromJson(jsonText))
+    {
+        if (lastError.isEmpty())
+            lastError = "Theme manifest could not be read";
+        resetToDefault();
         return false;
+    }
 
     const auto root = juce::JSON::parse(jsonText);
     const auto id = root.getProperty("id", "").toString();
