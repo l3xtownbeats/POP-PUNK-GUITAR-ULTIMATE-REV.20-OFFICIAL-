@@ -1820,11 +1820,11 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     runtimeSkinRoot = getRuntimeSkinRoot();
     // Medium first-launch footprint for FL Studio; the JUCE resize corner remains enabled.
     // The responsive layout below keeps the main controls visible down to the minimum size.
-    setSize(1024, 700);
+    setSize(1400, 790);
     setResizable(true, true);
-    setResizeLimits(900, 640, 1600, 1100);
+    setResizeLimits(1100, 650, 1920, 1080);
     titleLabel.setText("PPGU", juce::dontSendNotification);
-    titleLabel.setFont(makeThemeFont(themeManager.getPalette(), 28.0f, true, true));
+    titleLabel.setFont(makeThemeFont(themeManager.getPalette(), 40.0f, true, true));
     titleLabel.setColour(juce::Label::textColourId, themeManager.getPalette().token("text_primary"));
     addAndMakeVisible(titleLabel);
     subtitleLabel.setText("L3XTOWN AUDIO LAB", juce::dontSendNotification);
@@ -1919,9 +1919,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     for (auto* unavailable : { &autoSoundHunterButton, &curatorButton })
     {
         unavailable->setEnabled(false);
-        unavailable->setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("lowlight"));
-        unavailable->setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_disabled"));
-        addAndMakeVisible(*unavailable);
+        unavailable->setVisible(false); // Journal: no unimplemented discovery/curation controls on the cover.
     }
     autoSoundHunterButton.setTooltip("AUTO SOUND HUNTER is not implemented yet. No search or auto-import action is available.");
     curatorButton.setTooltip("CURATOR is not implemented yet. No asset is marked approved.");
@@ -1968,6 +1966,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     modeBox.setColour(juce::ComboBox::textColourId, themeManager.getPalette().token("text_primary"));
     modeBox.setColour(juce::ComboBox::outlineColourId, themeManager.getPalette().token("accent").withAlpha(0.5f));
     addAndMakeVisible(modeBox);
+    modeBox.setVisible(false); // The two approved mode tabs are the visible selectors.
     modeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(processor.parameters, "playMode", modeBox);
     startModeBox.addItem("HOST", 1);
     startModeBox.addItem("HOST START", 2);
@@ -1981,9 +1980,11 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     if (auto* diagram = dynamic_cast<PPGUChordDiagram*>(chordDiagram.get()))
         diagram->setPalette(themeManager.getPalette());
     addAndMakeVisible(*chordDiagram);
+    chordDiagram->setVisible(false); // AutoChords is an auxiliary PATTERN window, not a third main mode.
 
     mainFxEdit = std::make_unique<PPGUFXEditPanel>(processor, 0);
     addAndMakeVisible(*mainFxEdit);
+    mainFxEdit->setVisible(false); // FX detail editor opens only from the seven main FX switches.
 
     keyboard = std::make_unique<juce::MidiKeyboardComponent>(processor.keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard);
     keyboard->setAvailableRange(36, 84);
@@ -1996,12 +1997,13 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     addAndMakeVisible(*keyboard);
     performanceDisplay = std::make_unique<PPGUPerformanceDisplay>(processor);
     addAndMakeVisible(*performanceDisplay);
+    performanceDisplay->setVisible(false); // Main cover follows the approved reference; no extra harmony monitor.
     melodyTab.onClick = [this] { modeBox.setSelectedId(1); };
     patternTab.onClick = [this] { modeBox.setSelectedId(2); openPatternSectionPanel(); };
     modeBox.onChange = [this]
     {
         if (chordDiagram != nullptr)
-            chordDiagram->setVisible(modeBox.getSelectedId() == 2);
+            chordDiagram->setVisible(false);
     };
     for (size_t i = 0; i < knobs.size(); ++i) {
         configureKnob(knobs[i], knobLabels[i], knobNames[i]);
@@ -2024,6 +2026,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
             static constexpr std::array<int, 7> detailGroups {{ 0, 1, 2, 3, 5, 6, 7 }};
             if (auto* panel = dynamic_cast<PPGUFXEditPanel*>(mainFxEdit.get()))
                 panel->setSelectedGroup(detailGroups[i]);
+            openFxEditPanel(detailGroups[i]);
         };
         addAndMakeVisible(b);
     }
@@ -2040,8 +2043,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     options.filenameSuffix = "settings";
     options.folderName = "L3XTOWN";
     uiProperties.setStorageParameters(options);
-    int restoredWidth = 1024;
-    int restoredHeight = 700;
+    int restoredWidth = 1400;
+    int restoredHeight = 790;
     if (auto* settings = uiProperties.getUserSettings())
     {
         auxiliaryWorkspace->setPanelScale(static_cast<float>(settings->getDoubleValue("workspacePanelScale", 1.0)));
@@ -2052,8 +2055,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     loadSavedSkin();
     applyPalette();
     uiSettingsReady = true;
-    setSize(juce::jlimit(900, 1600, restoredWidth),
-            juce::jlimit(640, 1100, restoredHeight));
+    setSize(juce::jlimit(1100, 1920, restoredWidth),
+            juce::jlimit(650, 1080, restoredHeight));
 }
 
 PopPunkGuitarUltimateAudioProcessorEditor::~PopPunkGuitarUltimateAudioProcessorEditor()
