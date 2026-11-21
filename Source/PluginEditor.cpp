@@ -2096,46 +2096,82 @@ void PopPunkGuitarUltimateAudioProcessorEditor::configureKnob(juce::Slider& s, j
 void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
     juce::Graphics& g, juce::Rectangle<int> area, const juce::String& sectionTitle)
 {
+    if (area.getWidth() < 2 || area.getHeight() < 2)
+        return;
+
     const auto& p = themeManager.getPalette();
     const auto bounds = area.toFloat();
+    const auto radius = 11.0f;
 
+    // Layered chassis: deep drop shadow, graphite body and a restrained
+    // machined-metal rim. All visual colours come from the active skin.
+    g.setColour(p.token("shadow").withAlpha(0.72f));
+    g.fillRoundedRectangle(bounds.translated(0.0f, 3.0f), radius);
     g.setGradientFill(juce::ColourGradient(p.token("panel_elevated"),
                                            bounds.getX(), bounds.getY(),
                                            p.token("panel"),
                                            bounds.getX(), bounds.getBottom(), false));
-    g.fillRoundedRectangle(bounds, 12.0f);
-    drawThemeArtworkLayers(g, area, p, 0.10f, 0.42f, 0.0f);
+    g.fillRoundedRectangle(bounds, radius);
+    drawThemeArtworkLayers(g, area, p, 0.075f, 0.30f, 0.0f);
+
+    auto header = area.reduced(1, 1).removeFromTop(32);
+    g.setGradientFill(juce::ColourGradient(p.token("control_face").withAlpha(0.72f),
+                                           header.getX(), header.getY(),
+                                           p.token("panel").withAlpha(0.18f),
+                                           header.getX(), header.getBottom(), false));
+    g.fillRoundedRectangle(header.toFloat(), 9.0f);
+    g.fillRect(header.getX(), header.getCentreY(), header.getWidth(), header.getHeight() / 2);
+
     if (p.framesPanelsSpriteSheet.isValid())
-    {
-        const auto header = area.reduced(1, 1).removeFromTop(30);
         g.drawImage(p.framesPanelsSpriteSheet, header.getX(), header.getY(),
                     header.getWidth(), header.getHeight(), 30, 650, 450, 60);
-    }
-    g.setColour(p.token("control_border").withAlpha(0.78f));
-    g.drawRoundedRectangle(bounds.reduced(0.5f), 12.0f, 1.0f);
 
-    // Section chrome belongs to the visual shell; it does not create or
-    // reassign controls and follows the active theme's semantic palette.
-    g.setColour(p.token("text_secondary"));
+    // Double rim and inner highlight create a premium instrument chassis.
+    g.setColour(p.token("control_border").withAlpha(0.82f));
+    g.drawRoundedRectangle(bounds.reduced(0.5f), radius, 1.0f);
+    g.setColour(p.token("highlight").withAlpha(0.10f));
+    g.drawRoundedRectangle(bounds.reduced(2.0f), radius - 2.0f, 0.7f);
+
+    g.setColour(p.token("text_primary"));
     g.setFont(makeThemeFont(p, 9.5f, false, true));
     auto heading = area.reduced(15, 7).removeFromTop(19);
     g.drawText(sectionTitle, heading, juce::Justification::centredLeft, true);
 
-    g.setColour(p.token("accent").withAlpha(0.9f));
+    // Accent rail and segmented micro-indicator make each section readable
+    // without adding decorative, non-functional controls.
+    g.setColour(p.token("accent").withAlpha(0.95f));
     g.fillRoundedRectangle(bounds.getX() + 15.0f, bounds.getY() + 29.0f,
-                           34.0f, 2.0f, 1.0f);
-    g.setColour(p.token("control_border").withAlpha(0.45f));
-    g.drawHorizontalLine(static_cast<int>(bounds.getY() + 33.0f),
+                           38.0f, 2.0f, 1.0f);
+    g.setColour(p.token("accent_glow").withAlpha(0.55f));
+    g.fillRoundedRectangle(bounds.getX() + 56.0f, bounds.getY() + 29.0f,
+                           12.0f, 2.0f, 1.0f);
+    g.setColour(p.token("control_border").withAlpha(0.38f));
+    g.drawHorizontalLine(static_cast<int>(bounds.getY() + 34.0f),
                          bounds.getX() + 15.0f, bounds.getRight() - 15.0f);
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
 {
     const auto& p = themeManager.getPalette();
+    const auto full = getLocalBounds();
     g.fillAll(p.token("window_bg"));
-    drawThemeArtworkLayers(g, getLocalBounds(), p, 0.16f, 0.78f, 0.055f, true);
+    drawThemeArtworkLayers(g, full, p, 0.11f, 0.48f, 0.035f, true);
 
-    auto area = getLocalBounds().reduced(14);
+    // Header deck: restrained magenta stage rail, brand plate and right-side
+    // instrument status lamps. Real buttons remain native JUCE components.
+    auto header = full.reduced(14).removeFromTop(48);
+    auto headerPlate = header.toFloat();
+    g.setGradientFill(juce::ColourGradient(p.token("panel_elevated"),
+        headerPlate.getX(), headerPlate.getY(), p.token("panel"),
+        headerPlate.getX(), headerPlate.getBottom(), false));
+    g.fillRoundedRectangle(headerPlate, 9.0f);
+    g.setColour(p.token("control_border").withAlpha(0.72f));
+    g.drawRoundedRectangle(headerPlate.reduced(0.5f), 9.0f, 1.0f);
+    g.setColour(p.token("accent").withAlpha(0.9f));
+    g.fillRoundedRectangle(headerPlate.getX() + 10.0f, headerPlate.getBottom() - 2.0f,
+                           58.0f, 2.0f, 1.0f);
+
+    auto area = full.reduced(14);
     area.removeFromTop(48);
     area.removeFromBottom(132);
     area.removeFromTop(8);
@@ -2149,10 +2185,21 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
     auto right = area.removeFromRight(rightWidth);
     area.removeFromRight(10);
 
-    drawPanel(g, left, "AUTOCHORDS  /  PRESETS");
-    drawPanel(g, area, "FX EDIT  /  NEON STAGE");
-    drawPanel(g, right, "AMP & TONE");
-    drawPanel(g, fxChain, "FX CHAIN");
+    drawPanel(g, left, "PRESET LIBRARY  /  HARMONY");
+    drawPanel(g, area, "SIGNAL FORGE  /  PERFORMANCE");
+    drawPanel(g, right, "AMP  /  TONE  /  FEEL");
+    drawPanel(g, fxChain, "EFFECTS CHAIN");
+
+    // Footer is a separate console strip; the live performance meter,
+    // MIDI keyboard and library status are painted by their own components.
+    auto footer = full.reduced(14).removeFromBottom(132).toFloat();
+    g.setColour(p.token("panel").withAlpha(0.96f));
+    g.fillRoundedRectangle(footer, 9.0f);
+    g.setColour(p.token("control_border").withAlpha(0.72f));
+    g.drawRoundedRectangle(footer.reduced(0.5f), 9.0f, 1.0f);
+    g.setColour(p.token("accent").withAlpha(0.72f));
+    g.fillRoundedRectangle(footer.getX() + 12.0f, footer.getY() + 5.0f,
+                           28.0f, 1.5f, 1.0f);
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::resized()
