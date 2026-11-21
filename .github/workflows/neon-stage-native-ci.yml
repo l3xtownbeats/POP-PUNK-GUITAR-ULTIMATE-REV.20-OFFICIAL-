@@ -13,6 +13,7 @@ on:
       - "tools/validate_skin_registry_16.py"
       - "tools/migrate_neon_stage_png.py"
       - "tools/migrate_skin_studio_png.py"
+      - "tools/migrate_skin_studio_png.py"
       - "tools/render_neon_stage_svg.cjs"
       - ".github/workflows/neon-stage-native-ci.yml"
   pull_request:
@@ -26,6 +27,7 @@ on:
       - "tools/package_active_skins.py"
       - "tools/validate_skin_registry_16.py"
       - "tools/migrate_neon_stage_png.py"
+      - "tools/migrate_skin_studio_png.py"
       - ".github/workflows/neon-stage-native-ci.yml"
 
 permissions:
