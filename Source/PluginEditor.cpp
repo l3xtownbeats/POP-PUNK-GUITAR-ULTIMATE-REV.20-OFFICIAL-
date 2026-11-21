@@ -2208,8 +2208,6 @@ void PopPunkGuitarUltimateAudioProcessorEditor::timerCallback()
     if (categoryBox.isMouseOver() || categoryBox.hasKeyboardFocus(true))
         categoryBox.repaint();
 
-    if (mainFxEdit != nullptr)
-        mainFxEdit->repaint();
     if (auxiliaryWorkspace != nullptr)
         auxiliaryWorkspace->setAnimationPhase(animationPhase);
 
