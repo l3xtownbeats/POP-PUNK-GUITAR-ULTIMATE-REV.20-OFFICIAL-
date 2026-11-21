@@ -177,3 +177,17 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Hid unfinished Auto Sound Hunter/Curator controls, the inline chord diagram, the third PUNK GROUP mode and any fake CPU/RAM indicators from the main cover.
 - Added Skin-1 hero PNG decoding/rendering and CTest assertions. The current `assets/hero.png` is still a legacy placeholder, not the final exact photographic guitar crop; final isolated hero/control artwork and pixel-parity review remain open.
 - Added a static cover-layout regression test and enabled the Windows x64 validation workflow for this branch/PR. No Windows build, CTest, pluginval or FL Studio 20 acceptance result is claimed until the exact branch-head workflow passes.
+
+
+## 2026-11-21 — Windows x64 VST3 acceptance CI PASS (tested SHA 09ebf598ff9119aa35a45276ee2c4ca4a45817a6)
+
+- GitHub Actions run: `44903101708` — Windows 2022 x64.
+- CMake configure: PASS.
+- VST3 + C++ contract test build: PASS.
+- Full CTest suite: PASS.
+- Exact 16-skin registry validation: PASS.
+- 16-skin runtime package staging: PASS.
+- pluginval strictness level 5: PASS.
+- Artifact: `PPGU-REV20-Windows-x64-VST3`, ID `14707315505`, 11,088,750 bytes; SHA-256 `fb4fa88dbdd57afefe5a47a663dec9f75a32a398fdf8415b523c054671a2d554`; expires 2026-12-05.
+- This CI pass proves the tested revision builds and passes automated checks. It does not prove visual pixel parity or successful FL Studio 20 use on a physical Windows 10 installation.
+- Remaining gates: exact final isolated hero/control artwork, visual review against mockup 01, FL Studio 20 host acceptance, and verification that the package resolves the skin directory correctly on the target Windows installation.
