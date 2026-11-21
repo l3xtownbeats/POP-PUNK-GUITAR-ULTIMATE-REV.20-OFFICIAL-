@@ -48,7 +48,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install PNG migration dependencies
-        run: python -m pip install --disable-pip-version-check Pillow
+        run: python -m pip install --disable-pip-version-check Pillow numpy
 
       - name: Install deterministic Arial-compatible font
         run: |
