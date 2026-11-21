@@ -1,0 +1,40 @@
+name: Export NEON STAGE reference PNGs
+on:
+  push:
+    branches:
+      - fix/neon-stage-graphite-cyan-blue
+    paths:
+      - .github/workflows/export-neon-stage-reference-pngs.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download seven approved reference PNGs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p neon-stage-reference-pngs
+          base="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}"
+          files=(
+            "01 INTERFACE  NEON STAGE DEFAULT .png"
+            "02 INTERFACE  NEON STAGE DEFAULT AUTOCHORDS .png"
+            "03 INTERFACE  NEON STAGE DEFAULT .png"
+            "04 INTERFACE  NEON STAGE DEFAULT .png"
+            "05 INTERFACE  NEON STAGE DEFAULT .png"
+            "06 INTERFACE  NEON STAGE DEFAULT .png"
+            "07 INTERFACE  NEON STAGE DEFAULT .png"
+          )
+          for f in "${files[@]}"; do
+            curl --fail --location --retry 3 "${base}/${f// /%20}" -o "neon-stage-reference-pngs/${f}"
+            file "neon-stage-reference-pngs/${f}"
+          done
+          sha256sum neon-stage-reference-pngs/*.png | tee neon-stage-reference-pngs/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neon-stage-reference-pngs
+          path: neon-stage-reference-pngs/
+          if-no-files-found: error
+          retention-days: 7
