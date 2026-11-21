@@ -14,6 +14,7 @@ on:
       - "SKIN/Skin_053/**"
       - "tools/package_active_skins.py"
       - "tools/migrate_neon_stage_png.py"
+      - "tools/render_neon_stage_svg.cjs"
       - ".github/workflows/skin1-control-state-ci.yml"
 
 permissions:
@@ -44,7 +45,10 @@ jobs:
           path: SKIN/Skin_053/assets/png_migration
 
       - name: Install PNG migration dependencies
-        run: python -m pip install --disable-pip-version-check Pillow CairoSVG
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Install deterministic Resvg renderer
+        run: npm install --no-save --no-package-lock @resvg/resvg-js
 
       - name: Render and audit Skin-1 PNG artwork
         run: python tools/migrate_neon_stage_png.py
