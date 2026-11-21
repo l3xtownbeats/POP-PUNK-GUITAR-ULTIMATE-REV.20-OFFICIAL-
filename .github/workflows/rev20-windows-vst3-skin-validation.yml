@@ -15,6 +15,8 @@ on:
       - "SKIN/**"
       - "assets/library/**"
       - "tools/validate_skin_registry_16.py"
+      - "tools/migrate_neon_stage_png.py"
+      - "tools/render_neon_stage_svg.cjs"
       - "tools/package_active_skins.py"
       - "tools/validate_library_tiers.py"
       - "SoundHunter/**"
