@@ -463,7 +463,10 @@ int main()
             juce::MidiBuffer midiB;
             processor.processBlock(blockB, midiB);
 
-            const double firstChordRms = rms(blockA, 256, 4200);
+            // Chord B is injected at sample 5872 and strummed across the
+            // next 576 samples; measure after all three voices have started,
+            // before chord C replaces it at sample 8872.
+            const double firstChordRms = rms(blockA, 6500, 1800);
             const double finalChordRms = rms(blockB, 1000, 7000);
             if (!(firstChordRms > 0.04))
             {

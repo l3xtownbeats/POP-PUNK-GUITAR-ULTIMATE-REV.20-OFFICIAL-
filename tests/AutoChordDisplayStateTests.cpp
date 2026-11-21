@@ -44,6 +44,16 @@ int main()
         return 3;
     }
 
+    // Clear the earlier C-major example before starting the correlated
+    // stress values below. Otherwise the reader could legitimately observe
+    // that older, non-correlated seed snapshot before the writer's first tick.
+    AutoChordDisplayState stressSeed;
+    if (!store.publish(stressSeed))
+    {
+        std::cerr << "Could not initialize the concurrent snapshot stress test.\n";
+        return 4;
+    }
+
     // Concurrent writer/readers stress the two-slot handoff. Each complete
     // snapshot carries correlated values; a torn or mixed copy is rejected.
     std::atomic<bool> finished { false };

@@ -40,7 +40,6 @@ int main()
     // A fretted note receives a stable finger assignment; open and muted
     // strings are represented explicitly, and the thumb is limited to low E.
     int frettedFingerCount = 0;
-    int openStringCount = 0;
     int thumbCount = 0;
     for (std::size_t string = 0; string < 6; ++string)
     {
