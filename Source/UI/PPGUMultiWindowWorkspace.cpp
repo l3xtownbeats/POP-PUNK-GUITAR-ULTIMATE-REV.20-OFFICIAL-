@@ -367,13 +367,13 @@ int PPGUMultiWindowWorkspace::getOpenPanelCount() const noexcept
 
 void PPGUMultiWindowWorkspace::setPanelGap(int pixels)
 {
-    panelGap = juce::jlimit(0, 64, pixels);
+    panelGap = juce::jlimit(0, 32, pixels);
     layoutPanels();
 }
 
 void PPGUMultiWindowWorkspace::setPanelScale(float scale)
 {
-    panelScale = std::isfinite(scale) ? juce::jlimit(0.5f, 3.0f, scale) : 1.0f;
+    panelScale = std::isfinite(scale) ? juce::jlimit(0.5f, 1.5f, scale) : 1.0f;
     layoutPanels();
 }
 
