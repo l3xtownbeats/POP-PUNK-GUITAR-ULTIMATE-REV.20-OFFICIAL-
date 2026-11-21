@@ -2182,6 +2182,37 @@ void PopPunkGuitarUltimateAudioProcessorEditor::timerCallback()
         animationPhase -= juce::MathConstants<float>::twoPi;
     premiumLookAndFeel.setAnimationPhase(animationPhase);
 
+    // Repaint only components whose artwork uses the animation phase. Avoid
+    // invalidating the complete 1024x700 editor surface on every 30 Hz tick.
+    for (auto& knob : knobs)
+        knob.repaint();
+
+    const auto repaintIfAnimated = [](juce::Button& button)
+    {
+        if (button.isEnabled()
+            && (button.getToggleState() || button.isMouseOverOrDragging()
+                || button.hasKeyboardFocus(true)))
+            button.repaint();
+    };
+    for (auto& button : fxButtons)
+        repaintIfAnimated(button);
+    repaintIfAnimated(melodyTab);
+    repaintIfAnimated(patternTab);
+    repaintIfAnimated(loadButton);
+    repaintIfAnimated(skinButton);
+    repaintIfAnimated(autoChordsButton);
+    repaintIfAnimated(settingsButton);
+
+    if (presetBox.isMouseOver() || presetBox.hasKeyboardFocus(true))
+        presetBox.repaint();
+    if (categoryBox.isMouseOver() || categoryBox.hasKeyboardFocus(true))
+        categoryBox.repaint();
+
+    if (mainFxEdit != nullptr)
+        mainFxEdit->repaint();
+    if (auxiliaryWorkspace != nullptr)
+        auxiliaryWorkspace->setAnimationPhase(animationPhase);
+
     if (resizeSavePending
         && static_cast<juce::uint32>(juce::Time::getMillisecondCounter() - lastResizeChangeMs) >= 450u)
     {
@@ -2193,7 +2224,6 @@ void PopPunkGuitarUltimateAudioProcessorEditor::timerCallback()
         }
         resizeSavePending = false;
     }
-    repaint();
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::configureKnob(juce::Slider& s, juce::Label& l, const juce::String& name)
