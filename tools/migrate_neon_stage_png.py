@@ -19,7 +19,7 @@ def sha256(data: bytes) -> str:
 def dimensions(root: ET.Element) -> tuple[int, int]:
     def number(value):
         if not value: return None
-        match = re.match(r"^\\s*(\\d+(?:\\.\\d+)?)", value)
+        match = re.match(r"^\s*(\d+(?:\.\d+)?)", value)
         return round(float(match.group(1))) if match else None
     width, height = number(root.get("width")), number(root.get("height"))
     if not width or not height:
@@ -87,7 +87,7 @@ def main() -> int:
                 "convertedSourceCount":len(records),"variantCount":sum(len(x["variants"]) for x in records),
                 "records":records}
     path = OUTPUT / "png_manifest.json"
-    path.write_text(json.dumps(manifest, indent=2)+"\\n", encoding="utf-8")
+    path.write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
     print(f"SVG sources: {source_count}; converted sources: {len(records)}; PNG variants: {manifest['variantCount']}")
     print(f"Manifest: {path.relative_to(ROOT)}")
     if errors:
