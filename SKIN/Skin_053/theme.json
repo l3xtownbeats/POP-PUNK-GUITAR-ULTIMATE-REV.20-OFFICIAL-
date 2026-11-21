@@ -5,7 +5,7 @@
   "name": "NEON STAGE DEFAULT",
   "family": "special",
   "layout": "STUDIO_CONSOLE",
-  "description": "Canonical SKIN-1 visual shell: dark graphite studio console with restrained cyan, electric-blue, violet and magenta stage accents. Default minimal mode; effects are opt-in.",
+  "description": "Canonical NEON STAGE DEFAULT shell: premium matte graphite and precision anodized-metal studio console, with restrained cyan/electric-blue signal accents. Match the approved main interface mockup exactly; do not reinterpret or redesign the composition.",
   "palette": {
     "window_bg": "#080B14",
     "panel": "#101827",
@@ -349,12 +349,14 @@
     "layoutChanges": false,
     "audioChanges": false
   },
-  "designStatus": "REV20_RUNTIME_READY_CI_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
+  "designStatus": "VISUAL_ALIGNMENT_IN_PROGRESS; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
   "notes": [
     "[IDENTITY-RULE] SKIN-1 = NEON STAGE DEFAULT = skin-053/Skin_053. Stable asset ID and index 53 are preserved.",
-    "Default display mode is MINIMALISM; premium glow/effects are opt-in only.",
+    "Default layout density is STANDARD. Musical modes remain MELODY and PATTERN; AutoChords is a helper within PATTERN. Premium glow is restrained.",
     "All control IDs and grid metadata are preserved from the REV18 canonical source.",
     "Visual-only change: no APVTS, DSP, sampler, MIDI, preset or audio callback changes.",
-    "NEON STAGE DEFAULT / SKIN-1 is the canonical default and reset target. REV.20 exact SHA 8cfd11ecce3c8039360c1c194be5251e716c9015 passed Windows x64 VST3 build, full CTest, this theme's texture/bezel/crest SVG decoding, PNG CRC/dimension validation and 16-only package staging (workflow 44717722638). Runtime-ready/selectable in REV.20. FL Studio 20 host acceptance and pluginval remain pending."
+    "NEON STAGE DEFAULT / SKIN-1 is the canonical default and reset target. REV.20 exact SHA 8cfd11ecce3c8039360c1c194be5251e716c9015 passed Windows x64 VST3 build, full CTest, this theme's texture/bezel/crest SVG decoding, PNG CRC/dimension validation and 16-only package staging (workflow 44717722638). Runtime-ready/selectable in REV.20. FL Studio 20 host acceptance and pluginval remain pending.",
+    "[VISUAL-SOURCE-OF-TRUTH] The approved repository mockup `01 INTERFACE  NEON STAGE DEFAULT .png` is the single source of truth for the main editor composition, proportions, spacing, panel geometry, materials and control placement. This theme manifest must not redefine or reinterpret that layout.",
+    "[PALETTE-LOCK] SKIN-1 uses the approved graphite/cyan palette from the NEON STAGE master asset specification. Do not substitute magenta/purple accents."
   ]
 }

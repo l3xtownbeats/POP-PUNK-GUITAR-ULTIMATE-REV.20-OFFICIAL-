@@ -53,20 +53,21 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
                             float crestOpacity = 0.035f,
                             bool includePremiumStageLayers = false)
 {
-    const auto drawLayer = [&g, bounds](const juce::Image& image, float opacity)
+    const auto drawLayer = [&g, bounds](const juce::Image& image, float opacity,
+                                        juce::RectanglePlacement placement = juce::RectanglePlacement::stretchToFit)
     {
         if (!image.isValid() || opacity <= 0.0f)
             return;
         g.saveState();
         g.setOpacity(opacity);
         g.drawImageWithin(image, bounds.getX(), bounds.getY(), bounds.getWidth(),
-                          bounds.getHeight(), juce::RectanglePlacement::stretchToFit);
+                          bounds.getHeight(), placement);
         g.restoreState();
     };
 
     if (includePremiumStageLayers)
     {
-        drawLayer(palette.backgroundArtwork, 0.36f);
+        drawLayer(palette.backgroundArtwork, 1.0f, juce::RectanglePlacement::fillDestination);
         if (palette.materialArtwork.isValid())
         {
             g.saveState();
@@ -124,7 +125,7 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
 class PPGUSkinGalleryPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
 public:
-    struct Skin { int index = 0; juce::String id, name, family, familyKey, layout; juce::File preview; juce::Colour accent { 0xff00d9ff }; bool active = false, favorite = false; };
+    struct Skin { int index = 0; juce::String id, name, family, familyKey, layout; juce::File preview; juce::Colour accent { 0xffe6007e }; bool active = false, favorite = false; };
 
     PPGUSkinGalleryPanel(std::vector<Skin> skinsIn, PPGUThemeManager::Palette paletteIn,
                          int activeIndex, juce::StringArray favoritesIn, std::function<void(const juce::StringArray&)> saveFavoritesIn,
@@ -1540,7 +1541,11 @@ private:
 
 // Premium NEON STAGE shell. Visual theme code never touches processor/audio state.
 
-namespace { void getPluginModuleAnchor() {} }
+namespace
+{
+    void getPluginModuleAnchor() {}
+
+}
 
 void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int w, int h,
                                                     float pos, float start, float end, juce::Slider& slider)
@@ -1575,27 +1580,10 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         }
     }
 
-    if (palette.controlsSpriteSheet.isValid())
-    {
-        // Eight authored 100x100 frames at 45-degree increments. Quantization
-        // is visual only; the Slider's continuous parameter value is unchanged.
-        const int frame = juce::jlimit(0, 7, juce::roundToInt(pos * 7.0f));
-        const int sourceX = 65 + (frame % 4) * 110;
-        const int sourceY = frame < 4 ? 120 : 220;
-        const int diameter = juce::jmax(1, juce::roundToInt(
-            static_cast<float>(juce::jmin(w, h)) * 0.82f));
-        const int destinationX = x + (w - diameter) / 2;
-        const int destinationY = y + (h - diameter) / 2;
-        g.drawImage(palette.controlsSpriteSheet, destinationX, destinationY,
-                    diameter, diameter, sourceX, sourceY, 100, 100);
-        if (!slider.isEnabled())
-        {
-            g.setColour(palette.token("window_bg").withAlpha(0.48f));
-            g.fillEllipse(static_cast<float>(destinationX), static_cast<float>(destinationY),
-                          static_cast<float>(diameter), static_cast<float>(diameter));
-        }
-        return;
-    }
+    // Legacy cyan/blue sprite atlas is retained in the package for provenance
+    // and compatibility, but is intentionally not rendered by NEON STAGE.
+    // The approved per-control state artwork above is preferred; the native
+    // graphite/magenta vector fallback below covers any unmapped control.
 
     const float d = juce::jmin(static_cast<float>(w), static_cast<float>(h)) * 0.76f;
     const float r = d * 0.5f;
@@ -1615,6 +1603,25 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     g.strokePath(track, juce::PathStrokeType(4.0f, juce::PathStrokeType::curved,
                                              juce::PathStrokeType::rounded));
 
+    // Precision scale around the dial:  thirteen subtle machined index marks.
+    // These are visual graduations only; the underlying APVTS value stays continuous.
+    for (int tick = 0; tick <= 12; ++tick)
+    {
+        const float t = static_cast<float>(tick) / 12.0f;
+        const float tickAngle = start + t * (end - start);
+        const float outer = r + 10.0f;
+        const float inner = outer - ((tick % 3) == 0 ? 5.0f : 2.8f);
+        juce::Path mark;
+        mark.startNewSubPath(cx + std::sin(tickAngle) * inner,
+                             cy - std::cos(tickAngle) * inner);
+        mark.lineTo(cx + std::sin(tickAngle) * outer,
+                    cy - std::cos(tickAngle) * outer);
+        g.setColour(enabled
+            ? palette.token("highlight").withAlpha((tick % 3) == 0 ? 0.72f : 0.34f)
+            : palette.token("text_disabled").withAlpha(0.22f));
+        g.strokePath(mark, juce::PathStrokeType((tick % 3) == 0 ? 1.35f : 0.8f));
+    }
+
     juce::Path value;
     value.addCentredArc(cx, cy, r + 5.0f, r + 5.0f, 0.0f, start, angle, true);
     g.setColour(enabled ? (hovered ? palette.accent.brighter(0.12f) : palette.accent)
@@ -1632,6 +1639,12 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     g.drawEllipse(cx - r + 4.0f, cy - r + 4.0f, d - 8.0f, d - 8.0f,
                   focused ? 2.0f : 1.2f);
 
+    // Recessed centre hub with a metallic highlight ring.
+    g.setColour(palette.token("shadow").withAlpha(0.72f));
+    g.fillEllipse(cx - 6.0f, cy - 6.0f, 12.0f, 12.0f);
+    g.setColour(palette.token("highlight").withAlpha(enabled ? 0.72f : 0.24f));
+    g.drawEllipse(cx - 5.0f, cy - 5.0f, 10.0f, 10.0f, 0.9f);
+
     juce::Path pointer;
     pointer.startNewSubPath(cx, cy);
     pointer.lineTo(cx + std::sin(angle) * r * 0.56f,
@@ -1647,41 +1660,35 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
                                                float sliderPos, float minSliderPos, float maxSliderPos,
                                                juce::Slider::SliderStyle style, juce::Slider& slider)
 {
-    juce::ignoreUnused(minSliderPos, maxSliderPos, slider);
-    if (style != juce::Slider::LinearHorizontal || !palette.metersSlidersSpriteSheet.isValid())
+    if (style != juce::Slider::LinearHorizontal)
     {
         juce::LookAndFeel_V4::drawLinearSlider(g, x, y, width, height,
                                                sliderPos, minSliderPos, maxSliderPos, style, slider);
         return;
     }
 
-    const bool useLongTrack = width >= 420;
-    const int sourceX = 60;
-    const int sourceY = useLongTrack ? 445 : 570;
-    const int sourceWidth = useLongTrack ? 820 : 390;
-    const int sourceHeight = 22;
-    const auto track = juce::Rectangle<int>(x + 4, y + (height - 12) / 2,
-                                             juce::jmax(1, width - 8), 12);
-    g.drawImage(palette.metersSlidersSpriteSheet, track.getX(), track.getY(),
-                track.getWidth(), track.getHeight(), sourceX, sourceY, sourceWidth, sourceHeight);
-
-    const float proportion = juce::jlimit(0.0f, 1.0f,
+    const auto track = juce::Rectangle<float>(static_cast<float>(x + 4),
+        static_cast<float>(y + (height - 8) / 2), static_cast<float>(juce::jmax(1, width - 8)), 8.0f);
+    const bool enabled = slider.isEnabled();
+    const auto proportion = juce::jlimit(0.0f, 1.0f,
         (sliderPos - static_cast<float>(x + 4)) / static_cast<float>(juce::jmax(1, width - 8)));
-    const int fillWidth = juce::jlimit(0, track.getWidth(),
-        juce::roundToInt(static_cast<float>(track.getWidth()) * proportion));
-    if (fillWidth > 0)
+    g.setColour(palette.token("control_bg"));
+    g.fillRoundedRectangle(track, 4.0f);
+    g.setColour(palette.token("control_border").withAlpha(enabled ? 0.9f : 0.4f));
+    g.drawRoundedRectangle(track, 4.0f, 1.0f);
+    if (proportion > 0.0f)
     {
-        g.setColour(palette.token("accent_glow").withAlpha(0.88f));
-        g.fillRoundedRectangle(track.withWidth(fillWidth).toFloat().reduced(1.0f), 4.0f);
+        g.setColour(palette.token("accent").withAlpha(enabled ? 0.92f : 0.35f));
+        g.fillRoundedRectangle(track.withWidth(track.getWidth() * proportion).reduced(1.0f), 3.0f);
     }
-
-    const int thumbSize = juce::jlimit(16, 30, height + 8);
-    const int thumbX = juce::jlimit(track.getX() - thumbSize / 2,
-        track.getRight() - thumbSize / 2,
-        juce::roundToInt(sliderPos) - thumbSize / 2);
-    const int thumbY = track.getCentreY() - thumbSize / 2;
-    g.drawImage(palette.metersSlidersSpriteSheet, thumbX, thumbY, thumbSize, thumbSize,
-                910, 640, 32, 32);
+    const float thumbX = juce::jlimit(track.getX(), track.getRight(), static_cast<float>(sliderPos));
+    const float thumbY = track.getCentreY();
+    g.setColour(palette.token("shadow").withAlpha(0.55f));
+    g.fillEllipse(thumbX - 7.0f, thumbY - 5.0f, 14.0f, 14.0f);
+    g.setColour(enabled ? palette.token("highlight") : palette.token("text_disabled"));
+    g.fillEllipse(thumbX - 6.0f, thumbY - 7.0f, 12.0f, 12.0f);
+    g.setColour(palette.token("control_border"));
+    g.drawEllipse(thumbX - 6.0f, thumbY - 7.0f, 12.0f, 12.0f, 1.0f);
 }
 
 void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
@@ -1703,31 +1710,8 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         }
     }
 
-    if (palette.controlsSpriteSheet.isValid() && button.isEnabled())
-    {
-        // Atlas state boxes are authored at 225x125; JUCE draws the button's
-        // text/icon afterwards, so labels remain live and accessible.
-        int sourceX = 25;
-        int sourceY = 690;
-        int sourceWidth = 225;
-        int sourceHeight = 125;
-        if (button.getClickingTogglesState())
-        {
-            // FX bypass and power controls use the dedicated OFF/ON switch art.
-            sourceX = button.getToggleState() ? 535 : 65;
-            sourceY = 430;
-            sourceWidth = 400;
-            sourceHeight = 170;
-        }
-        else if (down) sourceX = 505;
-        else if (button.getToggleState()) sourceX = 745;
-        else if (hovered) sourceX = 265;
-        const auto bounds = button.getLocalBounds();
-        g.drawImage(palette.controlsSpriteSheet, bounds.getX(), bounds.getY(),
-                    bounds.getWidth(), bounds.getHeight(), sourceX, sourceY,
-                    sourceWidth, sourceHeight);
-        return;
-    }
+    // Do not render the legacy cyan/blue atlas. Use canonical state artwork
+    // above or the live palette-driven native button below.
 
     auto bounds = button.getLocalBounds().toFloat().reduced(0.5f);
     const bool enabled = button.isEnabled();
@@ -1926,10 +1910,10 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     autoSoundHunterButton.setTooltip("AUTO SOUND HUNTER is not implemented yet. No search or auto-import action is available.");
     curatorButton.setTooltip("CURATOR is not implemented yet. No asset is marked approved.");
 
-    aboutButton.setEnabled(true);
+    aboutButton.setEnabled(false);
     aboutButton.setTooltip("Plugin version, format and runtime information.");
-    aboutButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
-    aboutButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
+    aboutButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("lowlight"));
+    aboutButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_disabled"));
     aboutButton.onClick = [this]
     {
         juce::AlertWindow::showMessageBoxAsync(
@@ -1984,6 +1968,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
 
     mainFxEdit = std::make_unique<PPGUFXEditPanel>(processor, 0);
     addAndMakeVisible(*mainFxEdit);
+    mainFxEdit->setVisible(false); // FX detail pages open in the auxiliary workspace; the main canvas is reserved for the approved 9-control playing core.
 
     keyboard = std::make_unique<juce::MidiKeyboardComponent>(processor.keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard);
     keyboard->setAvailableRange(36, 84);
@@ -2024,10 +2009,11 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
             static constexpr std::array<int, 7> detailGroups {{ 0, 1, 2, 3, 5, 6, 7 }};
             if (auto* panel = dynamic_cast<PPGUFXEditPanel*>(mainFxEdit.get()))
                 panel->setSelectedGroup(detailGroups[i]);
+            openFxEditPanel(detailGroups[i]);
         };
         addAndMakeVisible(b);
     }
-    ampTitle.setText("AMP / PERFORMANCE", juce::dontSendNotification);
+    ampTitle.setText("PLAYING CORE  /  AMP & TONE", juce::dontSendNotification);
     fxTitle.setText("FX CHAIN", juce::dontSendNotification);
     playbackTitle.setText("PLAYBACK", juce::dontSendNotification);
     for (auto* l : { &ampTitle, &fxTitle, &playbackTitle }) {
@@ -2084,7 +2070,19 @@ void PopPunkGuitarUltimateAudioProcessorEditor::configureKnob(juce::Slider& s, j
     s.setColour(juce::Slider::rotarySliderOutlineColourId, themeManager.getPalette().token("control_border"));
     s.setColour(juce::Slider::thumbColourId, themeManager.getPalette().token("text_primary"));
     s.setColour(juce::Slider::textBoxTextColourId, themeManager.getPalette().token("text_primary"));
+    s.setColour(juce::Slider::textBoxBackgroundColourId, themeManager.getPalette().token("control_bg").withAlpha(0.82f));
     s.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
+    s.setColour(juce::Slider::textBoxHighlightColourId, themeManager.getPalette().token("accent").withAlpha(0.30f));
+    const auto help = name == "GAIN" ? "Output level / amplifier gain"
+        : name == "TREBLE" ? "High-frequency tone shaping"
+        : name == "MID" ? "Mid-frequency tone shaping"
+        : name == "BASS" ? "Low-frequency tone shaping"
+        : name == "VELOCITY" ? "MIDI velocity response"
+        : name == "DYNAMICS" ? "Performance dynamics response"
+        : name == "SWING" ? "Pattern timing swing"
+        : name == "HUMANIZE" ? "Timing and velocity variation"
+        : "Accent strength / emphasis";
+    s.setTooltip(help);
     addAndMakeVisible(s);
     l.setText(name, juce::dontSendNotification);
     l.setFont(makeThemeFont(themeManager.getPalette(), 9.5f, false, true));
@@ -2096,63 +2094,104 @@ void PopPunkGuitarUltimateAudioProcessorEditor::configureKnob(juce::Slider& s, j
 void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
     juce::Graphics& g, juce::Rectangle<int> area, const juce::String& sectionTitle)
 {
+    if (area.getWidth() < 2 || area.getHeight() < 2)
+        return;
+
     const auto& p = themeManager.getPalette();
     const auto bounds = area.toFloat();
+    const auto radius = 11.0f;
 
+    // Layered chassis: deep drop shadow, graphite body and a restrained
+    // machined-metal rim. All visual colours come from the active skin.
+    g.setColour(p.token("shadow").withAlpha(0.72f));
+    g.fillRoundedRectangle(bounds.translated(0.0f, 3.0f), radius);
     g.setGradientFill(juce::ColourGradient(p.token("panel_elevated"),
                                            bounds.getX(), bounds.getY(),
                                            p.token("panel"),
                                            bounds.getX(), bounds.getBottom(), false));
-    g.fillRoundedRectangle(bounds, 12.0f);
-    drawThemeArtworkLayers(g, area, p, 0.10f, 0.42f, 0.0f);
-    if (p.framesPanelsSpriteSheet.isValid())
-    {
-        const auto header = area.reduced(1, 1).removeFromTop(30);
-        g.drawImage(p.framesPanelsSpriteSheet, header.getX(), header.getY(),
-                    header.getWidth(), header.getHeight(), 30, 650, 450, 60);
-    }
-    g.setColour(p.token("control_border").withAlpha(0.78f));
-    g.drawRoundedRectangle(bounds.reduced(0.5f), 12.0f, 1.0f);
+    g.fillRoundedRectangle(bounds, radius);
+    drawThemeArtworkLayers(g, area, p, 0.075f, 0.30f, 0.0f);
 
-    // Section chrome belongs to the visual shell; it does not create or
-    // reassign controls and follows the active theme's semantic palette.
-    g.setColour(p.token("text_secondary"));
+    auto header = area.reduced(1, 1).removeFromTop(32);
+    g.setGradientFill(juce::ColourGradient(p.token("control_face").withAlpha(0.72f),
+                                           header.getX(), header.getY(),
+                                           p.token("panel").withAlpha(0.18f),
+                                           header.getX(), header.getBottom(), false));
+    g.fillRoundedRectangle(header.toFloat(), 9.0f);
+    g.fillRect(header.getX(), header.getCentreY(), header.getWidth(), header.getHeight() / 2);
+
+    // The separate NEON STAGE Manager 3.0 frame atlas is intentionally not
+    // substituted here. Main-shell metal and accents follow the PPGU Skin_1
+    // manifest and the approved NEON STAGE DEFAULT reference.
+
+    // Double rim and inner highlight create a premium instrument chassis.
+    g.setColour(p.token("control_border").withAlpha(0.82f));
+    g.drawRoundedRectangle(bounds.reduced(0.5f), radius, 1.0f);
+    g.setColour(p.token("highlight").withAlpha(0.10f));
+    g.drawRoundedRectangle(bounds.reduced(2.0f), radius - 2.0f, 0.7f);
+
+    g.setColour(p.token("text_primary"));
     g.setFont(makeThemeFont(p, 9.5f, false, true));
     auto heading = area.reduced(15, 7).removeFromTop(19);
     g.drawText(sectionTitle, heading, juce::Justification::centredLeft, true);
 
-    g.setColour(p.token("accent").withAlpha(0.9f));
+    // Accent rail and segmented micro-indicator make each section readable
+    // without adding decorative, non-functional controls.
+    g.setColour(p.token("accent").withAlpha(0.95f));
     g.fillRoundedRectangle(bounds.getX() + 15.0f, bounds.getY() + 29.0f,
-                           34.0f, 2.0f, 1.0f);
-    g.setColour(p.token("control_border").withAlpha(0.45f));
-    g.drawHorizontalLine(static_cast<int>(bounds.getY() + 33.0f),
+                           38.0f, 2.0f, 1.0f);
+    g.setColour(p.token("accent_glow").withAlpha(0.55f));
+    g.fillRoundedRectangle(bounds.getX() + 56.0f, bounds.getY() + 29.0f,
+                           12.0f, 2.0f, 1.0f);
+    g.setColour(p.token("control_border").withAlpha(0.38f));
+    g.drawHorizontalLine(static_cast<int>(bounds.getY() + 34.0f),
                          bounds.getX() + 15.0f, bounds.getRight() - 15.0f);
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
 {
     const auto& p = themeManager.getPalette();
+    const auto full = getLocalBounds();
     g.fillAll(p.token("window_bg"));
-    drawThemeArtworkLayers(g, getLocalBounds(), p, 0.16f, 0.78f, 0.055f, true);
+    drawThemeArtworkLayers(g, full, p, 0.11f, 0.48f, 0.035f, true);
 
-    auto area = getLocalBounds().reduced(14);
-    area.removeFromTop(48);
-    area.removeFromBottom(132);
-    area.removeFromTop(8);
-    const auto fxChain = area.removeFromBottom(56);
-    area.removeFromBottom(8);
+    // Canonical NEON STAGE: one header, three main columns, one lower
+    // performance/keyboard strip. Keep the approved 1024x700 proportions.
+    auto header = full.reduced(14).removeFromTop(48).toFloat();
+    g.setGradientFill(juce::ColourGradient(p.token("panel_elevated"),
+        header.getX(), header.getY(), p.token("panel"),
+        header.getX(), header.getBottom(), false));
+    g.fillRoundedRectangle(header, 9.0f);
+    g.setColour(p.token("control_border").withAlpha(0.82f));
+    g.drawRoundedRectangle(header.reduced(0.5f), 9.0f, 1.0f);
+    g.setColour(p.token("accent").withAlpha(0.9f));
+    g.fillRoundedRectangle(header.getX() + 10.0f, header.getBottom() - 2.0f,
+                           58.0f, 2.0f, 1.0f);
 
-    const int leftWidth = juce::jlimit(180, 220, area.getWidth() / 5);
-    const int rightWidth = juce::jlimit(240, 285, area.getWidth() / 4);
-    auto left = area.removeFromLeft(leftWidth);
-    area.removeFromLeft(10);
-    auto right = area.removeFromRight(rightWidth);
-    area.removeFromRight(10);
+    auto bounds = full.reduced(14);
+    bounds.removeFromTop(48);
+    auto footer = bounds.removeFromBottom(132);
+    bounds.removeFromTop(8);
+    auto work = bounds;
+    constexpr int gap = 10;
+    const int leftWidth = juce::jlimit(180, 220, work.getWidth() / 5);
+    const int rightWidth = juce::jlimit(205, 245, work.getWidth() / 4);
+    auto left = work.removeFromLeft(leftWidth);
+    work.removeFromLeft(gap);
+    auto right = work.removeFromRight(rightWidth);
+    work.removeFromRight(gap);
+    drawPanel(g, left, "FACTORY PRESET BROWSER");
+    drawPanel(g, work, "PLAYING CORE  /  MELODY + PATTERN");
+    drawPanel(g, right, "AMP & TONE  /  FX CHAIN");
 
-    drawPanel(g, left, "AUTOCHORDS  /  PRESETS");
-    drawPanel(g, area, "FX EDIT  /  NEON STAGE");
-    drawPanel(g, right, "AMP & TONE");
-    drawPanel(g, fxChain, "FX CHAIN");
+    const auto footerF = footer.toFloat();
+    g.setColour(p.token("panel").withAlpha(0.98f));
+    g.fillRoundedRectangle(footerF, 9.0f);
+    g.setColour(p.token("control_border").withAlpha(0.82f));
+    g.drawRoundedRectangle(footerF.reduced(0.5f), 9.0f, 1.0f);
+    g.setColour(p.token("accent").withAlpha(0.82f));
+    g.fillRoundedRectangle(footerF.getX() + 12.0f, footerF.getY() + 5.0f,
+                           32.0f, 1.5f, 1.0f);
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::resized()
@@ -2165,8 +2204,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     if (auxiliaryWorkspace != nullptr)
         auxiliaryWorkspace->setBounds(bounds);
 
-    // Approved NEON STAGE six-part composition:
-    // header / left fretboard / centre FX edit / right Amp & Tone / FX chain / piano.
+    // Header: brand and the seven approved utility actions.
     auto header = bounds.removeFromTop(48);
     titleLabel.setBounds(header.removeFromLeft(105).reduced(2, 4));
     subtitleLabel.setBounds(18, 47, 150, 14);
@@ -2180,7 +2218,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     loadButton.setBounds(header.removeFromRight(112).reduced(2, 5));
     header.removeFromRight(8);
 
-    // Performance monitor, status and the native MIDI keyboard occupy the footer.
+    // Lower performance strip: real status, live harmony and 49-key MIDI keyboard.
     auto footer = bounds.removeFromBottom(132);
     statusLabel.setBounds(footer.removeFromBottom(22).reduced(3, 1));
     footer.removeFromBottom(4);
@@ -2190,33 +2228,17 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     if (keyboard != nullptr)
         keyboard->setBounds(footer.reduced(2, 2));
 
-    bounds.removeFromBottom(8);
-    auto fxChain = bounds.removeFromBottom(56);
-    fxTitle.setBounds(fxChain.removeFromLeft(88).reduced(3, 5));
-    fxChain.removeFromLeft(4);
-    constexpr int fxGap = 4;
-    const int fxButtonWidth = juce::jmax(1,
-        (fxChain.getWidth() - fxGap * static_cast<int>(fxButtons.size() - 1))
-            / static_cast<int>(fxButtons.size()));
-    for (size_t i = 0; i < fxButtons.size(); ++i)
-    {
-        auto slot = fxChain.removeFromLeft(fxButtonWidth);
-        fxButtons[i].setBounds(slot.reduced(2, 5));
-        if (i + 1 < fxButtons.size())
-            fxChain.removeFromLeft(fxGap);
-    }
-
     bounds.removeFromTop(8);
     constexpr int workspaceGap = 10;
     const int leftWidth = juce::jlimit(180, 220, bounds.getWidth() / 5);
-    const int rightWidth = juce::jlimit(240, 285, bounds.getWidth() / 4);
+    const int rightWidth = juce::jlimit(205, 245, bounds.getWidth() / 4);
     auto left = bounds.removeFromLeft(leftWidth);
     bounds.removeFromLeft(workspaceGap);
     auto right = bounds.removeFromRight(rightWidth);
     bounds.removeFromRight(workspaceGap);
     auto centre = bounds;
 
-    // Left: preset filtering and the PATTERN-only reference fretboard.
+    // Left: one unified preset catalogue with MELODY/PATTERN filters.
     left.removeFromTop(34);
     categoryBox.setBounds(left.removeFromTop(34).reduced(4, 2));
     left.removeFromTop(4);
@@ -2230,37 +2252,48 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
         chordDiagram->setBounds(left.reduced(4, 2));
     }
 
-    // Centre: MELODY/PATTERN transport and the real APVTS-backed FX editor.
-    auto modeRow = centre.removeFromTop(38);
+    // Centre: mode selector plus the nine real APVTS-backed controls in a 3x3 deck.
+    centre.removeFromTop(34);
+    ampTitle.setBounds(centre.removeFromTop(22).reduced(5, 1));
+    auto modeRow = centre.removeFromTop(36);
     melodyTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
     patternTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
     modeBox.setBounds(modeRow.removeFromLeft(138).reduced(2, 3));
     startModeBox.setBounds(modeRow.reduced(2, 3));
-    centre.removeFromTop(5);
-    if (mainFxEdit != nullptr)
-        mainFxEdit->setBounds(centre.reduced(2, 2));
+    centre.removeFromTop(4);
 
-    // Right: all nine locked REV.20 controls; the first four are Amp/Tone,
-    // the remaining five retain the approved performance/feel controls.
-    right.removeFromTop(34);
-    ampTitle.setBounds(right.removeFromTop(24).reduced(5, 1));
     const int columns = 3;
     const int rows = 3;
-    const int cellWidth = juce::jmax(1, right.getWidth() / columns);
-    const int cellHeight = juce::jmax(1, right.getHeight() / rows);
+    const int cellWidth = juce::jmax(1, centre.getWidth() / columns);
+    const int cellHeight = juce::jmax(1, centre.getHeight() / rows);
     for (size_t i = 0; i < knobs.size(); ++i)
     {
         const int column = static_cast<int>(i) % columns;
         const int row = static_cast<int>(i) / columns;
-        auto cell = juce::Rectangle<int>(right.getX() + column * cellWidth,
-            right.getY() + row * cellHeight, cellWidth, cellHeight).reduced(2, 2);
+        auto cell = juce::Rectangle<int>(centre.getX() + column * cellWidth,
+            centre.getY() + row * cellHeight, cellWidth, cellHeight).reduced(3, 2);
         knobLabels[i].setBounds(cell.removeFromTop(17));
         knobs[i].setBounds(cell.reduced(1, 1));
     }
 
-    // This legacy heading is retained for compatibility but is represented by
-    // the horizontal seven-switch bar above.
-    fxTitle.setVisible(false); // The bar title is painted by the shared panel chrome.
+    // Right: exactly seven primary FX switches. Detail controls open separately.
+    right.removeFromTop(34);
+    fxTitle.setBounds(right.removeFromTop(26).reduced(5, 1));
+    right.removeFromTop(4);
+    const int buttonGap = 5;
+    const int buttonHeight = juce::jmax(30,
+        (right.getHeight() - buttonGap * static_cast<int>(fxButtons.size() - 1))
+            / static_cast<int>(fxButtons.size()));
+    for (size_t i = 0; i < fxButtons.size(); ++i)
+    {
+        fxButtons[i].setBounds(right.removeFromTop(buttonHeight).reduced(4, 2));
+        if (i + 1 < fxButtons.size())
+            right.removeFromTop(buttonGap);
+    }
+
+    // FX detail is an auxiliary page, never a replacement for the approved main deck.
+    if (mainFxEdit != nullptr)
+        mainFxEdit->setVisible(false);
     playbackTitle.setVisible(false);
 }
 
@@ -2551,7 +2584,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette()
  presetSearch.setColour(juce::TextEditor::backgroundColourId,p.token("control_bg"));presetSearch.setColour(juce::TextEditor::textColourId,p.token("text_primary"));presetSearch.setColour(juce::TextEditor::outlineColourId,p.token("control_border"));presetSearch.setColour(juce::TextEditor::focusedOutlineColourId,p.token("highlight"));presetSearch.setColour(juce::TextEditor::highlightColourId,p.token("accent").withAlpha(.3f));
  loadButton.setColour(juce::TextButton::buttonColourId,p.token("accent"));loadButton.setColour(juce::TextButton::textColourOffId,p.token("window_bg"));settingsButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));settingsButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));skinButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setTooltip("Active skin: "+p.name+"  /  Ctrl+K");
  for (auto* unavailable : { &autoSoundHunterButton, &curatorButton }) { unavailable->setColour(juce::TextButton::buttonColourId,p.token("lowlight")); unavailable->setColour(juce::TextButton::textColourOffId,p.token("text_disabled")); unavailable->setEnabled(false); }
- aboutButton.setEnabled(true); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));
+ aboutButton.setEnabled(false); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));
  for(auto* b:{&melodyTab,&patternTab}){b->setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b->setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b->setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b->setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
  for(auto& s:knobs){s.setColour(juce::Slider::rotarySliderFillColourId,p.token("accent"));s.setColour(juce::Slider::rotarySliderOutlineColourId,p.token("control_border"));s.setColour(juce::Slider::thumbColourId,p.token("text_primary"));s.setColour(juce::Slider::textBoxTextColourId,p.token("text_primary"));}
  for(auto& l:knobLabels){l.setFont(makeThemeFont(p,9.5f,false,true));l.setColour(juce::Label::textColourId,p.token("text_secondary"));}
@@ -2620,15 +2653,22 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openFxEditPanel(int selectedEffe
 {
     if (auxiliaryWorkspace == nullptr)
         return;
-    constexpr int fxEditPanelId = 2101;
+    static const std::array<juce::String, 8> effectNames {{
+        "COMPRESSOR", "EQ", "DISTORTION", "CHORUS",
+        "FLANGER", "DELAY", "REVERB", "CABINET IR"
+    }};
+    const int safeEffect = juce::jlimit(0, static_cast<int>(effectNames.size()) - 1, selectedEffect);
+    // One stable auxiliary page per FX group so clicking another switch always
+    // opens the matching controls instead of leaving a stale first selection.
+    const int fxEditPanelId = 2200 + safeEffect;
     if (!auxiliaryWorkspace->isPanelOpen(fxEditPanelId))
     {
         PPGUMultiWindowWorkspace::PanelSpec spec;
         spec.id = fxEditPanelId;
-        spec.title = "FX EDIT  /  NEON STAGE";
+        spec.title = "FX EDIT  /  " + effectNames[static_cast<size_t>(safeEffect)] + "  /  NEON STAGE";
         spec.desired = { 1000, 680 };
         spec.minimum = { 620, 440 };
-        spec.content = std::make_unique<PPGUFXEditPanel>(processor, selectedEffect);
+        spec.content = std::make_unique<PPGUFXEditPanel>(processor, safeEffect);
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }

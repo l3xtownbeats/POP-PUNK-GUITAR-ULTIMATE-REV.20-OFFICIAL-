@@ -1,5 +1,8 @@
 #include "ThemeManager.h"
+#include <array>
 #include <iostream>
+#include <utility>
+#include <vector>
 #include <set>
 #include <string>
 
@@ -19,6 +22,19 @@ int main()
     expect(manager.getPalette().id == "skin-053", "fallback stable ID is canonical SKIN-1");
     expect(manager.getPalette().name == "NEON STAGE DEFAULT", "fallback name is NEON STAGE DEFAULT");
     expect(manager.getPalette().usedFallback, "default palette is safe fallback until manifest load");
+    expect(manager.getPalette().tokens.warning == juce::Colour(0xfff2a900),
+           "NEON STAGE fallback warning token matches the approved amber value");
+
+    expect(!manager.loadFromJson({}), "empty theme JSON is rejected");
+    expect(manager.getPalette().usedFallback, "empty JSON restores the safe fallback palette");
+    expect(manager.getLastError().contains("empty"), "empty JSON reports a useful diagnostic");
+
+    std::vector<char> oversizedBytes(static_cast<std::size_t>(1024 * 1024 + 1), static_cast<char>(' '));
+    oversizedBytes.push_back('\0');
+    const auto oversizedManifest = juce::String::fromUTF8(oversizedBytes.data());
+    expect(!manager.loadFromJson(oversizedManifest), "oversized theme JSON is rejected before parsing");
+    expect(manager.getPalette().usedFallback, "oversized JSON restores the safe fallback palette");
+    expect(manager.getLastError().contains("1 MiB"), "oversized JSON reports the configured size limit");
 
     const auto root = juce::File::getCurrentWorkingDirectory();
     const auto skinRoot = root.getChildFile("SKIN");
@@ -149,12 +165,83 @@ int main()
     {
         expect(manager.getPalette().id == "skin-053", "NEON STAGE stable ID stays skin-053");
         expect(manager.getPalette().name == "NEON STAGE DEFAULT", "NEON STAGE name is canonical");
-        expect(manager.getPalette().tokens.windowBg == juce::Colour(0xff080b14),
-               "NEON STAGE palette is canonical");
+        const auto& p = manager.getPalette().tokens;
+        const std::vector<std::pair<juce::Colour, juce::uint32>> canonicalPalette {
+            { p.windowBg, 0xff08090d }, { p.panel, 0xff14161b },
+            { p.panelElevated, 0xff20232b }, { p.controlBg, 0xff0e1015 },
+            { p.controlFace, 0xff292d36 }, { p.controlBorder, 0xff656b76 },
+            { p.textPrimary, 0xfff2f0f4 }, { p.textSecondary, 0xffb9b5bf },
+            { p.textDisabled, 0xff77727d }, { p.accent, 0xffe6007e },
+            { p.accentGlow, 0xff7b2c91 }, { p.danger, 0xffd7264d },
+            { p.warning, 0xfff2a900 }, { p.success, 0xff55c98a },
+            { p.lcdBg, 0xff08090d }, { p.lcdText, 0xfff0dce8 },
+            { p.ledOn, 0xffe6007e }, { p.ledOff, 0xff38313b },
+            { p.shadow, 0xff030305 }, { p.highlight, 0xffd9d7df },
+            { p.lowlight, 0xff090a0e }
+        };
+        const std::array<const char*, 21> paletteNames {
+            "window_bg", "panel", "panel_elevated", "control_bg", "control_face",
+            "control_border", "text_primary", "text_secondary", "text_disabled",
+            "accent", "accent_glow", "danger", "warning", "success", "lcd_bg",
+            "lcd_text", "led_on", "led_off", "shadow", "highlight", "lowlight"
+        };
+        expect(canonicalPalette.size() == paletteNames.size(),
+               "NEON STAGE canonical palette contains all 21 required tokens");
+        for (size_t i = 0; i < canonicalPalette.size(); ++i)
+            expect(canonicalPalette[i].first.getARGB() == canonicalPalette[i].second,
+                   juce::String("NEON STAGE token matches approved graphite/magenta value: ")
+                       + paletteNames[i]);
     }
+    // A package that passes JSON/schema validation but references an unsafe
+    // artwork path must not publish its candidate palette or discard NEON STAGE.
+    auto tamperedManifest = juce::JSON::parse(neon.loadFileAsString());
+    auto tamperedAssets = tamperedManifest.getProperty("assets", juce::var());
+    if (auto* assetsObject = tamperedAssets.getDynamicObject())
+    {
+        assetsObject->setProperty("texture", "../escape.svg");
+        tamperedManifest.getDynamicObject()->setProperty("assets", tamperedAssets);
+        const auto tempDirectory = juce::File::getSpecialLocation(juce::File::tempDirectory)
+            .getChildFile("ppgu-theme-transaction-" + juce::String(juce::Time::getMillisecondCounter()));
+        const auto madeDirectory = tempDirectory.createDirectory();
+        expect(madeDirectory.wasOk(), "transaction test temporary directory is created");
+        const auto badManifest = tempDirectory.getChildFile("theme.json");
+        expect(badManifest.replaceWithText(juce::JSON::toString(tamperedManifest)),
+               "transaction test manifest is written");
+        const bool badLoad = manager.loadFromFile(badManifest);
+        expect(!badLoad, "unsafe artwork path rejects the complete theme candidate");
+        expect(manager.getPalette().id == "skin-053"
+                   && manager.getPalette().name == "NEON STAGE DEFAULT",
+               "failed file load preserves the last-known-good NEON STAGE palette");
+        expect(manager.getPalette().textureArtwork.isValid(),
+               "failed file load preserves last-known-good decoded artwork");
+        expect(manager.getLastError().isNotEmpty(),
+               "failed transactional load reports a diagnostic");
+        badManifest.deleteFile();
+        tempDirectory.deleteRecursively();
+    }
+    else
+    {
+        expect(false, "transaction test can access manifest assets object");
+    }
+
+    const auto lastGoodId = manager.getPalette().id;
+    const auto lastGoodName = manager.getPalette().name;
     const auto invalid = neon.loadFileAsString().replace("\"index\": 53", "\"index\": 54");
     expect(!manager.loadFromJson(invalid), "stable ID/index mismatch is rejected");
-    expect(manager.getPalette().usedFallback, "invalid theme restores safe fallback");
+    expect(manager.getPalette().id == lastGoodId && manager.getPalette().name == lastGoodName,
+           "invalid JSON load preserves the last-known-good theme");
+    expect(manager.getPalette().textureArtwork.isValid(),
+           "invalid JSON load preserves last-known-good decoded artwork");
+    expect(manager.getLastError().isNotEmpty(), "invalid JSON load keeps a useful diagnostic");
+
+    manager.resetToDefault();
+    expect(manager.getPalette().usedFallback, "resetToDefault restores the canonical NEON STAGE fallback");
+    expect(manager.getPalette().id == "skin-053"
+               && manager.getPalette().name == "NEON STAGE DEFAULT",
+           "resetToDefault restores the immutable NEON STAGE identity");
+    expect(manager.getLastError().isEmpty(),
+           "resetToDefault clears stale load diagnostics");
+
     std::cout << (failures == 0 ? "PASS" : "FAIL")
               << " — REV.20 16-theme registry and NEON STAGE runtime contract" << std::endl;
     return failures == 0 ? 0 : 1;

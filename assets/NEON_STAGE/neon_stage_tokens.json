@@ -1,0 +1,99 @@
+{
+  "schema": "ppgu.neon-stage.tokens.v1",
+  "authority": "assets/POP_PUNK_GUITAR_ULTIMATE_BANNER.svg",
+  "identity": "NEON STAGE",
+  "note": "Tokens are derived from the approved master artwork. Do not independently recolour or reinterpret the master.",
+  "colors": {
+    "stage": {
+      "background0": "#05070D",
+      "background1": "#0C1220",
+      "background2": "#10091B"
+    },
+    "surface": {
+      "panelTop": "#1A2636",
+      "panelMid": "#0B111C",
+      "panelBottom": "#070B13",
+      "well": "#07101B",
+      "raised": "#0A1523",
+      "deep": "#03060B"
+    },
+    "line": {
+      "primary": "#284866",
+      "secondary": "#1D3B5B",
+      "muted": "#20364E",
+      "frame": "#55718E"
+    },
+    "text": {
+      "primary": "#F4F8FF",
+      "secondary": "#B8C7DC",
+      "muted": "#9FB6D4",
+      "quiet": "#7890AC",
+      "ice": "#DDFBFF"
+    },
+    "accent": {
+      "cyan": "#37F2FF",
+      "blue": "#168CFF",
+      "violet": "#8D5CFF",
+      "purple": "#9B4DFF",
+      "magenta": "#F14BCB",
+      "rose": "#FF6A9B"
+    },
+    "signal": {
+      "cyan": "#24DFFF",
+      "cyanBright": "#B8F8FF",
+      "purple": "#7650B5",
+      "meterBlue": "#1D91D2"
+    },
+    "status": {
+      "ok": "#42E9FF",
+      "okHighlight": "#B9FBFF"
+    }
+  },
+  "gradients": {
+    "stage": "background0 -> background1 -> background2",
+    "panel": "panelTop -> panelMid -> panelBottom",
+    "accentCyan": "cyan -> blue -> violet",
+    "accentPink": "purple -> magenta -> rose"
+  },
+  "geometry": {
+    "panelRadius": 22,
+    "cardRadius": 14,
+    "controlRadius": 12,
+    "pillRadius": 21,
+    "frameStroke": 2
+  },
+  "typography": {
+    "family": "Arial, Helvetica, sans-serif",
+    "titleWeight": 800,
+    "sectionTracking": 2,
+    "eyebrowTracking": 3
+  },
+  "states": {
+    "default": {
+      "brightness": 1,
+      "stroke": "line.primary"
+    },
+    "hover": {
+      "brightness": 1.12,
+      "stroke": "accent.cyan"
+    },
+    "pressed": {
+      "brightness": 0.88,
+      "innerShadow": true
+    },
+    "disabled": {
+      "brightness": 0.48,
+      "saturation": 0.35
+    },
+    "dragged": {
+      "brightness": 1.08,
+      "stroke": "accent.violet"
+    }
+  },
+  "constraints": [
+    "Master banner is immutable visual authority.",
+    "No generic palette overrides that conflict with the master artwork.",
+    "Interactive controls must bind to real plugin functionality.",
+    "No graphics loading, decoding, JSON parsing or blocking locks on the audio thread."
+  ]
+}

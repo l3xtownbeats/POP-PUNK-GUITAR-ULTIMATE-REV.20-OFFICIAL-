@@ -1,0 +1,75 @@
+{
+  "schema": "ppgu.neon-stage-default-tokens.v1",
+  "visualAuthority": "assets/POP_PUNK_GUITAR_ULTIMATE_BANNER.svg",
+  "runtimeTheme": "SKIN/Skin_053/theme.json",
+  "identity": "NEON STAGE",
+  "rule": "The GitHub master banner is immutable and is the 100% layout/composition reference. Runtime DEFAULT colors are read from the canonical Skin_053 theme; do not recolor or modify the master banner.",
+  "palette": {
+    "window_bg": "#08090D",
+    "panel": "#14161B",
+    "panel_elevated": "#20232B",
+    "control_bg": "#0E1015",
+    "control_face": "#292D36",
+    "control_border": "#656B76",
+    "text_primary": "#F2F0F4",
+    "text_secondary": "#B9B5BF",
+    "text_disabled": "#77727D",
+    "accent": "#E6007E",
+    "accent_glow": "#7B2C91",
+    "danger": "#D7264D",
+    "warning": "#F2A900",
+    "success": "#55C98A",
+    "lcd_bg": "#08090D",
+    "lcd_text": "#F0DCE8",
+    "led_on": "#E6007E",
+    "led_off": "#38313B",
+    "shadow": "#030305",
+    "highlight": "#D9D7DF",
+    "lowlight": "#090A0E"
+  },
+  "export": {
+    "vectorMaster": "SVG",
+    "sourceArtboard": {
+      "width": 1800,
+      "height": 720,
+      "aspectRatio": "5:2",
+      "viewBox": "0 0 1800 720"
+    },
+    "exactAspect4K": {
+      "width": 3840,
+      "height": 1536,
+      "aspectRatio": "5:2",
+      "note": "Preserves the master banner aspect ratio without cropping or distortion."
+    },
+    "uhdCanvas": {
+      "width": 3840,
+      "height": 2160,
+      "aspectRatio": "16:9",
+      "content": {
+        "width": 3840,
+        "height": 1536,
+        "alignment": "center",
+        "topAndBottomLetterbox": true
+      },
+      "note": "Do not stretch the 5:2 master layout to 16:9. Preserve the complete composition."
+    },
+    "scaleFactors": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "preserveAspectRatio": "xMidYMid meet",
+    "rasterDpiIndependent": true
+  },
+  "restrictions": [
+    "Never modify assets/POP_PUNK_GUITAR_ULTIMATE_BANNER.svg.",
+    "Do not invent a second layout, skin, GUI shell or competing visual identity.",
+    "Keep the banner's overall left brand stage / right instrument-console composition and relative geometry as the master layout reference.",
+    "All runtime colors must use Skin_053 palette tokens.",
+    "No cyan, blue, teal or turquoise in NEON STAGE DEFAULT runtime assets.",
+    "Every interactive asset must map to a verified native component/APVTS binding in neon_stage_control_map.json.",
+    "Decorative assets must be explicitly marked decorative and must not imply interaction.",
+    "SVG is the vector source of truth; raster exports are generated derivatives only."
+  ]
+}

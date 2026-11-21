@@ -1,0 +1,177 @@
+{
+  "schema": "ppgu.neon-stage-4k-asset-manifest.v1",
+  "visualAuthority": {
+    "file": "assets/POP_PUNK_GUITAR_ULTIMATE_BANNER.svg",
+    "sha": "82854d433e3a4183c13fbd6d3c131d565a621f46",
+    "immutable": true,
+    "role": "100% layout/composition reference"
+  },
+  "themeAuthority": {
+    "file": "SKIN/Skin_053/theme.json",
+    "sha": "7181d5bd7d7bd98787aaf461d4657524938538cb",
+    "role": "canonical runtime DEFAULT palette"
+  },
+  "artboard": {
+    "source": {
+      "width": 1800,
+      "height": 720,
+      "ratio": "5:2"
+    },
+    "vectorExport": {
+      "width": 3840,
+      "height": 1536,
+      "ratio": "5:2"
+    },
+    "uhdDelivery": {
+      "width": 3840,
+      "height": 2160,
+      "fit": "centered 3840x1536 artboard with vertical letterboxing; never stretch or crop"
+    }
+  },
+  "files": [
+    "assets/NEON_STAGE/neon_stage_default_tokens.json",
+    "assets/NEON_STAGE/neon_stage_4k_surfaces.svg",
+    "assets/NEON_STAGE/neon_stage_4k_controls.svg",
+    "assets/NEON_STAGE/neon_stage_4k_indicators.svg",
+    "assets/NEON_STAGE/neon_stage_4k_details.svg"
+  ],
+  "catalogs": [
+    {
+      "file": "neon_stage_4k_surfaces.svg",
+      "symbols": [
+        "ns-stage-background",
+        "ns-console-outer-frame",
+        "ns-panel",
+        "ns-header-strip",
+        "ns-footer-strip",
+        "ns-divider",
+        "ns-card-frame",
+        "ns-microtexture"
+      ],
+      "category": "surfaces"
+    },
+    {
+      "file": "neon_stage_4k_controls.svg",
+      "symbols": [
+        "ns-knob-base",
+        "ns-knob-default",
+        "ns-knob-hover",
+        "ns-knob-pressed",
+        "ns-knob-disabled",
+        "ns-button-default",
+        "ns-button-active",
+        "ns-button-pressed",
+        "ns-button-disabled",
+        "ns-toggle-off",
+        "ns-toggle-on",
+        "ns-slider-track",
+        "ns-slider-thumb",
+        "ns-tab-active",
+        "ns-tab-inactive",
+        "ns-selector"
+      ],
+      "category": "controls"
+    },
+    {
+      "file": "neon_stage_4k_indicators.svg",
+      "symbols": [
+        "ns-led-off",
+        "ns-led-on",
+        "ns-vu-meter",
+        "ns-signal-trace",
+        "ns-lcd-display",
+        "ns-key-white",
+        "ns-key-black",
+        "ns-status-pill"
+      ],
+      "category": "indicators"
+    },
+    {
+      "file": "neon_stage_4k_details.svg",
+      "symbols": [
+        "ns-screw",
+        "ns-metal-trim",
+        "ns-magenta-lightline",
+        "ns-brand-mark",
+        "ns-label-rule",
+        "ns-corner-glint"
+      ],
+      "category": "decorative"
+    }
+  ],
+  "states": [
+    "default",
+    "hover",
+    "pressed",
+    "disabled",
+    "dragged"
+  ],
+  "interactionPolicy": "SVG symbols are visual resources only. Existing JUCE controls and verified APVTS attachments remain the source of interaction and parameter truth.",
+  "bindings": {
+    "rotaryKnobs": [
+      "ampGain",
+      "eqHigh",
+      "eqMid",
+      "eqLow",
+      "velocity",
+      "dynamics",
+      "swing",
+      "humanize",
+      "accent"
+    ],
+    "primaryFx": [
+      "compressorOn",
+      "eqOn",
+      "distortionOn",
+      "chorusOn",
+      "delayOn",
+      "reverbOn",
+      "cabinetOn"
+    ],
+    "additionalFxEditor": [
+      "flangerOn"
+    ],
+    "modeSelector": [
+      "playMode"
+    ],
+    "syncSelector": [
+      "syncMode"
+    ],
+    "midiKeyboard": {
+      "component": "keyboard",
+      "midiRange": [
+        36,
+        84
+      ]
+    },
+    "performanceDisplay": "performanceDisplay",
+    "decorative": [
+      "ns-screw",
+      "ns-metal-trim",
+      "ns-magenta-lightline",
+      "ns-brand-mark",
+      "ns-label-rule",
+      "ns-corner-glint"
+    ]
+  },
+  "validation": {
+    "json": "to be checked after commit",
+    "svg": "XML well-formedness to be checked after commit",
+    "nativeEditorIntegration": "not yet connected by this asset-library commit",
+    "windowsBuild": "not run by this asset-library commit",
+    "pluginval": "not run",
+    "flStudio20": "host acceptance pending"
+  },
+  "sourceArtworkAuthorization": {
+    "status": "owner_attested_2026-11-21",
+    "attestation": "docs/MESHY_AI_ASSET_OWNER_ATTESTATION.md",
+    "scope": "Listed owner-created Meshy AI source images may be used for NEON STAGE visual review and derived SVG artwork; commercial use of owner-controlled results is asserted by the owner, subject to applicable service terms and third-party input rights.",
+    "integrationStatus": "source_artwork_not_yet_visually_audited_or_wired_to_runtime",
+    "rules": [
+      "Preserve immutable master banner and its 5:2 composition.",
+      "Use SKIN/Skin_053/theme.json as the sole DEFAULT runtime palette.",
+      "Create optimized component SVGs; do not blindly package full reference sheets.",
+      "Preserve alpha and inspect every derived asset against the master before runtime approval."
+    ]
+  }
+}

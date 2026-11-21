@@ -134,30 +134,86 @@ namespace
         return true;
     }
 
+    bool isSafeThemeRelativePath(const juce::String& path) noexcept
+    {
+        if (path.isEmpty() || path.startsWith("/") || path.startsWith("\\")
+            || path.endsWith("/") || path.contains("//")
+            || path.contains(":") || path.contains("\\"))
+            return false;
+
+        // Reject characters that are invalid or ambiguous on supported Windows
+        // and POSIX filesystems, so a package cannot change meaning by platform.
+        for (int i = 0; i < path.length(); ++i)
+        {
+            const auto character = path[i];
+            if (character < 0x20 || character == 0x7f
+                || character == '<' || character == '>' || character == '"'
+                || character == '|' || character == '?' || character == '*')
+                return false;
+        }
+
+        juce::StringArray segments;
+        segments.addTokens(path, "/", "");
+        if (segments.isEmpty())
+            return false;
+        for (const auto& segment : segments)
+            if (segment.isEmpty() || segment == "." || segment == "..")
+                return false;
+        return true;
+    }
+
+    // A lexical child check alone is insufficient when any directory in the
+    // path is a symlink. Reject symlinks from the asset itself all the way up
+    // through the selected theme root and its ancestors.
+    bool hasNoSymlinkComponents(juce::File file) noexcept
+    {
+        for (;;)
+        {
+            if (file.isSymbolicLink())
+                return false;
+
+            const auto parent = file.getParentDirectory();
+            if (parent == file)
+                return true;
+            file = parent;
+        }
+    }
+
+    bool isSafeThemeAssetFile(const juce::File& themeRoot,
+                              const juce::String& relativePath,
+                              juce::File& resolvedFile,
+                              juce::String& error,
+                              const juce::String& assetType)
+    {
+        if (!isSafeThemeRelativePath(relativePath))
+        {
+            error = "Theme " + assetType + " path is not a safe relative path";
+            return false;
+        }
+
+        resolvedFile = themeRoot.getChildFile(relativePath);
+        if (!resolvedFile.isAChildOf(themeRoot)
+            || !hasNoSymlinkComponents(resolvedFile))
+        {
+            error = "Theme " + assetType + " resolves outside its package or traverses a symbolic link";
+            return false;
+        }
+        return true;
+    }
+
     bool loadSafeSvgArtwork(const juce::File& themeRoot,
                             const juce::String& relativePath,
                             int width, int height,
                             juce::Image& destination,
                             juce::String& error)
     {
-        if (relativePath.isEmpty() || relativePath.startsWith("/")
-            || relativePath.contains("..") || relativePath.contains(":")
-            || relativePath.contains("\\"))
-        {
-            error = "Theme SVG path is not a safe relative path";
+        juce::File file;
+        if (!isSafeThemeAssetFile(themeRoot, relativePath, file, error, "SVG"))
             return false;
-        }
 
-        const auto file = themeRoot.getChildFile(relativePath);
-        if (!file.existsAsFile() || !file.isAChildOf(themeRoot)
-            || file.getSize() <= 0 || file.getSize() > 256 * 1024)
+        if (!file.existsAsFile() || file.getSize() <= 0 || file.getSize() > 256 * 1024)
         {
-            error = "Theme SVG is missing, outside its theme folder, or exceeds the size limit";
-            return false;
-        }
-        if (file.isSymbolicLink() && !file.getLinkedTarget().isAChildOf(themeRoot))
-        {
-            error = "Theme SVG symbolic link escapes the theme folder";
+            error = "Theme SVG is missing or exceeds the size limit";
             return false;
         }
 
@@ -214,24 +270,13 @@ namespace
                             juce::Image& destination,
                             juce::String& error)
     {
-        if (relativePath.isEmpty() || relativePath.startsWith("/")
-            || relativePath.contains("..") || relativePath.contains(":")
-            || relativePath.contains("\\"))
-        {
-            error = "Theme PNG path is not a safe relative path";
+        juce::File file;
+        if (!isSafeThemeAssetFile(themeRoot, relativePath, file, error, "PNG"))
             return false;
-        }
 
-        const auto file = themeRoot.getChildFile(relativePath);
-        if (!file.existsAsFile() || !file.isAChildOf(themeRoot)
-            || file.getSize() <= 0 || file.getSize() > 8 * 1024 * 1024)
+        if (!file.existsAsFile() || file.getSize() <= 0 || file.getSize() > 8 * 1024 * 1024)
         {
-            error = "Theme PNG is missing, outside its theme folder, or exceeds the size limit";
-            return false;
-        }
-        if (file.isSymbolicLink() && !file.getLinkedTarget().isAChildOf(themeRoot))
-        {
-            error = "Theme PNG symbolic link escapes the theme folder";
+            error = "Theme PNG is missing or exceeds the size limit";
             return false;
         }
 
@@ -729,43 +774,81 @@ juce::Colour PPGUThemeManager::Palette::token(const juce::String& key) const noe
 
 bool PPGUThemeManager::loadFromJson(const juce::String& jsonText)
 {
+    // Manifests are user-provided files. Bound parsing work before constructing
+    // a JUCE var tree, and reject empty/oversized input deterministically.
+    constexpr int maximumManifestCharacters = 1024 * 1024;
+    if (jsonText.isEmpty() || jsonText.length() > maximumManifestCharacters)
+    {
+        lastError = jsonText.isEmpty()
+            ? "Theme manifest is empty"
+            : "Theme manifest exceeds the 1 MiB parsing limit";
+        return false;
+    }
+
     const auto root = juce::JSON::parse(jsonText);
     Palette candidate;
     juce::String error;
 
     if (!validateManifest(root, candidate, error))
     {
-        lastError = error.isNotEmpty() ? error : "Theme manifest validation failed";
-        resetToDefault();
+        lastError = error.isNotEmpty() ? error : "Theme manifest is invalid JSON or failed validation";
         return false;
     }
 
-    activePalette = candidate;
+    activePalette = std::move(candidate);
     lastError.clear();
     return true;
 }
 
 bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
 {
-    if (!manifestFile.existsAsFile())
+    // Do not follow a manifest symlink: theme manifests must be regular files
+    // inside the selected skin package, not pointers to arbitrary user files.
+    if (!manifestFile.existsAsFile() || manifestFile.isDirectory()
+        || !hasNoSymlinkComponents(manifestFile))
     {
-        lastError = "Theme manifest file does not exist";
-        resetToDefault();
+        lastError = "Theme manifest is missing, not a regular file, or is a symbolic link";
+
+        return false;
+    }
+
+    constexpr juce::int64 maximumManifestBytes = 1024 * 1024;
+    const auto manifestSize = manifestFile.getSize();
+    if (manifestSize <= 0 || manifestSize > maximumManifestBytes)
+    {
+        lastError = "Theme manifest is empty or exceeds the 1 MiB file limit";
+
         return false;
     }
 
     const auto jsonText = manifestFile.loadFileAsString();
-    if (!loadFromJson(jsonText))
+    if (jsonText.isEmpty())
+    {
+        lastError = "Theme manifest could not be read";
         return false;
+    }
+
+    // Validate into an isolated candidate; publish only after every mandatory
+    // artwork resource has passed validation.
+    PPGUThemeManager parsedCandidate;
+    if (!parsedCandidate.loadFromJson(jsonText))
+    {
+        lastError = parsedCandidate.getLastError();
+        return false;
+    }
 
     const auto root = juce::JSON::parse(jsonText);
     const auto id = root.getProperty("id", "").toString();
+    auto candidate = parsedCandidate.activePalette;
     if (id.length() < 8)
-        return true; // Legacy themes do not define the three Skin Studio artwork layers.
+    {
+        activePalette = std::move(candidate);
+        lastError.clear();
+        return true;
+    }
 
     const auto assets = root.getProperty("assets", juce::var());
     const auto themeRoot = manifestFile.getParentDirectory();
-    auto candidate = activePalette;
     juce::String error;
 
     if (!loadSafeSvgArtwork(themeRoot, assets.getProperty("texture", "").toString(),
@@ -776,7 +859,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
                                480, 168, candidate.crestArtwork, error))
     {
         lastError = error.isNotEmpty() ? error : "Theme artwork loading failed";
-        resetToDefault();
+
         return false;
     }
 
@@ -808,20 +891,26 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
                                    800, 450, candidate.shadowArtwork, error))
         {
             lastError = error.isNotEmpty() ? error : "NEON STAGE sprite atlas or premium artwork manifest is incomplete";
-            resetToDefault();
+
             return false;
         }
 
         const auto controlManifestFile = themeRoot.getChildFile("assets/controls/control_states_manifest.json");
         if (!controlManifestFile.existsAsFile() || !controlManifestFile.isAChildOf(themeRoot)
-            || controlManifestFile.isSymbolicLink()
+            || !hasNoSymlinkComponents(controlManifestFile)
             || controlManifestFile.getSize() <= 0 || controlManifestFile.getSize() > 512 * 1024)
         {
             lastError = "NEON STAGE control-state manifest is missing or unsafe";
-            resetToDefault();
+
             return false;
         }
-        const auto controlManifest = juce::JSON::parse(controlManifestFile.loadFileAsString());
+        const auto controlManifestText = controlManifestFile.loadFileAsString();
+        if (controlManifestText.isEmpty())
+        {
+            lastError = "NEON STAGE control-state manifest could not be read";
+            return false;
+        }
+        const auto controlManifest = juce::JSON::parse(controlManifestText);
         const auto statesVar = controlManifest.getProperty("states", juce::var());
         const auto idsVar = controlManifest.getProperty("controlIds", juce::var());
         const auto recordsVar = controlManifest.getProperty("records", juce::var());
@@ -843,7 +932,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
             || states->size() != 5 || ids->size() != 27 || records->size() != 135)
         {
             lastError = "NEON STAGE control-state manifest has an invalid schema or record count";
-            resetToDefault();
+
             return false;
         }
         juce::StringArray actualStates, actualIds;
@@ -856,7 +945,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         if (actualStates != requiredStates || actualIds != requiredIds)
         {
             lastError = "NEON STAGE control-state manifest IDs/states do not match the approved contract";
-            resetToDefault();
+
             return false;
         }
 
@@ -870,21 +959,21 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
                 || !relativePath.startsWith("assets/controls/"))
             {
                 lastError = "NEON STAGE control-state record contains an unknown ID, state or path";
-                resetToDefault();
+
                 return false;
             }
             const auto key = (controlId + "|" + state).toStdString();
             if (decodedControlStates.find(key) != decodedControlStates.end())
             {
                 lastError = "NEON STAGE control-state manifest contains a duplicate record";
-                resetToDefault();
+
                 return false;
             }
             juce::Image decoded;
             if (!loadSafePngArtwork(themeRoot, relativePath, 256, 256, decoded, error))
             {
                 lastError = error.isNotEmpty() ? error : "NEON STAGE control-state image failed validation";
-                resetToDefault();
+
                 return false;
             }
             // The authored PNGs are square presentation tiles. Crop the control
@@ -905,7 +994,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
             if (!controlFace.isValid())
             {
                 lastError = "NEON STAGE control-state crop produced an invalid image";
-                resetToDefault();
+
                 return false;
             }
             decodedControlStates.emplace(key, controlFace.rescaled(
@@ -914,7 +1003,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         if (decodedControlStates.size() != 135)
         {
             lastError = "NEON STAGE control-state image set is incomplete";
-            resetToDefault();
+
             return false;
         }
         candidate.controlStateArtwork = std::move(decodedControlStates);
@@ -928,4 +1017,5 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
 void PPGUThemeManager::resetToDefault() noexcept
 {
     activePalette = Palette{};
+    lastError.clear();
 }

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="1536" viewBox="0 0 1800 720" role="img" aria-labelledby="title desc"><title id="title">NEON STAGE DEFAULT — 4K details library</title><desc id="desc">Decorative detail symbols: screw heads, metallic trim, restrained magenta glow, labels and studio-console micro details. Decorative items do not represent controls.</desc><defs>
+<linearGradient id="stage" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#08090D"/><stop offset=".55" stop-color="#14161B"/><stop offset="1" stop-color="#20232B"/></linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#D9D7DF"/><stop offset=".22" stop-color="#656B76"/><stop offset=".55" stop-color="#292D36"/><stop offset="1" stop-color="#090A0E"/></linearGradient>
+<linearGradient id="magenta" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#7B2C91"/><stop offset=".52" stop-color="#E6007E"/><stop offset="1" stop-color="#D7264D"/></linearGradient>
+<radialGradient id="pinkGlow"><stop stop-color="#E6007E" stop-opacity=".5"/><stop offset="1" stop-color="#E6007E" stop-opacity="0"/></radialGradient>
+<filter id="shadow"><feGaussianBlur in="SourceAlpha" stdDeviation="5"/><feOffset dy="5"/><feComponentTransfer><feFuncA type="linear" slope=".45"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<pattern id="brushed" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M0 1H10M0 5H10M0 9H10" stroke="#D9D7DF" stroke-opacity=".035"/></pattern>
+</defs>
+<symbol id="ns-screw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="url(#metal)" stroke="#090A0E"/><path d="M5.5 10H14.5" stroke="#08090D" stroke-width="1.5"/><path d="M5.5 9H14.5" stroke="#D9D7DF" stroke-opacity=".45" stroke-width=".7"/></symbol>
+<symbol id="ns-metal-trim" viewBox="0 0 600 12"><rect x="0" y="1" width="600" height="10" rx="4" fill="url(#metal)"/><path d="M4 2H596" stroke="#F2F0F4" stroke-opacity=".32"/><path d="M4 10H596" stroke="#030305" stroke-opacity=".8"/></symbol>
+<symbol id="ns-magenta-lightline" viewBox="0 0 600 8"><path d="M0 4H600" stroke="#7B2C91" stroke-width="7" stroke-opacity=".25" filter="url(#glow)"/><path d="M0 4H600" stroke="url(#magenta)" stroke-width="2"/></symbol>
+<symbol id="ns-brand-mark" viewBox="0 0 80 50"><path d="M0 34L20 0L40 34L60 0L80 34" fill="none" stroke="url(#magenta)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 45H70" stroke="#D9D7DF" stroke-opacity=".5" stroke-width="2"/></symbol>
+<symbol id="ns-label-rule" viewBox="0 0 440 2"><rect width="440" height="2" fill="url(#magenta)"/></symbol>
+<symbol id="ns-corner-glint" viewBox="0 0 48 48"><path d="M2 2H22M2 2V22M46 46H26M46 46V26" fill="none" stroke="#B9B5BF" stroke-opacity=".55" stroke-width="1.5"/></symbol>
+</svg>

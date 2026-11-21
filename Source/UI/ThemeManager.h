@@ -28,7 +28,7 @@ public:
             juce::Colour warning { 0xffffbe55 };
             juce::Colour success { 0xff42e6b0 };
             juce::Colour lcdBg { 0xff050d1b };
-            juce::Colour lcdText { 0xff8debff };
+            juce::Colour lcdText { 0xff8deBff };
             juce::Colour ledOn { 0xff00e5ff };
             juce::Colour ledOff { 0xff263b55 };
             juce::Colour shadow { 0xff03060b };
@@ -93,7 +93,7 @@ public:
     PPGUThemeManager() = default;
 
     // Parsing and file access are UI/control-thread operations only.
-    // A failed load always restores the canonical NEON STAGE DEFAULT palette.
+    // Failed loads preserve the last-known-good palette and decoded artwork.
     bool loadFromJson(const juce::String& jsonText);
     bool loadFromFile(const juce::File& manifestFile);
     void resetToDefault() noexcept;
