@@ -1877,6 +1877,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     subtitleLabel.setColour(juce::Label::textColourId, themeManager.getPalette().token("accent"));
     addAndMakeVisible(subtitleLabel);
     presetBox.setTextWhenNothingSelected("FACTORY PRESET CATALOG");
+    presetBox.setComponentID("preset_browser");
     presetBox.setColour(juce::ComboBox::backgroundColourId, themeManager.getPalette().token("control_bg"));
     presetBox.setColour(juce::ComboBox::textColourId, themeManager.getPalette().token("text_primary"));
     presetBox.setColour(juce::ComboBox::outlineColourId, themeManager.getPalette().token("accent").withAlpha(0.5f));
@@ -1938,6 +1939,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     refreshPresetList();
     loadButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("accent"));
     loadButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("window_bg"));
+    loadButton.setComponentID("Import_Guitar");
     loadButton.onClick = [this] { openImportGuitarPanel(); };
     addAndMakeVisible(loadButton);
     auxiliaryWorkspace = std::make_unique<PPGUMultiWindowWorkspace>();
@@ -1946,11 +1948,13 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
         themeManager.getPalette().token("accent"), themeManager.getPalette().token("text_primary"));
     addAndMakeVisible(*auxiliaryWorkspace);
     auxiliaryWorkspace->setVisible(false);
+    settingsButton.setComponentID("Settings");
     settingsButton.setTooltip("Workspace scale, panel spacing and visual defaults.");
     settingsButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
     settingsButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
     settingsButton.onClick = [this] { openSettingsPanel(); };
     addAndMakeVisible(settingsButton);
+    skinButton.setComponentID("SKIN_button");
     skinButton.setTooltip("Open the premium visual skin gallery. Ctrl+K.");
     skinButton.onClick = [this] { openSkinGalleryPanel(); };
     addAndMakeVisible(skinButton);
@@ -1969,21 +1973,11 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     autoSoundHunterButton.setTooltip("AUTO SOUND HUNTER is not implemented yet. No search or auto-import action is available.");
     curatorButton.setTooltip("CURATOR is not implemented yet. No asset is marked approved.");
 
-    aboutButton.setEnabled(true);
-    aboutButton.setTooltip("Plugin version, format and runtime information.");
+    aboutButton.setComponentID("About");
+    aboutButton.setEnabled(false);
+    aboutButton.setTooltip("ABOUT is reserved in the approved 27-control map; its REV.20 content panel is not implemented.");
     aboutButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
-    aboutButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
-    aboutButton.onClick = [this]
-    {
-        juce::AlertWindow::showMessageBoxAsync(
-            juce::MessageBoxIconType::NoIcon,
-            "ABOUT  /  POP PUNK GUITAR ULTIMATE",
-            juce::String(JucePlugin_Name) + "\nVersion 4.0.0"
-            + "\nVST3 Instrument  /  Windows x64"
-            + "\n\nNEON STAGE interface, MIDI guitar performance, pattern playback and built-in effects."
-            + "\n\nAudio sample rate and buffer size are controlled by the host DAW."
-            + "\n\nSample libraries remain user-managed; use only content whose licence permits your use.");
-    };
+    aboutButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_disabled"));
     addAndMakeVisible(aboutButton);
     statusLabel.setText("NO LIBRARY LOADED  /  LOAD A LICENSED SFZ INSTRUMENT", juce::dontSendNotification);
     const auto savedSfzPath = processor.getCurrentSfzFilePath();
@@ -2000,6 +1994,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     addAndMakeVisible(statusLabel);
     melodyTab.setClickingTogglesState(false);
     patternTab.setClickingTogglesState(false);
+    melodyTab.setComponentID("mode_selector");
+    patternTab.setComponentID("mode_selector");
     for (auto* b : { &melodyTab, &patternTab }) {
         b->setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("control_bg"));
         b->setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
