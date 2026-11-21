@@ -145,7 +145,7 @@ def main() -> int:
         "metal_border": "#00D2FF",
         "glow_cyan": "#00E5FF",
         "glow_blue": "#0048FF",
-        "accent_magenta": "#FF007F",
+        "accent_blue": "#0048FF",
     }
     if atlas_manifest.get("project") != "NEON_STAGE_MANAGER_3_0" \
             or atlas_manifest.get("theme") != "NEON_STAGE_DEFAULT_SKIN_1" \
@@ -207,7 +207,7 @@ def main() -> int:
             or slider_instances.get("thumb", {}).get("bbox") != [910, 640, 942, 672]:
         raise SystemExit("FAIL: NEON STAGE slider track/thumb geometry mismatch")
     leds = meters.get("status_leds", {})
-    expected_led_states = ["off", "cyan", "blue", "magenta"]
+    expected_led_states = ["off", "cyan", "blue", "electric_blue"]
     if leds.get("round", {}).get("states") != expected_led_states \
             or leds.get("square", {}).get("states") != expected_led_states \
             or leds.get("round", {}).get("row_y") != [810, 920] \
