@@ -73,14 +73,14 @@ require("button.getToggleState()" in LOOK_AND_FEEL
 
 required_windows = [
     "openFxEditPanel", "openPatternSectionPanel", "openAutoChordsPanel",
-    "openImportGuitarPanel", "openSkinGalleryPanel", "openSettingsPanel",
+    "openImportGuitarPanel", "openSkinGalleryPanel", "openSettingsPanel", "openAboutPanel",
 ]
 for method in required_windows:
     require(f"void PopPunkGuitarUltimateAudioProcessorEditor::{method}" in EDITOR,
             f"missing real window implementation: {method}")
 require("PPGUMultiWindowWorkspace" in HEADER and "auxiliaryWorkspace->openPanel" in EDITOR,
         "auxiliary windows must use the shared multi-window workspace")
-require("void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette" in EDITOR,
+require("class PPGUAboutPanel final" in EDITOR\n        and "std::make_unique<PPGUAboutPanel>" in EDITOR\n        and "aboutButton.onClick = [this] { openAboutPanel(); };" in EDITOR,\n        "ABOUT must open as a theme-aware workspace panel, not a detached message box")\nrequire("void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette" in EDITOR,
         "theme changes must propagate through the editor")
 require("void PopPunkGuitarUltimateAudioProcessorEditor::resized" in EDITOR,
         "responsive layout implementation is required")
