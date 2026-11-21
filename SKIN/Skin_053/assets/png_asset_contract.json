@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1.0.0",
+  "skinId": "skin-053",
+  "theme": "NEON STAGE DEFAULT",
+  "canonicalFormat": "PNG",
+  "colorMode": "RGBA",
+  "alphaChannelRequired": true,
+  "reference": "01 INTERFACE  NEON STAGE DEFAULT .png",
+  "palette": {
+    "graphite": [
+      "#080B14",
+      "#101827"
+    ],
+    "cyan": "#00D9FF",
+    "electricBlue": "#6B8CFF",
+    "forbiddenAccentFamilies": [
+      "purple",
+      "violet",
+      "magenta"
+    ]
+  },
+  "naming": {
+    "runtimeRoot": "SKIN/Skin_053/assets/png_runtime",
+    "controlPattern": "controls/<controlId>/<state>.png",
+    "stateNames": [
+      "default",
+      "hover",
+      "pressed",
+      "active",
+      "disabled",
+      "focus",
+      "dragged"
+    ],
+    "panelPattern": "panels/<panelId>/<scale>.png",
+    "iconPattern": "icons/<iconId>/<state>.png",
+    "scaleVariants": [
+      "1x",
+      "2x",
+      "3x"
+    ],
+    "checksum": "SHA-256"
+  },
+  "requiredControlIds": [
+    "preset_browser",
+    "mode_selector",
+    "knob01",
+    "knob02",
+    "knob03",
+    "knob04",
+    "knob05",
+    "knob06",
+    "knob07",
+    "knob08",
+    "knob09",
+    "fx_switch01",
+    "fx_switch02",
+    "fx_switch03",
+    "fx_switch04",
+    "fx_switch05",
+    "fx_switch06",
+    "fx_switch07",
+    "midi_keyboard",
+    "LCD_display",
+    "LED_indicator",
+    "SKIN_button",
+    "Import_Guitar",
+    "Auto_Discover",
+    "Curator",
+    "Settings",
+    "About"
+  ],
+  "requirements": {
+    "everyStateIsAnIndividualFile": true,
+    "noCombinedStateSpritesForRuntimeControls": true,
+    "sourceArtworkMayBeRetainedForEditing": true,
+    "shippedRuntimeGraphicsArePngOnly": true,
+    "preserveApprovedReferenceComposition": true,
+    "noInventedControlsOrTelemetry": true
+  },
+  "auditNotes": [
+    "The seven main FX switches remain exactly seven; FLANGER belongs only in FX EDIT.",
+    "The nine main rotary bindings remain exactly the existing APVTS IDs.",
+    "PNG conversion alone does not establish visual parity or JUCE integration.",
+    "The 1x/2x/3x variants must preserve physical layout and state semantics."
+  ]
+}
