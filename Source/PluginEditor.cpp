@@ -53,20 +53,21 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
                             float crestOpacity = 0.035f,
                             bool includePremiumStageLayers = false)
 {
-    const auto drawLayer = [&g, bounds](const juce::Image& image, float opacity)
+    const auto drawLayer = [&g, bounds](const juce::Image& image, float opacity,
+                                        juce::RectanglePlacement placement = juce::RectanglePlacement::stretchToFit)
     {
         if (!image.isValid() || opacity <= 0.0f)
             return;
         g.saveState();
         g.setOpacity(opacity);
         g.drawImageWithin(image, bounds.getX(), bounds.getY(), bounds.getWidth(),
-                          bounds.getHeight(), juce::RectanglePlacement::stretchToFit);
+                          bounds.getHeight(), placement);
         g.restoreState();
     };
 
     if (includePremiumStageLayers)
     {
-        drawLayer(palette.backgroundArtwork, 0.36f);
+        drawLayer(palette.backgroundArtwork, 1.0f, juce::RectanglePlacement::fillDestination);
         if (palette.materialArtwork.isValid())
         {
             g.saveState();
@@ -2119,8 +2120,9 @@ void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
     g.fillRoundedRectangle(header.toFloat(), 9.0f);
     g.fillRect(header.getX(), header.getCentreY(), header.getWidth(), header.getHeight() / 2);
 
-    // The legacy frame atlas carries the retired cyan/blue treatment. Header
-    // metal is drawn natively from the canonical Skin_053 graphite/silver tokens.
+    // The separate NEON STAGE Manager 3.0 frame atlas is intentionally not
+    // substituted here. Main-shell metal and accents follow the PPGU Skin_1
+    // manifest and the approved NEON STAGE DEFAULT reference.
 
     // Double rim and inner highlight create a premium instrument chassis.
     g.setColour(p.token("control_border").withAlpha(0.82f));
