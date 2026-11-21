@@ -209,6 +209,9 @@ add_test(NAME ppgu_neon_stage_animation_contract
 add_test(NAME ppgu_neon_stage_workspace_settings_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_neon_stage_workspace_settings_contract.py)
 
+add_test(NAME ppgu_neon_stage_focus_state_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_neon_stage_focus_state_contract.py)
+
 add_test(NAME ppgu_neon_stage_cover_layout_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_neon_stage_cover_layout_contract.py)
 
