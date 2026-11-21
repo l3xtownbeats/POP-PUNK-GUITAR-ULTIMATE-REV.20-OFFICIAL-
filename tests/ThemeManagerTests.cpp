@@ -17,7 +17,7 @@ int main()
     juce::ScopedJuceInitialiser_GUI juceInitialiser;
     PPGUThemeManager manager;
     expect(manager.getPalette().id == "skin-053", "fallback stable ID is canonical SKIN-1");
-    expect(manager.getPalette().name == "NEON STAGE DEFAULT", "fallback name is NEON STAGE DEFAULT");
+    expect(manager.getPalette().name == "NEON STAGE PREMIUM", "fallback name is NEON STAGE PREMIUM");
     expect(manager.getPalette().usedFallback, "default palette is safe fallback until manifest load");
 
     const auto root = juce::File::getCurrentWorkingDirectory();
@@ -143,12 +143,12 @@ int main()
 
     const auto neon = skinRoot.getChildFile("Skin_053").getChildFile("theme.json");
     const bool loaded = neon.existsAsFile() && manager.loadFromFile(neon);
-    expect(loaded, "NEON STAGE DEFAULT manifest loads"
+    expect(loaded, "NEON STAGE PREMIUM manifest loads"
            + (loaded ? juce::String{} : ": " + manager.getLastError()));
     if (loaded)
     {
         expect(manager.getPalette().id == "skin-053", "NEON STAGE stable ID stays skin-053");
-        expect(manager.getPalette().name == "NEON STAGE DEFAULT", "NEON STAGE name is canonical");
+        expect(manager.getPalette().name == "NEON STAGE PREMIUM", "NEON STAGE name is canonical");
         expect(manager.getPalette().tokens.windowBg == juce::Colour(0xff080b14),
                "NEON STAGE palette is canonical");
     }
