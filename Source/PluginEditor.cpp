@@ -117,9 +117,54 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
     }
 }
 
+void drawAmpCabinet(juce::Graphics& g, juce::Rectangle<int> area,
+                    const PPGUThemeManager::Palette& palette)
+{
+    auto body = area.toFloat().reduced(10.0f, 6.0f);
+    g.setGradientFill(juce::ColourGradient(palette.token("panel_elevated"),
+                                           body.getX(), body.getY(),
+                                           palette.token("window_bg"),
+                                           body.getX(), body.getBottom(), false));
+    g.fillRoundedRectangle(body, 8.0f);
+    g.setColour(palette.token("control_border"));
+    g.drawRoundedRectangle(body, 8.0f, 1.2f);
+
+    auto controlStrip = body.reduced(10.0f, 8.0f).removeFromTop(24.0f);
+    g.setColour(palette.token("text_secondary"));
+    g.setFont(juce::Font(8.5f, juce::Font::bold));
+    g.drawText("L3XTOWN  /  AMP HEAD", controlStrip.removeFromLeft(118.0f),
+               juce::Justification::centredLeft);
+    for (int i = 0; i < 5; ++i)
+    {
+        const float x = controlStrip.getX() + 12.0f + static_cast<float>(i) * 22.0f;
+        const float y = controlStrip.getCentreY();
+        g.setColour(palette.token("shadow"));
+        g.fillEllipse(x - 5.0f, y - 5.0f, 10.0f, 10.0f);
+        g.setColour(palette.token("accent").withAlpha(0.75f));
+        g.drawEllipse(x - 5.0f, y - 5.0f, 10.0f, 10.0f, 1.0f);
+    }
+
+    auto grille = body.reduced(12.0f, 38.0f);
+    g.setColour(juce::Colour(0xff070b12));
+    g.fillRoundedRectangle(grille, 4.0f);
+    g.saveState();
+    g.reduceClipRegion(grille.toNearestInt());
+    g.setColour(palette.token("text_secondary").withAlpha(0.13f));
+    for (float x = grille.getX() - grille.getHeight(); x < grille.getRight(); x += 7.0f)
+        g.drawLine(x, grille.getBottom(), x + grille.getHeight(), grille.getY(), 1.0f);
+    for (float y = grille.getY() + 5.0f; y < grille.getBottom(); y += 7.0f)
+        g.drawHorizontalLine(juce::roundToInt(y), grille.getX(), grille.getRight());
+    g.restoreState();
+    g.setColour(palette.token("control_border").withAlpha(0.8f));
+    g.drawRoundedRectangle(grille, 4.0f, 1.0f);
+    g.setColour(palette.token("accent").withAlpha(0.7f));
+    g.fillRoundedRectangle(body.getX() + 14.0f, body.getBottom() - 5.0f,
+                           body.getWidth() - 28.0f, 2.0f, 1.0f);
 }
 
-// Scrollable visual browser for the complete registry. Preview images are loaded
+}
+
+ // Scrollable visual browser for the complete registry. Preview images are loaded
 // lazily by visible cards so opening the gallery does not decode all 102 PNGs.
 class PPGUSkinGalleryPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
