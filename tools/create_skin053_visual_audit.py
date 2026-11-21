@@ -29,7 +29,7 @@ def fit_rgba(path: Path) -> Image.Image:
     image.thumbnail((THUMB_W, THUMB_H), Image.Resampling.LANCZOS)
     canvas = Image.new("RGBA", (THUMB_W, THUMB_H), (8, 9, 13, 255))
     canvas.alpha_composite(image, ((THUMB_W-image.width)//2, (THUMB_H-image.height)//2))
-    return canvas.convert("RGB)
+    return canvas.convert("RGB")
 
 def main() -> int:
     parser = argparse.ArgumentParser()
