@@ -149,8 +149,32 @@ int main()
     {
         expect(manager.getPalette().id == "skin-053", "NEON STAGE stable ID stays skin-053");
         expect(manager.getPalette().name == "NEON STAGE DEFAULT", "NEON STAGE name is canonical");
-        expect(manager.getPalette().tokens.windowBg == juce::Colour(0xff08090d),
-               "NEON STAGE palette is canonical");
+        const auto& p = manager.getPalette().tokens;
+        const std::vector<std::pair<juce::Colour, juce::uint32>> canonicalPalette {
+            { p.windowBg, 0xff08090d }, { p.panel, 0xff14161b },
+            { p.panelElevated, 0xff20232b }, { p.controlBg, 0xff0e1015 },
+            { p.controlFace, 0xff292d36 }, { p.controlBorder, 0xff656b76 },
+            { p.textPrimary, 0xfff2f0f4 }, { p.textSecondary, 0xffb9b5bf },
+            { p.textDisabled, 0xff77727d }, { p.accent, 0xffe6007e },
+            { p.accentGlow, 0xff7b2c91 }, { p.danger, 0xffd7264d },
+            { p.warning, 0xfff2a900 }, { p.success, 0xff55c98a },
+            { p.lcdBg, 0xff08090d }, { p.lcdText, 0xfff0dce8 },
+            { p.ledOn, 0xffe6007e }, { p.ledOff, 0xff38313b },
+            { p.shadow, 0xff030305 }, { p.highlight, 0xffd9d7df },
+            { p.lowlight, 0xff090a0e }
+        };
+        const std::array<const char*, 21> paletteNames {
+            "window_bg", "panel", "panel_elevated", "control_bg", "control_face",
+            "control_border", "text_primary", "text_secondary", "text_disabled",
+            "accent", "accent_glow", "danger", "warning", "success", "lcd_bg",
+            "lcd_text", "led_on", "led_off", "shadow", "highlight", "lowlight"
+        };
+        expect(canonicalPalette.size() == paletteNames.size(),
+               "NEON STAGE canonical palette contains all 21 required tokens");
+        for (size_t i = 0; i < canonicalPalette.size(); ++i)
+            expect(canonicalPalette[i].first.getARGB() == canonicalPalette[i].second,
+                   juce::String("NEON STAGE token matches approved graphite/magenta value: ")
+                       + paletteNames[i]);
     }
     const auto invalid = neon.loadFileAsString().replace("\"index\": 53", "\"index\": 54");
     expect(!manager.loadFromJson(invalid), "stable ID/index mismatch is rejected");
