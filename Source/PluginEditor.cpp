@@ -1615,6 +1615,25 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     g.strokePath(track, juce::PathStrokeType(4.0f, juce::PathStrokeType::curved,
                                              juce::PathStrokeType::rounded));
 
+    // Precision scale around the dial:  thirteen subtle machined index marks.
+    // These are visual graduations only; the underlying APVTS value stays continuous.
+    for (int tick = 0; tick <= 12; ++tick)
+    {
+        const float t = static_cast<float>(tick) / 12.0f;
+        const float tickAngle = start + t * (end - start);
+        const float outer = r + 10.0f;
+        const float inner = outer - ((tick % 3) == 0 ? 5.0f : 2.8f);
+        juce::Path mark;
+        mark.startNewSubPath(cx + std::sin(tickAngle) * inner,
+                             cy - std::cos(tickAngle) * inner);
+        mark.lineTo(cx + std::sin(tickAngle) * outer,
+                    cy - std::cos(tickAngle) * outer);
+        g.setColour(enabled
+            ? palette.token("highlight").withAlpha((tick % 3) == 0 ? 0.72f : 0.34f)
+            : palette.token("text_disabled").withAlpha(0.22f));
+        g.strokePath(mark, juce::PathStrokeType((tick % 3) == 0 ? 1.35f : 0.8f));
+    }
+
     juce::Path value;
     value.addCentredArc(cx, cy, r + 5.0f, r + 5.0f, 0.0f, start, angle, true);
     g.setColour(enabled ? (hovered ? palette.accent.brighter(0.12f) : palette.accent)
@@ -1631,6 +1650,12 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     g.setColour(focused ? palette.focus : palette.border);
     g.drawEllipse(cx - r + 4.0f, cy - r + 4.0f, d - 8.0f, d - 8.0f,
                   focused ? 2.0f : 1.2f);
+
+    // Recessed centre hub with a metallic highlight ring.
+    g.setColour(palette.token("shadow").withAlpha(0.72f));
+    g.fillEllipse(cx - 6.0f, cy - 6.0f, 12.0f, 12.0f);
+    g.setColour(palette.token("highlight").withAlpha(enabled ? 0.72f : 0.24f));
+    g.drawEllipse(cx - 5.0f, cy - 5.0f, 10.0f, 10.0f, 0.9f);
 
     juce::Path pointer;
     pointer.startNewSubPath(cx, cy);
@@ -2084,7 +2109,19 @@ void PopPunkGuitarUltimateAudioProcessorEditor::configureKnob(juce::Slider& s, j
     s.setColour(juce::Slider::rotarySliderOutlineColourId, themeManager.getPalette().token("control_border"));
     s.setColour(juce::Slider::thumbColourId, themeManager.getPalette().token("text_primary"));
     s.setColour(juce::Slider::textBoxTextColourId, themeManager.getPalette().token("text_primary"));
+    s.setColour(juce::Slider::textBoxBackgroundColourId, themeManager.getPalette().token("control_bg").withAlpha(0.82f));
     s.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
+    s.setColour(juce::Slider::textBoxHighlightColourId, themeManager.getPalette().token("accent").withAlpha(0.30f));
+    const auto help = name == "GAIN" ? "Output level / amplifier gain"
+        : name == "TREBLE" ? "High-frequency tone shaping"
+        : name == "MID" ? "Mid-frequency tone shaping"
+        : name == "BASS" ? "Low-frequency tone shaping"
+        : name == "VELOCITY" ? "MIDI velocity response"
+        : name == "DYNAMICS" ? "Performance dynamics response"
+        : name == "SWING" ? "Pattern timing swing"
+        : name == "HUMANIZE" ? "Timing and velocity variation"
+        : "Accent strength / emphasis";
+    s.setTooltip(help);
     addAndMakeVisible(s);
     l.setText(name, juce::dontSendNotification);
     l.setFont(makeThemeFont(themeManager.getPalette(), 9.5f, false, true));
