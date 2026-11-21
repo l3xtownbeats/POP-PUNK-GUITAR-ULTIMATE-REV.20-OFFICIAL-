@@ -61,11 +61,18 @@ jobs:
       - name: Render and audit Skin-1 PNG artwork
         run: python tools/migrate_neon_stage_png.py
 
-      - name: Upload generated, audited Skin-1 PNG artwork
+      - name: Render all 15 Skin Studio themes to 1x/2x/3x PNG
+        run: python tools/migrate_skin_studio_png.py
+
+      - name: Upload complete audited theme PNG artwork
         uses: actions/upload-artifact@v4
         with:
           name: ppgu-skin1-png-migration
-          path: SKIN/Skin_053/assets/png_migration/
+          path: |
+            SKIN/Skin_053/assets/png_migration/
+            SKIN/Skin_*/assets/png_migration/**
+            SKIN/Skin_*/theme.json
+            SKIN/skin_studio_png_migration_manifest.json
           if-no-files-found: error
           retention-days: 1
 
@@ -86,7 +93,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ppgu-skin1-png-migration
-          path: SKIN/Skin_053/assets/png_migration
+          path: .
 
       - name: Checkout JUCE 7.0.12
         shell: pwsh
@@ -177,7 +184,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ppgu-skin1-png-migration
-          path: SKIN/Skin_053/assets/png_migration
+          path: .
 
       - name: Checkout JUCE 9.0.6
         shell: pwsh
