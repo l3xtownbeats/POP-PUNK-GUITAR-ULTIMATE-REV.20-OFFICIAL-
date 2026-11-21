@@ -57,6 +57,7 @@ public:
         juce::Image edgeHighlightArtwork;
         juce::Image specularArtwork;
         juce::Image shadowArtwork;
+        juce::Image heroArtwork; // Approved guitar hero crop from NEON STAGE reference 01.
         // Optional NEON STAGE sprite atlases. Only SKIN-1 supplies these;
         // other approved themes continue using the shared vector fallback.
         juce::Image controlsSpriteSheet;
