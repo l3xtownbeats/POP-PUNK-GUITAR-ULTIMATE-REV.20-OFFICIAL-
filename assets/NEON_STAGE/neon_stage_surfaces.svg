@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">NEON STAGE — Surface Asset Set</title><desc id="desc">Reusable vector surfaces derived from the official NEON STAGE master banner.</desc>
+<defs>
+ <linearGradient id="ns-bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#05070D"/><stop offset=".48" stop-color="#0C1220"/><stop offset="1" stop-color="#10091B"/></linearGradient>
+ <linearGradient id="ns-panel" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#1A2636"/><stop offset=".45" stop-color="#0B111C"/><stop offset="1" stop-color="#070B13"/></linearGradient>
+ <linearGradient id="ns-cyan" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#37F2FF"/><stop offset=".5" stop-color="#168CFF"/><stop offset="1" stop-color="#8D5CFF"/></linearGradient>
+ <linearGradient id="ns-pink" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#9B4DFF"/><stop offset=".55" stop-color="#F14BCB"/><stop offset="1" stop-color="#FF6A9B"/></linearGradient>
+ <pattern id="ns-grid" width="44" height="44" patternUnits="userSpaceOnUse"><path d="M44 0H0V44" fill="none" stroke="#B8D8FF" stroke-opacity=".045"/></pattern>
+ <pattern id="ns-micro" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#B7D5F5" opacity=".18"/></pattern>
+ <filter id="ns-glow"><feGaussianBlur stdDeviation="7"/></filter>
+ <symbol id="ns-stage-background" viewBox="0 0 1800 720"><rect width="1800" height="720" fill="url(#ns-bg)"/><rect width="1800" height="720" fill="url(#ns-grid)"/><path d="M80 0L450 720M1720 0L1350 720" stroke="#28DFFF" stroke-opacity=".09" stroke-width="2"/><path d="M0 635H1800" stroke="url(#ns-cyan)" stroke-width="2" opacity=".75"/><path d="M0 641H1800" stroke="#7C3AED" stroke-opacity=".22" stroke-width="14" filter="url(#ns-glow)"/></symbol>
+ <symbol id="ns-main-panel" viewBox="0 0 1050 560"><rect x="1" y="1" width="1048" height="558" rx="28" fill="#03060B" stroke="#55718E" stroke-opacity=".7" stroke-width="2"/><rect x="8" y="8" width="1034" height="544" rx="22" fill="url(#ns-panel)" stroke="#1D3B5B" stroke-width="2"/><rect x="8" y="8" width="1034" height="544" rx="22" fill="url(#ns-micro)" opacity=".38"/><path d="M28 84H1022" stroke="url(#ns-cyan)" stroke-width="2" opacity=".8"/></symbol>
+ <symbol id="ns-section-panel" viewBox="0 0 982 182"><rect x="1" y="1" width="980" height="180" rx="14" fill="#07101B" stroke="#294663" stroke-width="2"/><path d="M24 54H958M24 91H958M24 128H958" stroke="#20364E" stroke-dasharray="5 8"/></symbol>
+ <symbol id="ns-header-bar" viewBox="0 0 982 54"><rect x="1" y="1" width="980" height="52" rx="12" fill="#0A1523" stroke="#284866" stroke-width="2"/><path d="M18 53H964" stroke="url(#ns-cyan)" opacity=".35"/></symbol>
+ <symbol id="ns-footer-strip" viewBox="0 0 982 25"><rect x=".5" y=".5" width="981" height="24" rx="5" fill="#050A12" stroke="#24415D"/><path d="M8 22H974" stroke="url(#ns-cyan)" opacity=".28"/></symbol>
+ <symbol id="ns-divider-cyan" viewBox="0 0 440 4"><rect width="440" height="2" fill="url(#ns-cyan)"/><rect y="3" width="440" height="1" fill="#7C3AED" opacity=".25"/></symbol>
+ <symbol id="ns-frame-card" viewBox="0 0 320 180"><rect x="1" y="1" width="318" height="178" rx="14" fill="#07101B" stroke="#294663" stroke-width="2"/><path d="M16 42H304" stroke="url(#ns-cyan)" opacity=".65"/></symbol>
+</defs>
+<rect width="1600" height="900" fill="#05070D"/>
+<g font-family="Arial,Helvetica,sans-serif" fill="#F4F8FF">
+ <text x="48" y="58" font-size="28" font-weight="800" letter-spacing="3">NEON STAGE / SURFACES</text><text x="48" y="88" font-size="14" fill="#9FB6D4" letter-spacing="2">MASTER-DERIVED VECTOR ASSET ATLAS</text>
+ <g transform="translate(48 130)"><use xlink:href="#ns-stage-background" width="720" height="288"/><rect width="720" height="288" rx="12" fill="none" stroke="#55718E"/><text x="16" y="28" font-size="15">STAGE BACKGROUND</text></g>
+ <g transform="translate(820 130)"><use xlink:href="#ns-main-panel" width="630" height="336"/><text x="24" y="32" font-size="15">MAIN PANEL / FRAME</text></g>
+ <g transform="translate(48 480)"><use xlink:href="#ns-section-panel" width="720" height="133"/><text x="18" y="30" font-size="15">SIGNAL / SECTION PANEL</text></g>
+ <g transform="translate(820 520)"><use xlink:href="#ns-header-bar" width="630" height="35"/><text x="18" y="24" font-size="13">HEADER BAR</text></g>
+ <g transform="translate(820 600)"><use xlink:href="#ns-footer-strip" width="630" height="16"/><text x="18" y="52" font-size="13">FOOTER / STATUS STRIP</text></g>
+ <g transform="translate(48 680)"><use xlink:href="#ns-divider-cyan" width="440" height="4"/><text x="0" y="30" font-size="13">CYAN-VIOLET DIVIDER</text></g>
+ <g transform="translate(540 660)"><use xlink:href="#ns-frame-card" width="250" height="140"/><text x="12" y="25" font-size="13">CARD FRAME</text></g>
+</g></svg>
