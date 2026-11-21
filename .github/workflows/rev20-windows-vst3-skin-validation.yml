@@ -64,7 +64,7 @@ jobs:
         shell: pwsh
         run: ctest --test-dir build -C Release --output-on-failure
 
-      - name: Validate exactly 16 named graphical skins and all artwork assets
+      - name: Convert artwork batches 01-08 to audited RGBA PNG and write SHA-256 manifest\n        shell: pwsh\n        run: python tools/migrate_neon_stage_png.py\n\n      - name: Validate exactly 16 named graphical skins and all artwork assets
         shell: pwsh
         run: python tools/validate_skin_registry_16.py
 
