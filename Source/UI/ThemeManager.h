@@ -93,7 +93,7 @@ public:
     PPGUThemeManager() = default;
 
     // Parsing and file access are UI/control-thread operations only.
-    // A failed load always restores the canonical NEON STAGE DEFAULT palette.
+    // Failed loads preserve the last-known-good palette and decoded artwork.
     bool loadFromJson(const juce::String& jsonText);
     bool loadFromFile(const juce::File& manifestFile);
     void resetToDefault() noexcept;
