@@ -3,18 +3,18 @@
 Status: APPROVED / implementation contract  
 Product: POP PUNK GUITAR ULTIMATE REV.20  
 Visual system: NEON STAGE  
-Functional control deck: SIGNAL FORGE
+Main visual theme / skin / complete plugin GUI: NEON STAGE
 
 ## Non-negotiable architecture
 
-- One VST3 product, one editor, one SIGNAL FORGE control deck and one NEON STAGE visual skin.
+- One VST3 product, one editor, one unified NEON STAGE main visual theme/skin and complete functional GUI.
 - Theme code is visual-only. It must not modify APVTS parameter IDs, processor state, DSP, sampler, MIDI scheduling or audio-thread behaviour.
 - MELODY and PATTERN remain the only top-level musical modes. AutoChords 2.0 remains a PATTERN sub-feature.
 - All interactive controls remain real controls bound to existing functionality. No decorative fake controls.
 - Approved NEON STAGE palette: graphite/black, metallic silver, purple, magenta and crimson; functional meters may use green/amber/orange/red. No blue/cyan/teal/turquoise palette or lighting.
 - Theme parsing, file access, image decoding, cache mutation and theme replacement run only on the message/UI thread. The audio thread must never parse manifests, load files, decode images, allocate theme assets or wait on theme locks.
 
-## Six approved engineering engines
+## Seven approved engineering engines
 
 ### E1 — Theme Validation Engine
 Deeply validate manifest schema/version, identity, required semantic palette tokens, typography ranges, canonical control IDs, asset declarations, dimensions, formats, safe relative paths, file sizes, image decoding and compatibility contract. Reject duplicate/missing state records, malformed images and path traversal. Validation must be deterministic and return actionable diagnostics. Validate into a candidate object; publish only after the entire package passes.
@@ -23,7 +23,7 @@ Deeply validate manifest schema/version, identity, required semantic palette tok
 Centralise theme asset resolution, safe file access, decoding, dimensions, byte budgets, ownership and cache lifetime. Enforce theme-root containment after resolving links; reject escaping symlinks. Cache decoded immutable images by canonical path + file identity/size/mtime (or content digest where practical). Avoid duplicate decode of the same asset. Bound per-asset and total decoded-memory use. Never perform asset I/O on the audio thread.
 
 ### E3 — Palette Engine
-Keep the 21 approved semantic tokens as the single source of truth. All SIGNAL FORGE panels, controls, labels, meters, status indicators and fallback rendering must obtain colours through semantic tokens. No hard-coded theme colours in component paint code, except explicitly documented status semantics or transparent utility colours. Palette changes must update all theme-aware components consistently.
+Keep the 21 approved semantic tokens as the single source of truth. All NEON STAGE panels, controls, labels, meters, status indicators and fallback rendering must obtain colours through semantic tokens. No hard-coded theme colours in component paint code, except explicitly documented status semantics or transparent utility colours. Palette changes must update all theme-aware components consistently.
 
 ### E4 — Theme State Engine
 Support the canonical visual states: Default, Hover, Pressed, Disabled and Dragged. State resolution must be deterministic and consistent across knobs, FX switches, buttons, sliders and indicators. Missing optional state art falls back to a defined vector/state treatment; it must never leave a control invisible. State rendering must not change the underlying parameter value or interaction semantics.
@@ -45,7 +45,7 @@ Keep a canonical NEON STAGE DEFAULT fallback. Any malformed manifest, unsafe pat
 - NEON STAGE loads four sprite atlases, premium background/material/effect layers and 135 control-state records for 27 controls × 5 states.
 - Palette stores decoded images and exposes control-state lookup.
 - Theme loading builds a candidate palette before publishing.
-- Editor uses theme-aware rendering and the current branch contains a first visual upgrade to panel chrome and rotary controls.
+- The NEON STAGE interface uses theme-aware rendering and the current branch contains a first visual upgrade to panel chrome and rotary controls.
 
 These are existing foundations, not proof that every engine is complete. In particular, cache deduplication/aggregate memory budgets, complete resolved-path/symlink hardening, transactional hot swap with Preview/Apply/Cancel, consistent state fallback, full palette audit and performance profiling still require implementation and verification.
 
@@ -79,33 +79,35 @@ This BASE authorises implementation of the theme engine only. It does not author
 
 ## Canonical terminology — NEON STAGE (approved BASE)
 
-For REV.20, the following terms are synonyms and refer to one and the same
-canonical concept: **NEON STAGE — the plugin's single main theme/skin**:
+For REV.20, **NEON STAGE** is the single canonical name for the plugin's
+entire main visual theme / skin and complete graphical interface.
 
-- interface / graphical interface;
-- plugin shell / visual shell;
-- theme / skin / main theme;
-- main plugin window / main plugin panel / control panel;
-- visual appearance / visual style / visual identity;
-- graphical presentation / external interface;
-- colour palette and all visual assets.
+When the project refers to the plugin's interface, graphical interface, shell,
+visual shell, theme, skin, main window, main panel, control panel, appearance,
+visual style, visual identity, graphical design, colour palette, graphics,
+textures, artwork, controls, meters, indicators, typography, animations or
+visual states, all of these are parts of **NEON STAGE**. They are not separate
+systems, products, interfaces or skins.
 
-These terms must not be interpreted as separate products, separate interfaces,
-or independently switchable skins. They are different descriptions of the
-same NEON STAGE visual system.
+NEON STAGE includes both:
+- the complete visual presentation: layout, backgrounds, panels, colours,
+  typography, textures, artwork, graphics, lighting and visual effects;
+- every functional control presented by that interface: knobs, buttons,
+  switches, sliders, selectors, meters, indicators, labels and their states.
 
-**SIGNAL FORGE** names the functional control-deck arrangement presented
-inside NEON STAGE. It is not a second theme, a second shell, or a separate
-main interface. NEON STAGE owns and styles the complete presentation of
-SIGNAL FORGE and every plugin panel, control, meter, indicator, graphic,
-texture, typography element, and visual state.
+**Functional meaning:** NEON STAGE is not merely decorative artwork. It is the
+one unified plugin GUI whose visual elements are connected to the plugin's
+real controls and existing functionality. Adding a control or a graphical
+element to the plugin interface means integrating it into NEON STAGE.
 
 Architecture constraints:
-1. REV.20 has exactly one main visual theme/skin: NEON STAGE.
-2. All plugin GUI surfaces and visual resources belong to NEON STAGE.
-3. E1–E7 are subsystems of the NEON STAGE theme engine; they do not create
-   additional themes or interfaces.
-4. Do not introduce a parallel shell, duplicate main window, independent
-   SIGNAL FORGE skin, or a second visual product.
-5. Palette, assets, control states, fallback, and theme switching must remain
-   coherent across the entire NEON STAGE visual system.
+1. REV.20 has exactly one main visual theme/skin and one complete plugin GUI:
+   NEON STAGE.
+2. All plugin GUI surfaces, functional controls and visual resources belong
+   to NEON STAGE.
+3. E1–E7 are internal engineering subsystems supporting NEON STAGE; they do
+   not create additional themes, skins, shells, panels or interfaces.
+4. Do not introduce a parallel shell, duplicate main window, independently
+   named control-deck interface, or second visual product.
+5. Palette, assets, controls, states, fallback, layout and theme switching
+   must remain coherent across the entire NEON STAGE interface.
