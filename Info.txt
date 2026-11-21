@@ -243,3 +243,13 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - По журналу Actions выявлена причина падения NEON STAGE artwork loader tests: CTest запускался до генерации PNG runtime_artwork/texture.png, bezel.png и crest.png, поэтому ThemeManager проверял ещё не подготовленные файлы.
 - Перенесён шаг подготовки и аудита PNG runtime artwork перед CMake configure/build/CTest в Windows VST3 workflow. CTest теперь должен видеть те же PNG-файлы, которые затем проверяются registry validator и упаковываются в skin pack.
 - Это исправление порядка CI-шагов. Оно не закрывает отдельные production artwork gaps (hero placeholder, 13 panel PNGs, полный state artwork) и не означает, что сборка уже прошла.
+
+
+## 2026-11-21 — WINDOWS CI PNG RENDERER COMPATIBILITY FIX (branch only)
+
+- Проверены реальные логи Windows x64 VST3 workflow для ревизии 770264f3db908db7ee71ca7deeaa518987e12f02.
+- Найдена конкретная причина раннего падения: CairoSVG устанавливался через pip на Windows runner, но нативная библиотека Cairo DLL отсутствовала. Ошибка: `OSError: no library called "cairo-2" was found`. Установка Python-пакета сама по себе не поставляет системный Cairo runtime.
+- Изменён workflow: рендер SVG → PNG и аудит SHA-256/размеров/alpha/palette выполняются на Ubuntu runner, где Cairo доступен; проверенные PNG migration outputs передаются Windows runner через artifact и скачиваются до CMake configure/build/CTest.
+- Windows остаётся целевой средой сборки VST3; рендер artwork вынесен в совместимую Linux подготовительную job. Содержимое PNG не подменяется и не генерируется на лету во время CTest.
+- Это устраняет подтверждённую платформенную причину импорта CairoSVG, но ещё не подтверждает успешный повторный workflow. Отдельные ThemeManager/skin packaging ошибки из CTest требуют проверки после повторного запуска.
+- Миграция пока генерирует PNG в CI из SVG-исходников; production pipeline ещё не является PNG-only, и SVG-файлы не удалялись. Изменения только в `work/neon-stage-cover-parity`; `main` не затрагивалась.
