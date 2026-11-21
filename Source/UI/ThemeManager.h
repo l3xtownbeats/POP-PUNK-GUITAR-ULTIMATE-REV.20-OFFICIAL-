@@ -13,27 +13,27 @@ public:
     {
         struct Tokens
         {
-            juce::Colour windowBg { 0xff08090d };
-            juce::Colour panel { 0xff14161b };
-            juce::Colour panelElevated { 0xff20232b };
-            juce::Colour controlBg { 0xff0e1015 };
-            juce::Colour controlFace { 0xff292d36 };
-            juce::Colour controlBorder { 0xff656b76 };
-            juce::Colour textPrimary { 0xfff2f0f4 };
-            juce::Colour textSecondary { 0xffb9b5bf };
-            juce::Colour textDisabled { 0xff77727d };
-            juce::Colour accent { 0xffe6007e };
-            juce::Colour accentGlow { 0xff7b2c91 };
-            juce::Colour danger { 0xffd7264d };
-            juce::Colour warning { 0xfff2a900 };
-            juce::Colour success { 0xff55c98a };
-            juce::Colour lcdBg { 0xff08090d };
-            juce::Colour lcdText { 0xfff0dce8 };
-            juce::Colour ledOn { 0xffe6007e };
-            juce::Colour ledOff { 0xff38313b };
-            juce::Colour shadow { 0xff030305 };
-            juce::Colour highlight { 0xffd9d7df };
-            juce::Colour lowlight { 0xff090a0e };
+            juce::Colour windowBg { 0xff080b14 };
+            juce::Colour panel { 0xff101827 };
+            juce::Colour panelElevated { 0xff17243a };
+            juce::Colour controlBg { 0xff0c1422 };
+            juce::Colour controlFace { 0xff1a2940 };
+            juce::Colour controlBorder { 0xff31506f };
+            juce::Colour textPrimary { 0xfff4f7ff };
+            juce::Colour textSecondary { 0xffb5c4dc };
+            juce::Colour textDisabled { 0xff71829d };
+            juce::Colour accent { 0xff00d9ff };
+            juce::Colour accentGlow { 0xff6b8cff };
+            juce::Colour danger { 0xffff557a };
+            juce::Colour warning { 0xffffbe55 };
+            juce::Colour success { 0xff42e6b0 };
+            juce::Colour lcdBg { 0xff080b14 };
+            juce::Colour lcdText { 0xff8deBff };
+            juce::Colour ledOn { 0xff00d9ff };
+            juce::Colour ledOff { 0xff263b55 };
+            juce::Colour shadow { 0xff03060b };
+            juce::Colour highlight { 0xff8dcbff };
+            juce::Colour lowlight { 0xff080f1b };
         };
 
         juce::String id { "skin-053" };
@@ -74,17 +74,17 @@ public:
             return found != controlStateArtwork.end() ? &found->second : nullptr;
         }
         // Compatibility aliases used by the existing editor shell.
-        juce::Colour canvas { 0xff08090d };
-        juce::Colour canvasInset { 0xff0e1015 };
-        juce::Colour surface { 0xff14161b };
-        juce::Colour surfaceSecondary { 0xff0e1015 };
-        juce::Colour surfaceRaised { 0xff20232b };
-        juce::Colour text { 0xfff2f0f4 };
-        juce::Colour textSecondary { 0xffb9b5bf };
-        juce::Colour accent { 0xffe6007e };
-        juce::Colour accentSecondary { 0xff7b2c91 };
-        juce::Colour border { 0xff656b76 };
-        juce::Colour focus { 0xffd9d7df };
+        juce::Colour canvas { 0xff080b14 };
+        juce::Colour canvasInset { 0xff0c1422 };
+        juce::Colour surface { 0xff101827 };
+        juce::Colour surfaceSecondary { 0xff0c1422 };
+        juce::Colour surfaceRaised { 0xff17243a };
+        juce::Colour text { 0xfff4f7ff };
+        juce::Colour textSecondary { 0xffb5c4dc };
+        juce::Colour accent { 0xff00d9ff };
+        juce::Colour accentSecondary { 0xff6b8cff };
+        juce::Colour border { 0xff31506f };
+        juce::Colour focus { 0xff8dcbff };
         bool usedFallback = true;
 
         juce::Colour token(const juce::String& name) const noexcept;
