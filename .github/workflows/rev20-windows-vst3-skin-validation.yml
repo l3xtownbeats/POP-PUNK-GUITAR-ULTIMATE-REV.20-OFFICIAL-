@@ -129,3 +129,83 @@ jobs:
             build/PPGU_artefacts/Release/VST3/Skins/**
           if-no-files-found: error
           retention-days: 14
+
+  windows-x64-juce9-direct2d-candidate:
+    name: Windows x64 / JUCE 9.0.6 Direct2D candidate
+    needs: windows-x64-vst3
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - name: Checkout generated branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install artwork validation dependency
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Checkout JUCE 9.0.6
+        shell: pwsh
+        run: git clone --depth 1 --branch 9.0.6 https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure Windows x64
+        shell: pwsh
+        run: cmake -S . -B build -A x64
+
+      - name: Build VST3 and all C++ contract tests
+        shell: pwsh
+        run: cmake --build build --config Release --parallel
+
+      - name: Run full CTest suite
+        shell: pwsh
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Validate exactly 16 named graphical skins and all artwork assets
+        shell: pwsh
+        run: python tools/validate_skin_registry_16.py
+
+      - name: Stage exactly 16 approved skin folders beside VST3
+        shell: pwsh
+        run: python tools/package_active_skins.py --root SKIN --output build/PPGU_artefacts/Release/VST3/Skins
+
+      - name: Locate VST3 bundle
+        id: vst3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $plugin = Get-ChildItem build -Directory -Recurse -Filter '*.vst3' | Select-Object -First 1
+          if (-not $plugin) { throw 'VST3 bundle not found after successful JUCE 9 build.' }
+          "path=$($plugin.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Run pluginval strictness level 5
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'pluginval_Windows.zip'
+          $toolDir = Join-Path $env:RUNNER_TEMP 'pluginval-juce9'
+          Invoke-WebRequest -Uri 'https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_Windows.zip' -OutFile $archive -TimeoutSec 180
+          Expand-Archive -LiteralPath $archive -DestinationPath $toolDir -Force
+          $validator = Get-ChildItem -LiteralPath $toolDir -Recurse -File -Filter 'pluginval.exe' | Select-Object -First 1
+          if (-not $validator) { throw 'pluginval.exe was not found in the official Windows release archive.' }
+          $pluginPath = "${{ steps.vst3.outputs.path }}"
+          $arguments = @('--strictness-level', '5', ('"{0}"' -f $pluginPath))
+          $validationProcess = Start-Process -FilePath $validator.FullName -ArgumentList $arguments -NoNewWindow -Wait -PassThru
+          if ($validationProcess.ExitCode -ne 0) {
+            throw "pluginval strictness level 5 failed with exit code $($validationProcess.ExitCode)."
+          }
+
+      - name: Upload JUCE 9.0.6 candidate VST3 and matching 16-skin pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-REV20-JUCE-9.0.6-Windows-x64-VST3-candidate
+          path: |
+            build/PPGU_artefacts/Release/VST3/*.vst3
+            build/PPGU_artefacts/Release/VST3/Skins/**
+          if-no-files-found: error
+          retention-days: 14
