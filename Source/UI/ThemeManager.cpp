@@ -780,20 +780,18 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         return false;
     }
 
-    // The default NEON STAGE shell has a four-atlas visual package.
-    // Atlases are decoded only on the UI/control thread and never touched by audio code.
+    // NEON STAGE runtime uses individually validated control artwork and
+    // authored material layers. The legacy generated atlas pack is intentionally
+    // not loaded: its manifest belongs to a different prototype palette and
+    // contains generic meter/control artwork that is not the approved REV.20 UI.
+    // Keep atlas fields empty so LookAndFeel uses per-control PNGs and its
+    // native vector fallback for states without an approved individual asset.
     if (id == "skin-053")
     {
-        juce::var spriteSheets;
-        if (!hasObject(assets, "spriteSheets", spriteSheets)
-            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("controls", "").toString(),
-                                  1024, 1024, candidate.controlsSpriteSheet, error)
-            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("meters_sliders", "").toString(),
-                                   1024, 1024, candidate.metersSlidersSpriteSheet, error)
-            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("frames_panels", "").toString(),
-                                   1024, 1024, candidate.framesPanelsSpriteSheet, error)
-            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("icons", "").toString(),
-                                   1024, 1024, candidate.iconsSpriteSheet, error)
+        candidate.controlsSpriteSheet = {};
+        candidate.metersSlidersSpriteSheet = {};
+        candidate.framesPanelsSpriteSheet = {};
+        candidate.iconsSpriteSheet = {};
             || !loadSafePngArtwork(themeRoot, "assets/background/main.png",
                                    2560, 1440, candidate.backgroundArtwork, error)
             || !loadSafePngArtwork(themeRoot, "assets/textures/material.png",
