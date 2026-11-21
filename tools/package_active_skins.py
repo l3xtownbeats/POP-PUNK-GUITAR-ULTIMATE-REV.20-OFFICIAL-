@@ -115,6 +115,22 @@ def main() -> int:
             source_relative = (Path(folder) / relative).as_posix()
             copy_one(root, output, source_relative)
 
+        # Preserve the complete audited HiDPI artwork library in the VST3
+        # package, not only the 1x files referenced by the runtime theme JSON.
+        migration_dir = root / folder / "assets" / "png_migration"
+        if migration_dir.is_dir():
+            for source in sorted(migration_dir.rglob("*.png")):
+                if source.is_symlink() or not source.is_file():
+                    raise SystemExit(f"{name}: unsafe PNG migration asset: {source}")
+                relative = source.relative_to(root).as_posix()
+                copy_one(root, output, relative)
+            for source in sorted(migration_dir.glob("*.json")):
+                if source.is_symlink() or not source.is_file():
+                    raise SystemExit(f"{name}: unsafe PNG migration manifest: {source}")
+                copy_one(root, output, source.relative_to(root).as_posix())
+        if stable_id == "skin-053":
+            copy_one(root, output, "skin_studio_png_migration_manifest.json")
+
         # NEON STAGE DEFAULT ships four extra runtime atlases. Copy them
         # only for SKIN-1; the other 15 shells retain their existing package.
         if stable_id == "skin-053":
