@@ -38,12 +38,6 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Download audited PNG artwork before configure/build/CTest
-        uses: actions/download-artifact@v4
-        with:
-          name: ppgu-skin1-png-migration
-          path: SKIN/Skin_053/assets/png_migration
-
       - name: Install PNG migration dependencies
         run: python -m pip install --disable-pip-version-check Pillow
 
@@ -73,6 +67,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Download audited PNG artwork before configure/build/CTest
+        uses: actions/download-artifact@v4
+        with:
+          name: ppgu-skin1-png-migration
+          path: SKIN/Skin_053/assets/png_migration
 
       - name: Checkout JUCE 7.0.12
         shell: pwsh
