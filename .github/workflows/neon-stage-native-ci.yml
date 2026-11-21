@@ -12,6 +12,8 @@ on:
       - "tools/package_active_skins.py"
       - "tools/validate_skin_registry_16.py"
       - ".github/workflows/neon-stage-native-ci.yml"
+  workflow_dispatch:
+
   pull_request:
     branches:
       - main
