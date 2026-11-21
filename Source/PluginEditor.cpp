@@ -1540,7 +1540,33 @@ private:
 
 // Premium NEON STAGE shell. Visual theme code never touches processor/audio state.
 
-namespace { void getPluginModuleAnchor() {} }
+namespace
+{
+    void getPluginModuleAnchor() {}
+
+    juce::String ppguSliderArtworkState(const juce::Slider& slider)
+    {
+        if (!slider.isEnabled())
+            return "disabled";
+        if (slider.isMouseButtonDown())
+            return "dragged";
+        if (slider.isMouseOver())
+            return "hover";
+        return "default";
+    }
+
+    juce::String ppguButtonArtworkState(const juce::Button& button, bool hovered, bool down)
+    {
+        if (!button.isEnabled())
+            return "disabled";
+        // A latched FX switch uses the pressed artwork as its persistent ON face.
+        if (down || button.getToggleState())
+            return "pressed";
+        if (hovered || button.isMouseOver())
+            return "hover";
+        return "default";
+    }
+}
 
 void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int w, int h,
                                                     float pos, float start, float end, juce::Slider& slider)
