@@ -237,3 +237,9 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Уточнён комментарий ThemeManager.h: artwork загружается как проверенные локальные PNG; SVG runtime decoder ранее удалён.
 - Focus feedback реализован векторной обводкой поверх существующих PNG. Это не заявка на наличие отдельных авторских PNG-файлов focus/active; производство этих отдельных состояний остаётся отдельной задачей asset pipeline.
 - Не менялись DSP, sampler, MIDI scheduler, APVTS IDs/ranges, preset data и аудиопоток. Изменения только в work/neon-stage-cover-parity; main не изменялась.
+
+
+## 2026-11-21 — SKIN-1 PNG PREPARATION ORDER FIX
+- По журналу Actions выявлена причина падения NEON STAGE artwork loader tests: CTest запускался до генерации PNG runtime_artwork/texture.png, bezel.png и crest.png, поэтому ThemeManager проверял ещё не подготовленные файлы.
+- Перенесён шаг подготовки и аудита PNG runtime artwork перед CMake configure/build/CTest в Windows VST3 workflow. CTest теперь должен видеть те же PNG-файлы, которые затем проверяются registry validator и упаковываются в skin pack.
+- Это исправление порядка CI-шагов. Оно не закрывает отдельные production artwork gaps (hero placeholder, 13 panel PNGs, полный state artwork) и не означает, что сборка уже прошла.
