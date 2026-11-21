@@ -172,6 +172,19 @@ NEON STAGE — не отдельный альтернативный скин, а
 - начальное состояние синхронизируется при создании редактора;
 - смена режима инициирует repaint обоих табов.
 
+### 4.4 Реализация интерактивной подсветки — 21.11.2026
+
+В рабочей ветке добавлено уточнение runtime-отрисовки без изменения утверждённой геометрии, DSP или APVTS-контрактов:
+
+- Rotary controls продолжают использовать authored NEON STAGE PNG как основу; поверх неё нативно рисуются value-track, cyan/electric-blue value arc с мягким glow и указатель. Угол и дуга вычисляются из текущего normalized value JUCE Slider, поэтому визуальное положение следует за APVTS/host automation.
+- MELODY и PATTERN получили отдельный LookAndFeel path `mode_tab`. Он использует состояния artwork `mode_selector`; активное состояние берёт нейтральную основу и добавляет динамический cyan indicator/glow. Это исключает ошибочное повторное использование FX rocker atlas для двух режимов.
+- Взаимоисключающее состояние режимов остаётся производным от единственного APVTS `playMode`; ComboBoxAttachment, табы и восстановление проекта используют один источник истины.
+- Семь FX-переключателей сохраняют ButtonAttachment к исходным APVTS IDs; их OFF/ON и hover/pressed/disabled визуальные состояния определяются текущим состоянием JUCE Button и Skin-1 artwork/atlas.
+- Добавлены регрессионные проверки приоритетов default/hover/pressed/active/disabled в `tests/ThemeManagerTests.cpp`.
+- Добавлен `tools/validate_neon_stage_ui_contract.py` и запуск этого контракта в Windows native CI. Скрипт проверяет количество и порядок APVTS IDs, реальные attachment bindings, синхронизацию режимов, dedicated mode renderer, rotary value arc/pointer и наличие реализаций вспомогательных окон.
+
+**Граница подтверждения:** source changes и автоматические проверки подготовлены; пока Windows CI не завершит сборку и CTest, а runtime не будет проверен в FL Studio 20, фактическая интерактивность в хосте не считается принятой.
+
 ## 5. Современные инженерные подходы
 
 Применять новые средства там, где они повышают надёжность, не ломая совместимость JUCE 7/9 и Windows x64:
