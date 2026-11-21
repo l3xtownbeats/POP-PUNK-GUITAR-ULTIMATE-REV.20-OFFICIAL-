@@ -13,6 +13,7 @@ on:
       - "tests/**"
       - "SKIN/Skin_053/**"
       - "tools/package_active_skins.py"
+      - "tools/migrate_neon_stage_png.py"
       - ".github/workflows/skin1-control-state-ci.yml"
 
 permissions:
@@ -23,7 +24,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  prepare-skin1-png:
+    name: Prepare audited Skin-1 PNG artwork (Linux renderer)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout tested revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download audited PNG artwork before configure/build/CTest
+        uses: actions/download-artifact@v4
+        with:
+          name: ppgu-skin1-png-migration
+          path: SKIN/Skin_053/assets/png_migration
+
+      - name: Install PNG migration dependencies
+        run: python -m pip install --disable-pip-version-check Pillow CairoSVG
+
+      - name: Render and audit Skin-1 PNG artwork
+        run: python tools/migrate_neon_stage_png.py
+
+      - name: Upload audited PNG artwork
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppgu-skin1-png-migration
+          path: SKIN/Skin_053/assets/png_migration/
+          if-no-files-found: error
+          retention-days: 1
+
   windows-x64:
+    needs: prepare-skin1-png
     runs-on: windows-2022
     timeout-minutes: 45
     steps:
