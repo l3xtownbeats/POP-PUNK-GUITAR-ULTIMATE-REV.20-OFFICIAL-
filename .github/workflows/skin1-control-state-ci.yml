@@ -15,6 +15,7 @@ on:
       - "tools/package_active_skins.py"
       - "tools/migrate_neon_stage_png.py"
       - "tools/migrate_skin_studio_png.py"
+      - "tools/migrate_skin_studio_png.py"
       - "tools/render_neon_stage_svg.cjs"
       - ".github/workflows/skin1-control-state-ci.yml"
 
