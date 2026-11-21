@@ -2823,6 +2823,11 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openFxEditPanel(int selectedEffe
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
+    else if (auto* panel = dynamic_cast<PPGUFXEditPanel*>(auxiliaryWorkspace->getPanelContent(fxEditPanelId)))
+    {
+        // Reuse the existing window, but always follow the FX module the user selected.
+        panel->setSelectedGroup(selectedEffect);
+    }
     auxiliaryWorkspace->setVisible(true);
     auxiliaryWorkspace->toFront(false);
 }
