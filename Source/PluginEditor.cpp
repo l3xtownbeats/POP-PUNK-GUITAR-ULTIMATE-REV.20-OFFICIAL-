@@ -710,6 +710,10 @@ public:
                                                bounds.getX(), bounds.getBottom(), false));
         g.fillRoundedRectangle(bounds, 9.0f);
         drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.045f, 0.0f, 0.0f);
+        // A restrained moving cyan scan line gives the live LCD/performance surface motion.
+        const float scanY = bounds.getY() + 8.0f + scanPhase * juce::jmax(1.0f, bounds.getHeight() - 16.0f);
+        g.setColour(palette.tokens.accent.withAlpha(0.10f));
+        g.drawLine(bounds.getX() + 8.0f, scanY, bounds.getRight() - 8.0f, scanY, 1.2f);
         g.setColour(palette.tokens.controlBorder.withAlpha(0.9f));
         g.drawRoundedRectangle(bounds.reduced(0.5f), 9.0f, 1.0f);
         g.setColour(palette.tokens.accent);
@@ -879,7 +883,13 @@ private:
         }
     }
 
-    void timerCallback() override { refreshState(); }
+    void timerCallback() override
+    {
+        scanPhase += 0.018f;
+        if (scanPhase >= 1.0f) scanPhase = 0.0f;
+        refreshState();
+        repaint();
+    }
 
     PopPunkGuitarUltimateAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& parameters;
@@ -887,6 +897,7 @@ private:
     juce::String chordText { "—" };
     juce::String notesText { "Waiting for MIDI input" };
     juce::String keyText { "CHROMATIC" };
+    float scanPhase = 0.0f;
 };
 
 
@@ -1749,6 +1760,14 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
             if (artwork->isValid())
             {
                 const auto bounds = button.getLocalBounds();
+                if (button.isEnabled() && (button.getToggleState() || hovered || down))
+                {
+                    const float pulse = 0.5f + 0.5f * std::sin(animationPhase + 0.7f);
+                    const float alpha = down ? 0.30f
+                        : (button.getToggleState() ? 0.16f + 0.10f * pulse : 0.08f + 0.07f * pulse);
+                    g.setColour(palette.token("accent").withAlpha(alpha));
+                    g.drawRoundedRectangle(bounds.toFloat().expanded(1.4f), 7.5f, down ? 2.2f : 1.4f);
+                }
                 g.drawImageWithin(*artwork, bounds.getX(), bounds.getY(),
                     bounds.getWidth(), bounds.getHeight(), juce::RectanglePlacement::centred);
                 return;
