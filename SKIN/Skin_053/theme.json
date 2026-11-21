@@ -5,7 +5,7 @@
   "name": "NEON STAGE DEFAULT",
   "family": "special",
   "layout": "STUDIO_CONSOLE",
-  "description": "Canonical SKIN-1 visual shell: dark graphite studio console with restrained cyan, electric-blue, violet and magenta stage accents. Default minimal mode; effects are opt-in.",
+  "description": "Canonical SKIN-1 visual shell: dark graphite studio console with restrained cyan and electric-blue stage accents. Default minimal mode; premium lighting remains controlled by the theme.",
   "palette": {
     "window_bg": "#080B14",
     "panel": "#101827",
@@ -43,7 +43,7 @@
     "crest": "svg/crest.svg",
     "shadowDepth": 0.28,
     "edgeHighlight": 0.18,
-    "glow": "opt-in baked accent lighting; disabled in default minimal mode"
+    "glow": "controlled cyan/electric-blue accent lighting; restrained in default mode"
   },
   "reduceInEco": true,
   "hotSwapFadeMs": 150,
