@@ -29,16 +29,29 @@ def dimensions(root: ET.Element) -> tuple[int, int]:
     if not width or not height: raise ValueError("SVG has no usable width/height or viewBox")
     return width, height
 
-def purple_pixels(image: Image.Image) -> int:
-    count = 0
+def purple_pixel_diagnostics(image: Image.Image, limit: int = 12) -> tuple[int, list[str]]:
+    """Return a count plus reproducible pixel coordinates for palette-audit failures."""
     rgba = image.convert("RGBA")
-    for r, g, b, a in rgba.getdata():
-        if a < 16: continue
-        h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
+    width, height = rgba.size
+    count = 0
+    samples: list[str] = []
+    for index, (r, g, b, a) in enumerate(rgba.getdata()):
+        if a < 16:
+            continue
+        h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
         # Reject saturated violet/purple/magenta accents, not neutral metal or blue/cyan.
         if s >= 0.38 and v >= 0.18 and 0.76 <= h <= 0.94:
             count += 1
-    return count
+            if len(samples) < limit:
+                x, y = index % width, index // width
+                samples.append(
+                    f"(x={x},y={y},rgba={r},{g},{b},{a},hsv={h:.3f},{s:.3f},{v:.3f})"
+                )
+    return count, samples
+
+
+def purple_pixels(image: Image.Image) -> int:
+    return purple_pixel_diagnostics(image)[0]
 
 def main() -> int:
     OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -67,9 +80,12 @@ def main() -> int:
                         if rgba.size != (width*scale, height*scale):
                             raise ValueError(f"{scale}x dimensions mismatch: {rgba.size}")
                         alpha_min, alpha_max = rgba.getchannel("A").getextrema()
-                        bad = purple_pixels(rgba)
+                        bad, samples = purple_pixel_diagnostics(rgba)
                         if bad:
-                            raise ValueError(f"{bad} visible purple/violet/magenta pixels detected at {scale}x")
+                            raise ValueError(
+                                f"{bad} visible purple/violet/magenta pixels detected at {scale}x; "
+                                f"first pixel samples: {'; '.join(samples)}"
+                            )
                         if rgba.mode != "RGBA": raise ValueError("RGBA conversion failed")
                         rgba.save(out, format="PNG", optimize=True)
                     payload = out.read_bytes()
@@ -104,9 +120,12 @@ def main() -> int:
                 if rgba.size != (width, height):
                     raise ValueError(f"runtime dimensions mismatch: {rgba.size}")
                 alpha_min, alpha_max = rgba.getchannel("A").getextrema()
-                bad = purple_pixels(rgba)
+                bad, samples = purple_pixel_diagnostics(rgba)
                 if bad:
-                    raise ValueError(f"{bad} visible purple/violet/magenta pixels detected")
+                    raise ValueError(
+                        f"{bad} visible purple/violet/magenta pixels detected; "
+                        f"first pixel samples: {'; '.join(samples)}"
+                    )
                 rgba.save(out, format="PNG", optimize=True)
             payload = out.read_bytes()
             core_records.append({
