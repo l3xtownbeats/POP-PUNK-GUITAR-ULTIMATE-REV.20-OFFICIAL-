@@ -93,7 +93,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ppgu-skin1-png-migration
-          path: .
+          path: SKIN
 
       - name: Checkout JUCE 7.0.12
         shell: pwsh
@@ -184,7 +184,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ppgu-skin1-png-migration
-          path: .
+          path: SKIN
 
       - name: Checkout JUCE 9.0.6
         shell: pwsh
