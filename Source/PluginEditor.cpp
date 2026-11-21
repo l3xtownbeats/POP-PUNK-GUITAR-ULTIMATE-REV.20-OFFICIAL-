@@ -2660,7 +2660,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openFxEditPanel(int selectedEffe
     const int safeEffect = juce::jlimit(0, static_cast<int>(effectNames.size()) - 1, selectedEffect);
     // One stable auxiliary page per FX group so clicking another switch always
     // opens the matching controls instead of leaving a stale first selection.
-    const int fxEditPanelId = 2101 + safeEffect;
+    const int fxEditPanelId = 2200 + safeEffect;
     if (!auxiliaryWorkspace->isPanelOpen(fxEditPanelId))
     {
         PPGUMultiWindowWorkspace::PanelSpec spec;
