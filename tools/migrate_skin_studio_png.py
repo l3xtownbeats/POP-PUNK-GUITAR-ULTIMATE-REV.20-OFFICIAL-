@@ -30,7 +30,7 @@ class ResvgWorker:
         output.parent.mkdir(parents=True, exist_ok=True)
         request = {"source": str(source), "output": str(output), "width": width, "height": height}
         assert self.process.stdin and self.process.stdout
-        self.process.stdin.write(json.dumps(request) + "\\n")
+        self.process.stdin.write(json.dumps(request) + "\n")
         self.process.stdin.flush()
         response = self.process.stdout.readline()
         if not response:
@@ -43,7 +43,7 @@ class ResvgWorker:
     def close(self):
         if self.process.poll() is None:
             assert self.process.stdin
-            self.process.stdin.write(json.dumps({"quit": True}) + "\\n")
+            self.process.stdin.write(json.dumps({"quit": True}) + "\n")
             self.process.stdin.flush()
             self.process.stdin.close()
             self.process.wait(timeout=60)
@@ -102,7 +102,7 @@ def main() -> int:
                     # The canonical runtime path is the 1x derivative.
                     theme.setdefault("assets", {})[layer] = f"assets/png_migration/{layer}.png"
                     theme.setdefault("effects", {})[layer] = f"assets/png_migration/{layer}.png"
-                theme_path.write_text(json.dumps(theme, indent=2, ensure_ascii=False) + "\\n", encoding="utf-8")
+                theme_path.write_text(json.dumps(theme, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
             except Exception as exc:
                 errors.append(f"{folder_name}: {exc}")
     finally:
@@ -121,7 +121,7 @@ def main() -> int:
         "records": records,
     }
     manifest_path = SKIN / "skin_studio_png_migration_manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\\n", encoding="utf-8")
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"Skin Studio themes: 15; layers: {len(records)}; PNG variants: {manifest['variantCount']}")
     print(f"Manifest: {manifest_path.relative_to(ROOT)}")
     if errors:
