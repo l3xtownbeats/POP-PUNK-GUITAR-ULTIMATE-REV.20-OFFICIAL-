@@ -124,7 +124,7 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
 class PPGUSkinGalleryPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
 public:
-    struct Skin { int index = 0; juce::String id, name, family, familyKey, layout; juce::File preview; juce::Colour accent { 0xff00d9ff }; bool active = false, favorite = false; };
+    struct Skin { int index = 0; juce::String id, name, family, familyKey, layout; juce::File preview; juce::Colour accent { 0xffe6007e }; bool active = false, favorite = false; };
 
     PPGUSkinGalleryPanel(std::vector<Skin> skinsIn, PPGUThemeManager::Palette paletteIn,
                          int activeIndex, juce::StringArray favoritesIn, std::function<void(const juce::StringArray&)> saveFavoritesIn,
@@ -1575,27 +1575,10 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         }
     }
 
-    if (palette.controlsSpriteSheet.isValid())
-    {
-        // Eight authored 100x100 frames at 45-degree increments. Quantization
-        // is visual only; the Slider's continuous parameter value is unchanged.
-        const int frame = juce::jlimit(0, 7, juce::roundToInt(pos * 7.0f));
-        const int sourceX = 65 + (frame % 4) * 110;
-        const int sourceY = frame < 4 ? 120 : 220;
-        const int diameter = juce::jmax(1, juce::roundToInt(
-            static_cast<float>(juce::jmin(w, h)) * 0.82f));
-        const int destinationX = x + (w - diameter) / 2;
-        const int destinationY = y + (h - diameter) / 2;
-        g.drawImage(palette.controlsSpriteSheet, destinationX, destinationY,
-                    diameter, diameter, sourceX, sourceY, 100, 100);
-        if (!slider.isEnabled())
-        {
-            g.setColour(palette.token("window_bg").withAlpha(0.48f));
-            g.fillEllipse(static_cast<float>(destinationX), static_cast<float>(destinationY),
-                          static_cast<float>(diameter), static_cast<float>(diameter));
-        }
-        return;
-    }
+    // Legacy cyan/blue sprite atlas is retained in the package for provenance
+    // and compatibility, but is intentionally not rendered by NEON STAGE.
+    // The approved per-control state artwork above is preferred; the native
+    // graphite/magenta vector fallback below covers any unmapped control.
 
     const float d = juce::jmin(static_cast<float>(w), static_cast<float>(h)) * 0.76f;
     const float r = d * 0.5f;
@@ -1672,41 +1655,35 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
                                                float sliderPos, float minSliderPos, float maxSliderPos,
                                                juce::Slider::SliderStyle style, juce::Slider& slider)
 {
-    juce::ignoreUnused(minSliderPos, maxSliderPos, slider);
-    if (style != juce::Slider::LinearHorizontal || !palette.metersSlidersSpriteSheet.isValid())
+    if (style != juce::Slider::LinearHorizontal)
     {
         juce::LookAndFeel_V4::drawLinearSlider(g, x, y, width, height,
                                                sliderPos, minSliderPos, maxSliderPos, style, slider);
         return;
     }
 
-    const bool useLongTrack = width >= 420;
-    const int sourceX = 60;
-    const int sourceY = useLongTrack ? 445 : 570;
-    const int sourceWidth = useLongTrack ? 820 : 390;
-    const int sourceHeight = 22;
-    const auto track = juce::Rectangle<int>(x + 4, y + (height - 12) / 2,
-                                             juce::jmax(1, width - 8), 12);
-    g.drawImage(palette.metersSlidersSpriteSheet, track.getX(), track.getY(),
-                track.getWidth(), track.getHeight(), sourceX, sourceY, sourceWidth, sourceHeight);
-
-    const float proportion = juce::jlimit(0.0f, 1.0f,
+    const auto track = juce::Rectangle<float>(static_cast<float>(x + 4),
+        static_cast<float>(y + (height - 8) / 2), static_cast<float>(juce::jmax(1, width - 8)), 8.0f);
+    const bool enabled = slider.isEnabled();
+    const auto proportion = juce::jlimit(0.0f, 1.0f,
         (sliderPos - static_cast<float>(x + 4)) / static_cast<float>(juce::jmax(1, width - 8)));
-    const int fillWidth = juce::jlimit(0, track.getWidth(),
-        juce::roundToInt(static_cast<float>(track.getWidth()) * proportion));
-    if (fillWidth > 0)
+    g.setColour(palette.token("control_bg"));
+    g.fillRoundedRectangle(track, 4.0f);
+    g.setColour(palette.token("control_border").withAlpha(enabled ? 0.9f : 0.4f));
+    g.drawRoundedRectangle(track, 4.0f, 1.0f);
+    if (proportion > 0.0f)
     {
-        g.setColour(palette.token("accent_glow").withAlpha(0.88f));
-        g.fillRoundedRectangle(track.withWidth(fillWidth).toFloat().reduced(1.0f), 4.0f);
+        g.setColour(palette.token("accent").withAlpha(enabled ? 0.92f : 0.35f));
+        g.fillRoundedRectangle(track.withWidth(track.getWidth() * proportion).reduced(1.0f), 3.0f);
     }
-
-    const int thumbSize = juce::jlimit(16, 30, height + 8);
-    const int thumbX = juce::jlimit(track.getX() - thumbSize / 2,
-        track.getRight() - thumbSize / 2,
-        juce::roundToInt(sliderPos) - thumbSize / 2);
-    const int thumbY = track.getCentreY() - thumbSize / 2;
-    g.drawImage(palette.metersSlidersSpriteSheet, thumbX, thumbY, thumbSize, thumbSize,
-                910, 640, 32, 32);
+    const float thumbX = juce::jlimit(track.getX(), track.getRight(), static_cast<float>(sliderPos));
+    const float thumbY = track.getCentreY();
+    g.setColour(palette.token("shadow").withAlpha(0.55f));
+    g.fillEllipse(thumbX - 7.0f, thumbY - 5.0f, 14.0f, 14.0f);
+    g.setColour(enabled ? palette.token("highlight") : palette.token("text_disabled"));
+    g.fillEllipse(thumbX - 6.0f, thumbY - 7.0f, 12.0f, 12.0f);
+    g.setColour(palette.token("control_border"));
+    g.drawEllipse(thumbX - 6.0f, thumbY - 7.0f, 12.0f, 12.0f, 1.0f);
 }
 
 void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
@@ -1728,31 +1705,8 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         }
     }
 
-    if (palette.controlsSpriteSheet.isValid() && button.isEnabled())
-    {
-        // Atlas state boxes are authored at 225x125; JUCE draws the button's
-        // text/icon afterwards, so labels remain live and accessible.
-        int sourceX = 25;
-        int sourceY = 690;
-        int sourceWidth = 225;
-        int sourceHeight = 125;
-        if (button.getClickingTogglesState())
-        {
-            // FX bypass and power controls use the dedicated OFF/ON switch art.
-            sourceX = button.getToggleState() ? 535 : 65;
-            sourceY = 430;
-            sourceWidth = 400;
-            sourceHeight = 170;
-        }
-        else if (down) sourceX = 505;
-        else if (button.getToggleState()) sourceX = 745;
-        else if (hovered) sourceX = 265;
-        const auto bounds = button.getLocalBounds();
-        g.drawImage(palette.controlsSpriteSheet, bounds.getX(), bounds.getY(),
-                    bounds.getWidth(), bounds.getHeight(), sourceX, sourceY,
-                    sourceWidth, sourceHeight);
-        return;
-    }
+    // Do not render the legacy cyan/blue atlas. Use canonical state artwork
+    // above or the live palette-driven native button below.
 
     auto bounds = button.getLocalBounds().toFloat().reduced(0.5f);
     const bool enabled = button.isEnabled();
@@ -2159,9 +2113,8 @@ void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
     g.fillRoundedRectangle(header.toFloat(), 9.0f);
     g.fillRect(header.getX(), header.getCentreY(), header.getWidth(), header.getHeight() / 2);
 
-    if (p.framesPanelsSpriteSheet.isValid())
-        g.drawImage(p.framesPanelsSpriteSheet, header.getX(), header.getY(),
-                    header.getWidth(), header.getHeight(), 30, 650, 450, 60);
+    // The legacy frame atlas carries the retired cyan/blue treatment. Header
+    // metal is drawn natively from the canonical Skin_053 graphite/silver tokens.
 
     // Double rim and inner highlight create a premium instrument chassis.
     g.setColour(p.token("control_border").withAlpha(0.82f));
