@@ -70,7 +70,7 @@ class ResvgWorker:
         request = {"source": str(source), "output": str(output),
                    "width": width, "height": height}
         assert self.process.stdin is not None and self.process.stdout is not None
-        self.process.stdin.write(json.dumps(request) + "\\n")
+        self.process.stdin.write(json.dumps(request) + "\n")
         self.process.stdin.flush()
         response = self.process.stdout.readline()
         if not response:
@@ -83,7 +83,7 @@ class ResvgWorker:
     def close(self) -> None:
         if self.process.poll() is None:
             assert self.process.stdin is not None
-            self.process.stdin.write(json.dumps({"quit": True}) + "\\n")
+            self.process.stdin.write(json.dumps({"quit": True}) + "\n")
             self.process.stdin.flush()
             self.process.stdin.close()
             self.process.wait(timeout=60)
