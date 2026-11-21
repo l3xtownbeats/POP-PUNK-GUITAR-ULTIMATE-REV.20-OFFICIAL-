@@ -136,6 +136,7 @@ int main()
     const auto secondTone = directory.getChildFile("second-chord.wav");
     const auto thirdTone = directory.getChildFile("third-chord.wav");
     const auto sfz = directory.getChildFile("pattern-test.sfz");
+    const auto autoChordSfz = directory.getChildFile("autochord-spectral-test.sfz");
 
     // Different source levels make the chord identity observable in rendered
     // audio: chord A is deliberately 3x louder than chord B.
@@ -149,8 +150,8 @@ int main()
 
     const auto sfzText =
         "<region> sample=first-chord.wav key=60 ampeg_release=0.01\n"
-        "<region> sample=second-chord.wav key=64 ampeg_release=0.01\n"
-        "<region> sample=third-chord.wav key=67 ampeg_release=0.01\n"
+        "<region> sample=first-chord.wav key=64 ampeg_release=0.01\n"
+        "<region> sample=first-chord.wav key=67 ampeg_release=0.01\n"
         "<region> sample=second-chord.wav key=62 ampeg_release=0.01\n"
         "<region> sample=second-chord.wav key=66 ampeg_release=0.01\n"
         "<region> sample=second-chord.wav key=69 ampeg_release=0.01\n"
@@ -160,6 +161,18 @@ int main()
     if (!sfz.replaceWithText(sfzText))
     {
         std::cerr << "Could not create SFZ fixture.\n";
+        return 1;
+    }
+
+    // Separate spectral fixture ensures the auto-generated triad test cannot
+    // alter the velocity/loudness behavior of the existing chord scenarios.
+    const auto autoChordSfzText =
+        "<region> sample=first-chord.wav key=60 ampeg_release=0.01\n"
+        "<region> sample=second-chord.wav key=64 ampeg_release=0.01\n"
+        "<region> sample=third-chord.wav key=67 ampeg_release=0.01\n";
+    if (!autoChordSfz.replaceWithText(autoChordSfzText))
+    {
+        std::cerr << "Could not create AutoChords spectral SFZ fixture.\n";
         return 1;
     }
 
@@ -217,6 +230,12 @@ int main()
         if (!setParameter(processor, "cabinetOn", 0.0f)
             || !setParameter(processor, "doubleTrackOn", 0.0f))
             result = 1;
+        const auto spectralLoad = processor.loadSfzFile(autoChordSfz);
+        if (!spectralLoad.success)
+        {
+            std::cerr << "Could not load isolated AutoChords spectral fixture.\n";
+            result = 1;
+        }
 
         if (result == 0)
         {
@@ -265,6 +284,16 @@ int main()
                           << ", E4=" << e4Magnitude << ", G4=" << g4Magnitude << "\n";
                 result = 1;
             }
+
+            // Restore the original SFZ mapping before the pre-existing
+            // chord loudness and transition assertions below.
+            const auto restoredLoad = processor.loadSfzFile(sfz);
+            if (!restoredLoad.success)
+            {
+                std::cerr << "Could not restore the original integration SFZ fixture.\n";
+                result = 1;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
             // AutoChords OFF in PATTERN must preserve a single incoming pitch.
             if (!setParameter(processor, "singleMidiNoteAsChordRoot", 0.0f))

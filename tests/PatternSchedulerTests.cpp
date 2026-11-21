@@ -59,7 +59,7 @@ int main()
             resumedBeforeOff, 48000.0, 6000, 0.0, 0, events) != 0)
         return 34;
     auto resumedAtOldOff = stopPendingScheduler.beginBlock(
-        { true, true, 120.0, 0.50 }, false, 120.0, 48000.0, 6000);
+        { true, true, 120.0, 0.75 }, false, 120.0, 48000.0, 6000);
     if (stopPendingScheduler.schedule(stopPendingPattern, 1.0, 0.0,
             resumedAtOldOff, 48000.0, 6000, 0.0, 0, events) != 0)
     {
