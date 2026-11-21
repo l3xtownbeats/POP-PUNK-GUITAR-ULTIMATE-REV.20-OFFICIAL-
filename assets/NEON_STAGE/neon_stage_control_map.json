@@ -1,0 +1,605 @@
+{
+  "schema": "ppgu.neon-stage.signal-forge-map.v1",
+  "product": "POP PUNK GUITAR ULTIMATE REV.20",
+  "visual_authority": "assets/POP_PUNK_GUITAR_ULTIMATE_BANNER.svg",
+  "visual_identity": "NEON STAGE",
+  "functional_surface": "SIGNAL FORGE",
+  "source_files": [
+    "Source/PluginEditor.h",
+    "Source/PluginEditor.cpp",
+    "Source/PluginProcessor.cpp"
+  ],
+  "rules": [
+    "The approved master banner is the immutable visual source of truth; do not redesign or reinterpret it.",
+    "Every visible control must map to a verified GUI component and, where applicable, a real APVTS parameter ID.",
+    "Do not create a visual control for an APVTS parameter unless its UI role and interaction are explicitly implemented.",
+    "Keep existing APVTS IDs, DSP, processor state, MIDI scheduling and audio-thread behavior unchanged.",
+    "Asset references describe intended visual use; they do not claim that SVG assets are already loaded by the native editor."
+  ],
+  "main_controls": [
+    {
+      "label": "GAIN",
+      "parameter_id": "ampGain",
+      "asset_component": "Rotary knob",
+      "gui_region": "Main AMP / PERFORMANCE row",
+      "status": "confirmed APVTS SliderAttachment",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-knob"
+    },
+    {
+      "label": "TREBLE",
+      "parameter_id": "eqHigh",
+      "asset_component": "Rotary knob",
+      "gui_region": "Main AMP / PERFORMANCE row",
+      "status": "confirmed APVTS SliderAttachment",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-knob"
+    },
+    {
+      "label": "MID",
+      "parameter_id": "eqMid",
+      "asset_component": "Rotary knob",
+      "gui_region": "Main AMP / PERFORMANCE row",
+      "status": "confirmed APVTS SliderAttachment",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-knob"
+    },
+    {
+      "label": "BASS",
+      "parameter_id": "eqLow",
+      "asset_component": "Rotary knob",
+      "gui_region": "Main AMP / PERFORMANCE row",
+      "status": "confirmed APVTS SliderAttachment",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-knob"
+    },
+    {
+      "label": "VELOCITY",
+      "parameter_id": "velocity",
+      "asset_component": "Rotary knob",
+      "gui_region": "Main AMP / PERFORMANCE row",
+      "status": "confirmed APVTS SliderAttachment",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-knob"
+    },
+    {
+      "label": "DYNAMICS",
+      "parameter_id": "dynamics",
+      "asset_component": "Rotary knob",
+      "gui_region": "Main AMP / PERFORMANCE row",
+      "status": "confirmed APVTS SliderAttachment",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-knob"
+    },
+    {
+      "label": "SWING",
+      "parameter_id": "swing",
+      "asset_component": "Rotary knob",
+      "gui_region": "Main AMP / PERFORMANCE row",
+      "status": "confirmed APVTS SliderAttachment",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-knob"
+    },
+    {
+      "label": "HUMANIZE",
+      "parameter_id": "humanize",
+      "asset_component": "Rotary knob",
+      "gui_region": "Main AMP / PERFORMANCE row",
+      "status": "confirmed APVTS SliderAttachment",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-knob"
+    },
+    {
+      "label": "ACCENT",
+      "parameter_id": "accent",
+      "asset_component": "Rotary knob",
+      "gui_region": "Main AMP / PERFORMANCE row",
+      "status": "confirmed APVTS SliderAttachment",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-knob"
+    },
+    {
+      "label": "COMPRESSOR",
+      "parameter_id": "compressorOn",
+      "component_id": "fx_switch01",
+      "asset_component": "toggle/button",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-button-primary",
+      "gui_region": "Primary FX CHAIN",
+      "status": "confirmed APVTS ButtonAttachment; click selects corresponding auxiliary FX detail page"
+    },
+    {
+      "label": "EQ",
+      "parameter_id": "eqOn",
+      "component_id": "fx_switch02",
+      "asset_component": "toggle/button",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-button-primary",
+      "gui_region": "Primary FX CHAIN",
+      "status": "confirmed APVTS ButtonAttachment; click selects corresponding auxiliary FX detail page"
+    },
+    {
+      "label": "DISTORTION",
+      "parameter_id": "distortionOn",
+      "component_id": "fx_switch03",
+      "asset_component": "toggle/button",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-button-primary",
+      "gui_region": "Primary FX CHAIN",
+      "status": "confirmed APVTS ButtonAttachment; click selects corresponding auxiliary FX detail page"
+    },
+    {
+      "label": "CHORUS",
+      "parameter_id": "chorusOn",
+      "component_id": "fx_switch04",
+      "asset_component": "toggle/button",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-button-primary",
+      "gui_region": "Primary FX CHAIN",
+      "status": "confirmed APVTS ButtonAttachment; click selects corresponding auxiliary FX detail page"
+    },
+    {
+      "label": "DELAY",
+      "parameter_id": "delayOn",
+      "component_id": "fx_switch05",
+      "asset_component": "toggle/button",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-button-primary",
+      "gui_region": "Primary FX CHAIN",
+      "status": "confirmed APVTS ButtonAttachment; click selects corresponding auxiliary FX detail page"
+    },
+    {
+      "label": "REVERB",
+      "parameter_id": "reverbOn",
+      "component_id": "fx_switch06",
+      "asset_component": "toggle/button",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-button-primary",
+      "gui_region": "Primary FX CHAIN",
+      "status": "confirmed APVTS ButtonAttachment; click selects corresponding auxiliary FX detail page"
+    },
+    {
+      "label": "CABINET IR",
+      "parameter_id": "cabinetOn",
+      "component_id": "fx_switch07",
+      "asset_component": "toggle/button",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "asset_symbol": "ns-button-primary",
+      "gui_region": "Primary FX CHAIN",
+      "status": "confirmed APVTS ButtonAttachment; click selects corresponding auxiliary FX detail page"
+    }
+  ],
+  "navigation_and_performance": [
+    {
+      "label": "MELODY",
+      "component": "melodyTab",
+      "asset_symbol": "ns-tab-active / ns-tab-inactive",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "behavior": "Selects Melody mode through modeBox/playMode",
+      "status": "native tab; modeBox is APVTS-attached"
+    },
+    {
+      "label": "PATTERN",
+      "component": "patternTab",
+      "asset_symbol": "ns-tab-active / ns-tab-inactive",
+      "asset_file": "assets/NEON_STAGE/neon_stage_controls.svg",
+      "behavior": "Selects Pattern mode through modeBox/playMode",
+      "status": "native tab; modeBox is APVTS-attached"
+    },
+    {
+      "label": "PLAY MODE",
+      "parameter_id": "playMode",
+      "component": "modeBox",
+      "behavior": "Melody / Pattern choice",
+      "status": "confirmed APVTS ComboBoxAttachment"
+    },
+    {
+      "label": "START / SYNC MODE",
+      "parameter_id": "syncMode",
+      "component": "startModeBox",
+      "behavior": "Host / Host Start / Internal",
+      "status": "confirmed APVTS ComboBoxAttachment"
+    },
+    {
+      "label": "MIDI KEYBOARD",
+      "component": "keyboard",
+      "asset_symbol": "ns-key-strip",
+      "asset_file": "assets/NEON_STAGE/neon_stage_indicators.svg",
+      "behavior": "JUCE MidiKeyboardComponent, MIDI note range 36–84",
+      "status": "native keyboard component; visual asset is a styling reference"
+    },
+    {
+      "label": "PERFORMANCE DISPLAY",
+      "component": "performanceDisplay",
+      "asset_symbol": "ns-meter-bars / ns-signal-trace",
+      "asset_file": "assets/NEON_STAGE/neon_stage_indicators.svg",
+      "behavior": "PPGUPerformanceDisplay(processor)",
+      "status": "native processor-backed display"
+    },
+    {
+      "label": "PRESET LIBRARY",
+      "component": "presetBox",
+      "behavior": "Factory preset selection; selecting a preset applies it",
+      "status": "implemented native component"
+    },
+    {
+      "label": "PRESET CATEGORY",
+      "component": "categoryBox",
+      "behavior": "All Presets / Melody / Pattern filtering",
+      "status": "implemented native component; filtering does not silently load a different preset"
+    },
+    {
+      "label": "PRESET SEARCH",
+      "component": "presetSearch",
+      "behavior": "Filters visible factory preset catalog",
+      "status": "implemented native component"
+    },
+    {
+      "label": "IMPORT GUITAR",
+      "component": "loadButton",
+      "behavior": "Calls openImportGuitarPanel(); SFZ panel exposes LOAD SFZ callback",
+      "status": "implemented import entry; library loading availability depends on importer/backend"
+    },
+    {
+      "label": "SKIN",
+      "component": "skinButton",
+      "behavior": "Opens skin gallery",
+      "status": "implemented native component; does not create a second GUI"
+    },
+    {
+      "label": "AUTOCHORDS",
+      "component": "autoChordsButton",
+      "behavior": "Opens chord/harmony workspace",
+      "status": "implemented auxiliary workspace entry"
+    },
+    {
+      "label": "SETTINGS",
+      "component": "settingsButton",
+      "behavior": "Opens workspace settings",
+      "status": "implemented auxiliary workspace entry"
+    },
+    {
+      "label": "ABOUT",
+      "component": "aboutButton",
+      "behavior": "Plugin version/runtime information",
+      "status": "enabled native component"
+    }
+  ],
+  "auxiliary_fx_editor": [
+    {
+      "group": "COMPRESSOR",
+      "enable_parameter": "compressorOn",
+      "parameters": [
+        "compressorThreshold",
+        "compressorRatio",
+        "compressorAttack",
+        "compressorRelease",
+        "compressorAmount"
+      ],
+      "component": "PPGUFXEditPanel",
+      "status": "auxiliary detail editor parameter group; do not present as extra primary FX slot"
+    },
+    {
+      "group": "EQ",
+      "enable_parameter": "eqOn",
+      "parameters": [
+        "eqLow",
+        "eqMid",
+        "eqHigh",
+        "eqLowFreq",
+        "eqMidFreq",
+        "eqMidQ",
+        "eqHighFreq"
+      ],
+      "component": "PPGUFXEditPanel",
+      "status": "auxiliary detail editor parameter group; do not present as extra primary FX slot"
+    },
+    {
+      "group": "DISTORTION",
+      "enable_parameter": "distortionOn",
+      "parameters": [
+        "distortionDrive",
+        "distortionTone",
+        "distortionMix"
+      ],
+      "component": "PPGUFXEditPanel",
+      "status": "auxiliary detail editor parameter group; do not present as extra primary FX slot"
+    },
+    {
+      "group": "CHORUS",
+      "enable_parameter": "chorusOn",
+      "parameters": [
+        "chorusRate",
+        "chorusDepth",
+        "chorusMix"
+      ],
+      "component": "PPGUFXEditPanel",
+      "status": "auxiliary detail editor parameter group; do not present as extra primary FX slot"
+    },
+    {
+      "group": "FLANGER",
+      "enable_parameter": "flangerOn",
+      "parameters": [
+        "flangerRate",
+        "flangerDepth",
+        "flangerFeedback",
+        "flangerMix"
+      ],
+      "component": "PPGUFXEditPanel",
+      "status": "auxiliary detail editor parameter group; do not present as extra primary FX slot"
+    },
+    {
+      "group": "DELAY",
+      "enable_parameter": "delayOn",
+      "parameters": [
+        "delayTime",
+        "delayFeedback",
+        "delayMix"
+      ],
+      "component": "PPGUFXEditPanel",
+      "status": "auxiliary detail editor parameter group; do not present as extra primary FX slot"
+    },
+    {
+      "group": "REVERB",
+      "enable_parameter": "reverbOn",
+      "parameters": [
+        "reverbRoomSize",
+        "reverbDamping",
+        "reverbMix"
+      ],
+      "component": "PPGUFXEditPanel",
+      "status": "auxiliary detail editor parameter group; do not present as extra primary FX slot"
+    },
+    {
+      "group": "CABINET IR",
+      "enable_parameter": "cabinetOn",
+      "parameters": [
+        "cabinetMix",
+        "cabinetLowCut",
+        "cabinetHighCut"
+      ],
+      "component": "PPGUFXEditPanel",
+      "status": "auxiliary detail editor parameter group; do not present as extra primary FX slot"
+    }
+  ],
+  "apvts_parameters_without_confirmed_main_editor_control": [
+    {
+      "parameter_id": "master",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "voices",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "palmMuteThreshold",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "tuning",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "pan",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "output",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "articulation",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "pickStyle",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "pitchBendTarget",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "vibrato",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "slideTime",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "legato",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "hammerPull",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "scaleRoot",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "scaleMode",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "monoMode",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "fretNoiseOnChordChange",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "slideModifier",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "slideVelocitySensitivity",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "modWheelVibrato",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "melodyPatternSlot",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "endingLength",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "palmHitOnEnding",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "stringSlapOnEnding",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "patternSlot",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "patternLength",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "swingBase",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "globalPpqOffset",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "chordSlashBass",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "singleMidiNoteAsChordRoot",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "preserveHumanTiming",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "dnaChugDensity",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "dnaHammerPullProbability",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "dnaStringSpread",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "dnaBeatAccent",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "dnaFxTaste",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "fxSlot1",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "fxSlot2",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "fxSlot3",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "fxSlot4",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "fxSlot5",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "fxSlot6",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "fxSlot7",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "bpm",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "startOnFirstChord",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "patternQuantize",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    },
+    {
+      "parameter_id": "tone",
+      "status": "APVTS parameter exists in processor source; no direct main-editor attachment confirmed in the inspected editor header/source. Do not invent a visible control."
+    }
+  ],
+  "unavailable_features": [
+    {
+      "label": "AUTO SOUND HUNTER",
+      "component": "autoSoundHunterButton",
+      "status": "disabled; backend not implemented; do not show as active"
+    },
+    {
+      "label": "CURATOR",
+      "component": "curatorButton",
+      "status": "disabled; backend not implemented; do not show as active"
+    }
+  ],
+  "asset_symbol_inventory": {
+    "assets/NEON_STAGE/neon_stage_surfaces.svg": [
+      "ns-stage-background",
+      "ns-main-panel",
+      "ns-section-panel",
+      "ns-header",
+      "ns-footer",
+      "ns-divider",
+      "ns-card-frame"
+    ],
+    "assets/NEON_STAGE/neon_stage_controls.svg": [
+      "ns-tab-active",
+      "ns-tab-inactive",
+      "ns-button-primary",
+      "ns-button-secondary",
+      "ns-button-pressed",
+      "ns-knob",
+      "ns-toggle",
+      "ns-slider"
+    ],
+    "assets/NEON_STAGE/neon_stage_indicators.svg": [
+      "ns-signal-trace",
+      "ns-led-on",
+      "ns-led-off",
+      "ns-meter-bars",
+      "ns-status-pill",
+      "ns-key-strip"
+    ]
+  },
+  "implementation_status": {
+    "control_mapping": "documented from current feature-branch source inspection",
+    "reusable_vector_assets": "present in assets/NEON_STAGE",
+    "native_editor_asset_loading": "not verified by this mapping commit",
+    "windows_x64_build": "not run here",
+    "ctest": "not run here",
+    "pluginval": "not run here",
+    "fl_studio_20_host_acceptance": "not run here"
+  }
+}
