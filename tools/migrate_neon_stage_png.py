@@ -1,47 +1,44 @@
 #!/usr/bin/env python3
-"""Convert NEON STAGE artwork batches 01-08 from SVG sources to audited RGBA PNG.
-
-SVG files remain source material during the migration. Runtime integration is a
-separate step; this tool creates deterministic PNG derivatives and a SHA-256
-manifest without modifying existing UI bindings.
-"""
+"""Create audited 1x/2x/3x RGBA PNG derivatives for NEON STAGE SVG batches."""
 from __future__ import annotations
-
-import hashlib
-import json
-import re
-import sys
+import hashlib, json, re, sys, colorsys
 import xml.etree.ElementTree as ET
 from pathlib import Path
-
-from PIL import Image
 import cairosvg
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "SKIN" / "Skin_053" / "assets"
 BATCHES = [ASSETS / f"artwork_batch_{i:02d}" for i in range(1, 9)]
 OUTPUT = ASSETS / "png_migration"
-FORBIDDEN = re.compile(r"#(?:[89a-fA-F][0-9a-fA-F]{0,4})?(?:[89a-fA-F][0-9a-fA-F]){0,2}", re.I)
-FORBIDDEN_COLORS = {"#ff00ff", "#ff00cc", "#d000ff", "#a000ff", "#8000ff", "#c000c0", "#ff00aa"}
+SCALES = (1, 2, 3)
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 def dimensions(root: ET.Element) -> tuple[int, int]:
-    def number(value: str | None) -> int | None:
-        if not value:
-            return None
-        match = re.match(r"^\s*(\d+(?:\.\d+)?)", value)
+    def number(value):
+        if not value: return None
+        match = re.match(r"^\\s*(\\d+(?:\\.\\d+)?)", value)
         return round(float(match.group(1))) if match else None
     width, height = number(root.get("width")), number(root.get("height"))
     if not width or not height:
         view = (root.get("viewBox") or "").replace(",", " ").split()
         if len(view) == 4:
-            width = width or round(float(view[2]))
-            height = height or round(float(view[3]))
-    if not width or not height:
-        raise ValueError("SVG has no usable width/height or viewBox")
+            width = width or round(float(view[2])); height = height or round(float(view[3]))
+    if not width or not height: raise ValueError("SVG has no usable width/height or viewBox")
     return width, height
+
+def purple_pixels(image: Image.Image) -> int:
+    count = 0
+    rgba = image.convert("RGBA")
+    for r, g, b, a in rgba.getdata():
+        if a < 16: continue
+        h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
+        # Reject saturated violet/purple/magenta accents, not neutral metal or blue/cyan.
+        if s >= 0.38 and v >= 0.18 and 0.76 <= h <= 0.94:
+            count += 1
+    return count
 
 def main() -> int:
     OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -55,71 +52,51 @@ def main() -> int:
             try:
                 svg = source.read_bytes()
                 root = ET.fromstring(svg)
-                if not root.tag.endswith("svg"):
-                    raise ValueError("Root XML element is not <svg>")
+                if not root.tag.endswith("svg"): raise ValueError("Root XML element is not <svg>")
                 width, height = dimensions(root)
-                out = OUTPUT / batch.name / (source.stem + ".png")
-                out.parent.mkdir(parents=True, exist_ok=True)
-                png = cairosvg.svg2png(bytestring=svg, output_width=width, output_height=height)
-                out.write_bytes(png)
-                with Image.open(out) as image:
-                    image.load()
-                    if image.format != "PNG":
-                        raise ValueError("Renderer did not produce PNG")
-                    if image.mode not in ("RGBA", "LA"):
-                        image = image.convert("RGBA")
-                        image.save(out)
-                    with Image.open(out) as checked:
-                        checked.load()
-                        if checked.size != (width, height):
-                            raise ValueError(f"PNG size {checked.size} != expected {(width, height)}")
-                        if checked.mode != "RGBA":
-                            raise ValueError(f"PNG mode is {checked.mode}, expected RGBA")
-                        alpha_min, alpha_max = checked.getchannel("A").getextrema()
-                colors = sorted({c.lower() for c in re.findall(r"#[0-9a-fA-F]{6}", svg)})
-                forbidden = sorted(set(colors) & FORBIDDEN_COLORS)
-                if forbidden:
-                    errors.append(f"{source.relative_to(ROOT)} uses forbidden accent colors: {forbidden}")
-                payload = out.read_bytes()
-                records.append({
-                    "source": source.relative_to(ROOT).as_posix(),
-                    "png": out.relative_to(ROOT).as_posix(),
-                    "width": width,
-                    "height": height,
-                    "format": "PNG",
-                    "mode": "RGBA",
-                    "alphaExtrema": [alpha_min, alpha_max],
-                    "sourceSha256": sha256(svg),
-                    "pngSha256": sha256(payload),
-                    "paletteHex": colors,
-                })
+                source_record = {"source": source.relative_to(ROOT).as_posix(),
+                                 "sourceSha256": sha256(svg), "variants": []}
+                for scale in SCALES:
+                    out = OUTPUT / batch.name / f"{source.stem}{'@'+str(scale)+'x' if scale > 1 else ''}.png"
+                    out.parent.mkdir(parents=True, exist_ok=True)
+                    png = cairosvg.svg2png(bytestring=svg, output_width=width*scale, output_height=height*scale)
+                    out.write_bytes(png)
+                    with Image.open(out) as im:
+                        im.load()
+                        rgba = im.convert("RGBA")
+                        if rgba.size != (width*scale, height*scale):
+                            raise ValueError(f"{scale}x dimensions mismatch: {rgba.size}")
+                        alpha_min, alpha_max = rgba.getchannel("A").getextrema()
+                        bad = purple_pixels(rgba)
+                        if bad:
+                            raise ValueError(f"{bad} visible purple/violet/magenta pixels detected at {scale}x")
+                        if rgba.mode != "RGBA": raise ValueError("RGBA conversion failed")
+                        rgba.save(out, format="PNG", optimize=True)
+                    payload = out.read_bytes()
+                    source_record["variants"].append({
+                        "scale": f"{scale}x", "png": out.relative_to(ROOT).as_posix(),
+                        "width": width*scale, "height": height*scale, "format": "PNG",
+                        "mode": "RGBA", "alphaExtrema": [alpha_min, alpha_max],
+                        "purplePixelCount": 0, "pngSha256": sha256(payload)
+                    })
+                records.append(source_record)
             except Exception as exc:
                 errors.append(f"{source.relative_to(ROOT)}: {exc}")
-    manifest = {
-        "schemaVersion": "1.0.0",
-        "skinId": "skin-053",
-        "theme": "NEON STAGE DEFAULT",
-        "conversion": "SVG source -> PNG RGBA derivative",
-        "sourceCount": source_count,
-        "convertedCount": len(records),
-        "records": records,
-    }
-    manifest_path = OUTPUT / "png_manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    print(f"SVG sources discovered: {source_count}")
-    print(f"PNG files converted and audited: {len(records)}")
-    print(f"Manifest: {manifest_path.relative_to(ROOT)}")
+    manifest = {"schemaVersion":"1.1.0","skinId":"skin-053","theme":"NEON STAGE DEFAULT",
+                "conversion":"SVG -> PNG RGBA; 1x/2x/3x","sourceCount":source_count,
+                "convertedSourceCount":len(records),"variantCount":sum(len(x["variants"]) for x in records),
+                "records":records}
+    path = OUTPUT / "png_manifest.json"
+    path.write_text(json.dumps(manifest, indent=2)+"\\n", encoding="utf-8")
+    print(f"SVG sources: {source_count}; converted sources: {len(records)}; PNG variants: {manifest['variantCount']}")
+    print(f"Manifest: {path.relative_to(ROOT)}")
     if errors:
         print("PNG MIGRATION AUDIT: FAIL")
-        for error in errors:
-            print("ERROR:", error)
+        for error in errors: print("ERROR:", error)
         return 1
-    if source_count == 0:
-        print("PNG MIGRATION AUDIT: FAIL (no SVG sources found)")
-        return 1
-    print("PNG MIGRATION AUDIT: PASS (RGBA, dimensions, alpha metadata, SHA-256)")
-    print("NOTE: generated PNGs are not yet connected to JUCE runtime controls.")
+    if source_count == 0: print("PNG MIGRATION AUDIT: FAIL (no SVG sources)"); return 1
+    print("PNG MIGRATION AUDIT: PASS (RGBA, 1x/2x/3x, dimensions, alpha, purple-pixel scan, SHA-256)")
+    print("NOTE: PNGs are not yet wired into JUCE runtime controls.")
     return 0
 
-if __name__ == "__main__":
-    sys.exit(main())
+if __name__ == "__main__": sys.exit(main())
