@@ -1622,6 +1622,16 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
                 }
                 g.drawImageWithin(*artwork, destinationX, destinationY, diameter, diameter,
                                   juce::RectanglePlacement::centred);
+                // Focus is a separate interaction state: keep the authored PNG
+                // unchanged and draw a crisp accessibility ring around the live control.
+                if (slider.isEnabled() && slider.hasKeyboardFocus(true))
+                {
+                    g.setColour(palette.token("highlight").withAlpha(0.96f));
+                    g.drawEllipse(static_cast<float>(destinationX) - 2.0f,
+                                  static_cast<float>(destinationY) - 2.0f,
+                                  static_cast<float>(diameter) + 4.0f,
+                                  static_cast<float>(diameter) + 4.0f, 1.8f);
+                }
                 // Artwork remains position-neutral; the live indicator follows APVTS.
                 const float cx = static_cast<float>(x) + static_cast<float>(w) * 0.5f;
                 const float cy = static_cast<float>(y) + static_cast<float>(h) * 0.5f;
@@ -1770,6 +1780,13 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                 }
                 g.drawImageWithin(*artwork, bounds.getX(), bounds.getY(),
                     bounds.getWidth(), bounds.getHeight(), juce::RectanglePlacement::centred);
+                // Focus is independent of ON/OFF and pointer states. It must remain
+                // visible even when the active authored PNG is being displayed.
+                if (button.isEnabled() && button.hasKeyboardFocus(true))
+                {
+                    g.setColour(palette.token("highlight").withAlpha(0.98f));
+                    g.drawRoundedRectangle(bounds.toFloat().reduced(1.0f), 7.5f, 2.0f);
+                }
                 return;
             }
         }
