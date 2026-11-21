@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetBase": "NEON_STAGE_PREMIUM",
+  "approval": "BASE_APPROVED",
+  "referencesAreImmutable": true,
+  "visualSystem": "ONE_UNIFIED_NEON_STAGE_SYSTEM",
+  "format": "PNG",
+  "references": [
+    {
+      "id": "01",
+      "filename": "01 INTERFACE  NEON STAGE DEFAULT .png",
+      "role": "main_default_interface",
+      "status": "present_in_repository_root_binary_visual_inspection_pending",
+      "sha256": null,
+      "dimensions": null
+    },
+    {
+      "id": "02",
+      "filename": "02 INTERFACE  NEON STAGE DEFAULT AUTOCHORDS .png",
+      "role": "autochords_interface_state",
+      "status": "present_in_repository_root_binary_visual_inspection_pending",
+      "sha256": null,
+      "dimensions": null
+    },
+    {
+      "id": "03",
+      "filename": "03 INTERFACE  NEON STAGE DEFAULT .png",
+      "role": "supporting_screen_role_pending_image_inspection",
+      "status": "present_in_repository_root_binary_visual_inspection_pending",
+      "sha256": null,
+      "dimensions": null
+    },
+    {
+      "id": "04",
+      "filename": "04 INTERFACE  NEON STAGE DEFAULT .png",
+      "role": "supporting_screen_role_pending_image_inspection",
+      "status": "present_in_repository_root_binary_visual_inspection_pending",
+      "sha256": null,
+      "dimensions": null
+    },
+    {
+      "id": "05",
+      "filename": "05 INTERFACE  NEON STAGE DEFAULT .png",
+      "role": "supporting_screen_role_pending_image_inspection",
+      "status": "present_in_repository_root_binary_visual_inspection_pending",
+      "sha256": null,
+      "dimensions": null
+    },
+    {
+      "id": "06",
+      "filename": "06 INTERFACE  NEON STAGE DEFAULT .png",
+      "role": "supporting_screen_role_pending_image_inspection",
+      "status": "present_in_repository_root_binary_visual_inspection_pending",
+      "sha256": null,
+      "dimensions": null
+    },
+    {
+      "id": "07",
+      "filename": "07 INTERFACE  NEON STAGE DEFAULT .png",
+      "role": "supporting_screen_role_pending_image_inspection",
+      "status": "present_in_repository_root_binary_visual_inspection_pending",
+      "sha256": null,
+      "dimensions": null
+    }
+  ],
+  "notes": [
+    "Source references are not to be overwritten or replaced by redraws.",
+    "Dimensions and hashes remain null until binary payloads can be read and verified.",
+    "No claim of pixel-level inspection is made."
+  ]
+}
