@@ -1,27 +1,37 @@
 #!/usr/bin/env node
 "use strict";
 
-// Deterministic SVG -> PNG renderer for the NEON STAGE production migration.
-// The caller supplies the exact target dimensions; aspect ratio is preserved.
+// Persistent Resvg worker. Keeping one process alive avoids repeatedly loading
+// the native renderer and system font database for every 1x/2x/3x variant.
 const fs = require("node:fs");
+const path = require("node:path");
+const readline = require("node:readline");
 const { Resvg } = require("@resvg/resvg-js");
 
-if (process.argv.length !== 6) {
-  throw new Error("Usage: render_neon_stage_svg.cjs <input.svg> <output.png> <width> <height>");
-}
-
-const [, , inputPath, outputPath, widthArg, heightArg] = process.argv;
-const width = Number.parseInt(widthArg, 10);
-const height = Number.parseInt(heightArg, 10);
-if (!Number.isInteger(width) || width < 1 || !Number.isInteger(height) || height < 1) {
-  throw new Error("Target width and height must be positive integers");
-}
-
-const svg = fs.readFileSync(inputPath);
-const renderer = new Resvg(svg, {
-  fitTo: { mode: "width", value: width },
-  font: { loadSystemFonts: true }
+const input = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
+input.on("line", (line) => {
+  let request;
+  try {
+    request = JSON.parse(line);
+    if (request.quit === true) {
+      input.close();
+      process.exit(0);
+    }
+    const { source, output, width, height } = request;
+    if (!source || !output || !Number.isInteger(width) || width < 1 ||
+        !Number.isInteger(height) || height < 1) {
+      throw new Error("Invalid render request");
+    }
+    const svg = fs.readFileSync(source);
+    const renderer = new Resvg(svg, {
+      fitTo: { mode: "width", value: width },
+      font: { loadSystemFonts: true }
+    });
+    const png = renderer.render().asPng();
+    fs.mkdirSync(path.dirname(output), { recursive: true });
+    fs.writeFileSync(output, png);
+    process.stdout.write(JSON.stringify({ ok: true }) + "\n");
+  } catch (error) {
+    process.stdout.write(JSON.stringify({ ok: false, error: String(error && error.stack || error) }) + "\n");
+  }
 });
-const png = renderer.render().asPng();
-fs.mkdirSync(require("node:path").dirname(outputPath), { recursive: true });
-fs.writeFileSync(outputPath, png);
