@@ -53,14 +53,54 @@ def purple_pixels(image: Image.Image) -> int:
     return purple_pixel_diagnostics(image)[0]
 
 
+class ResvgWorker:
+    """One long-lived Node process for all artwork variants in this migration."""
+    def __init__(self) -> None:
+        self.process = subprocess.Popen(
+            ["node", str(ROOT / "tools" / "render_neon_stage_svg.cjs")],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, bufsize=1,
+        )
+
+    def render(self, source: Path, output: Path, width: int, height: int) -> None:
+        if self.process.poll() is not None:
+            stderr = self.process.stderr.read() if self.process.stderr else ""
+            raise RuntimeError(f"Resvg worker exited early: {stderr}")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        request = {"source": str(source), "output": str(output),
+                   "width": width, "height": height}
+        assert self.process.stdin is not None and self.process.stdout is not None
+        self.process.stdin.write(json.dumps(request) + "\\n")
+        self.process.stdin.flush()
+        response = self.process.stdout.readline()
+        if not response:
+            stderr = self.process.stderr.read() if self.process.stderr else ""
+            raise RuntimeError(f"Resvg worker returned no response: {stderr}")
+        result = json.loads(response)
+        if not result.get("ok"):
+            raise RuntimeError(result.get("error", "Unknown Resvg render error"))
+
+    def close(self) -> None:
+        if self.process.poll() is None:
+            assert self.process.stdin is not None
+            self.process.stdin.write(json.dumps({"quit": True}) + "\\n")
+            self.process.stdin.flush()
+            self.process.stdin.close()
+            self.process.wait(timeout=60)
+        if self.process.returncode not in (0, None):
+            stderr = self.process.stderr.read() if self.process.stderr else ""
+            raise RuntimeError(f"Resvg worker shutdown failed: {stderr}")
+
+
+_RENDERER: ResvgWorker | None = None
+
+
 def render_png(source: Path, output: Path, width: int, height: int) -> None:
-    """Render with resvg so SVG text/gradients are rasterized consistently."""
-    output.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
-        ["node", str(ROOT / "tools" / "render_neon_stage_svg.cjs"),
-         str(source), str(output), str(width), str(height)],
-        check=True,
-    )
+    """Render with one persistent Resvg worker for deterministic HiDPI output."""
+    global _RENDERER
+    if _RENDERER is None:
+        _RENDERER = ResvgWorker()
+    _RENDERER.render(source, output, width, height)
 
 def main() -> int:
     OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -144,6 +184,12 @@ def main() -> int:
             })
         except Exception as exc:
             errors.append(f"{source.relative_to(ROOT)}: {exc}")
+    if _RENDERER is not None:
+        try:
+            _RENDERER.close()
+        except Exception as exc:
+            errors.append(f"Resvg worker shutdown: {exc}")
+
     manifest = {"schemaVersion":"1.1.0","skinId":"skin-053","theme":"NEON STAGE DEFAULT",
                 "conversion":"SVG -> PNG RGBA; 1x/2x/3x","sourceCount":source_count,
                 "convertedSourceCount":len(records),"variantCount":sum(len(x["variants"]) for x in records),
