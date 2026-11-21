@@ -178,13 +178,14 @@ int main()
             result = 1;
         }
 
-        const std::array<std::pair<const char*, float>, 17> settings {{
+        const std::array<std::pair<const char*, float>, 20> settings {{
             { "playMode", 1.0f }, { "syncMode", 2.0f }, { "patternSlot", 0.0f },
             { "patternLength", 0.0f }, { "patternQuantize", 0.0f }, { "bpm", 120.0f },
             { "startOnFirstChord", 1.0f }, { "voices", 64.0f }, { "master", 1.0f },
             { "ampGain", 5.0f }, { "eqOn", 0.0f }, { "compressorOn", 0.0f },
             { "distortionOn", 0.0f }, { "chorusOn", 0.0f }, { "flangerOn", 0.0f },
-            { "delayOn", 0.0f }, { "reverbOn", 0.0f }
+            { "delayOn", 0.0f }, { "reverbOn", 0.0f },
+            { "singleMidiNoteAsChordRoot", 1.0f }, { "scaleRoot", 0.0f }, { "scaleMode", 1.0f }
         }};
         for (const auto& setting : settings)
             if (!setParameter(processor, setting.first, setting.second))
@@ -199,12 +200,26 @@ int main()
             const std::array<int, 3> chordB { 62, 66, 69 };
             const std::array<int, 3> chordC { 55, 59, 62 };
 
-            // Warm the first chord's streaming page before measuring audio.
-            // The first note is deliberately sent through the real processor.
+            // A single incoming C4 must be expanded by the real AutoChord
+            // path to C4-E4-G4, then scheduled into the same SamplerEngine.
             juce::AudioBuffer<float> warmBlock(2, 128);
             juce::MidiBuffer warmMidi;
-            addChordOn(warmMidi, 16, chordA);
+            warmMidi.addEvent(juce::MidiMessage::noteOn(1, 60, static_cast<juce::uint8>(110)), 16);
             processor.processBlock(warmBlock, warmMidi);
+
+            ppgu::performance::AutoChordDisplayState autoChordState;
+            if (!processor.getAutoChordDisplayState(autoChordState)
+                || autoChordState.inputNoteCount != 1 || autoChordState.inputNotes[0] != 60
+                || autoChordState.noteCount != 3
+                || autoChordState.generatedNotes[0] != 60
+                || autoChordState.generatedNotes[1] != 64
+                || autoChordState.generatedNotes[2] != 67
+                || !autoChordState.enabled || !autoChordState.autoChordApplied
+                || autoChordState.playMode != 1)
+            {
+                std::cerr << "Single-root AutoChords display/processor contract failed.\\n";
+                result = 1;
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
             // One real processor block contains two distinct chord replacements.

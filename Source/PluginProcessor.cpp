@@ -346,6 +346,30 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
         parameters.getRawParameterValue("velocity")->load(std::memory_order_relaxed));
     const int playMode = juce::jlimit(0, 1,
         static_cast<int>(parameters.getRawParameterValue("playMode")->load(std::memory_order_relaxed)));
+    const bool autoChordsEnabled = parameters.getRawParameterValue("singleMidiNoteAsChordRoot")
+        ->load(std::memory_order_relaxed) > 0.5f;
+    const int scaleRoot = juce::jlimit(0, 11,
+        static_cast<int>(parameters.getRawParameterValue("scaleRoot")->load(std::memory_order_relaxed)));
+    const int scaleMode = juce::jlimit(0, 2,
+        static_cast<int>(parameters.getRawParameterValue("scaleMode")->load(std::memory_order_relaxed)));
+
+    const auto publishDisplayState = [&](const std::array<int, 6>& inputNotes, int inputCount,
+                                         const std::array<int, 6>& outputNotes, int outputCount,
+                                         bool autoChordApplied) noexcept
+    {
+        ppgu::performance::AutoChordDisplayState snapshot;
+        snapshot.inputNotes = inputNotes;
+        snapshot.generatedNotes = outputNotes;
+        snapshot.inputNoteCount = juce::jlimit(0, 6, inputCount);
+        snapshot.noteCount = juce::jlimit(0, 6, outputCount);
+        snapshot.scaleRoot = scaleRoot;
+        snapshot.scaleMode = scaleMode;
+        snapshot.playMode = playMode;
+        snapshot.enabled = autoChordsEnabled;
+        snapshot.active = snapshot.inputNoteCount > 0 && snapshot.noteCount > 0;
+        snapshot.autoChordApplied = autoChordApplied;
+        (void) autoChordDisplayState.publish(snapshot);
+    };
 
     // Read one immutable host-position snapshot per block. Pattern timing is
     // derived from PPQ/sample-rate; the scheduler never calls the host from a
@@ -379,6 +403,27 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
         sampler.allNotesOff();
         patternScheduler.reset(patternTransportClock.startPpq);
         for (auto& channel : patternHeldNotes) channel.fill(false);
+        for (auto& channel : displayHeldNotes)
+            for (auto& held : channel)
+                held.store(false, std::memory_order_relaxed);
+        // Rebuild only from events in this block, so a held note left over from
+        // the previous mode cannot remain falsely highlighted after a switch.
+        for (const auto metadata : midi)
+        {
+            const auto& message = metadata.getMessage();
+            const auto channel = static_cast<std::size_t>(juce::jlimit(0, 15, message.getChannel() - 1));
+            if (message.isAllNotesOff() || message.isAllSoundOff())
+            {
+                for (auto& held : displayHeldNotes[channel])
+                    held.store(false, std::memory_order_relaxed);
+            }
+            else if (message.isNoteOn())
+                displayHeldNotes[channel][static_cast<std::size_t>(message.getNoteNumber())]
+                    .store(true, std::memory_order_relaxed);
+            else if (message.isNoteOff())
+                displayHeldNotes[channel][static_cast<std::size_t>(message.getNoteNumber())]
+                    .store(false, std::memory_order_relaxed);
+        }
         patternCycleStarted = false;
         previousPatternChordCount = 0;
         previousPatternChordNotes.fill(-1);
@@ -413,6 +458,19 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
 
     if (playMode == 0)
     {
+        // MELODY display mirrors the final held input set for this block.
+        std::array<int, 6> heldNotes {{ -1, -1, -1, -1, -1, -1 }};
+        int heldCount = 0;
+        for (int note = 0; note < 128 && heldCount < static_cast<int>(heldNotes.size()); ++note)
+        {
+            bool held = false;
+            for (const auto& channel : displayHeldNotes)
+                held = held || channel[static_cast<std::size_t>(note)].load(std::memory_order_relaxed);
+            if (held)
+                heldNotes[static_cast<std::size_t>(heldCount++)] = note;
+        }
+        publishDisplayState(heldNotes, heldCount, heldNotes, heldCount, false);
+
         // MELODY: one incoming MIDI key always plays its mapped chromatic note.
         // No pattern scheduler or chord interpretation can intercept it.
         int cursor = 0;
@@ -466,49 +524,64 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
         const double quantizeGridBeats = quantizeChoice == 0 ? 0.25 : 0.125;
         const bool startOnFirstChord = parameters.getRawParameterValue("startOnFirstChord")->load(std::memory_order_relaxed) > 0.5f;
         const double ppqPerSample = patternTransportClock.bpm / (60.0 * currentSampleRate);
-        const bool autoChordsEnabled = parameters.getRawParameterValue("singleMidiNoteAsChordRoot")
-            ->load(std::memory_order_relaxed) > 0.5f;
-        const int scaleRoot = juce::jlimit(0, 11,
-            static_cast<int>(parameters.getRawParameterValue("scaleRoot")->load(std::memory_order_relaxed)));
-        const int scaleMode = juce::jlimit(0, 2,
-            static_cast<int>(parameters.getRawParameterValue("scaleMode")->load(std::memory_order_relaxed)));
+        struct ChordSnapshot
+        {
+            std::array<int, 6> inputNotes {{ -1, -1, -1, -1, -1, -1 }};
+            std::array<int, 6> outputNotes {{ -1, -1, -1, -1, -1, -1 }};
+            int inputCount = 0;
+            int outputCount = 0;
+            int channel = 1;
+            bool autoChordApplied = false;
+        };
 
         auto readChord = [&]()
         {
-            std::array<int, 6> notes {};
-            notes.fill(-1);
-            int count = 0;
-            int channel = 1;
-            for (int ch = 0; ch < 16 && count < static_cast<int>(notes.size()); ++ch)
-                for (int note = 0; note < 128 && count < static_cast<int>(notes.size()); ++note)
+            ChordSnapshot snapshot;
+            for (int ch = 0; ch < 16 && snapshot.inputCount < static_cast<int>(snapshot.inputNotes.size()); ++ch)
+                for (int note = 0; note < 128 && snapshot.inputCount < static_cast<int>(snapshot.inputNotes.size()); ++note)
                     if (patternHeldNotes[static_cast<size_t>(ch)][static_cast<size_t>(note)])
                     {
-                        notes[static_cast<size_t>(count++)] = note;
-                        channel = ch + 1;
+                        snapshot.inputNotes[static_cast<size_t>(snapshot.inputCount++)] = note;
+                        snapshot.channel = ch + 1;
                     }
+
+            snapshot.outputNotes = snapshot.inputNotes;
+            snapshot.outputCount = snapshot.inputCount;
             // AutoChords runs only in PATTERN mode and only for one held root.
-            // Melody mode above remains a strict one-key / one-note instrument.
-            if (count == 1 && autoChordsEnabled)
+            // Two or more input notes pass through as the user's own chord.
+            if (snapshot.inputCount == 1 && autoChordsEnabled)
             {
                 const auto generated = ppgu::performance::generateDiatonicTriad(
-                    notes[0], scaleRoot, scaleMode);
-                notes = generated.notes;
-                count = generated.count;
+                    snapshot.inputNotes[0], scaleRoot, scaleMode);
+                snapshot.outputNotes = generated.notes;
+                snapshot.outputCount = generated.count;
+                snapshot.autoChordApplied = generated.count > snapshot.inputCount;
             }
-            return std::make_tuple(notes, count, channel);
+            return snapshot;
         };
 
-        auto chordDiffers = [&](const std::array<int, 6>& notes, int count, int channel)
+        const auto publishChordDisplay = [&](const ChordSnapshot& snapshot) noexcept
         {
-            return count != previousPatternChordCount || channel != previousPatternChordChannel
-                || !std::equal(notes.begin(), notes.begin() + count, previousPatternChordNotes.begin());
+            publishDisplayState(snapshot.inputNotes, snapshot.inputCount,
+                                snapshot.outputNotes, snapshot.outputCount,
+                                snapshot.autoChordApplied);
         };
 
-        auto updateChordState = [&](int sampleOffset, const std::array<int, 6>& notes, int count, int channel)
+        auto chordDiffers = [&](const ChordSnapshot& snapshot)
+        {
+            return snapshot.outputCount != previousPatternChordCount
+                || snapshot.channel != previousPatternChordChannel
+                || !std::equal(snapshot.outputNotes.begin(),
+                               snapshot.outputNotes.begin() + snapshot.outputCount,
+                               previousPatternChordNotes.begin());
+        };
+
+        auto updateChordState = [&](int sampleOffset, const ChordSnapshot& snapshot)
         {
             const double changePpq = patternTransportClock.startPpq + static_cast<double>(sampleOffset) * ppqPerSample;
             const auto decision = ppgu::performance::makeChordTransitionDecision(
-                previousPatternChordCount, count, changePpq, patternCycleStartPpq, startOnFirstChord);
+                previousPatternChordCount, snapshot.outputCount, changePpq,
+                patternCycleStartPpq, startOnFirstChord);
 
             if (decision.releaseVoices)
                 sampler.allNotesOff();
@@ -519,12 +592,13 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
                 patternCycleStarted = true;
                 patternCycleStartPpq = decision.patternCycleStartPpq;
             }
-            else if (count == 0)
+            else if (snapshot.outputCount == 0)
                 patternCycleStarted = false;
 
-            previousPatternChordCount = count;
-            previousPatternChordNotes = notes;
-            previousPatternChordChannel = channel;
+            previousPatternChordCount = snapshot.outputCount;
+            previousPatternChordNotes = snapshot.outputNotes;
+            previousPatternChordChannel = snapshot.channel;
+            publishChordDisplay(snapshot);
         };
 
         auto restartPatternForSettings = [&](int count)
@@ -540,21 +614,26 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
             }
         };
 
-        const auto [initialNotes, initialCount, initialChannel] = readChord();
+        const auto initialChord = readChord();
         const bool patternSettingsChanged =
             (previousPatternSlot >= 0 && patternSlot != previousPatternSlot)
             || (previousPatternLengthChoice >= 0 && patternLengthChoice != previousPatternLengthChoice);
-        if (chordDiffers(initialNotes, initialCount, initialChannel))
-            updateChordState(0, initialNotes, initialCount, initialChannel);
-        if (patternSettingsChanged && initialCount > 0)
-            restartPatternForSettings(initialCount);
+        if (chordDiffers(initialChord))
+            updateChordState(0, initialChord);
+        else
+            publishChordDisplay(initialChord);
+        if (patternSettingsChanged && initialChord.outputCount > 0)
+            restartPatternForSettings(initialChord.outputCount);
         previousPatternSlot = patternSlot;
         previousPatternLengthChoice = patternLengthChoice;
 
         auto renderPatternInterval = [&](int intervalStart, int intervalEnd)
         {
             if (intervalEnd <= intervalStart) return;
-            const auto [notes, count, channel] = readChord();
+            const auto chord = readChord();
+            const auto& notes = chord.outputNotes;
+            const int count = chord.outputCount;
+            const int channel = chord.channel;
             if (count == 0)
             {
                 renderSegment(intervalStart, intervalEnd - intervalStart);
@@ -645,10 +724,13 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
                 // sample has been applied. In particular, a same-sample
                 // note-off(old chord)+note-on(new chord) must not look like an
                 // intermediate empty chord and reset the pattern cycle.
-                const auto [nextNotes, nextCount, nextChannel] = readChord();
-                if (chordDiffers(nextNotes, nextCount, nextChannel))
-                    updateChordState(eventSample, nextNotes, nextCount, nextChannel);
+                const auto nextChord = readChord();
+                if (chordDiffers(nextChord))
+                    updateChordState(eventSample, nextChord);
+                else
+                    publishChordDisplay(nextChord);
             });
+        publishChordDisplay(readChord());
         if (patternScheduler.consumePendingOverflow()) sampler.allNotesOff();
     }
 
