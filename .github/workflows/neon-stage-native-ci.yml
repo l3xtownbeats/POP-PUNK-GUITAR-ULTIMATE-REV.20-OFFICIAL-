@@ -33,7 +33,12 @@ concurrency:
 
 jobs:
   windows-x64:
+    name: Windows x64 / JUCE ${{ matrix.juce-version }}
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        juce-version: ["7.0.12", "9.0.5"]
     timeout-minutes: 45
     steps:
       - name: Checkout pull request merge commit
@@ -48,9 +53,9 @@ jobs:
         shell: pwsh
         run: python -m pip install --disable-pip-version-check Pillow
 
-      - name: Checkout JUCE 7.0.12
+      - name: Checkout JUCE ${{ matrix.juce-version }}
         shell: pwsh
-        run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
+        run: git clone --depth 1 --branch ${{ matrix.juce-version }} https://github.com/juce-framework/JUCE.git JUCE
 
       - name: Configure Windows x64
         shell: pwsh
@@ -71,3 +76,11 @@ jobs:
       - name: Stage runtime skin pack in build directory
         shell: pwsh
         run: python tools/package_active_skins.py --root SKIN --output build/PPGU_artefacts/Release/VST3/Skins
+
+      - name: Upload VST3 validation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-REV20-Windows-x64-JUCE-${{ matrix.juce-version }}-VST3
+          path: build/PPGU_artefacts/Release/VST3/
+          if-no-files-found: error
+          retention-days: 14
