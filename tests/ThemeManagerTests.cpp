@@ -149,7 +149,7 @@ int main()
     {
         expect(manager.getPalette().id == "skin-053", "NEON STAGE stable ID stays skin-053");
         expect(manager.getPalette().name == "NEON STAGE DEFAULT", "NEON STAGE name is canonical");
-        expect(manager.getPalette().tokens.windowBg == juce::Colour(0xff080b14),
+        expect(manager.getPalette().tokens.windowBg == juce::Colour(0xff08090d),
                "NEON STAGE palette is canonical");
     }
     const auto invalid = neon.loadFileAsString().replace("\"index\": 53", "\"index\": 54");
