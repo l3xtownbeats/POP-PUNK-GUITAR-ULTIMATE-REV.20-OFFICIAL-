@@ -31,7 +31,8 @@ The full stack is drawn only on the main Skin-1 canvas. Floating panels continue
 - `PPGUThemeManager` validates the control IDs, state names, record count, safe relative paths and 256×256 PNG dimensions, then caches 128×128 UI images.
 - The nine rotary controls and seven FX switches resolve their authored default/hover/pressed/disabled/dragged images by component ID. Rotary indicators remain driven by the live slider value.
 - The existing four Skin-1 sprite atlases, their manifest, the approved theme identity and the existing parameter bindings are preserved.
-- No APVTS IDs, ranges, audio behaviour, plugin layout geometry or theme IDs are changed.
+- The main editor baseline is aligned to the approved NEON STAGE DEFAULT mockup: preset browser left, MELODY/PATTERN and nine real controls centre, seven primary FX switches right, performance strip and MIDI keyboard below.
+- No APVTS IDs, parameter ranges, DSP, sampler, MIDI processing, audio callback behaviour or theme IDs are changed.
 
 ## Verification
 
@@ -42,3 +43,16 @@ The full stack is drawn only on the main Skin-1 canvas. Floating panels continue
 ## Rollout sequence
 
 Skin-1 is the quality and packaging reference. SKIN-2 through SKIN-16 are intentionally not modified in this phase; their premium asset work starts only after Skin-1 is accepted.
+
+
+## Approved mockup alignment — REV.20 correction
+
+The exact repository image `01 INTERFACE  NEON STAGE DEFAULT .png` is the single source of truth for the main editor. The Skin-1 manifest and runtime fallback now use the graphite/cyan palette from the NEON STAGE master asset specification. The base-stage artwork is rendered at full opacity with aspect-preserving fill; the previous 36% overlay weakened the approved artwork.
+
+The main editor uses the three-zone layout contract:
+- left: unified factory preset browser and PATTERN chord reference;
+- centre: MELODY/PATTERN mode controls and the nine APVTS-backed rotary controls;
+- right: seven primary FX bypass switches, with detailed FX pages opened in auxiliary windows;
+- bottom: live performance display, MIDI keyboard and real library status.
+
+The About, Auto Sound Hunter and Curator actions remain visibly disabled until their approved REV.20 implementations are available. The visual-lock CI validator checks the approved mockup blob, Skin-1 token set, closed 27-control map and main editor layout contract. CI and FL Studio 20 host acceptance remain release gates.
