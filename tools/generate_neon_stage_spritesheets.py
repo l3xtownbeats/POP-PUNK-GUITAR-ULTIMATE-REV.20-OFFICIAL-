@@ -174,7 +174,7 @@ d.ellipse(thumb_box,fill=rgba("#19334A"),outline=rgba(P["glow_cyan"]),width=3)
 slider_boxes["thumb"]={"bbox":thumb_box}
 label(ImageDraw.Draw(im),(30,755,970,780),"STATUS LEDS / ROUND + SQUARE",P["text"],12)
 led_states=["off","cyan","blue","white"]
-led_colors={"off":"#344354","cyan":P["glow_cyan"],"blue":P["glow_blue"],"blue":P["accent_magenta"]}
+led_colors={"off":"#344354","cyan":P["glow_cyan"],"blue":P["glow_blue"],"white":"#EAFBFF"}
 led_boxes={"round":{},"square":{}}
 for shape,x_start in (("round",50),("square",570)):
     for y in (810,920):
@@ -341,7 +341,7 @@ def draw_icon(name,box):
         d.arc((cx-48,cy-72,cx+48,cy+23),205,335,fill=col,width=4)
     elif name=="palette":
         d.ellipse((cx-43,cy-38,cx+43,cy+39),outline=col,width=5)
-        for ox,oy,cc in [(-20,-12,P["accent_magenta"]),(7,-22,P["glow_blue"]),(25,4,P["glow_cyan"]),(-12,22,"#FFFFFF")]:
+        for ox,oy,cc in [(-20,-12,P["accent_blue"]),(7,-22,P["glow_blue"]),(25,4,P["glow_cyan"]),(-12,22,"#FFFFFF")]:
             d.ellipse((cx+ox-6,cy+oy-6,cx+ox+6,cy+oy+6),fill=rgba(cc))
     elif name=="play":
         d.polygon([(cx-22,cy-38),(cx+38,cy),(cx-22,cy+38)],fill=col)
