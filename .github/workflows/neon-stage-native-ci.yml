@@ -70,6 +70,18 @@ jobs:
         shell: pwsh
         run: python tools/validate_skin_registry_16.py
 
+      - name: Generate Skin_053 master/runtime visual audit sheets
+        shell: pwsh
+        run: python tools/create_skin053_visual_audit.py --root SKIN/Skin_053 --output build/neon_stage_visual_audit
+
+      - name: Upload Skin_053 visual audit sheets
+        uses: actions/upload-artifact@v4
+        with:
+          name: NEON-STAGE-Skin053-Visual-Audit
+          path: build/neon_stage_visual_audit/**
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Stage runtime skin pack in build directory
         shell: pwsh
         run: python tools/package_active_skins.py --root SKIN --output build/PPGU_artefacts/Release/VST3/Skins
