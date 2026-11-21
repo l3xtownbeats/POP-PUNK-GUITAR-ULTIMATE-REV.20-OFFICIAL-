@@ -88,8 +88,8 @@ int main()
                            "NEON STAGE icon atlas decoded");
                     const auto& skinOne = artworkCandidate.getPalette();
                     expect(skinOne.heroArtwork.isValid()
-                               && skinOne.heroArtwork.getWidth() == 512
-                               && skinOne.heroArtwork.getHeight() == 138,
+                               && skinOne.heroArtwork.getWidth() == 800
+                               && skinOne.heroArtwork.getHeight() == 450,
                            "NEON STAGE reference-matched guitar hero artwork decoded");
                     expect(skinOne.backgroundArtwork.isValid()
                                && skinOne.backgroundArtwork.getWidth() == 2560
