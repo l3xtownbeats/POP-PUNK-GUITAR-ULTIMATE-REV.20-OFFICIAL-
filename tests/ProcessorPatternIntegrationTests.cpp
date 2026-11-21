@@ -80,6 +80,30 @@ double rms(const juce::AudioBuffer<float>& audio, int start, int length)
     return count == 0 ? 0.0 : std::sqrt(sum / static_cast<double>(count));
 }
 
+double toneMagnitude(const juce::AudioBuffer<float>& audio, int start, int length,
+                     double frequency, double sampleRate)
+{
+    if (audio.getNumChannels() == 0 || length <= 0)
+        return 0.0;
+    const auto* data = audio.getReadPointer(0);
+    const int begin = juce::jlimit(0, audio.getNumSamples(), start);
+    const int end = juce::jlimit(begin, audio.getNumSamples(), start + length);
+    if (end <= begin)
+        return 0.0;
+
+    double real = 0.0;
+    double imaginary = 0.0;
+    for (int sample = begin; sample < end; ++sample)
+    {
+        const double phase = juce::MathConstants<double>::twoPi * frequency
+            * static_cast<double>(sample - begin) / sampleRate;
+        real += static_cast<double>(data[sample]) * std::cos(phase);
+        imaginary -= static_cast<double>(data[sample]) * std::sin(phase);
+    }
+    return 2.0 * std::sqrt(real * real + imaginary * imaginary)
+        / static_cast<double>(end - begin);
+}
+
 void addChordOn(juce::MidiBuffer& midi, int sample, const std::array<int, 3>& notes)
 {
     for (const int note : notes)
@@ -125,8 +149,8 @@ int main()
 
     const auto sfzText =
         "<region> sample=first-chord.wav key=60 ampeg_release=0.01\n"
-        "<region> sample=first-chord.wav key=64 ampeg_release=0.01\n"
-        "<region> sample=first-chord.wav key=67 ampeg_release=0.01\n"
+        "<region> sample=second-chord.wav key=64 ampeg_release=0.01\n"
+        "<region> sample=third-chord.wav key=67 ampeg_release=0.01\n"
         "<region> sample=second-chord.wav key=62 ampeg_release=0.01\n"
         "<region> sample=second-chord.wav key=66 ampeg_release=0.01\n"
         "<region> sample=second-chord.wav key=69 ampeg_release=0.01\n"
@@ -222,6 +246,26 @@ int main()
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
+            // Render a fresh block while only C4 is physically held. The SFZ
+            // maps generated C4/E4/G4 to distinct 220/330/440 Hz fixtures, so
+            // all three spectral components prove that the generated notes
+            // reached the sampler voices (not merely the UI snapshot).
+            juce::AudioBuffer<float> autoChordAudioBlock(2, 13000);
+            juce::MidiBuffer noAdditionalMidi;
+            processor.processBlock(autoChordAudioBlock, noAdditionalMidi);
+            const double autoChordRms = rms(autoChordAudioBlock, 7000, 3000);
+            const double c4Magnitude = toneMagnitude(autoChordAudioBlock, 7000, 3000, 220.0, 48000.0);
+            const double e4Magnitude = toneMagnitude(autoChordAudioBlock, 7000, 3000, 330.0, 48000.0);
+            const double g4Magnitude = toneMagnitude(autoChordAudioBlock, 7000, 3000, 440.0, 48000.0);
+            if (!(autoChordRms > 0.01 && c4Magnitude > 0.005
+                && e4Magnitude > 0.005 && g4Magnitude > 0.005))
+            {
+                std::cerr << "Generated C4/E4/G4 did not all reach the sampler audio output; RMS="
+                          << autoChordRms << ", C4=" << c4Magnitude
+                          << ", E4=" << e4Magnitude << ", G4=" << g4Magnitude << "\n";
+                result = 1;
+            }
+
             // AutoChords OFF in PATTERN must preserve a single incoming pitch.
             if (!setParameter(processor, "singleMidiNoteAsChordRoot", 0.0f))
                 result = 1;
@@ -286,6 +330,61 @@ int main()
                 || autoChordState.generatedNotes[0] != 69 || autoChordState.autoChordApplied)
             {
                 std::cerr << "MELODY mode did not preserve one-key/one-note display.\\n";
+                result = 1;
+            }
+
+            // Switching PATTERN while a MELODY key is still held must not
+            // resurrect that stale input or leave the dynamic fretboard lit.
+            if (!setParameter(processor, "playMode", 1.0f))
+                result = 1;
+            juce::AudioBuffer<float> switchBackBlock(2, 128);
+            juce::MidiBuffer noSwitchMidi;
+            processor.processBlock(switchBackBlock, noSwitchMidi);
+            if (!processor.getAutoChordDisplayState(autoChordState)
+                || autoChordState.active || autoChordState.inputNoteCount != 0
+                || autoChordState.noteCount != 0)
+            {
+                std::cerr << "A held MELODY note survived the switch back to PATTERN.\n";
+                result = 1;
+            }
+
+            // With one root still held, toggling AutoChords OFF and back ON
+            // must update the generated-note snapshot without requiring a
+            // fresh NoteOn event.
+            if (!setParameter(processor, "singleMidiNoteAsChordRoot", 0.0f))
+                result = 1;
+            juce::AudioBuffer<float> toggleOffBlock(2, 128);
+            juce::MidiBuffer toggleMidi;
+            toggleMidi.addEvent(juce::MidiMessage::noteOn(1, 60, static_cast<juce::uint8>(100)), 16);
+            processor.processBlock(toggleOffBlock, toggleMidi);
+            if (!processor.getAutoChordDisplayState(autoChordState)
+                || autoChordState.noteCount != 1 || autoChordState.autoChordApplied)
+            {
+                std::cerr << "AutoChords OFF failed to preserve the held root.\n";
+                result = 1;
+            }
+            if (!setParameter(processor, "singleMidiNoteAsChordRoot", 1.0f))
+                result = 1;
+            juce::AudioBuffer<float> toggleOnBlock(2, 128);
+            juce::MidiBuffer noToggleMidi;
+            processor.processBlock(toggleOnBlock, noToggleMidi);
+            if (!processor.getAutoChordDisplayState(autoChordState)
+                || autoChordState.noteCount != 3 || !autoChordState.autoChordApplied
+                || autoChordState.generatedNotes[0] != 60
+                || autoChordState.generatedNotes[1] != 64
+                || autoChordState.generatedNotes[2] != 67)
+            {
+                std::cerr << "Re-enabling AutoChords did not expand the currently held root.\n";
+                result = 1;
+            }
+            juce::AudioBuffer<float> clearToggleBlock(2, 128);
+            juce::MidiBuffer clearToggleMidi;
+            clearToggleMidi.addEvent(juce::MidiMessage::allNotesOff(1), 0);
+            processor.processBlock(clearToggleBlock, clearToggleMidi);
+            if (!processor.getAutoChordDisplayState(autoChordState)
+                || autoChordState.active || autoChordState.inputNoteCount != 0)
+            {
+                std::cerr << "All Notes Off did not clear the AutoChords state after a mode toggle.\n";
                 result = 1;
             }
 

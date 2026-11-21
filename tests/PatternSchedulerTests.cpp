@@ -37,6 +37,36 @@ int main()
     if (scheduler.schedule(pattern, 2.0, 4.0, stopped, 48000.0, 12000, 0.25, 0, events) != 0)
         return 4;
 
+    // A transport Stop must discard a NoteOff retained for a long gate.
+    // Resuming at the old NoteOff position must not emit the stale event.
+    PatternScheduler stopPendingScheduler;
+    std::array<PatternEvent, 1> stopPendingPattern {{{ 0.0, 0.75, 48, 100, 1 }}};
+    auto beforeStop = stopPendingScheduler.beginBlock(
+        { true, true, 120.0, 0.0 }, false, 120.0, 48000.0, 6000);
+    auto beforeStopCount = stopPendingScheduler.schedule(
+        stopPendingPattern, 1.0, 0.0, beforeStop, 48000.0, 6000, 0.0, 0, events);
+    if (beforeStopCount != 1 || events[0].kind != EventKind::NoteOn)
+        return 32;
+    auto stopWithPendingGate = stopPendingScheduler.beginBlock(
+        { true, false, 120.0, 0.25 }, false, 120.0, 48000.0, 6000);
+    if (!stopWithPendingGate.transportStopped
+        || stopPendingScheduler.schedule(stopPendingPattern, 1.0, 0.0,
+            stopWithPendingGate, 48000.0, 6000, 0.0, 0, events) != 0)
+        return 33;
+    auto resumedBeforeOff = stopPendingScheduler.beginBlock(
+        { true, true, 120.0, 0.25 }, false, 120.0, 48000.0, 6000);
+    if (stopPendingScheduler.schedule(stopPendingPattern, 1.0, 0.0,
+            resumedBeforeOff, 48000.0, 6000, 0.0, 0, events) != 0)
+        return 34;
+    auto resumedAtOldOff = stopPendingScheduler.beginBlock(
+        { true, true, 120.0, 0.50 }, false, 120.0, 48000.0, 6000);
+    if (stopPendingScheduler.schedule(stopPendingPattern, 1.0, 0.0,
+            resumedAtOldOff, 48000.0, 6000, 0.0, 0, events) != 0)
+    {
+        std::cerr << "A stale NoteOff survived transport Stop.\n";
+        return 35;
+    }
+
     // Internal fallback advances at configured BPM even without a host playhead.
     scheduler.reset(8.0);
     const auto internal = scheduler.beginBlock({ false, false, 0.0, 0.0 }, true, 60.0, 48000.0, 24000);
