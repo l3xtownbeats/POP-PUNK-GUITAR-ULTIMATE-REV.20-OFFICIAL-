@@ -1955,8 +1955,11 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     statusLabel.setColour(juce::Label::textColourId, themeManager.getPalette().token("text_secondary"));
     statusLabel.setFont(makeThemeFont(themeManager.getPalette(), 11.0f, false, false));
     addAndMakeVisible(statusLabel);
-    melodyTab.setClickingTogglesState(false);
-    patternTab.setClickingTogglesState(false);
+    // Mode tabs are real mutually-exclusive visual toggles. The APVTS
+    // playMode parameter remains authoritative; LookAndFeel renders the
+    // selected tab with the authored ON/glow state and the other tab OFF.
+    melodyTab.setClickingTogglesState(true);
+    patternTab.setClickingTogglesState(true);
     for (auto* b : { &melodyTab, &patternTab }) {
         b->setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("control_bg"));
         b->setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
@@ -1996,13 +1999,20 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     addAndMakeVisible(*keyboard);
     performanceDisplay = std::make_unique<PPGUPerformanceDisplay>(processor);
     addAndMakeVisible(*performanceDisplay);
-    melodyTab.onClick = [this] { modeBox.setSelectedId(1); };
-    patternTab.onClick = [this] { modeBox.setSelectedId(2); openPatternSectionPanel(); };
+    melodyTab.onClick = [this] { modeBox.setSelectedId(1, juce::sendNotification); };
+    patternTab.onClick = [this] { modeBox.setSelectedId(2, juce::sendNotification); openPatternSectionPanel(); };
     modeBox.onChange = [this]
     {
+        const bool patternSelected = modeBox.getSelectedId() == 2;
+        melodyTab.setToggleState(!patternSelected, juce::dontSendNotification);
+        patternTab.setToggleState(patternSelected, juce::dontSendNotification);
+        melodyTab.repaint();
+        patternTab.repaint();
         if (chordDiagram != nullptr)
-            chordDiagram->setVisible(modeBox.getSelectedId() == 2);
+            chordDiagram->setVisible(patternSelected);
     };
+    // Reflect the restored APVTS mode immediately at editor creation.
+    modeBox.onChange();
     for (size_t i = 0; i < knobs.size(); ++i) {
         configureKnob(knobs[i], knobLabels[i], knobNames[i]);
         knobs[i].setComponentID("knob" + juce::String(static_cast<int>(i + 1)).paddedLeft('0', 2));
