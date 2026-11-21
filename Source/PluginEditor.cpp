@@ -2651,15 +2651,22 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openFxEditPanel(int selectedEffe
 {
     if (auxiliaryWorkspace == nullptr)
         return;
-    constexpr int fxEditPanelId = 2101;
+    static const std::array<juce::String, 8> effectNames {{
+        "COMPRESSOR", "EQ", "DISTORTION", "CHORUS",
+        "FLANGER", "DELAY", "REVERB", "CABINET IR"
+    }};
+    const int safeEffect = juce::jlimit(0, static_cast<int>(effectNames.size()) - 1, selectedEffect);
+    // One stable auxiliary page per FX group so clicking another switch always
+    // opens the matching controls instead of leaving a stale first selection.
+    const int fxEditPanelId = 2101 + safeEffect;
     if (!auxiliaryWorkspace->isPanelOpen(fxEditPanelId))
     {
         PPGUMultiWindowWorkspace::PanelSpec spec;
         spec.id = fxEditPanelId;
-        spec.title = "FX EDIT  /  NEON STAGE";
+        spec.title = "FX EDIT  /  " + effectNames[static_cast<size_t>(safeEffect)] + "  /  NEON STAGE";
         spec.desired = { 1000, 680 };
         spec.minimum = { 620, 440 };
-        spec.content = std::make_unique<PPGUFXEditPanel>(processor, selectedEffect);
+        spec.content = std::make_unique<PPGUFXEditPanel>(processor, safeEffect);
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
