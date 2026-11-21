@@ -81,6 +81,8 @@ required_source_contract = (
     "for (size_t i = 0; i < fxButtons.size(); ++i)",
     "aboutButton.setEnabled(false)",
     "mainFxEdit->setVisible(false)",
+    "drawLayer(palette.backgroundArtwork, 1.0f, juce::RectanglePlacement::fillDestination)",
+    "const int fxEditPanelId = 2101 + safeEffect;",
 )
 for token in required_source_contract:
     if token not in source:
