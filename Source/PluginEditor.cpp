@@ -2283,8 +2283,6 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     melodyTab.setBounds(modeRow.removeFromLeft(132).reduced(3, 3));
     modeRow.removeFromLeft(8);
     patternTab.setBounds(modeRow.removeFromLeft(132).reduced(3, 3));
-    if (modeBox != nullptr)
-        modeBox.setVisible(false);
 
     // Five performance controls share the centre strip; four amp/EQ controls
     // occupy the right-hand Amp & Tone module. All nine retain their APVTS IDs.
@@ -2608,7 +2606,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette()
      diagram->setPalette(p);
  if (auto* fxPanel = dynamic_cast<PPGUThemeAwarePanel*>(mainFxEdit.get()))
      fxPanel->setThemePalette(p);
- premiumLookAndFeel.setPalette(p);titleLabel.setFont(makeThemeFont(p, 28.0f, true, true));subtitleLabel.setFont(makeThemeFont(p, 9.5f, false, true));statusLabel.setFont(makeThemeFont(p, 11.0f));ampTitle.setFont(makeThemeFont(p, 15.0f, false, true));fxTitle.setFont(makeThemeFont(p, 15.0f, false, true));playbackTitle.setFont(makeThemeFont(p, 15.0f, false, true));if(performanceDisplay)performanceDisplay->setPalette(p);
+ premiumLookAndFeel.setPalette(p);titleLabel.setFont(makeThemeFont(p, 40.0f, true, true));subtitleLabel.setFont(makeThemeFont(p, 9.5f, false, true));statusLabel.setFont(makeThemeFont(p, 11.0f));ampTitle.setFont(makeThemeFont(p, 15.0f, false, true));fxTitle.setFont(makeThemeFont(p, 15.0f, false, true));playbackTitle.setFont(makeThemeFont(p, 15.0f, false, true));if(performanceDisplay)performanceDisplay->setPalette(p);
  if (auxiliaryWorkspace != nullptr)
  {
      auxiliaryWorkspace->setSurfaceColours(p.token("window_bg"), p.token("panel"),
