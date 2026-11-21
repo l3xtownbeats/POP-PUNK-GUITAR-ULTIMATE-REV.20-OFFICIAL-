@@ -6,9 +6,9 @@
 
 ## Decision
 
-Keep JUCE as the VST3/audio/MIDI/plugin-host integration framework. Validate JUCE **9.0.5** as the next framework baseline in an isolated Windows CI lane before changing the production checkout. JUCE 9.0.5 is the current stable release selected for this validation pass.
+Keep JUCE as the VST3/audio/MIDI/plugin-host integration framework. Validate JUCE **9.0.6** as the next framework baseline in an isolated Windows CI lane before changing the production checkout. JUCE 9.0.6 is the current stable release selected for this validation pass.
 
-For Windows UI rendering, prefer JUCE's native **Direct2D** renderer. JUCE 8 introduced Direct2D as the default Windows renderer, with GPU-backed windows and images; JUCE 9.0.5 includes further Direct2D and Windows VST3 scaling fixes. This is a more direct fit for this native JUCE component UI than introducing a second independent renderer.
+For Windows UI rendering, prefer JUCE's native **Direct2D** renderer. JUCE 8 introduced Direct2D as the default Windows renderer, with GPU-backed windows and images; JUCE 9.0.6 includes further Direct2D and Windows VST3 scaling fixes. This is a more direct fit for this native JUCE component UI than introducing a second independent renderer.
 
 ## Rendering policy
 
@@ -28,9 +28,9 @@ For Windows UI rendering, prefer JUCE's native **Direct2D** renderer. JUCE 8 int
 
 ## Validation gates
 
-The new `NEON STAGE JUCE 9.0.5 GPU renderer validation` workflow builds the existing VST3 and runs the CTest suite using JUCE 9.0.5 on Windows x64. A green CI run is necessary but not sufficient.
+The new `NEON STAGE JUCE 9.0.6 GPU renderer validation` workflow builds the existing VST3 and runs the CTest suite using JUCE 9.0.6 on Windows x64. A green CI run is necessary but not sufficient.
 
-Before promoting JUCE 9.0.5 to the production build:
+Before promoting JUCE 9.0.6 to the production build:
 - compare the exact approved reference against the plugin at 100%, 125%, 150% and 200% DPI;
 - test resize, popup menus, floating AutoChords/FX EDIT windows, preset browsing and skin changes;
 - test repeated open/close and host reload in FL Studio 20;
