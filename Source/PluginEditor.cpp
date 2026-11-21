@@ -1481,22 +1481,18 @@ public:
         title.setFont(makeThemeFont(palette, 20.0f, false, true));
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
         addAndMakeVisible(title);
-        stateLabel.setText("PATTERN MODE ONLY: ONE HELD NOTE EXPANDS TO A SCALE-BASED TRIAD. MELODY MODE REMAINS SINGLE-NOTE.",
+        stateLabel.setText("SETUP ONLY — MIDI CHORD GENERATION / CUSTOM MODE / PREVIEW ENGINE NOT CONNECTED",
                             juce::dontSendNotification);
-        stateLabel.setColour(juce::Label::textColourId, palette.token("success"));
+        stateLabel.setColour(juce::Label::textColourId, palette.token("warning"));
         addAndMakeVisible(stateLabel);
-        offButton.setButtonText("AUTOCHORDS  /  ON-OFF");
-        offButton.setClickingTogglesState(true);
-        offButton.setEnabled(true);
-        offButton.setTooltip("Toggle single-note to diatonic-triad generation in PATTERN mode. MELODY mode is unchanged.");
-        offButton.setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
-        offButton.setColour(juce::TextButton::textColourOnId, palette.token("window_bg"));
-        if (auto* parameter = apvts.getRawParameterValue("singleMidiNoteAsChordRoot"))
-            offButton.setToggleState(parameter->load(std::memory_order_relaxed) > 0.5f,
-                                     juce::dontSendNotification);
+        offButton.setButtonText("AUTOCHORDS OFF");
+        offButton.setClickingTogglesState(false);
+        offButton.setEnabled(false);
+        offButton.setTooltip("Generator is unavailable until the approved Pattern MIDI/preview engine is connected.");
+        offButton.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
+        offButton.setColour(juce::TextButton::textColourOffId, palette.token("text_disabled"));
+        offButton.setToggleState(false, juce::dontSendNotification);
         addAndMakeVisible(offButton);
-        autoChordAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
-            apvts, "singleMidiNoteAsChordRoot", offButton);
 
         keyBox.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }, 1);
         modeBox.addItemList({ "Chromatic", "Major", "Minor" }, 1);
