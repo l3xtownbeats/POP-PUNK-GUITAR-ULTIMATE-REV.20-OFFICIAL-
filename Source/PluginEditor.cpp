@@ -2354,6 +2354,18 @@ int PopPunkGuitarUltimateAudioProcessorEditor::getSkinOrdinalForId(const juce::S
 void PopPunkGuitarUltimateAudioProcessorEditor::loadSavedSkin()
 {
     auto* settings = uiProperties.getUserSettings();
+
+    // One-time migration: the first build carrying the approved NEON STAGE
+    // PREMIUM default must open with SKIN-1 even if an older build persisted
+    // another gallery selection. Later user selections remain persistent.
+    constexpr auto defaultSkinMigrationKey = "neonStagePremiumDefaultApplied";
+    if (settings != nullptr && !settings->getBoolValue(defaultSkinMigrationKey, false))
+    {
+        settings->setValue("skinId", "skin-053");
+        settings->setValue(defaultSkinMigrationKey, true);
+        settings->saveIfNeeded();
+    }
+
     const auto id = settings ? settings->getValue("skinId", "skin-053") : juce::String("skin-053");
     const auto ordinal = getSkinOrdinalForId(id);
     if (ordinal < 1 || !loadSkinByIndex(ordinal, false))
