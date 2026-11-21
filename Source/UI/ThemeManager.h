@@ -25,7 +25,7 @@ public:
             juce::Colour accent { 0xffe6007e };
             juce::Colour accentGlow { 0xff7b2c91 };
             juce::Colour danger { 0xffd7264d };
-            juce::Colour warning { 0xffffbe55 };
+            juce::Colour warning { 0xfff2a900 };
             juce::Colour success { 0xff55c98a };
             juce::Colour lcdBg { 0xff08090d };
             juce::Colour lcdText { 0xfff0dce8 };
