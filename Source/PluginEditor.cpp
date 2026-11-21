@@ -2591,7 +2591,7 @@ bool PopPunkGuitarUltimateAudioProcessorEditor::keyPressed(const juce::KeyPress&
 void PopPunkGuitarUltimateAudioProcessorEditor::loadFactoryPresetCatalog()
 {
     factoryPresets.clear();
-    const auto jsonText = juce::String::fromUTF8(BinaryData::factory_bank_300_json, BinaryData::factory_bank_300_jsonSize);
+    const auto jsonText = juce::String::fromUTF8(BinaryData::factory_bank_500_json, BinaryData::factory_bank_500_jsonSize);
     const auto root = juce::JSON::parse(jsonText);
     if (!root.isObject()) { statusLabel.setText("FACTORY PRESET CATALOG ERROR", juce::dontSendNotification); return; }
     const auto append = [this](const juce::var& array) {
