@@ -2183,24 +2183,46 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
     g.fillAll(p.token("window_bg"));
     drawThemeArtworkLayers(g, getLocalBounds(), p, 0.16f, 0.78f, 0.055f, true);
 
+    // The main cover follows reference 01: Browser | Guitar Stage | Amp & Tone,
+    // with the approved performance controls, seven FX switches and MIDI keyboard.
     auto area = getLocalBounds().reduced(14);
-    area.removeFromTop(48);
-    area.removeFromBottom(132);
-    area.removeFromTop(8);
-    const auto fxChain = area.removeFromBottom(56);
+    area.removeFromTop(68);
+    area.removeFromBottom(126);
+    area.removeFromBottom(8);
+    const auto fxChain = area.removeFromBottom(76);
+    area.removeFromBottom(8);
+    const auto performance = area.removeFromBottom(132);
     area.removeFromBottom(8);
 
-    const int leftWidth = juce::jlimit(180, 220, area.getWidth() / 5);
-    const int rightWidth = juce::jlimit(240, 285, area.getWidth() / 4);
+    const int leftWidth = juce::jlimit(235, 270, area.getWidth() / 5);
+    const int rightWidth = juce::jlimit(245, 280, area.getWidth() / 4);
     auto left = area.removeFromLeft(leftWidth);
     area.removeFromLeft(10);
     auto right = area.removeFromRight(rightWidth);
     area.removeFromRight(10);
+    auto hero = area;
 
-    drawPanel(g, left, "AUTOCHORDS  /  PRESETS");
-    drawPanel(g, area, "FX EDIT  /  NEON STAGE");
+    drawPanel(g, left, "BROWSER");
+    drawPanel(g, hero, "NEON STAGE  /  GUITAR PERFORMANCE");
     drawPanel(g, right, "AMP & TONE");
+    drawPanel(g, performance, "PERFORMANCE");
     drawPanel(g, fxChain, "FX CHAIN");
+
+    auto heroArtworkBounds = hero.reduced(12, 8);
+    heroArtworkBounds.removeFromTop(38);
+    if (p.heroArtwork.isValid() && !heroArtworkBounds.isEmpty())
+    {
+        g.saveState();
+        g.setOpacity(0.98f);
+        g.drawImageWithin(p.heroArtwork, heroArtworkBounds.getX(), heroArtworkBounds.getY(),
+                          heroArtworkBounds.getWidth(), heroArtworkBounds.getHeight(),
+                          juce::RectanglePlacement::centred);
+        g.restoreState();
+    }
+
+    auto ampArtworkArea = right.reduced(8, 8);
+    ampArtworkArea.removeFromTop(34);
+    drawAmpCabinet(g, ampArtworkArea.removeFromTop(166), p);
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::resized()
@@ -2213,103 +2235,103 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     if (auxiliaryWorkspace != nullptr)
         auxiliaryWorkspace->setBounds(bounds);
 
-    // Approved NEON STAGE six-part composition:
-    // header / left fretboard / centre FX edit / right Amp & Tone / FX chain / piano.
-    auto header = bounds.removeFromTop(48);
-    titleLabel.setBounds(header.removeFromLeft(105).reduced(2, 4));
-    subtitleLabel.setBounds(18, 47, 150, 14);
-    header.removeFromLeft(8);
-    skinButton.setBounds(header.removeFromRight(78).reduced(2, 5));
-    aboutButton.setBounds(header.removeFromRight(72).reduced(2, 5));
-    settingsButton.setBounds(header.removeFromRight(92).reduced(2, 5));
-    curatorButton.setBounds(header.removeFromRight(88).reduced(2, 5));
-    autoSoundHunterButton.setBounds(header.removeFromRight(112).reduced(2, 5));
-    autoChordsButton.setBounds(header.removeFromRight(112).reduced(2, 5));
-    loadButton.setBounds(header.removeFromRight(112).reduced(2, 5));
-    header.removeFromRight(8);
+    // Header: product identity and only the journal-approved auxiliary actions.
+    auto header = bounds.removeFromTop(68);
+    titleLabel.setBounds(header.removeFromLeft(174).reduced(2, 3));
+    subtitleLabel.setBounds(18, 48, 168, 13);
+    header.removeFromLeft(12);
+    skinButton.setBounds(header.removeFromRight(76).reduced(2, 7));
+    aboutButton.setBounds(header.removeFromRight(72).reduced(2, 7));
+    settingsButton.setBounds(header.removeFromRight(90).reduced(2, 7));
+    autoChordsButton.setBounds(header.removeFromRight(112).reduced(2, 7));
+    loadButton.setBounds(header.removeFromRight(112).reduced(2, 7));
 
-    // Performance monitor, status and the native MIDI keyboard occupy the footer.
-    auto footer = bounds.removeFromBottom(132);
-    statusLabel.setBounds(footer.removeFromBottom(22).reduced(3, 1));
+    // Footer: native MIDI keyboard and honest status/sync controls only.
+    auto footer = bounds.removeFromBottom(126);
+    auto footerStatus = footer.removeFromBottom(24);
+    startModeBox.setBounds(footerStatus.removeFromRight(142).reduced(2, 1));
+    statusLabel.setBounds(footerStatus.reduced(3, 1));
     footer.removeFromBottom(4);
-    if (performanceDisplay != nullptr)
-        performanceDisplay->setBounds(footer.removeFromTop(42).reduced(2, 1));
-    footer.removeFromTop(5);
     if (keyboard != nullptr)
         keyboard->setBounds(footer.reduced(2, 2));
 
     bounds.removeFromBottom(8);
-    auto fxChain = bounds.removeFromBottom(56);
-    fxTitle.setBounds(fxChain.removeFromLeft(88).reduced(3, 5));
-    fxChain.removeFromLeft(4);
-    constexpr int fxGap = 4;
-    const int fxButtonWidth = juce::jmax(1,
-        (fxChain.getWidth() - fxGap * static_cast<int>(fxButtons.size() - 1))
-            / static_cast<int>(fxButtons.size()));
+    auto fxChain = bounds.removeFromBottom(76);
+    bounds.removeFromBottom(8);
+    auto performance = bounds.removeFromBottom(132);
+    bounds.removeFromBottom(8);
+
+    const int leftWidth = juce::jlimit(235, 270, bounds.getWidth() / 5);
+    const int rightWidth = juce::jlimit(245, 280, bounds.getWidth() / 4);
+    auto left = bounds.removeFromLeft(leftWidth);
+    bounds.removeFromLeft(10);
+    auto right = bounds.removeFromRight(rightWidth);
+    bounds.removeFromRight(10);
+    auto hero = bounds;
+
+    // Browser: real category filter, search field and current factory catalogue.
+    left.removeFromTop(34);
+    categoryBox.setBounds(left.removeFromTop(36).reduced(5, 2));
+    left.removeFromTop(5);
+    presetSearch.setBounds(left.removeFromTop(36).reduced(5, 2));
+    left.removeFromTop(5);
+    presetBox.setBounds(left.reduced(5, 2));
+
+    // Main hero: only the two approved playing modes.
+    hero.removeFromTop(34);
+    auto modeRow = hero.removeFromTop(48);
+    melodyTab.setBounds(modeRow.removeFromLeft(132).reduced(3, 3));
+    modeRow.removeFromLeft(8);
+    patternTab.setBounds(modeRow.removeFromLeft(132).reduced(3, 3));
+    if (modeBox != nullptr)
+        modeBox.setVisible(false);
+
+    // Five performance controls share the centre strip; four amp/EQ controls
+    // occupy the right-hand Amp & Tone module. All nine retain their APVTS IDs.
+    performance.removeFromTop(34);
+    const int performanceCellWidth = juce::jmax(1, performance.getWidth() / 5);
+    for (size_t i = 4; i < knobs.size(); ++i)
+    {
+        const int column = static_cast<int>(i - 4);
+        auto cell = juce::Rectangle<int>(performance.getX() + column * performanceCellWidth,
+            performance.getY(), performanceCellWidth, performance.getHeight()).reduced(3, 2);
+        knobLabels[i].setBounds(cell.removeFromTop(17));
+        knobs[i].setBounds(cell.reduced(2, 1));
+    }
+
+    right.removeFromTop(34);
+    ampTitle.setVisible(false);
+    right.removeFromTop(166); // Decorative amp head; the live controls remain below.
+    const int ampCellWidth = juce::jmax(1, right.getWidth() / 2);
+    const int ampCellHeight = juce::jmax(1, right.getHeight() / 2);
+    for (size_t i = 0; i < 4; ++i)
+    {
+        const int column = static_cast<int>(i % 2);
+        const int row = static_cast<int>(i / 2);
+        auto cell = juce::Rectangle<int>(right.getX() + column * ampCellWidth,
+            right.getY() + row * ampCellHeight, ampCellWidth, ampCellHeight).reduced(3, 2);
+        knobLabels[i].setBounds(cell.removeFromTop(17));
+        knobs[i].setBounds(cell.reduced(2, 1));
+    }
+
+    // The seven approved FX bypasses are the main chain. FLANGER stays inside FX EDIT.
+    fxTitle.setVisible(false);
+    playbackTitle.setVisible(false);
+    fxChain.removeFromTop(34);
+    const int fxButtonWidth = juce::jmax(1, fxChain.getWidth()
+        / static_cast<int>(fxButtons.size()));
     for (size_t i = 0; i < fxButtons.size(); ++i)
     {
         auto slot = fxChain.removeFromLeft(fxButtonWidth);
-        fxButtons[i].setBounds(slot.reduced(2, 5));
-        if (i + 1 < fxButtons.size())
-            fxChain.removeFromLeft(fxGap);
+        fxButtons[i].setBounds(slot.reduced(3, 4));
     }
 
-    bounds.removeFromTop(8);
-    constexpr int workspaceGap = 10;
-    const int leftWidth = juce::jlimit(180, 220, bounds.getWidth() / 5);
-    const int rightWidth = juce::jlimit(240, 285, bounds.getWidth() / 4);
-    auto left = bounds.removeFromLeft(leftWidth);
-    bounds.removeFromLeft(workspaceGap);
-    auto right = bounds.removeFromRight(rightWidth);
-    bounds.removeFromRight(workspaceGap);
-    auto centre = bounds;
-
-    // Left: preset filtering and the PATTERN-only reference fretboard.
-    left.removeFromTop(34);
-    categoryBox.setBounds(left.removeFromTop(34).reduced(4, 2));
-    left.removeFromTop(4);
-    presetSearch.setBounds(left.removeFromTop(34).reduced(4, 2));
-    left.removeFromTop(4);
-    presetBox.setBounds(left.removeFromTop(40).reduced(4, 2));
-    left.removeFromTop(6);
-    if (chordDiagram != nullptr)
-    {
-        chordDiagram->setVisible(modeBox.getSelectedId() == 2);
-        chordDiagram->setBounds(left.reduced(4, 2));
-    }
-
-    // Centre: MELODY/PATTERN transport and the real APVTS-backed FX editor.
-    auto modeRow = centre.removeFromTop(38);
-    melodyTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
-    patternTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
-    modeBox.setBounds(modeRow.removeFromLeft(138).reduced(2, 3));
-    startModeBox.setBounds(modeRow.reduced(2, 3));
-    centre.removeFromTop(5);
     if (mainFxEdit != nullptr)
-        mainFxEdit->setBounds(centre.reduced(2, 2));
-
-    // Right: all nine locked REV.20 controls; the first four are Amp/Tone,
-    // the remaining five retain the approved performance/feel controls.
-    right.removeFromTop(34);
-    ampTitle.setBounds(right.removeFromTop(24).reduced(5, 1));
-    const int columns = 3;
-    const int rows = 3;
-    const int cellWidth = juce::jmax(1, right.getWidth() / columns);
-    const int cellHeight = juce::jmax(1, right.getHeight() / rows);
-    for (size_t i = 0; i < knobs.size(); ++i)
-    {
-        const int column = static_cast<int>(i) % columns;
-        const int row = static_cast<int>(i) / columns;
-        auto cell = juce::Rectangle<int>(right.getX() + column * cellWidth,
-            right.getY() + row * cellHeight, cellWidth, cellHeight).reduced(2, 2);
-        knobLabels[i].setBounds(cell.removeFromTop(17));
-        knobs[i].setBounds(cell.reduced(1, 1));
-    }
-
-    // This legacy heading is retained for compatibility but is represented by
-    // the horizontal seven-switch bar above.
-    fxTitle.setVisible(false); // The bar title is painted by the shared panel chrome.
-    playbackTitle.setVisible(false);
+        mainFxEdit->setVisible(false);
+    if (chordDiagram != nullptr)
+        chordDiagram->setVisible(false);
+    if (performanceDisplay != nullptr)
+        performanceDisplay->setVisible(false);
 }
 
 juce::File PopPunkGuitarUltimateAudioProcessorEditor::getRuntimeSkinRoot() const
