@@ -1347,18 +1347,25 @@ public:
     // String index 0 is low E (string 6); -1 = muted, 0 = open,
     // and positive values are absolute fret numbers.
     void setVoicing(const juce::String& name, const std::array<int, 6>& positions,
-                    int firstDisplayedFret = 1)
+                    int firstDisplayedFret = 1,
+                    const std::array<int, 6>& fingerAssignments = {{ -1, -1, -1, -1, -1, -1 }})
     {
         const auto boundedBaseFret = juce::jlimit(1, 21, firstDisplayedFret);
         std::array<int, 6> boundedPositions {};
+        std::array<int, 6> boundedFingers {};
         for (size_t i = 0; i < frets.size(); ++i)
+        {
             boundedPositions[i] = juce::jlimit(-1, 24, positions[i]);
+            boundedFingers[i] = juce::jlimit(-1, 5, fingerAssignments[i]);
+        }
         const auto boundedName = name.isNotEmpty() ? name : juce::String("UNNAMED");
-        if (chordName == boundedName && baseFret == boundedBaseFret && frets == boundedPositions)
+        if (chordName == boundedName && baseFret == boundedBaseFret
+            && frets == boundedPositions && fingers == boundedFingers)
             return;
         chordName = boundedName;
         baseFret = boundedBaseFret;
         frets = boundedPositions;
+        fingers = boundedFingers;
         repaint();
     }
 
@@ -1430,6 +1437,15 @@ public:
                 g.fillEllipse(x - 4.5f, y - 4.5f, 9.0f, 9.0f);
                 g.setColour(palette.token("text_primary"));
                 g.drawEllipse(x - 4.5f, y - 4.5f, 9.0f, 9.0f, 0.8f);
+                const int finger = fingers[static_cast<size_t>(stringIndex)];
+                if (finger > 0)
+                {
+                    g.setColour(palette.token("window_bg"));
+                    g.setFont(makeThemeFont(palette, 7.0f, false, true));
+                    const auto marker = finger == 5 ? juce::String("T") : juce::String(finger);
+                    g.drawText(marker, juce::Rectangle<float>(x - 4.0f, y - 4.0f, 8.0f, 8.0f),
+                               juce::Justification::centred);
+                }
             }
         }
     }
@@ -1438,6 +1454,7 @@ private:
     PPGUThemeManager::Palette palette;
     juce::String chordName { "A MAJ  /  REFERENCE" };
     std::array<int, 6> frets {{ 0, 0, 2, 2, 2, 0 }};
+    std::array<int, 6> fingers {{ -1, -1, -1, -1, -1, -1 }};
     int baseFret = 1;
 };
 
@@ -1662,7 +1679,8 @@ private:
             const auto voicing = ppgu::performance::mapNotesToGuitarFretboard(
                 snapshot.generatedNotes, snapshot.noteCount);
             if (voicing.valid)
-                chordDiagram.setVoicing(newChord, voicing.fretsByString, voicing.baseFret);
+                chordDiagram.setVoicing(newChord, voicing.fretsByString,
+                                        voicing.baseFret, voicing.fingersByString);
             else
                 chordDiagram.setVoicing(newChord + "  /  NO PLAYABLE VOICING",
                                         {{ -1, -1, -1, -1, -1, -1 }}, 1);
