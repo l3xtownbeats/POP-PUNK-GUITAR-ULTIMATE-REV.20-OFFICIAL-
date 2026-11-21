@@ -792,7 +792,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         candidate.metersSlidersSpriteSheet = {};
         candidate.framesPanelsSpriteSheet = {};
         candidate.iconsSpriteSheet = {};
-            || !loadSafePngArtwork(themeRoot, "assets/background/main.png",
+        if (!loadSafePngArtwork(themeRoot, "assets/background/main.png",
                                    2560, 1440, candidate.backgroundArtwork, error)
             || !loadSafePngArtwork(themeRoot, "assets/textures/material.png",
                                    1024, 1024, candidate.materialArtwork, error)
