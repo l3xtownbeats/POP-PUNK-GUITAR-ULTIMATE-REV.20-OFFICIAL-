@@ -16,6 +16,7 @@ on:
       - "assets/library/**"
       - "tools/validate_skin_registry_16.py"
       - "tools/migrate_neon_stage_png.py"
+      - "tools/migrate_skin_studio_png.py"
       - "tools/render_neon_stage_svg.cjs"
       - "tools/package_active_skins.py"
       - "tools/validate_library_tiers.py"
@@ -94,6 +95,10 @@ jobs:
         with:
           name: ppgu-skin1-png-migration
           path: SKIN
+
+      - name: Install PNG validation dependency
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check Pillow
 
       - name: Checkout JUCE 7.0.12
         shell: pwsh
@@ -185,6 +190,10 @@ jobs:
         with:
           name: ppgu-skin1-png-migration
           path: SKIN
+
+      - name: Install PNG validation dependency
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check Pillow
 
       - name: Checkout JUCE 9.0.6
         shell: pwsh
