@@ -48,6 +48,10 @@ jobs:
         shell: pwsh
         run: python -m pip install --disable-pip-version-check Pillow CairoSVG
 
+      - name: Prepare audited Skin-1 PNG runtime artwork before CTest
+        shell: pwsh
+        run: python tools/migrate_neon_stage_png.py
+
       - name: Checkout JUCE 7.0.12
         shell: pwsh
         run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
@@ -64,9 +68,6 @@ jobs:
         shell: pwsh
         run: ctest --test-dir build -C Release --output-on-failure
 
-      - name: Convert artwork batches 01-08 to audited RGBA PNG and write SHA-256 manifest
-        shell: pwsh
-        run: python tools/migrate_neon_stage_png.py
 
       - name: Validate exactly 16 named graphical skins and all artwork assets
         shell: pwsh
