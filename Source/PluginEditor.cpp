@@ -1880,9 +1880,9 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     runtimeSkinRoot = getRuntimeSkinRoot();
     // Medium first-launch footprint for FL Studio; the JUCE resize corner remains enabled.
     // The responsive layout below keeps the main controls visible down to the minimum size.
-    setSize(1400, 790);
+    setSize(1024, 700);
     setResizable(true, true);
-    setResizeLimits(1100, 650, 1920, 1080);
+    setResizeLimits(900, 640, 1600, 1100);
     titleLabel.setText("PPGU", juce::dontSendNotification);
     titleLabel.setFont(makeThemeFont(themeManager.getPalette(), 40.0f, true, true));
     titleLabel.setColour(juce::Label::textColourId, themeManager.getPalette().token("text_primary"));
@@ -2103,8 +2103,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     options.filenameSuffix = "settings";
     options.folderName = "L3XTOWN";
     uiProperties.setStorageParameters(options);
-    int restoredWidth = 1400;
-    int restoredHeight = 790;
+    int restoredWidth = 1024;
+    int restoredHeight = 700;
     if (auto* settings = uiProperties.getUserSettings())
     {
         auxiliaryWorkspace->setPanelScale(static_cast<float>(settings->getDoubleValue("workspacePanelScale", 1.0)));
@@ -2115,8 +2115,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     loadSavedSkin();
     applyPalette();
     uiSettingsReady = true;
-    setSize(juce::jlimit(1100, 1920, restoredWidth),
-            juce::jlimit(650, 1080, restoredHeight));
+    setSize(juce::jlimit(900, 1600, restoredWidth),
+            juce::jlimit(640, 1100, restoredHeight));
 }
 
 PopPunkGuitarUltimateAudioProcessorEditor::~PopPunkGuitarUltimateAudioProcessorEditor()
