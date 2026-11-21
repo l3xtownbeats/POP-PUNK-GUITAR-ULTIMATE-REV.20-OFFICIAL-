@@ -14,6 +14,7 @@
 #endif
 #include "Sampler/SamplePool.h"
 #include "Performance/PatternScheduler.h"
+#include "Performance/AutoChordDisplayState.h"
 
 class PopPunkGuitarUltimateAudioProcessor final : public juce::AudioProcessor
 {
@@ -73,6 +74,12 @@ public:
         return false;
     }
 
+    // Coherent lock-free snapshot of the last AutoChords/MIDI state for UI readers.
+    bool getAutoChordDisplayState(ppgu::performance::AutoChordDisplayState& destination) const noexcept
+    {
+        return autoChordDisplayState.read(destination);
+    }
+
     // Lock-free post-output peak snapshot for UI meters. Values are linear 0..1+.
     float getOutputPeak(int channel) const noexcept
     {
@@ -91,6 +98,8 @@ private:
     std::atomic<int> patternPreviewSlot { -1 };
     std::array<std::array<std::atomic<bool>, 128>, 16> displayHeldNotes {};
     std::array<std::atomic<float>, 2> outputPeakMeters {};
+    ppgu::performance::AutoChordDisplayStateStore autoChordDisplayState;
+    std::uint32_t autoChordDisplayGeneration = 0;
     double currentSampleRate = 44100.0;
     int maximumBlockSize = 512;
     ppgu::sampler::SamplerEngine sampler;

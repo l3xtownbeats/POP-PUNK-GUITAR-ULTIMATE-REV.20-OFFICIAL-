@@ -3,10 +3,12 @@
 #include "PluginEditor.h"
 #include "PPGUData.h"
 #include "UI/PPGUControlState.h"
+#include "Performance/GuitarFretboardMapper.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <set>
 #include <limits>
@@ -637,8 +639,8 @@ private:
     juce::TextButton loadButton;
 };
 
-// Compact live harmony monitor. It observes the existing MIDI keyboard state and
-// scale parameters only; it never writes to APVTS or changes processor behaviour.
+// Compact live harmony monitor. It observes the audio engine's published chord snapshot
+// and never writes to APVTS or changes processor behaviour.
 class PPGUPerformanceDisplay final : public juce::Component, private juce::Timer
 {
 public:
@@ -654,6 +656,13 @@ public:
     {
         palette = value;
         repaint();
+    }
+
+    void setStateCallback(std::function<void(const ppgu::performance::AutoChordDisplayState&,
+                                             const juce::String&)> callback)
+    {
+        stateCallback = std::move(callback);
+        refreshState();
     }
 
     void paint(juce::Graphics& g) override
@@ -692,7 +701,7 @@ public:
         area.removeFromRight(8);
         g.setColour(palette.tokens.textSecondary);
         g.setFont(makeThemeFont(palette, 8.5f, false, true));
-        g.drawText("NOTES HELD", area.removeFromTop(13), juce::Justification::left);
+        g.drawText("NOTES USED", area.removeFromTop(13), juce::Justification::left);
         g.setColour(palette.tokens.textPrimary);
         g.setFont(makeThemeFont(palette, 12.0f, false, false));
         g.drawFittedText(notesText, area, juce::Justification::centredLeft, 1);
@@ -795,35 +804,26 @@ private:
 
     void refreshState()
     {
-        std::vector<int> held;
-        held.reserve(8);
-        for (int note = 0; note < 128; ++note)
-        {
-            bool isHeld = false;
-            isHeld = processor.isMidiNoteHeld(note);
-            if (isHeld)
-                held.push_back(note);
-        }
+        ppgu::performance::AutoChordDisplayState snapshot;
+        if (!processor.getAutoChordDisplayState(snapshot))
+            return;
+
+        std::vector<int> displayedNotes;
+        displayedNotes.reserve(6);
+        for (int i = 0; i < juce::jlimit(0, 6, snapshot.noteCount); ++i)
+            displayedNotes.push_back(snapshot.generatedNotes[static_cast<std::size_t>(i)]);
 
         juce::StringArray noteNames;
-        for (size_t i = 0; i < held.size() && i < 6; ++i)
-            noteNames.add(noteName(held[i]));
-        if (held.size() > 6)
-            noteNames.add("+" + juce::String(static_cast<int>(held.size() - 6)));
+        for (const auto note : displayedNotes)
+            noteNames.add(noteName(note));
 
-        const auto newChord = detectChord(held);
-        const auto newNotes = held.empty() ? juce::String("Waiting for MIDI input")
-                                           : noteNames.joinIntoString("   /   ");
-
-        auto* rootParameter = parameters.getRawParameterValue("scaleRoot");
-        auto* modeParameter = parameters.getRawParameterValue("scaleMode");
-        const int root = rootParameter != nullptr
-            ? juce::jlimit(0, 11, static_cast<int>(rootParameter->load(std::memory_order_relaxed))) : 0;
-        const int mode = modeParameter != nullptr
-            ? juce::jlimit(0, 2, static_cast<int>(modeParameter->load(std::memory_order_relaxed))) : 0;
-        const auto newKey = mode == 1 ? pitchName(root) + " MAJOR"
-                         : mode == 2 ? pitchName(root) + " MINOR"
-                                     : juce::String("CHROMATIC");
+        const auto newChord = detectChord(displayedNotes);
+        const auto newNotes = displayedNotes.empty()
+            ? juce::String("Waiting for MIDI input")
+            : noteNames.joinIntoString("   /   ");
+        const auto newKey = snapshot.scaleMode == 1 ? pitchName(snapshot.scaleRoot) + " MAJOR"
+                         : snapshot.scaleMode == 2 ? pitchName(snapshot.scaleRoot) + " MINOR"
+                                                   : juce::String("CHROMATIC");
 
         if (newChord != chordText || newNotes != notesText || newKey != keyText)
         {
@@ -832,6 +832,8 @@ private:
             keyText = newKey;
             repaint();
         }
+        if (stateCallback)
+            stateCallback(snapshot, newChord);
     }
 
     void timerCallback() override { refreshState(); }
@@ -842,6 +844,7 @@ private:
     juce::String chordText { "—" };
     juce::String notesText { "Waiting for MIDI input" };
     juce::String keyText { "CHROMATIC" };
+    std::function<void(const ppgu::performance::AutoChordDisplayState&, const juce::String&)> stateCallback;
 };
 
 
@@ -1341,12 +1344,28 @@ public:
         setPalette(value);
     }
 
-    // fret values: -1 = muted, 0 = open, 1..4 = fretted within this diagram.
-    void setVoicing(const juce::String& name, const std::array<int, 6>& positions)
+    // String index 0 is low E (string 6); -1 = muted, 0 = open,
+    // and positive values are absolute fret numbers.
+    void setVoicing(const juce::String& name, const std::array<int, 6>& positions,
+                    int firstDisplayedFret = 1,
+                    const std::array<int, 6>& fingerAssignments = {{ -1, -1, -1, -1, -1, -1 }})
     {
-        chordName = name.isNotEmpty() ? name : "UNNAMED";
+        const auto boundedBaseFret = juce::jlimit(1, 21, firstDisplayedFret);
+        std::array<int, 6> boundedPositions {};
+        std::array<int, 6> boundedFingers {};
         for (size_t i = 0; i < frets.size(); ++i)
-            frets[i] = juce::jlimit(-1, 4, positions[i]);
+        {
+            boundedPositions[i] = juce::jlimit(-1, 24, positions[i]);
+            boundedFingers[i] = juce::jlimit(-1, 5, fingerAssignments[i]);
+        }
+        const auto boundedName = name.isNotEmpty() ? name : juce::String("UNNAMED");
+        if (chordName == boundedName && baseFret == boundedBaseFret
+            && frets == boundedPositions && fingers == boundedFingers)
+            return;
+        chordName = boundedName;
+        baseFret = boundedBaseFret;
+        frets = boundedPositions;
+        fingers = boundedFingers;
         repaint();
     }
 
@@ -1361,10 +1380,10 @@ public:
         auto heading = getLocalBounds().reduced(10, 7);
         g.setColour(palette.token("text_secondary"));
         g.setFont(makeThemeFont(palette, 8.5f, false, true));
-        g.drawText("REFERENCE VOICING", heading.removeFromTop(15), juce::Justification::centredLeft);
+        g.drawText("LIVE FRETBOARD  /  E-A-D-G-B-E", heading.removeFromTop(15), juce::Justification::centredLeft);
         g.setColour(palette.token("accent"));
         g.setFont(makeThemeFont(palette, 11.0f, false, true));
-        g.drawText(chordName, heading.removeFromTop(17), juce::Justification::centredLeft);
+        g.drawText(chordName + "   /   FRET " + juce::String(baseFret), heading.removeFromTop(17), juce::Justification::centredLeft);
 
         const auto grid = getLocalBounds().reduced(20, 42);
         if (grid.getWidth() < 40 || grid.getHeight() < 35)
@@ -1408,15 +1427,25 @@ public:
                 g.setColour(palette.token("text_secondary"));
                 g.drawEllipse(x - 3.0f, y1 - 9.0f, 6.0f, 6.0f, 1.0f);
             }
-            else if (fret <= fretCount)
+            else if (fret >= baseFret && fret < baseFret + fretCount)
             {
-                const float y = y1 + (static_cast<float>(fret) - 0.5f) * dy;
+                const float relativeFret = static_cast<float>(fret - baseFret);
+                const float y = y1 + (relativeFret + 0.5f) * dy;
                 g.setColour(palette.token("accent_glow").withAlpha(0.28f));
                 g.fillEllipse(x - 7.0f, y - 7.0f, 14.0f, 14.0f);
                 g.setColour(palette.token("accent"));
                 g.fillEllipse(x - 4.5f, y - 4.5f, 9.0f, 9.0f);
                 g.setColour(palette.token("text_primary"));
                 g.drawEllipse(x - 4.5f, y - 4.5f, 9.0f, 9.0f, 0.8f);
+                const int finger = fingers[static_cast<size_t>(stringIndex)];
+                if (finger > 0)
+                {
+                    g.setColour(palette.token("window_bg"));
+                    g.setFont(makeThemeFont(palette, 7.0f, false, true));
+                    const auto marker = finger == 5 ? juce::String("T") : juce::String(finger);
+                    g.drawText(marker, juce::Rectangle<float>(x - 4.0f, y - 4.0f, 8.0f, 8.0f),
+                               juce::Justification::centred);
+                }
             }
         }
     }
@@ -1425,21 +1454,37 @@ private:
     PPGUThemeManager::Palette palette;
     juce::String chordName { "A MAJ  /  REFERENCE" };
     std::array<int, 6> frets {{ 0, 0, 2, 2, 2, 0 }};
+    std::array<int, 6> fingers {{ -1, -1, -1, -1, -1, -1 }};
+    int baseFret = 1;
 };
 
-class PPGUAutoChordsPanel final : public juce::Component, public PPGUThemeAwarePanel
+class PPGUAutoChordsPanel final : public juce::Component,
+                                          public PPGUThemeAwarePanel,
+                                          private juce::Timer
 {
 public:
-    explicit PPGUAutoChordsPanel(juce::AudioProcessorValueTreeState& state) : apvts(state)
+    explicit PPGUAutoChordsPanel(PopPunkGuitarUltimateAudioProcessor& processorIn)
+        : processor(processorIn), apvts(processorIn.parameters)
     {
         title.setText("AUTOCHORDS  /  HARMONY SETUP", juce::dontSendNotification);
         title.setFont(makeThemeFont(palette, 20.0f, false, true));
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
         addAndMakeVisible(title);
-        stateLabel.setText("PATTERN MODE ONLY: ONE HELD NOTE EXPANDS TO A SCALE-BASED TRIAD. MELODY MODE REMAINS SINGLE-NOTE.",
-                            juce::dontSendNotification);
-        stateLabel.setColour(juce::Label::textColourId, palette.token("success"));
+
+        stateLabel.setText("WAITING FOR AUDIO ENGINE STATE", juce::dontSendNotification);
+        stateLabel.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(stateLabel);
+
+        liveChordLabel.setText("—", juce::dontSendNotification);
+        liveChordLabel.setFont(makeThemeFont(palette, 18.0f, false, true));
+        liveChordLabel.setColour(juce::Label::textColourId, palette.token("accent"));
+        addAndMakeVisible(liveChordLabel);
+
+        liveNotesLabel.setText("INPUT —   →   OUTPUT —", juce::dontSendNotification);
+        liveNotesLabel.setFont(makeThemeFont(palette, 10.0f, false, false));
+        liveNotesLabel.setColour(juce::Label::textColourId, palette.token("text_primary"));
+        addAndMakeVisible(liveNotesLabel);
+
         offButton.setButtonText("AUTOCHORDS  /  ON-OFF");
         offButton.setClickingTogglesState(true);
         offButton.setEnabled(true);
@@ -1473,15 +1518,20 @@ public:
         keyLabel.setText("KEY", juce::dontSendNotification);
         modeLabel.setText("SCALE / QUALITY", juce::dontSendNotification);
         patternLabel.setText("RHYTHM PATTERN SLOT", juce::dontSendNotification);
+        refreshDisplay();
+        startTimerHz(20);
     }
+
     void setThemePalette(const PPGUThemeManager::Palette& value) override
     {
         palette = value;
         title.setFont(makeThemeFont(palette, 20.0f, false, true));
+        liveChordLabel.setFont(makeThemeFont(palette, 18.0f, false, true));
+        liveNotesLabel.setFont(makeThemeFont(palette, 10.0f, false, false));
         for (auto* label : { &keyLabel, &modeLabel, &patternLabel })
             label->setFont(makeThemeFont(palette, 9.5f, false, true));
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
-        stateLabel.setColour(juce::Label::textColourId, palette.token("warning"));
+        liveNotesLabel.setColour(juce::Label::textColourId, palette.token("text_primary"));
         for (auto* label : { &keyLabel, &modeLabel, &patternLabel })
             label->setColour(juce::Label::textColourId, palette.token("text_secondary"));
         offButton.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
@@ -1506,16 +1556,20 @@ public:
         g.setColour(palette.token("control_border"));
         g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(12), 10, 1);
     }
+
     void resized() override
     {
         auto area = getLocalBounds().reduced(24);
         title.setBounds(area.removeFromTop(38));
-        stateLabel.setBounds(area.removeFromTop(32));
-        offButton.setBounds(area.removeFromTop(44).removeFromLeft(210).reduced(2));
-        area.removeFromTop(24);
+        stateLabel.setBounds(area.removeFromTop(28));
+        offButton.setBounds(area.removeFromTop(42).removeFromLeft(210).reduced(2));
+        liveChordLabel.setBounds(area.removeFromTop(32));
+        liveNotesLabel.setBounds(area.removeFromTop(25));
+        area.removeFromTop(12);
+
         auto controls = area.removeFromLeft(300);
-        auto diagramArea = area.removeFromRight(196);
-        chordDiagram.setBounds(diagramArea.removeFromTop(176).reduced(3));
+        auto diagramArea = area.reduced(4, 2);
+        chordDiagram.setBounds(diagramArea);
 
         keyLabel.setBounds(controls.removeFromTop(22));
         keyBox.setBounds(controls.removeFromTop(44).removeFromLeft(260));
@@ -1526,15 +1580,127 @@ public:
         patternLabel.setBounds(controls.removeFromTop(22));
         patternBox.setBounds(controls.removeFromTop(44).removeFromLeft(280));
     }
+
 private:
-    PPGUThemeManager::Palette palette;
+    static juce::String pitchName(int pitchClass)
+    {
+        static const char* names[] = {
+            "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+        };
+        return names[juce::jlimit(0, 11, pitchClass)];
+    }
+
+    static juce::String noteName(int midiNote)
+    {
+        return pitchName(midiNote % 12) + juce::String(midiNote / 12 - 1);
+    }
+
+    static juce::String chordName(const std::array<int, 6>& notes, int count)
+    {
+        if (count <= 0)
+            return "WAITING FOR MIDI";
+        if (count == 1)
+            return noteName(notes[0]);
+        std::array<bool, 12> present {};
+        int pitchCount = 0;
+        for (int i = 0; i < juce::jlimit(0, 6, count); ++i)
+        {
+            const int pitchClass = notes[static_cast<std::size_t>(i)] % 12;
+            if (!present[static_cast<std::size_t>(pitchClass)])
+            {
+                present[static_cast<std::size_t>(pitchClass)] = true;
+                ++pitchCount;
+            }
+        }
+
+        struct Shape { const char* suffix; std::array<int, 4> intervals; int size; };
+        static constexpr Shape shapes[] {
+            { "maj", {{ 0, 4, 7, 0 }}, 3 },
+            { "m",   {{ 0, 3, 7, 0 }}, 3 },
+            { "dim", {{ 0, 3, 6, 0 }}, 3 },
+            { "aug", {{ 0, 4, 8, 0 }}, 3 },
+            { "sus2",{{ 0, 2, 7, 0 }}, 3 },
+            { "sus4",{{ 0, 5, 7, 0 }}, 3 },
+            { "5",   {{ 0, 7, 0, 0 }}, 2 }
+        };
+        for (int root = 0; root < 12; ++root)
+            for (const auto& shape : shapes)
+            {
+                if (pitchCount != shape.size)
+                    continue;
+                bool matches = true;
+                for (int i = 0; i < shape.size; ++i)
+                    matches = matches && present[static_cast<std::size_t>((root + shape.intervals[static_cast<std::size_t>(i)]) % 12)];
+                if (matches)
+                    return pitchName(root) + shape.suffix;
+            }
+        return pitchName(notes[0] % 12) + "  /  " + juce::String(pitchCount) + " tones";
+    }
+
+    void refreshDisplay()
+    {
+        ppgu::performance::AutoChordDisplayState snapshot;
+        if (!processor.getAutoChordDisplayState(snapshot))
+            return;
+
+        juce::StringArray inputNames, outputNames;
+        for (int i = 0; i < juce::jlimit(0, 6, snapshot.inputNoteCount); ++i)
+            inputNames.add(noteName(snapshot.inputNotes[static_cast<std::size_t>(i)]));
+        for (int i = 0; i < juce::jlimit(0, 6, snapshot.noteCount); ++i)
+            outputNames.add(noteName(snapshot.generatedNotes[static_cast<std::size_t>(i)]));
+
+        const auto mode = snapshot.playMode == 1 ? juce::String("PATTERN") : juce::String("MELODY");
+        const auto scale = snapshot.scaleMode == 1 ? pitchName(snapshot.scaleRoot) + " MAJOR"
+                         : snapshot.scaleMode == 2 ? pitchName(snapshot.scaleRoot) + " MINOR"
+                                                   : juce::String("CHROMATIC");
+        const auto enabledText = snapshot.enabled ? "ON" : "OFF";
+        const auto activityText = snapshot.autoChordApplied ? "TRIAD GENERATED"
+            : (snapshot.active ? "INPUT CHORD PASSTHROUGH" : "NO ACTIVE NOTES");
+        const auto status = "AUTOCHORDS " + juce::String(enabledText) + "  /  "
+            + mode + "  /  " + scale + "  /  " + activityText;
+        const auto newChord = chordName(snapshot.generatedNotes, snapshot.noteCount);
+        const auto newNotes = "INPUT: " + (inputNames.isEmpty() ? juce::String("—") : inputNames.joinIntoString("  "))
+            + "    →    OUTPUT: " + (outputNames.isEmpty() ? juce::String("—") : outputNames.joinIntoString("  "));
+
+        if (statusLabelText != status || chordLabelText != newChord || notesLabelText != newNotes)
+        {
+            statusLabelText = status;
+            chordLabelText = newChord;
+            notesLabelText = newNotes;
+            stateLabel.setText(statusLabelText, juce::dontSendNotification);
+            liveChordLabel.setText(chordLabelText, juce::dontSendNotification);
+            liveNotesLabel.setText(notesLabelText, juce::dontSendNotification);
+            stateLabel.setColour(juce::Label::textColourId,
+                snapshot.autoChordApplied ? palette.token("success") : palette.token("text_secondary"));
+        }
+
+        if (snapshot.active && snapshot.noteCount > 0)
+        {
+            const auto voicing = ppgu::performance::mapNotesToGuitarFretboard(
+                snapshot.generatedNotes, snapshot.noteCount);
+            if (voicing.valid)
+                chordDiagram.setVoicing(newChord, voicing.fretsByString,
+                                        voicing.baseFret, voicing.fingersByString);
+            else
+                chordDiagram.setVoicing(newChord + "  /  NO PLAYABLE VOICING",
+                                        {{ -1, -1, -1, -1, -1, -1 }}, 1);
+        }
+        else
+            chordDiagram.setVoicing("WAITING FOR MIDI", {{ -1, -1, -1, -1, -1, -1 }}, 1);
+    }
+
+    void timerCallback() override { refreshDisplay(); }
+
+    PopPunkGuitarUltimateAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& apvts;
-    juce::Label title, stateLabel, keyLabel, modeLabel, patternLabel;
+    PPGUThemeManager::Palette palette;
+    juce::Label title, stateLabel, keyLabel, modeLabel, patternLabel, liveChordLabel, liveNotesLabel;
     PPGUChordDiagram chordDiagram;
     juce::TextButton offButton;
     juce::ComboBox keyBox, modeBox, patternBox;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> keyAttachment, modeAttachment, patternAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> autoChordAttachment;
+    juce::String statusLabelText, chordLabelText, notesLabelText;
 };
 }
 
@@ -1995,6 +2161,25 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     keyboard->setColour(juce::MidiKeyboardComponent::keyDownOverlayColourId, themeManager.getPalette().token("accent").withAlpha(0.85f));
     addAndMakeVisible(*keyboard);
     performanceDisplay = std::make_unique<PPGUPerformanceDisplay>(processor);
+    performanceDisplay->setStateCallback([this](const ppgu::performance::AutoChordDisplayState& snapshot,
+                                                 const juce::String& chordName)
+    {
+        auto* diagram = dynamic_cast<PPGUChordDiagram*>(chordDiagram.get());
+        if (diagram == nullptr)
+            return;
+        if (snapshot.active && snapshot.noteCount > 0)
+        {
+            const auto voicing = ppgu::performance::mapNotesToGuitarFretboard(
+                snapshot.generatedNotes, snapshot.noteCount);
+            if (voicing.valid)
+                diagram->setVoicing(chordName, voicing.fretsByString, voicing.baseFret);
+            else
+                diagram->setVoicing(chordName + "  /  NO PLAYABLE VOICING",
+                                    {{ -1, -1, -1, -1, -1, -1 }}, 1);
+        }
+        else
+            diagram->setVoicing("WAITING FOR MIDI", {{ -1, -1, -1, -1, -1, -1 }}, 1);
+    });
     addAndMakeVisible(*performanceDisplay);
     melodyTab.onClick = [this] { modeBox.setSelectedId(1); };
     patternTab.onClick = [this] { modeBox.setSelectedId(2); openPatternSectionPanel(); };
@@ -2059,6 +2244,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
 PopPunkGuitarUltimateAudioProcessorEditor::~PopPunkGuitarUltimateAudioProcessorEditor()
 {
     stopTimer();
+    if (performanceDisplay != nullptr)
+        performanceDisplay->setStateCallback({});
     timerCallback();
     setLookAndFeel(nullptr);
 }
@@ -2669,7 +2856,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openAutoChordsPanel()
         spec.title = "AUTOCHORDS  /  HARMONY WORKSPACE";
         spec.desired = { 900, 620 };
         spec.minimum = { 560, 420 };
-        spec.content = std::make_unique<PPGUAutoChordsPanel>(processor.parameters);
+        spec.content = std::make_unique<PPGUAutoChordsPanel>(processor);
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }

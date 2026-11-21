@@ -89,6 +89,7 @@ target_link_libraries(PPGU PRIVATE
 juce_generate_juce_header(PPGU)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+find_package(Threads REQUIRED)
 enable_testing()
 
 function(ppgu_add_test target source)
@@ -126,6 +127,14 @@ target_include_directories(ppgu_panel_contracts PRIVATE Source/UI)
 # AutoChords: bounded scale-aware MIDI root-to-triad mapping.
 ppgu_add_test(ppgu_autochord_contracts tests/AutoChordGeneratorTests.cpp)
 target_include_directories(ppgu_autochord_contracts PRIVATE Source)
+
+# AutoChords UI handoff and live guitar fretboard mapping contracts.
+ppgu_add_test(ppgu_autochord_display_state_tests tests/AutoChordDisplayStateTests.cpp)
+target_include_directories(ppgu_autochord_display_state_tests PRIVATE Source)
+target_link_libraries(ppgu_autochord_display_state_tests PRIVATE Threads::Threads)
+
+ppgu_add_test(ppgu_guitar_fretboard_mapper_tests tests/GuitarFretboardMapperTests.cpp)
+target_include_directories(ppgu_guitar_fretboard_mapper_tests PRIVATE Source)
 
 # Gallery Preview/Apply/Cancel draft-state contract; no APVTS or skin ID changes.
 ppgu_add_test(ppgu_skin_gallery_selection_contracts tests/SkinGallerySelectionTests.cpp)
