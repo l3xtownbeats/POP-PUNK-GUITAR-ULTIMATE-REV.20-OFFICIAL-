@@ -222,9 +222,15 @@ int main()
         expect(false, "transaction test can access manifest assets object");
     }
 
+    const auto lastGoodId = manager.getPalette().id;
+    const auto lastGoodName = manager.getPalette().name;
     const auto invalid = neon.loadFileAsString().replace("\"index\": 53", "\"index\": 54");
     expect(!manager.loadFromJson(invalid), "stable ID/index mismatch is rejected");
-    expect(manager.getPalette().usedFallback, "invalid theme restores safe fallback");
+    expect(manager.getPalette().id == lastGoodId && manager.getPalette().name == lastGoodName,
+           "invalid JSON load preserves the last-known-good theme");
+    expect(manager.getPalette().textureArtwork.isValid(),
+           "invalid JSON load preserves last-known-good decoded artwork");
+    expect(manager.getLastError().isNotEmpty(), "invalid JSON load keeps a useful diagnostic");
     std::cout << (failures == 0 ? "PASS" : "FAIL")
               << " — REV.20 16-theme registry and NEON STAGE runtime contract" << std::endl;
     return failures == 0 ? 0 : 1;
