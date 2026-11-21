@@ -253,3 +253,15 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Windows остаётся целевой средой сборки VST3; рендер artwork вынесен в совместимую Linux подготовительную job. Содержимое PNG не подменяется и не генерируется на лету во время CTest.
 - Это устраняет подтверждённую платформенную причину импорта CairoSVG, но ещё не подтверждает успешный повторный workflow. Отдельные ThemeManager/skin packaging ошибки из CTest требуют проверки после повторного запуска.
 - Миграция пока генерирует PNG в CI из SVG-исходников; production pipeline ещё не является PNG-only, и SVG-файлы не удалялись. Изменения только в `work/neon-stage-cover-parity`; `main` не затрагивалась.
+
+
+## 2026-11-21 — NEON STAGE INTERACTION / ARTWORK AUDIT DIAGNOSTICS
+
+- Повторная проверка UI-кода подтвердила существующие live bindings: 9 rotary controls имеют APVTS SliderAttachment; 7 FX switches имеют APVTS ButtonAttachment; MELODY/PATTERN синхронизируют toggle-state с выбранным режимом; MIDI keyboard получает processor keyboard state.
+- Визуальная логика уже различает default/hover/pressed/disabled/dragged; toggle ON запрашивает optional active artwork, а при его отсутствии использует существующий ON-визуальный fallback. Keyboard focus пока реализован отдельной доступной обводкой поверх PNG, а не dedicated focus PNG.
+- Проверка текущего control-state manifest подтвердила 27 ID × 5 состояний = 135 PNG записей. Dedicated active/focus PNG не входят в эти 135 записей.
+- Новая Linux PNG preparation job теперь доходит до реального SVG → PNG рендеринга, но palette audit остановил публикацию артефакта: обнаружены пиксели в фиолетово-пурпурном диапазоне в 10 исходных SVG. Эти цвета нельзя просто пропускать или маскировать: требуется локализовать источник и исправить только реальные цветовые отклонения, сохраняя геометрию утверждённого макета.
+- В `tools/migrate_neon_stage_png.py` добавлены координаты и RGBA/HSV образцы первых конфликтных пикселей. Следующий прогон даст данные для точечного исправления исходных SVG без ослабления палитрового gate.
+- Не создавались фальшивые статусы/функции. AUTOCHORDS остаётся SETUP ONLY до подключения генератора; About и другие недоступные элементы не должны имитировать работающие функции.
+- 13 production panel PNG и финальный guitar hero artwork остаются отдельными незакрытыми deliverables. Текущий UI interaction code inspection не заменяет ручной визуальный QA по семи макетам, тестирование в FL Studio 20 и измерения CPU/RAM/frame pacing.
+- Изменения только в `work/neon-stage-cover-parity`; `main` не затрагивалась.
