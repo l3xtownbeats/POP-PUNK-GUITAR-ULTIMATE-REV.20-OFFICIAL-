@@ -278,3 +278,11 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - 13 production panel PNG отсутствуют; guitar hero остаётся placeholder. About не должен имитировать несуществующую функциональность. AUTOCHORDS остаётся SETUP ONLY.
 - Следующая реализация должна закрывать зависимость native CI от подготовленного PNG artifact, исправить реальные PNG пути/размеры всех 16 тем, затем пройти полный CTest → registry/package → pluginval. После этого — dedicated ACTIVE/FOCUS assets и 13 production panels по утверждённым исходникам. Не создавать panel artwork из догадок и не заявлять pixel parity без визуального сравнения с утверждёнными макетами.
 - Все изменения этой серии ограничены рабочей веткой; PR/main не мержились.
+
+## 2026-11-21 — PNG ARTIFACT HANDOFF: NATIVE / JUCE 9 CI
+- Исправлен `.github/workflows/neon-stage-native-ci.yml`: отдельная Ubuntu job `prepare-skin1-png` выполняет CairoSVG/Pillow миграцию и строгий аудит, публикует `ppgu-skin1-png-migration`; Windows x64 matrix job зависит от неё и скачивает artifact до configure/build/CTest.
+- Исправлен `.github/workflows/rev20-windows-vst3-skin-validation.yml`: JUCE 9.0.6 candidate job также скачивает тот же подготовленный PNG artifact до CMake configure/build/CTest. Основная JUCE 7 job уже использовала эту зависимость.
+- Первичная правка native workflow была проверена повторным чтением и исправлена: artifact download расположен только в Windows consumer job, а не в Linux producer job. Trigger path включает migrator в push и pull_request фильтрах.
+- Новые GitHub Actions runs созданы после обновлений workflow; они ещё должны завершиться. Их наличие не означает, что PNG palette gate пройден.
+- Визуальная диагностика десяти SVG источников показывает повторяющийся тёмный RGB кластер около `(65,38,56)` в заголовках окон и отдельных кнопках/LCD. В SVG literal hex palette список не содержит соответствующего оттенка. Не выполнять массовую замену и не ослаблять audit: требуется проверить SVG filters, embedded styles, text/shadow paint и renderer compositing на точных координатах до изменения исходника.
+- `main` не изменялась; все commits находятся в `work/neon-stage-cover-parity`.
