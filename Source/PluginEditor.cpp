@@ -2594,7 +2594,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::loadFactoryPresetCatalog()
     const auto jsonText = juce::String::fromUTF8(BinaryData::factory_bank_300_json, BinaryData::factory_bank_300_jsonSize);
     const auto root = juce::JSON::parse(jsonText);
     if (!root.isObject()) { statusLabel.setText("FACTORY PRESET CATALOG ERROR", juce::dontSendNotification); return; }
-    const auto append = [this](const juce::var& array, const juce::String& mode) {
+    const auto append = [this](const juce::var& array) {
         if (auto* values = array.getArray()) for (const auto& value : *values) {
             if (!value.isObject()) continue;
             FactoryPreset preset;
@@ -2604,7 +2604,9 @@ void PopPunkGuitarUltimateAudioProcessorEditor::loadFactoryPresetCatalog()
                 displayName = displayName.substring(reference.length()).trim();
             preset.name = displayName;
             preset.category = "Original";
-            preset.mode = mode;
+            preset.mode = value.getProperty("mode", "MELODY").toString().toUpperCase();
+            if (preset.mode != "MELODY" && preset.mode != "PATTERN")
+                continue;
             preset.soundCharacter = value.getProperty("soundCharacter", "Electric").toString();
             preset.groove = value.getProperty("groove", "").toString();
             preset.articulation = value.getProperty("articulation", "").toString();
@@ -2616,9 +2618,10 @@ void PopPunkGuitarUltimateAudioProcessorEditor::loadFactoryPresetCatalog()
             factoryPresets.push_back(std::move(preset));
         }
     };
-    append(root.getProperty("melodyPresets", juce::var()), "MELODY");
-    append(root.getProperty("patternPresets", juce::var()), "PATTERN");
-    statusLabel.setText("FACTORY CATALOG: "+juce::String(static_cast<int>(factoryPresets.size()))+" PRESETS", juce::dontSendNotification);
+    append(root.getProperty("presets", juce::var()));
+    const int targetCount = static_cast<int>(root.getProperty("targetPresetCount", 500));
+    statusLabel.setText("FACTORY DATABASE: "+juce::String(static_cast<int>(factoryPresets.size()))
+                        +" / "+juce::String(targetCount)+" PRESETS", juce::dontSendNotification);
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::applyFactoryPreset(int index)
