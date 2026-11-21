@@ -173,7 +173,7 @@ d=ImageDraw.Draw(im)
 d.ellipse(thumb_box,fill=rgba("#19334A"),outline=rgba(P["glow_cyan"]),width=3)
 slider_boxes["thumb"]={"bbox":thumb_box}
 label(ImageDraw.Draw(im),(30,755,970,780),"STATUS LEDS / ROUND + SQUARE",P["text"],12)
-led_states=["off","cyan","blue","blue"]
+led_states=["off","cyan","blue","white"]
 led_colors={"off":"#344354","cyan":P["glow_cyan"],"blue":P["glow_blue"],"blue":P["accent_magenta"]}
 led_boxes={"round":{},"square":{}}
 for shape,x_start in (("round",50),("square",570)):
