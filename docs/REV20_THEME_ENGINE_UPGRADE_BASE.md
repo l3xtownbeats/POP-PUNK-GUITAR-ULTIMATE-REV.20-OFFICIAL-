@@ -11,7 +11,7 @@ NEON STAGE is the one unified theme for the complete plugin interface
 - Theme code is visual-only. It must not modify APVTS parameter IDs, processor state, DSP, sampler, MIDI scheduling or audio-thread behaviour.
 - MELODY and PATTERN remain the only top-level musical modes. AutoChords 2.0 remains a PATTERN sub-feature.
 - All interactive controls remain real controls bound to existing functionality. No decorative fake controls.
-- Approved NEON STAGE palette: graphite/black, metallic silver, purple, magenta and crimson; functional meters may use green/amber/orange/red. No blue/cyan/teal/turquoise palette or lighting.
+- Visual fidelity authority: reproduce the immutable GitHub-pinned NEON STAGE master banner/mockup exactly. Derive semantic palette tokens from that artwork; do not impose generic colour exclusions or independently recolour the approved design. Functional meters may retain clearly defined status semantics.
 - Theme parsing, file access, image decoding, cache mutation and theme replacement run only on the message/UI thread. The audio thread must never parse manifests, load files, decode images, allocate theme assets or wait on theme locks.
 
 ## Seven approved engineering engines
@@ -77,38 +77,62 @@ These are existing foundations, not proof that every engine is complete. In part
 
 This BASE authorises implementation of the theme engine only. It does not authorise a second editor, new VST3 target, new musical mode, parameter-ID changes, DSP changes, redistribution of unlicensed art, or merging PR #8 before conflicts and all required checks are resolved.
 
-## Canonical architecture — NEON STAGE (final approved definition)
+## Canonical visual architecture — NEON STAGE (immutable approved definition)
 
-**NEON STAGE IS THE THEME.** These names are equivalent: NEON STAGE = THEME.
-There is no separate parent system, nested THEME layer, second skin system or
-parallel interface. NEON STAGE is the one unified theme of POP PUNK GUITAR
-ULTIMATE REV.20.
+**NEON STAGE IS THE APPROVED PLUGIN DESIGN ITSELF.** The official GitHub-pinned
+banner/mockup `assets/POP_PUNK_GUITAR_ULTIMATE_BANNER.svg` is not a disposable
+reference and must not be replaced by a newly invented interpretation. It is
+the definitive visual source of truth for NEON STAGE. Preserve its composition,
+guitar artwork, illuminated controls, panel language, typography, lighting,
+and visual identity when implementing the actual plugin interface and assets.
 
-All of the following are components of the same NEON STAGE theme:
+The terms describe distinct roles within one approved design:
 
-- **MAIN THEME** — visual identity and presentation.
-- **SKIN** — complete visual styling and graphical appearance.
-- **GUI** — the plugin's complete graphical interface and layout.
-- **CONTROLS** — all functional interactive controls and indicators; their
-  visual design and states are part of NEON STAGE, and each control remains
-  bound to its real existing plugin function.
-- **ASSETS** — artwork, images, textures, icons, atlases and visual resources.
-- **PALETTE** — semantic colour tokens and their shared resolution.
-- **STATES** — Default, Hover, Pressed, Disabled and Dragged presentation.
-- **ANIMATIONS & EFFECTS** — transitions, lighting, glow and visual effects.
-- **E1–E7** — internal engineering modules that validate, load, manage,
-  render, switch, optimise and recover the NEON STAGE theme.
+- **GUI mockup / NEON STAGE master artwork** — the approved visual blueprint
+  and immutable appearance target. The pinned banner is the canonical source.
+- **MAIN THEME** — the overarching visual concept and design rules read from
+  that approved blueprint (identity, hierarchy, colour relationships,
+  typography, materials, lighting and consistency rules).
+- **SKIN / NEON STAGE** — the concrete graphical skin that implements the
+  approved appearance across the plugin. NEON STAGE is the name of this
+  approved skin/design; it is not a second or alternative design.
+- **GUI** — the actual plugin editor structure and layout that reproduces the
+  approved mockup, including its main screen, panels and component placement.
+- **SIGNAL FORGE** — the functional control surface within that GUI. It is
+  not a second GUI or a competing visual theme.
+- **CONTROLS** — real interactive controls and indicators placed and styled
+  according to the mockup; each must remain connected to its existing plugin
+  function. Never create decorative fake controls in place of functionality.
+- **ASSETS** — the production-ready images, textures, icons, vectors, atlases
+  and other resources needed to reproduce the approved design faithfully.
+- **PALETTE** — semantic colour tokens derived from the approved artwork.
+  Token values must not silently recolour or reinterpret the master design.
+- **STATES** — Default, Hover, Pressed, Disabled and Dragged visual treatments
+  that preserve the master design's appearance and control legibility.
+- **ANIMATIONS & EFFECTS** — implementation of the approved lighting,
+  illumination, transitions and visual feedback without changing the design.
+- **E1–E7** — internal engineering modules that validate, load, cache,
+  resolve, switch, optimise and recover the visual implementation. They are
+  implementation infrastructure, not visible design layers.
 
-Architecture constraints:
-1. NEON STAGE is the single theme and the complete visual/functional interface
-   system. NEON STAGE = THEME.
-2. MAIN THEME, SKIN, GUI, CONTROLS, ASSETS, PALETTE, STATES,
-   ANIMATIONS & EFFECTS and E1–E7 are all components of that same theme.
-3. Do not model any listed component as a separate theme, product, shell,
-   control deck, GUI or parallel visual system.
-4. CONTROLS must remain functional and connected to existing plugin
-   functionality; visual changes must not create decorative fake controls.
-5. E1–E7 are internal modules of NEON STAGE, not external systems or
-   additional theme layers.
-6. Preserve existing APVTS parameter IDs, processor state, DSP, sampler,
+Implementation and fidelity constraints:
+1. The pinned NEON STAGE banner/mockup is the immutable visual authority.
+   Do not create a replacement concept, alternative skin, new layout or
+   independent visual interpretation.
+2. MAIN THEME records the design rules derived from the master artwork;
+   SKIN implements those rules; GUI reproduces the approved layout.
+3. Do not treat MAIN THEME, SKIN and GUI as interchangeable terms. They are
+   related roles in one NEON STAGE design.
+4. The actual GUI must map every visible interactive control to an existing
+   real plugin function. Keep SIGNAL FORGE as the single functional control
+   surface.
+5. Derive palette, assets, component styling, states and effects from the
+   pinned artwork. Do not apply a generic palette restriction that conflicts
+   with visible colours in the approved master artwork; do not independently
+   recolour the master banner.
+6. E1–E7 remain internal implementation modules and must not become another
+   theme, skin, product, shell or GUI.
+7. Preserve existing APVTS parameter IDs, processor state, DSP, sampler,
    MIDI scheduling and audio-thread constraints.
+8. Any asset or implementation gap must be recorded and completed against the
+   master artwork; it is not permission to redesign or omit a visible element.
