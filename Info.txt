@@ -167,3 +167,13 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Pluginval strictness level 5: PASS. Logs show scan, cold/warm open, editor, audio processing, state, automation, parameter, VST3 validator and bus checks all completed successfully.
 - Artifact: `PPGU-REV20-Windows-x64-VST3`, ID `14625308194`, 5,857,765 bytes, SHA-256 `72e31eb39e36301c2f3dfa070e9ef277c6d5a360d2907db12f4e4a25e219e864`, expires 2026-12-04.
 - Remaining manual/release gates: FL Studio 20 host acceptance on Windows 10; full GUI/reference parity including Playing Core hero display; DPI 100/125/150%; 150 ms hot-swap/ECO/memory/performance observation; 15 GB BASIC payload completion; all 500 playable presets.
+
+
+## 2026-11-21 — NEON STAGE reference-01 cover parity work (branch only)
+
+- Created working branch `work/neon-stage-cover-parity` from the canonical `main` baseline; no changes were made to `main`.
+- Re-composed the JUCE main editor into the reference-01 structure: left Browser, central guitar stage with two mode tabs, right Amp & Tone, performance strip, seven-switch FX chain and MIDI keyboard footer.
+- Kept the journal's nine existing rotary/APVTS bindings, seven main FX switches and only MELODY/PATTERN as the two main modes. FLANGER stays in FX EDIT; AutoChords remains auxiliary.
+- Hid unfinished Auto Sound Hunter/Curator controls, the inline chord diagram, the third PUNK GROUP mode and any fake CPU/RAM indicators from the main cover.
+- Added Skin-1 hero PNG decoding/rendering and CTest assertions. The current `assets/hero.png` is still a legacy placeholder, not the final exact photographic guitar crop; final isolated hero/control artwork and pixel-parity review remain open.
+- Added a static cover-layout regression test and enabled the Windows x64 validation workflow for this branch/PR. No Windows build, CTest, pluginval or FL Studio 20 acceptance result is claimed until the exact branch-head workflow passes.
