@@ -35,6 +35,8 @@ public:
     bool closePanel(int id);
     void closeAllPanels();
     bool isPanelOpen(int id) const noexcept;
+    juce::Component* getPanelContent(int id) noexcept;
+    const juce::Component* getPanelContent(int id) const noexcept;
     int getOpenPanelCount() const noexcept;
 
     void setPanelGap(int pixels);
