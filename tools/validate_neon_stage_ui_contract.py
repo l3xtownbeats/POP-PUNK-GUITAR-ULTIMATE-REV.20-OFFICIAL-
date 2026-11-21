@@ -19,7 +19,7 @@ def require(condition: bool, message: str) -> None:
 
 
 def extract_array(source: str, declaration: str) -> list[str]:
-    match = re.search(re.escape(declaration) + r"\\s*\\{([^}]*)\\}", source, re.S)
+    match = re.search(re.escape(declaration) + r"\s*\{([^}]*)\}", source, re.S)
     if not match:
         return []
     return re.findall(r'"([^"]+)"', match.group(1))
