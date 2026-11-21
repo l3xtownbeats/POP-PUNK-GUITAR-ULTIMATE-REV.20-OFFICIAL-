@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# JUCE 7.0.12 is checked out by the Windows workflow into this directory.
+# The Windows CI matrix checks out the selected JUCE version into this directory.
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/CMakeLists.txt")
     message(FATAL_ERROR "JUCE 7.0.12 checkout is missing. Run the configured workflow or provide JUCE/.")
 endif()
@@ -202,6 +202,18 @@ add_test(NAME ppgu_processor_pattern_tests COMMAND ppgu_processor_pattern_tests)
 
 add_test(NAME ppgu_skin1_premium_artwork_package_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_skin1_premium_artwork_package.py)
+
+add_test(NAME ppgu_neon_stage_animation_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_neon_stage_animation_contract.py)
+
+add_test(NAME ppgu_neon_stage_workspace_settings_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_neon_stage_workspace_settings_contract.py)
+
+add_test(NAME ppgu_neon_stage_focus_state_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_neon_stage_focus_state_contract.py)
+
+add_test(NAME ppgu_neon_stage_cover_layout_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_neon_stage_cover_layout_contract.py)
 
 add_test(NAME ppgu_sound_asset_registry_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/TestSoundAssetRegistry.py)

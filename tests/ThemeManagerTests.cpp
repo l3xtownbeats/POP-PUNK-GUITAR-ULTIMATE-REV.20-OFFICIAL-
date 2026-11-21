@@ -66,27 +66,41 @@ int main()
             // artwork layers, even while a release/host gate remains pending.
             PPGUThemeManager artworkCandidate;
             const bool artworkLoaded = manifest.existsAsFile() && artworkCandidate.loadFromFile(manifest);
-            expect(artworkLoaded, id + " theme manifest and SVG artwork load"
+            expect(artworkLoaded, id + " theme manifest and local artwork load"
                    + (artworkLoaded ? juce::String{} : ": " + artworkCandidate.getLastError()));
             if (artworkLoaded)
             {
                 expect(artworkCandidate.getPalette().id == id, id + " artwork candidate ID matches");
                 expect(artworkCandidate.getPalette().name == entry.getProperty("name", "").toString(),
                        id + " artwork candidate display name matches");
-                expect(artworkCandidate.getPalette().textureArtwork.isValid(), id + " texture SVG decoded");
-                expect(artworkCandidate.getPalette().bezelArtwork.isValid(), id + " bezel SVG decoded");
-                expect(artworkCandidate.getPalette().crestArtwork.isValid(), id + " crest SVG decoded");
+                expect(artworkCandidate.getPalette().textureArtwork.isValid(), id + " texture artwork decoded");
+                expect(artworkCandidate.getPalette().bezelArtwork.isValid(), id + " bezel artwork decoded");
+                expect(artworkCandidate.getPalette().crestArtwork.isValid(), id + " crest artwork decoded");
                 if (id == "skin-053")
                 {
-                    expect(artworkCandidate.getPalette().controlsSpriteSheet.isValid(),
-                           "NEON STAGE controls sprite atlas decoded");
-                    expect(artworkCandidate.getPalette().metersSlidersSpriteSheet.isValid(),
-                           "NEON STAGE meters/sliders atlas decoded");
-                    expect(artworkCandidate.getPalette().framesPanelsSpriteSheet.isValid(),
-                           "NEON STAGE frames/panels atlas decoded");
-                    expect(artworkCandidate.getPalette().iconsSpriteSheet.isValid(),
-                           "NEON STAGE icon atlas decoded");
                     const auto& skinOne = artworkCandidate.getPalette();
+                    expect(!skinOne.controlsSpriteSheet.isValid(),
+                           "Legacy prototype controls atlas is not loaded");
+                    expect(!skinOne.metersSlidersSpriteSheet.isValid(),
+                           "Legacy prototype meters/sliders atlas is not loaded");
+                    expect(!skinOne.framesPanelsSpriteSheet.isValid(),
+                           "Legacy prototype frames/panels atlas is not loaded");
+                    expect(!skinOne.iconsSpriteSheet.isValid(),
+                           "Legacy prototype icon atlas is not loaded");
+                    expect(skinOne.controlStateArtwork.size() == 135,
+                           "All 27 controls decode their five individually authored runtime states");
+                    expect(skinOne.findControlArtwork("knob01", "default") != nullptr,
+                           "Main rotary artwork is available by control ID/state");
+                    expect(skinOne.findControlArtwork("fx_switch07", "pressed") != nullptr,
+                           "Seventh main FX switch artwork is available by control ID/state");
+                    expect(skinOne.findControlArtwork("Import_Guitar", "hover") != nullptr,
+                           "Import Guitar header artwork is available by control ID/state");
+                    expect(skinOne.findControlArtwork("About", "disabled") != nullptr,
+                           "Disabled About artwork is available by control ID/state");
+                    expect(skinOne.heroArtwork.isValid()
+                               && skinOne.heroArtwork.getWidth() == 800
+                               && skinOne.heroArtwork.getHeight() == 450,
+                           "NEON STAGE hero PNG decoded; visual reference parity remains a separate acceptance gate");
                     expect(skinOne.backgroundArtwork.isValid()
                                && skinOne.backgroundArtwork.getWidth() == 2560
                                && skinOne.backgroundArtwork.getHeight() == 1440,
@@ -150,7 +164,11 @@ int main()
         expect(manager.getPalette().id == "skin-053", "NEON STAGE stable ID stays skin-053");
         expect(manager.getPalette().name == "NEON STAGE DEFAULT", "NEON STAGE name is canonical");
         expect(manager.getPalette().tokens.windowBg == juce::Colour(0xff080b14),
-               "NEON STAGE palette is canonical");
+               "NEON STAGE graphite background is canonical");
+        expect(manager.getPalette().tokens.accent == juce::Colour(0xff00d9ff),
+               "NEON STAGE primary accent is cyan");
+        expect(manager.getPalette().tokens.accentGlow == juce::Colour(0xff6b8cff),
+               "NEON STAGE secondary accent is electric blue");
     }
     const auto invalid = neon.loadFileAsString().replace("\"index\": 53", "\"index\": 54");
     expect(!manager.loadFromJson(invalid), "stable ID/index mismatch is rejected");

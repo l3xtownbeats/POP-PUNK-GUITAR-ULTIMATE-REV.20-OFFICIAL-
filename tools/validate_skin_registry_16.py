@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Validate REV.20's exact 16-theme registry without accepting legacy skins."""
 from __future__ import annotations
+import hashlib
 import json
 import struct
 import zlib
 from pathlib import Path
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIN = ROOT / "SKIN"
@@ -62,6 +64,20 @@ def validate_png(path: Path, expected_size: tuple[int, int]) -> None:
         raise SystemExit(f"FAIL: incomplete PNG or trailing data: {path}")
     if dimensions != expected_size:
         raise SystemExit(f"FAIL: PNG dimensions {dimensions!r}, expected {expected_size!r}: {path}")
+    # CRC checks alone do not prove that the compressed image stream decodes.
+    try:
+        with Image.open(path) as image:
+            if image.format != "PNG":
+                raise SystemExit(f"FAIL: Pillow did not identify PNG format: {path}")
+            if image.size != expected_size:
+                raise SystemExit(f"FAIL: decoded PNG dimensions {image.size!r}, expected {expected_size!r}: {path}")
+            image.verify()
+        with Image.open(path) as image:
+            image.load()
+    except SystemExit:
+        raise
+    except Exception as exc:
+        raise SystemExit(f"FAIL: PNG decode verification failed: {path}: {exc}") from exc
 
 
 def main() -> int:
@@ -106,10 +122,70 @@ def main() -> int:
             if not asset_path.is_file():
                 raise SystemExit(f"FAIL: {label} lacks artwork {key}: {asset_path}")
             validate_png(asset_path, size)
-        for key in ("texture", "bezel", "crest"):
-            relative_svg = assets.get(key)
-            if not relative_svg or not (manifest_path.parent / relative_svg).is_file():
-                raise SystemExit(f"FAIL: {label} lacks SVG layer {key}")
+        layer_sizes = {
+            "texture": (512, 512),
+            "bezel": (800, 450),
+            "crest": (480, 168),
+        }
+        if stable_id == "skin-053":
+            # NEON STAGE has its own audited 61-source migration package.
+            migration_path = SKIN / folder / "assets" / "png_migration" / "png_manifest.json"
+            if not migration_path.is_file():
+                raise SystemExit("FAIL: missing NEON STAGE PNG migration manifest")
+            migration = json.loads(migration_path.read_text(encoding="utf-8"))
+            if migration.get("skinId") != stable_id or migration.get("convertedSourceCount") != 61 or migration.get("variantCount") != 183:
+                raise SystemExit("FAIL: NEON STAGE PNG migration manifest count/identity mismatch")
+            runtime_layers = {
+                "texture": ("assets/png_migration/runtime_artwork/texture.png", (512, 512)),
+                "bezel": ("assets/png_migration/runtime_artwork/bezel.png", (800, 450)),
+                "crest": ("assets/png_migration/runtime_artwork/crest.png", (480, 168)),
+            }
+            for key, (relative, size) in runtime_layers.items():
+                if assets.get(key) != relative:
+                    raise SystemExit(f"FAIL: invalid NEON STAGE runtime PNG path for {key}")
+                asset_path = SKIN / folder / relative
+                if not asset_path.is_file():
+                    raise SystemExit(f"FAIL: NEON STAGE lacks runtime PNG layer {key}: {asset_path}")
+                validate_png(asset_path, size)
+        else:
+            # The other 15 skins must use generated PNGs, not stale SVG-only
+            # references. Verify every 1x/2x/3x file against the migration manifest.
+            migration_path = SKIN / "skin_studio_png_migration_manifest.json"
+            if not migration_path.is_file():
+                raise SystemExit("FAIL: missing 15-theme PNG migration manifest")
+            migration = json.loads(migration_path.read_text(encoding="utf-8"))
+            if (migration.get("sourceThemes") != 15
+                    or migration.get("sourceLayers") != 45
+                    or migration.get("variantCount") != 135
+                    or migration.get("renderer") != "@resvg/resvg-js"):
+                raise SystemExit("FAIL: 15-theme PNG migration manifest count/renderer mismatch")
+            records = {
+                (record.get("theme"), record.get("layer")): record
+                for record in migration.get("records", [])
+            }
+            for key, size in layer_sizes.items():
+                expected_base = f"assets/png_migration/{key}.png"
+                if assets.get(key) != expected_base:
+                    raise SystemExit(f"FAIL: {label} has non-PNG {key} runtime path")
+                record = records.get((stable_id, key))
+                if not record or len(record.get("variants", [])) != 3:
+                    raise SystemExit(f"FAIL: {label} lacks complete {key} 1x/2x/3x manifest")
+                expected_variants = {"1x": size, "2x": (size[0] * 2, size[1] * 2), "3x": (size[0] * 3, size[1] * 3)}
+                seen_scales = set()
+                for variant in record["variants"]:
+                    scale = variant.get("scale")
+                    if scale not in expected_variants or scale in seen_scales:
+                        raise SystemExit(f"FAIL: {label} has invalid {key} scale entry")
+                    seen_scales.add(scale)
+                    png_path = ROOT / variant.get("path", "")
+                    if not png_path.is_file():
+                        raise SystemExit(f"FAIL: {label} missing {key} {scale} PNG: {png_path}")
+                    validate_png(png_path, expected_variants[scale])
+                    if hashlib.sha256(png_path.read_bytes()).hexdigest() != variant.get("sha256"):
+                        raise SystemExit(f"FAIL: {label} {key} {scale} SHA-256 mismatch")
+                if seen_scales != set(expected_variants):
+                    raise SystemExit(f"FAIL: {label} lacks one or more {key} scale variants")
+
         if entry.get("runtimeReady") is True:
             ready.append(stable_id)
         elif entry.get("runtimeReady") is not False:

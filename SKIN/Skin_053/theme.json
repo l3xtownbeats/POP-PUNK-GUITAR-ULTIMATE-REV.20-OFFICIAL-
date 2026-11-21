@@ -5,7 +5,7 @@
   "name": "NEON STAGE DEFAULT",
   "family": "special",
   "layout": "STUDIO_CONSOLE",
-  "description": "Canonical SKIN-1 visual shell: dark graphite studio console with restrained cyan, electric-blue, violet and magenta stage accents. Default minimal mode; effects are opt-in.",
+  "description": "Canonical SKIN-1 visual shell: dark graphite studio console with restrained cyan and electric-blue stage accents. Default minimal mode; premium lighting remains controlled by the theme.",
   "palette": {
     "window_bg": "#080B14",
     "panel": "#101827",
@@ -38,12 +38,12 @@
   },
   "effects": {
     "material": "matte graphite / precision anodized metal",
-    "texture": "svg/texture.svg",
-    "bezel": "svg/bezel.svg",
-    "crest": "svg/crest.svg",
+    "texture": "assets/png_migration/runtime_artwork/texture.png",
+    "bezel": "assets/png_migration/runtime_artwork/bezel.png",
+    "crest": "assets/png_migration/runtime_artwork/crest.png",
     "shadowDepth": 0.28,
     "edgeHighlight": 0.18,
-    "glow": "opt-in baked accent lighting; disabled in default minimal mode"
+    "glow": "controlled cyan/electric-blue accent lighting; restrained in default mode"
   },
   "reduceInEco": true,
   "hotSwapFadeMs": 150,
@@ -332,9 +332,9 @@
   "assets": {
     "preview": "assets/preview.png",
     "hero": "assets/hero.png",
-    "texture": "svg/texture.svg",
-    "bezel": "svg/bezel.svg",
-    "crest": "svg/crest.svg",
+    "texture": "assets/png_migration/runtime_artwork/texture.png",
+    "bezel": "assets/png_migration/runtime_artwork/bezel.png",
+    "crest": "assets/png_migration/runtime_artwork/crest.png",
     "spriteSheets": {
       "controls": "assets/spritesheets/neon_stage_controls_spritesheet.png",
       "meters_sliders": "assets/spritesheets/neon_stage_meters_sliders_sheet.png",

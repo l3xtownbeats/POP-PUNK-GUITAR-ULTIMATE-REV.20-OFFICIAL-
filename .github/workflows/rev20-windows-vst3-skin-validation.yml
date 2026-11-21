@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+      - work/neon-stage-cover-parity
+  pull_request:
+    branches:
+      - main
     paths:
       - "CMakeLists.txt"
       - "Source/**"
@@ -11,7 +15,9 @@ on:
       - "SKIN/**"
       - "assets/library/**"
       - "tools/validate_skin_registry_16.py"
-      - "tools/generate_neon_stage_spritesheets.py"
+      - "tools/migrate_neon_stage_png.py"
+      - "tools/migrate_skin_studio_png.py"
+      - "tools/render_neon_stage_svg.cjs"
       - "tools/package_active_skins.py"
       - "tools/validate_library_tiers.py"
       - "SoundHunter/**"
@@ -22,18 +28,19 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: rev20-windows-x64-vst3-skin-validation
+  group: rev20-windows-x64-vst3-skin-validation-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  windows-x64-vst3:
-    runs-on: windows-2022
-    timeout-minutes: 45
+  prepare-skin1-png:
+    name: Prepare audited Skin-1 PNG artwork (Linux renderer)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - name: Checkout exact REV.20 main commit
+      - name: Checkout exact tested revision
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -41,29 +48,57 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install sprite atlas generator dependency
+      - name: Install PNG migration dependencies
+        run: python -m pip install --disable-pip-version-check Pillow numpy
+
+      - name: Install deterministic Arial-compatible font
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-liberation2
+
+      - name: Install deterministic Resvg renderer
+        run: npm install --no-save --no-package-lock @resvg/resvg-js
+
+      - name: Render and audit Skin-1 PNG artwork
+        run: python tools/migrate_neon_stage_png.py
+
+      - name: Render all 15 Skin Studio themes to 1x/2x/3x PNG
+        run: python tools/migrate_skin_studio_png.py
+
+      - name: Upload complete audited theme PNG artwork
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppgu-skin1-png-migration
+          path: |
+            SKIN/Skin_053/assets/png_migration/
+            SKIN/Skin_*/assets/png_migration/**
+            SKIN/Skin_*/theme.json
+            SKIN/skin_studio_png_migration_manifest.json
+          if-no-files-found: error
+          retention-days: 1
+
+  windows-x64-vst3:
+    needs: prepare-skin1-png
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact REV.20 branch or pull-request commit
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download audited Skin-1 PNG artwork before configure/build/CTest
+        uses: actions/download-artifact@v4
+        with:
+          name: ppgu-skin1-png-migration
+          path: SKIN
+
+      - name: Install PNG validation dependency
         shell: pwsh
         run: python -m pip install --disable-pip-version-check Pillow
-
-      - name: Generate canonical NEON STAGE sprite atlases
-        shell: pwsh
-        run: python tools/generate_neon_stage_spritesheets.py
-
-      - name: Commit generated NEON STAGE sprite atlases to the source tree
-        shell: pwsh
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add SKIN/Skin_053/assets/spritesheets/*.png SKIN/Skin_053/assets/spritesheets/neon_stage_spritesheet_manifest.json
-          git diff --cached --quiet
-          if ($LASTEXITCODE -ne 0) {
-            git commit -m "Refresh generated NEON STAGE sprite atlases"
-            git fetch origin main
-            git rebase origin/main
-            git push origin HEAD:main
-          } else {
-            Write-Host "Generated NEON STAGE sprite atlases match the committed source files."
-          }
 
       - name: Checkout JUCE 7.0.12
         shell: pwsh
@@ -81,9 +116,14 @@ jobs:
         shell: pwsh
         run: ctest --test-dir build -C Release --output-on-failure
 
+
       - name: Validate exactly 16 named graphical skins and all artwork assets
         shell: pwsh
         run: python tools/validate_skin_registry_16.py
+
+      - name: Audit journal-driven NEON STAGE modules and all-window artwork scope
+        shell: pwsh
+        run: python tools/validate_neon_stage_window_scope.py
 
       - name: Stage exactly 16 approved skin folders beside VST3
         shell: pwsh
@@ -119,6 +159,96 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: PPGU-REV20-Windows-x64-VST3
+          path: |
+            build/PPGU_artefacts/Release/VST3/*.vst3
+            build/PPGU_artefacts/Release/VST3/Skins/**
+          if-no-files-found: error
+          retention-days: 14
+
+  windows-x64-juce9-direct2d-candidate:
+    name: Windows x64 / JUCE 9.0.6 Direct2D candidate
+    needs: windows-x64-vst3
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - name: Checkout generated branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install artwork validation dependency
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Download audited Skin-1 PNG artwork before configure/build/CTest
+        uses: actions/download-artifact@v4
+        with:
+          name: ppgu-skin1-png-migration
+          path: SKIN
+
+      - name: Install PNG validation dependency
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Checkout JUCE 9.0.6
+        shell: pwsh
+        run: git clone --depth 1 --branch 9.0.6 https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure Windows x64
+        shell: pwsh
+        run: cmake -S . -B build -A x64
+
+      - name: Build VST3 and all C++ contract tests
+        shell: pwsh
+        run: cmake --build build --config Release --parallel
+
+      - name: Run full CTest suite
+        shell: pwsh
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Validate exactly 16 named graphical skins and all artwork assets
+        shell: pwsh
+        run: python tools/validate_skin_registry_16.py
+
+      - name: Stage exactly 16 approved skin folders beside VST3
+        shell: pwsh
+        run: python tools/package_active_skins.py --root SKIN --output build/PPGU_artefacts/Release/VST3/Skins
+
+      - name: Locate VST3 bundle
+        id: vst3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $plugin = Get-ChildItem build -Directory -Recurse -Filter '*.vst3' | Select-Object -First 1
+          if (-not $plugin) { throw 'VST3 bundle not found after successful JUCE 9 build.' }
+          "path=$($plugin.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Run pluginval strictness level 5
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'pluginval_Windows.zip'
+          $toolDir = Join-Path $env:RUNNER_TEMP 'pluginval-juce9'
+          Invoke-WebRequest -Uri 'https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_Windows.zip' -OutFile $archive -TimeoutSec 180
+          Expand-Archive -LiteralPath $archive -DestinationPath $toolDir -Force
+          $validator = Get-ChildItem -LiteralPath $toolDir -Recurse -File -Filter 'pluginval.exe' | Select-Object -First 1
+          if (-not $validator) { throw 'pluginval.exe was not found in the official Windows release archive.' }
+          $pluginPath = "${{ steps.vst3.outputs.path }}"
+          $arguments = @('--strictness-level', '5', ('"{0}"' -f $pluginPath))
+          $validationProcess = Start-Process -FilePath $validator.FullName -ArgumentList $arguments -NoNewWindow -Wait -PassThru
+          if ($validationProcess.ExitCode -ne 0) {
+            throw "pluginval strictness level 5 failed with exit code $($validationProcess.ExitCode)."
+          }
+
+      - name: Upload JUCE 9.0.6 candidate VST3 and matching 16-skin pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-REV20-JUCE-9.0.6-Windows-x64-VST3-candidate
           path: |
             build/PPGU_artefacts/Release/VST3/*.vst3
             build/PPGU_artefacts/Release/VST3/Skins/**

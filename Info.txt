@@ -167,3 +167,149 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Pluginval strictness level 5: PASS. Logs show scan, cold/warm open, editor, audio processing, state, automation, parameter, VST3 validator and bus checks all completed successfully.
 - Artifact: `PPGU-REV20-Windows-x64-VST3`, ID `14625308194`, 5,857,765 bytes, SHA-256 `72e31eb39e36301c2f3dfa070e9ef277c6d5a360d2907db12f4e4a25e219e864`, expires 2026-12-04.
 - Remaining manual/release gates: FL Studio 20 host acceptance on Windows 10; full GUI/reference parity including Playing Core hero display; DPI 100/125/150%; 150 ms hot-swap/ECO/memory/performance observation; 15 GB BASIC payload completion; all 500 playable presets.
+
+
+## 2026-11-21 — NEON STAGE reference-01 cover parity work (branch only)
+
+- Created working branch `work/neon-stage-cover-parity` from the canonical `main` baseline; no changes were made to `main`.
+- Re-composed the JUCE main editor into the reference-01 structure: left Browser, central guitar stage with two mode tabs, right Amp & Tone, performance strip, seven-switch FX chain and MIDI keyboard footer.
+- Kept the journal's nine existing rotary/APVTS bindings, seven main FX switches and only MELODY/PATTERN as the two main modes. FLANGER stays in FX EDIT; AutoChords remains auxiliary.
+- Hid unfinished Auto Sound Hunter/Curator controls, the inline chord diagram, the third PUNK GROUP mode and any fake CPU/RAM indicators from the main cover.
+- Added Skin-1 hero PNG decoding/rendering and CTest assertions. The current `assets/hero.png` is still a legacy placeholder, not the final exact photographic guitar crop; final isolated hero/control artwork and pixel-parity review remain open.
+- Added a static cover-layout regression test and enabled the Windows x64 validation workflow for this branch/PR. No Windows build, CTest, pluginval or FL Studio 20 acceptance result is claimed until the exact branch-head workflow passes.
+
+
+## 2026-11-21 — Windows x64 VST3 acceptance CI PASS (tested SHA 09ebf598ff9119aa35a45276ee2c4ca4a45817a6)
+
+- GitHub Actions run: `44903101708` — Windows 2022 x64.
+- CMake configure: PASS.
+- VST3 + C++ contract test build: PASS.
+- Full CTest suite: PASS.
+- Exact 16-skin registry validation: PASS.
+- 16-skin runtime package staging: PASS.
+- pluginval strictness level 5: PASS.
+- Artifact: `PPGU-REV20-Windows-x64-VST3`, ID `14707315505`, 11,088,750 bytes; SHA-256 `fb4fa88dbdd57afefe5a47a663dec9f75a32a398fdf8415b523c054671a2d554`; expires 2026-12-05.
+- This CI pass proves the tested revision builds and passes automated checks. It does not prove visual pixel parity or successful FL Studio 20 use on a physical Windows 10 installation.
+- Remaining gates: exact final isolated hero/control artwork, visual review against mockup 01, FL Studio 20 host acceptance, and verification that the package resolves the skin directory correctly on the target Windows installation.
+
+## 2026-11-21 — JOURNAL-DRIVEN ALL-WINDOW NEON STAGE ARTWORK PASS (branch only)
+
+- The canonical journal `Info.txt` and `PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt` are treated as the complete scope authority. Main reference 01 controls the main console; references 02–07 control their corresponding auxiliary-window visual language. No new layout or product controls are authorized.
+- Added `docs/NEON_STAGE_ALL_WINDOWS_ASSET_SCOPE_RU.md` and `SKIN/Skin_053/assets/window_asset_scope.json` to enumerate the main window zones, all currently implemented auxiliary windows, their live controls, artwork groups and explicit exclusions.
+- Updated the LookAndFeel to resolve per-control Skin-1 artwork for identified buttons and the preset browser; header control IDs now map to the approved artwork. About is disabled rather than opening an unapproved generic message box. The nine rotary and seven FX/APVTS bindings remain unchanged.
+- AutoChords now communicates the documented setup-only state and its generator control is disabled until the Pattern MIDI/chord/preview backend is genuinely connected. Key/scale/pattern setup selectors remain visible.
+- Removed runtime loading and CI regeneration of the legacy `NEON_STAGE_MANAGER_3_0` sprite atlases. Their manifest uses a different prototype palette including magenta and generic meter/control art, so those atlases are not approved REV.20 NEON STAGE production resources. Existing individual control PNGs and native vector fallback remain the rendering path.
+- Added `tools/validate_neon_stage_window_scope.py` to audit the 27-control map, current per-control PNG coverage, nine main parameter bindings, seven FX bindings, auxiliary module presence, disabled/unavailable semantics and exclusion of the legacy atlas generator.
+- This pass is structural/runtime integration, not a declaration of completed artwork. Open production tasks: dedicated ACTIVE/ON and FOCUS state art (current manifest contains default/hover/pressed/disabled/dragged only); separate 9-slice panel art for every main/auxiliary window; final approved photographic guitar hero artwork (current hero remains the preserved legacy placeholder); visual audit against all seven references; exact-SHA Windows build/CTest/pluginval and manual FL Studio 20 acceptance.
+- No DSP, sampler, MIDI, APVTS IDs/ranges, preset catalog, SoundBank or audio callback changes are intended. `main` remains untouched.
+
+## 2026-11-21 — APPROVED MAIN EDITOR GEOMETRY RESTORED (branch only)
+
+- Main editor initial size is now 1024×700 px; responsive limits are 900×640 through 1600×1100 px, matching the NEON STAGE production specification.
+- Restored-size persistence is clamped to the same approved limits, so older saved 1400×790 bounds cannot silently override the reference baseline.
+- Added these geometry requirements to the journal-driven window-scope CI audit. Exact-SHA Windows build/CTest remains in progress; no pass is claimed yet.
+
+
+## 2026-11-21 — NEON STAGE ANIMATION AND TARGETED REPAINT PASS (branch only)
+
+- Connected the existing 30 Hz editor animation phase to explicit repaint requests for the nine rotary controls, seven FX switches and the two main mode tabs. Rotary pointers continue to track their real APVTS values; they do not spin independently of parameter state.
+- Added a 30 Hz animation-phase update to the auxiliary workspace. Each open auxiliary window now receives a restrained cyan/blue border-breath phase and repaints its animated descendants: sliders, active/toggled/hovered/focused buttons, and hovered/focused selectors/editors.
+- Kept the LCD/harmony scan animation on its existing 20 Hz timer and output level meters on their existing 30 Hz timer.
+- Removed the unconditional full-editor repaint from the 30 Hz animation callback and avoided repainting the hidden inline FX editor. This narrows invalidation to controls and window chrome that actually use animation.
+- Added `tests/test_neon_stage_animation_contract.py` and registered it with CTest to guard timer frequency, targeted knob/button repainting, auxiliary workspace phase propagation, and avoidance of a full-editor repaint in the animation callback.
+- These are source-level and automated build/test gates. No measured CPU/RAM, frame pacing, flicker, window-open latency, or FL Studio 20 host acceptance result is claimed until the Windows CI and manual host measurements complete.
+
+
+## 2026-11-21 — NEON STAGE WORKSPACE SETTINGS RANGE ALIGNMENT
+- Проверена связь панели WORKSPACE SETTINGS с фактическим runtime workspace.
+- Найдено расхождение: UI ограничивал AUXILIARY PANEL SCALE диапазоном 0.5x–1.5x, а `PPGUMultiWindowWorkspace` принимал до 3.0x; UI ограничивал SPACE BETWEEN PANELS диапазоном 0–32 px, а runtime принимал до 64 px.
+- Исправлено в `Source/UI/PPGUMultiWindowWorkspace.cpp`: runtime clamps теперь совпадают с пользовательскими диапазонами 0.5x–1.5x и 0–32 px. Некорректное non-finite значение масштаба по-прежнему возвращает default 1.0x.
+- Добавлен `tests/test_neon_stage_workspace_settings_contract.py` и регистрация `ppgu_neon_stage_workspace_settings_contract` в CTest.
+- Это исправление согласованности настроек и runtime, а не подтверждение визуального pixel parity или измеренной производительности.
+- Изменения внесены только в `work/neon-stage-cover-parity`; `main` не изменялась.
+
+
+## 2026-11-21 — NEON STAGE PNG CONTROL FOCUS FEEDBACK
+- Сверен контракт состояний: пять индивидуально отрисованных PNG-состояний (default, hover, pressed, disabled, dragged) не заменяют отдельное состояние клавиатурного фокуса.
+- Для PNG-backed rotary controls добавлено независимое кольцо keyboard focus; стрелка регулятора по-прежнему следует реальному значению APVTS.
+- Для PNG-backed buttons добавлена независимая focus-обводка поверх текущей графики. Она не меняет ON/OFF toggle и не подменяет источник состояния APVTS.
+- Добавлен tests/test_neon_stage_focus_state_contract.py и регистрация ppgu_neon_stage_focus_state_contract в CTest.
+- Уточнён комментарий ThemeManager.h: artwork загружается как проверенные локальные PNG; SVG runtime decoder ранее удалён.
+- Focus feedback реализован векторной обводкой поверх существующих PNG. Это не заявка на наличие отдельных авторских PNG-файлов focus/active; производство этих отдельных состояний остаётся отдельной задачей asset pipeline.
+- Не менялись DSP, sampler, MIDI scheduler, APVTS IDs/ranges, preset data и аудиопоток. Изменения только в work/neon-stage-cover-parity; main не изменялась.
+
+
+## 2026-11-21 — SKIN-1 PNG PREPARATION ORDER FIX
+- По журналу Actions выявлена причина падения NEON STAGE artwork loader tests: CTest запускался до генерации PNG runtime_artwork/texture.png, bezel.png и crest.png, поэтому ThemeManager проверял ещё не подготовленные файлы.
+- Перенесён шаг подготовки и аудита PNG runtime artwork перед CMake configure/build/CTest в Windows VST3 workflow. CTest теперь должен видеть те же PNG-файлы, которые затем проверяются registry validator и упаковываются в skin pack.
+- Это исправление порядка CI-шагов. Оно не закрывает отдельные production artwork gaps (hero placeholder, 13 panel PNGs, полный state artwork) и не означает, что сборка уже прошла.
+
+
+## 2026-11-21 — WINDOWS CI PNG RENDERER COMPATIBILITY FIX (branch only)
+
+- Проверены реальные логи Windows x64 VST3 workflow для ревизии 770264f3db908db7ee71ca7deeaa518987e12f02.
+- Найдена конкретная причина раннего падения: CairoSVG устанавливался через pip на Windows runner, но нативная библиотека Cairo DLL отсутствовала. Ошибка: `OSError: no library called "cairo-2" was found`. Установка Python-пакета сама по себе не поставляет системный Cairo runtime.
+- Изменён workflow: рендер SVG → PNG и аудит SHA-256/размеров/alpha/palette выполняются на Ubuntu runner, где Cairo доступен; проверенные PNG migration outputs передаются Windows runner через artifact и скачиваются до CMake configure/build/CTest.
+- Windows остаётся целевой средой сборки VST3; рендер artwork вынесен в совместимую Linux подготовительную job. Содержимое PNG не подменяется и не генерируется на лету во время CTest.
+- Это устраняет подтверждённую платформенную причину импорта CairoSVG, но ещё не подтверждает успешный повторный workflow. Отдельные ThemeManager/skin packaging ошибки из CTest требуют проверки после повторного запуска.
+- Миграция пока генерирует PNG в CI из SVG-исходников; production pipeline ещё не является PNG-only, и SVG-файлы не удалялись. Изменения только в `work/neon-stage-cover-parity`; `main` не затрагивалась.
+
+
+## 2026-11-21 — NEON STAGE INTERACTION / ARTWORK AUDIT DIAGNOSTICS
+
+- Повторная проверка UI-кода подтвердила существующие live bindings: 9 rotary controls имеют APVTS SliderAttachment; 7 FX switches имеют APVTS ButtonAttachment; MELODY/PATTERN синхронизируют toggle-state с выбранным режимом; MIDI keyboard получает processor keyboard state.
+- Визуальная логика уже различает default/hover/pressed/disabled/dragged; toggle ON запрашивает optional active artwork, а при его отсутствии использует существующий ON-визуальный fallback. Keyboard focus пока реализован отдельной доступной обводкой поверх PNG, а не dedicated focus PNG.
+- Проверка текущего control-state manifest подтвердила 27 ID × 5 состояний = 135 PNG записей. Dedicated active/focus PNG не входят в эти 135 записей.
+- Новая Linux PNG preparation job теперь доходит до реального SVG → PNG рендеринга, но palette audit остановил публикацию артефакта: обнаружены пиксели в фиолетово-пурпурном диапазоне в 10 исходных SVG. Эти цвета нельзя просто пропускать или маскировать: требуется локализовать источник и исправить только реальные цветовые отклонения, сохраняя геометрию утверждённого макета.
+- В `tools/migrate_neon_stage_png.py` добавлены координаты и RGBA/HSV образцы первых конфликтных пикселей. Следующий прогон даст данные для точечного исправления исходных SVG без ослабления палитрового gate.
+- Не создавались фальшивые статусы/функции. AUTOCHORDS остаётся SETUP ONLY до подключения генератора; About и другие недоступные элементы не должны имитировать работающие функции.
+- 13 production panel PNG и финальный guitar hero artwork остаются отдельными незакрытыми deliverables. Текущий UI interaction code inspection не заменяет ручной визуальный QA по семи макетам, тестирование в FL Studio 20 и измерения CPU/RAM/frame pacing.
+- Изменения только в `work/neon-stage-cover-parity`; `main` не затрагивалась.
+
+
+## 2026-11-21 — NEON STAGE QUALITY GATE: LIVE CI FINDINGS
+- Проверены Actions runs для HEAD `6db0455f91d6f2111e65637667591b882ed99d4d` в ветке `work/neon-stage-cover-parity`; `main` не изменялась.
+- REV.20 Windows x64 VST3 / 16-skin workflow остановлен на Linux PNG preparation gate. Конвертер успешно обработал 61 SVG source, 51 conversion source и создал 153 масштабных варианта, но аудит палитры не разрешил опубликовать artifact.
+- Конкретные источники с отклонениями: `window_autochords_setup.svg` (85 пикселей), `window_fx_edit.svg` (112), `window_import_guitar.svg` (103), `window_settings.svg` (146), `window_skin_gallery.svg` (166), `button_active.svg` (44), `button_hover.svg` (50), `button_normal.svg` (10), `button_pressed.svg` (8), `fx_value_lcd.svg` (1). CI теперь печатает координаты и RGBA/HSV первых образцов. Следующий шаг — сопоставить каждый кластер с фактическим SVG paint/gradient/filter и исправить только первоисточник; порог палитрового gate не ослаблять.
+- Отдельный native integration workflow собрал VST3 и тестовые бинарники, но CTest завершился с 24/26 passed (92%). Не прошли `ppgu_theme_contracts` и `ppgu_skin1_premium_artwork_package_contract`: runtime PNG для Skin-1 отсутствовал в этом workflow, а проверки также обнаружили недекодируемые/неожиданных размеров PNG в skin-103…skin-117. Пакетировщик отдельно указал на отсутствующий `Skin_053/assets/png_migration/runtime_artwork/texture.png`. Это подтверждённые ошибки pipeline/asset readiness, а не повод пропускать тесты.
+- Успешная компиляция VST3 и contract-test binaries подтверждена; полный CTest, skin registry, skin packaging и pluginval НЕ подтверждены. JUCE 9 candidate job пропущен из-за зависимостей. FL Studio 20 acceptance, ручная визуальная проверка, CPU/RAM/frame pacing не выполнялись.
+- По пользовательской спецификации сохраняется точный NEON STAGE DEFAULT layout. 9 APVTS rotary bindings, 7 FX bindings, MELODY/PATTERN, MIDI keyboard state и шесть auxiliary module classes подтверждены исходниковой проверкой. Это не является доказательством полной визуальной готовности окон.
+- Отдельные ACTIVE/FOCUS PNG комплекты не готовы; действующий manifest остаётся 27 controls × 5 source states = 135 записей, keyboard focus сейчас рисуется независимой обводкой. Не менять схему manifest без полного согласованного обновления PNG, ThemeManager, package tool, validator и тестов.
+- 13 production panel PNG отсутствуют; guitar hero остаётся placeholder. About не должен имитировать несуществующую функциональность. AUTOCHORDS остаётся SETUP ONLY.
+- Следующая реализация должна закрывать зависимость native CI от подготовленного PNG artifact, исправить реальные PNG пути/размеры всех 16 тем, затем пройти полный CTest → registry/package → pluginval. После этого — dedicated ACTIVE/FOCUS assets и 13 production panels по утверждённым исходникам. Не создавать panel artwork из догадок и не заявлять pixel parity без визуального сравнения с утверждёнными макетами.
+- Все изменения этой серии ограничены рабочей веткой; PR/main не мержились.
+
+## 2026-11-21 — PNG ARTIFACT HANDOFF: NATIVE / JUCE 9 CI
+- Исправлен `.github/workflows/neon-stage-native-ci.yml`: отдельная Ubuntu job `prepare-skin1-png` выполняет CairoSVG/Pillow миграцию и строгий аудит, публикует `ppgu-skin1-png-migration`; Windows x64 matrix job зависит от неё и скачивает artifact до configure/build/CTest.
+- Исправлен `.github/workflows/rev20-windows-vst3-skin-validation.yml`: JUCE 9.0.6 candidate job также скачивает тот же подготовленный PNG artifact до CMake configure/build/CTest. Основная JUCE 7 job уже использовала эту зависимость.
+- Первичная правка native workflow была проверена повторным чтением и исправлена: artifact download расположен только в Windows consumer job, а не в Linux producer job. Trigger path включает migrator в push и pull_request фильтрах.
+- Новые GitHub Actions runs созданы после обновлений workflow; они ещё должны завершиться. Их наличие не означает, что PNG palette gate пройден.
+- Визуальная диагностика десяти SVG источников показывает повторяющийся тёмный RGB кластер около `(65,38,56)` в заголовках окон и отдельных кнопках/LCD. В SVG literal hex palette список не содержит соответствующего оттенка. Не выполнять массовую замену и не ослаблять audit: требуется проверить SVG filters, embedded styles, text/shadow paint и renderer compositing на точных координатах до изменения исходника.
+- `main` не изменялась; все commits находятся в `work/neon-stage-cover-parity`.
+
+## 2026-11-21 — PNG ARTIFACT HANDOFF: ALL SKIN-1 BUILD WORKFLOWS
+- В `.github/workflows/skin1-control-state-ci.yml` добавлена Linux job `prepare-skin1-png`: мигратор и строгий palette audit выполняются до Windows job; PNG artifact публикуется только после успешного аудита.
+- Windows consumer job теперь зависит от `prepare-skin1-png` и скачивает `ppgu-skin1-png-migration` до CMake configure/build/CTest. Trigger path pull_request включает `tools/migrate_neon_stage_png.py`.
+- Сверены три Windows build workflows: `neon-stage-native-ci.yml`, `rev20-windows-vst3-skin-validation.yml`, `skin1-control-state-ci.yml`. В каждом предусмотрен Linux producer и Windows consumer с dependency/download handoff. `rev20-sound-hunter-import.yml` и `library-manager-tests.yml` не используют Skin-1 runtime artwork и не включены в этот handoff.
+- Commit: `1f38509c57f0a3ea1fe04d84c0f160033bcf3d6a`. Изменение только в `work/neon-stage-cover-parity`; `main` не затрагивалась.
+- Палитровый gate остаётся блокирующим: последний подтверждённый log run `44927820128` на SHA `026e21c...` обнаружил тот же повторяющийся RGB-кластер в областях текста SVG. Ни source artwork, ни порог классификатора не менялись, поскольку пока не доказано, какой paint/render path создаёт эти пиксели.
+- Пакет 1x/2x/3x не объявляется готовым: 153 производных файла созданы во время неуспешного job, но artifact не опубликован из-за строгого аудита.
+
+## 2026-11-21 — SVG RENDERER ROOT-CAUSE ISOLATION
+- Palette diagnostics локализовали все текущие конфликтные пиксели в текстовых областях десяти SVG; literal source palette в проверенных файлах не содержит соответствующих тёмно-пурпурных значений. Это указывает на возможный renderer/font rasterization artifact, но само по себе ещё не доказывает его причину.
+- Добавлен `tools/render_neon_stage_svg.cjs` на базе Resvg; `tools/migrate_neon_stage_png.py` теперь вызывает этот renderer с заданными целевыми размерами, затем продолжает строгую проверку RGBA, alpha, размеров, forbidden-pixel scan и SHA-256. Palette gate не ослаблен, SVG source art не перекрашивалась.
+- Все три Skin-1 Windows build workflows (`neon-stage-native-ci`, `rev20-windows-vst3-skin-validation`, `skin1-control-state-ci`) теперь устанавливают Resvg в Linux preparation job до генерации и публикации artifact. Windows jobs продолжают скачивать только успешно проверенный artifact до configure/build/CTest.
+- Это диагностический renderer correction, а не подтверждённый palette fix: следующий Linux CI result должен показать, исчез ли аномальный пиксельный кластер. Если кластер сохранится, точечная правка source artwork останется обязательной.
+- `main` не изменялась; все изменения этой серии в `work/neon-stage-cover-parity`.
+
+## 2026-11-21 — CI HANDOFF ORDER RE-CHECK
+- Повторно проверены все три Skin-1 workflows после внедрения Resvg. Исправлено размещение `download-artifact` в `skin1-control-state-ci.yml`: download находится в Windows consumer job, а не в Linux producer job.
+- В `rev20-windows-vst3-skin-validation.yml` добавлены path triggers для `tools/migrate_neon_stage_png.py` и `tools/render_neon_stage_svg.cjs`, чтобы изменения renderer/migrator действительно запускали validation.
+- Проверка содержимого всех трёх workflow подтвердила: producer job содержит upload artifact; Windows consumer зависит от producer и содержит download; Resvg install/render присутствует в producer. Это структурная проверка YAML, не результат завершённого CI run.
+- Исправления: `3e11e6f` (control-state download order), `8f6ce98` (VST3 renderer triggers).
+- Следующий gate: дождаться полного Linux Resvg migration job. До его успешного завершения Windows build jobs должны оставаться skipped/blocked, а PNG pack не считать готовым.
+
+## 2026-11-21 — 16-SKIN PNG DECODE VALIDATION
+- `tools/validate_skin_registry_16.py` дополнен реальной декомпрессией PNG через Pillow после проверки сигнатуры, размеров чанков, CRC и ожидаемых размеров. Для каждого hero/preview всех 16 тем и четырёх NEON STAGE atlases теперь проверяется не только заголовок/CRC, но и успешный `verify()` + `load()` изображения.
+- В `skin1-control-state-ci.yml` добавлена установка Pillow в Windows consumer job; native и REV.20 validation jobs уже устанавливают Pillow. Вызов validator остаётся после сборки/CTest и до упаковки.
+- Изменения: `e467e60` (PNG decode verification), `0a7aaf1` (Pillow dependency). Это усиливает проверку путей/размеров/декодируемости, но не означает, что все 16 тем уже прошли её: требуется завершённый Actions run.

@@ -1,0 +1,363 @@
+{
+  "schemaVersion": "1.0.0",
+  "product": "POP PUNK GUITAR ULTIMATE REV.20",
+  "skin": {
+    "ordinal": 1,
+    "name": "NEON STAGE DEFAULT",
+    "id": "skin-053"
+  },
+  "authority": {
+    "journal": "Info.txt",
+    "masterArtworkSpec": "PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt",
+    "references": [
+      "01 INTERFACE  NEON STAGE DEFAULT .png",
+      "02 INTERFACE  NEON STAGE DEFAULT AUTOCHORDS .png",
+      "03 INTERFACE  NEON STAGE DEFAULT .png",
+      "04 INTERFACE  NEON STAGE DEFAULT .png",
+      "05 INTERFACE  NEON STAGE DEFAULT .png",
+      "06 INTERFACE  NEON STAGE DEFAULT .png",
+      "07 INTERFACE  NEON STAGE DEFAULT .png"
+    ]
+  },
+  "palette": {
+    "window_bg": "#080B14",
+    "panel": "#101827",
+    "panel_elevated": "#17243A",
+    "accent": "#00D9FF",
+    "accent_glow": "#6B8CFF",
+    "forbidden": [
+      "#FF007F",
+      "magenta",
+      "purple",
+      "violet"
+    ]
+  },
+  "mainWindow": {
+    "reference": "01",
+    "zones": [
+      {
+        "id": "header",
+        "elements": [
+          "PPGU",
+          "L3XTOWN AUDIO LAB",
+          "IMPORT GUITAR",
+          "AUTOCHORDS",
+          "SETTINGS",
+          "SKIN",
+          "ABOUT"
+        ],
+        "notes": [
+          "AUTO SOUND HUNTER and CURATOR hidden until backend exists",
+          "ABOUT disabled"
+        ]
+      },
+      {
+        "id": "preset_browser",
+        "elements": [
+          "FACTORY PRESET CATALOG",
+          "ALL PRESETS",
+          "MELODY",
+          "PATTERN",
+          "SEARCH PRESETS",
+          "preset list"
+        ],
+        "notes": [
+          "Do not claim 500 playable presets while catalog is partial"
+        ]
+      },
+      {
+        "id": "playing_core",
+        "elements": [
+          "guitar hero artwork",
+          "MELODY",
+          "PATTERN",
+          "knob01",
+          "knob02",
+          "knob03",
+          "knob04",
+          "knob05",
+          "knob06",
+          "knob07",
+          "knob08",
+          "knob09"
+        ],
+        "notes": [
+          "exactly two main modes"
+        ]
+      },
+      {
+        "id": "amp_tone",
+        "elements": [
+          "amp cabinet artwork",
+          "GAIN",
+          "TREBLE",
+          "MID",
+          "BASS"
+        ]
+      },
+      {
+        "id": "performance_strip",
+        "elements": [
+          "VELOCITY",
+          "DYNAMICS",
+          "SWING",
+          "HUMANIZE",
+          "ACCENT"
+        ],
+        "notes": [
+          "No fake CPU/RAM telemetry"
+        ]
+      },
+      {
+        "id": "fx_chain",
+        "elements": [
+          "fx_switch01",
+          "fx_switch02",
+          "fx_switch03",
+          "fx_switch04",
+          "fx_switch05",
+          "fx_switch06",
+          "fx_switch07"
+        ],
+        "notes": [
+          "FLANGER is only in FX EDIT"
+        ]
+      },
+      {
+        "id": "footer",
+        "elements": [
+          "midi_keyboard",
+          "LCD_display",
+          "LED_indicator",
+          "statusLabel",
+          "sync_selector"
+        ],
+        "notes": [
+          "MIDI range 36–84 inclusive; sync_selector is metadata/compatibility, not a user control"
+        ]
+      }
+    ]
+  },
+  "auxiliaryWindows": [
+    {
+      "id": "import_guitar",
+      "reference": "03-07",
+      "title": "LICENSED GUITAR LIBRARY",
+      "elements": [
+        "LOAD SFZ",
+        "status idle",
+        "status loading",
+        "status success",
+        "status warning",
+        "status error"
+      ],
+      "excluded": [
+        "folder import",
+        "ZIP import",
+        "mapping editor",
+        "auto convert"
+      ]
+    },
+    {
+      "id": "fx_edit",
+      "reference": "03-07",
+      "title": "NEON STAGE / FX EDIT",
+      "groups": {
+        "COMPRESSOR": [
+          "THRESHOLD",
+          "RATIO",
+          "ATTACK",
+          "RELEASE",
+          "AMOUNT"
+        ],
+        "EQ": [
+          "LOW",
+          "MID",
+          "HIGH",
+          "LOW FREQ",
+          "MID FREQ",
+          "MID Q",
+          "HIGH FREQ"
+        ],
+        "DISTORTION": [
+          "DRIVE",
+          "TONE",
+          "MIX"
+        ],
+        "CHORUS": [
+          "RATE",
+          "DEPTH",
+          "MIX"
+        ],
+        "FLANGER": [
+          "RATE",
+          "DEPTH",
+          "FEEDBACK",
+          "MIX"
+        ],
+        "DELAY": [
+          "TIME",
+          "FEEDBACK",
+          "MIX"
+        ],
+        "REVERB": [
+          "ROOM",
+          "DAMPING",
+          "MIX"
+        ],
+        "CABINET IR": [
+          "MIX",
+          "LOW CUT",
+          "HIGH CUT"
+        ]
+      },
+      "elements": [
+        "effect selector",
+        "POWER",
+        "PROCESS RESPONSE / VISUAL GUIDE",
+        "APVTS status"
+      ]
+    },
+    {
+      "id": "pattern_routing",
+      "reference": "03-07",
+      "title": "PATTERN / SONG SECTION ROUTING",
+      "elements": [
+        "INTRO",
+        "VERSE",
+        "CHORUS",
+        "BRIDGE",
+        "OUTRO",
+        "Pattern 1–8",
+        "PREVIEW",
+        "APPLY",
+        "CANCEL",
+        "status"
+      ],
+      "excluded": [
+        "waveform",
+        "clip timeline"
+      ]
+    },
+    {
+      "id": "autochords",
+      "reference": "02",
+      "title": "AUTOCHORDS / HARMONY SETUP",
+      "elements": [
+        "KEY C–B",
+        "Chromatic",
+        "Major",
+        "Minor",
+        "Pattern 1–8",
+        "AUTOCHORDS OFF",
+        "setup-only warning"
+      ],
+      "notes": [
+        "MIDI chord generation/custom mode/preview engine not connected; generator disabled"
+      ]
+    },
+    {
+      "id": "workspace_settings",
+      "reference": "03-07",
+      "title": "WORKSPACE SETTINGS",
+      "elements": [
+        "AUXILIARY PANEL SCALE 0.5x–1.5x",
+        "SPACE BETWEEN PANELS 0–32 px",
+        "RESTORE NEON STAGE DEFAULT",
+        "OPEN SKIN GALLERY"
+      ]
+    },
+    {
+      "id": "skin_gallery",
+      "reference": "03-07",
+      "title": "VISUAL SKIN GALLERY",
+      "elements": [
+        "Search",
+        "ALL SKINS",
+        "FAVORITES ONLY",
+        "count",
+        "16 theme cards",
+        "PREVIEW",
+        "FAVORITE",
+        "APPLY",
+        "CANCEL"
+      ],
+      "notes": [
+        "exactly 16 approved themes"
+      ]
+    },
+    {
+      "id": "about",
+      "title": "ABOUT",
+      "elements": [
+        "disabled control state"
+      ],
+      "notes": [
+        "no fake content window"
+      ]
+    }
+  ],
+  "controlContract": {
+    "count": 27,
+    "statesPresent": [
+      "default",
+      "hover",
+      "pressed",
+      "disabled",
+      "dragged"
+    ],
+    "statesRequired": [
+      "normal",
+      "hover",
+      "pressed",
+      "active/on",
+      "disabled",
+      "focus"
+    ],
+    "note": "dragged is not an alias for active or focus; audit and create dedicated state artwork."
+  },
+  "lockedControls": {
+    "knobs": [
+      "ampGain",
+      "eqHigh",
+      "eqMid",
+      "eqLow",
+      "velocity",
+      "dynamics",
+      "swing",
+      "humanize",
+      "accent"
+    ],
+    "fx": [
+      "compressorOn",
+      "eqOn",
+      "distortionOn",
+      "chorusOn",
+      "delayOn",
+      "reverbOn",
+      "cabinetOn"
+    ],
+    "mainModes": [
+      "MELODY",
+      "PATTERN"
+    ],
+    "midiRange": [
+      36,
+      84
+    ]
+  },
+  "nonGoals": [
+    "DSP",
+    "sampler",
+    "MIDI scheduler",
+    "APVTS IDs/ranges",
+    "500 preset content",
+    "SoundBank",
+    "audio callback",
+    "fake CPU/RAM",
+    "invented controls",
+    "third main mode",
+    "eighth main FX"
+  ],
+  "status": "scope_locked_artwork_completion_pending"
+}

@@ -56,6 +56,14 @@ public:
     bool isMaximized() const noexcept { return maximized; }
     void restoreBounds(juce::Rectangle<int> bounds) { setBounds(bounds); maximized = false; }
 
+    void setAnimationPhase(float phase)
+    {
+        animationPhase = phase;
+        repaint();
+        if (content != nullptr)
+            repaintAnimatedDescendants(*content);
+    }
+
     void setThemePalette(const PPGUThemeManager::Palette& palette)
     {
         themePalette = palette;
@@ -168,6 +176,9 @@ public:
             g.restoreState();
         }
 
+        const float breathe = 0.5f + 0.5f * std::sin(animationPhase);
+        g.setColour(borderColour.withAlpha(0.055f + 0.105f * breathe));
+        g.drawRoundedRectangle(area.reduced(1.5f), 8.0f, 3.0f);
         g.setColour(borderColour);
         g.drawRoundedRectangle(area.reduced(0.5f), 8.0f, 1.0f);
         g.setColour(borderColour.withAlpha(0.55f));
@@ -218,6 +229,39 @@ private:
     juce::Point<int> dragStartScreen;
     bool draggingHeader = false;
     bool maximized = false;
+    float animationPhase = 0.0f;
+
+    static void repaintAnimatedDescendants(juce::Component& parent)
+    {
+        for (int i = 0; i < parent.getNumChildComponents(); ++i)
+        {
+            auto* child = parent.getChildComponent(i);
+            if (child == nullptr || !child->isVisible())
+                continue;
+
+            if (auto* slider = dynamic_cast<juce::Slider*>(child))
+                slider->repaint();
+            else if (auto* button = dynamic_cast<juce::Button*>(child))
+            {
+                if (button->isEnabled()
+                    && (button->getToggleState() || button->isMouseOverOrDragging()
+                        || button->hasKeyboardFocus(true)))
+                    button->repaint();
+            }
+            else if (auto* combo = dynamic_cast<juce::ComboBox*>(child))
+            {
+                if (combo->isMouseOver() || combo->hasKeyboardFocus(true))
+                    combo->repaint();
+            }
+            else if (auto* editor = dynamic_cast<juce::TextEditor*>(child))
+            {
+                if (editor->isMouseOver() || editor->hasKeyboardFocus(true))
+                    editor->repaint();
+            }
+
+            repaintAnimatedDescendants(*child);
+        }
+    }
 };
 
 class PPGUMultiWindowWorkspace::TileSurface final : public juce::Component
@@ -323,13 +367,13 @@ int PPGUMultiWindowWorkspace::getOpenPanelCount() const noexcept
 
 void PPGUMultiWindowWorkspace::setPanelGap(int pixels)
 {
-    panelGap = juce::jlimit(0, 64, pixels);
+    panelGap = juce::jlimit(0, 32, pixels);
     layoutPanels();
 }
 
 void PPGUMultiWindowWorkspace::setPanelScale(float scale)
 {
-    panelScale = std::isfinite(scale) ? juce::jlimit(0.5f, 3.0f, scale) : 1.0f;
+    panelScale = std::isfinite(scale) ? juce::jlimit(0.5f, 1.5f, scale) : 1.0f;
     layoutPanels();
 }
 
@@ -353,6 +397,14 @@ void PPGUMultiWindowWorkspace::setThemePalette(const PPGUThemeManager::Palette& 
 
     for (auto& window : windows)
         window->setThemePalette(currentThemePalette);
+}
+
+void PPGUMultiWindowWorkspace::setAnimationPhase(float phase)
+{
+    if (!std::isfinite(phase))
+        return;
+    for (auto& window : windows)
+        window->setAnimationPhase(phase);
 }
 
 void PPGUMultiWindowWorkspace::setSurfaceColours(juce::Colour background,
