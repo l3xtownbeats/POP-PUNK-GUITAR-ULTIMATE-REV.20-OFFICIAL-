@@ -65,12 +65,16 @@ for index, preset in enumerate(presets):
             errors.append(f"{label}: parameters.{key} must be a finite number")
         elif not low <= value <= high:
             errors.append(f"{label}: parameters.{key} outside {low}..{high}")
-    if not isinstance(preset.get("sampleProfile"), str) or not preset["sampleProfile"].strip():
-        errors.append(f"{label}: missing sampleProfile")
-    if mode == "MELODY" and not preset.get("noteBehavior"):
+    if mode == "MELODY":
+        if not isinstance(preset.get("sampleProfile"), str) or not preset["sampleProfile"].strip():
+            errors.append(f"{label}: missing sampleProfile")
+        if not preset.get("noteBehavior"):
         errors.append(f"{label}: missing noteBehavior")
-    if mode == "PATTERN" and not preset.get("groove"):
-        errors.append(f"{label}: missing groove")
+    if mode == "PATTERN":
+        if not preset.get("groove"):
+            errors.append(f"{label}: missing groove")
+        if not isinstance(preset.get("sampleRequirement"), str) or not preset["sampleRequirement"].strip():
+            errors.append(f"{label}: missing sampleRequirement")
     if preset.get("status") == "READY":
         ready_count += 1
 
