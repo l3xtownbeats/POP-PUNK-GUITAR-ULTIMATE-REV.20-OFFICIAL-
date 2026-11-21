@@ -272,10 +272,13 @@ int main()
             juce::AudioBuffer<float> autoChordAudioBlock(2, 13000);
             juce::MidiBuffer noAdditionalMidi;
             processor.processBlock(autoChordAudioBlock, noAdditionalMidi);
-            const double autoChordRms = rms(autoChordAudioBlock, 7000, 3000);
-            const double c4Magnitude = toneMagnitude(autoChordAudioBlock, 7000, 3000, 220.0, 48000.0);
-            const double e4Magnitude = toneMagnitude(autoChordAudioBlock, 7000, 3000, 330.0, 48000.0);
-            const double g4Magnitude = toneMagnitude(autoChordAudioBlock, 7000, 3000, 440.0, 48000.0);
+            // The pattern's first gate is 0.20 beat (about 100 ms) long.
+            // Inspect an early window in the following block, before its
+            // sample-accurate NoteOff, rather than after the gate has closed.
+            const double autoChordRms = rms(autoChordAudioBlock, 1000, 3000);
+            const double c4Magnitude = toneMagnitude(autoChordAudioBlock, 1000, 3000, 220.0, 48000.0);
+            const double e4Magnitude = toneMagnitude(autoChordAudioBlock, 1000, 3000, 330.0, 48000.0);
+            const double g4Magnitude = toneMagnitude(autoChordAudioBlock, 1000, 3000, 440.0, 48000.0);
             if (!(autoChordRms > 0.01 && c4Magnitude > 0.005
                 && e4Magnitude > 0.005 && g4Magnitude > 0.005))
             {
