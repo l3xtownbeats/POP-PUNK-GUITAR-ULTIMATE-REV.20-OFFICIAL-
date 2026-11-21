@@ -71,3 +71,12 @@ The Windows 2022 x64 workflow passed on tested revision `09ebf598ff9119aa35a4527
 - pluginval strictness 5 — PASS.
 
 Artifact `PPGU-REV20-Windows-x64-VST3` (GitHub Actions artifact ID `14707315505`) contains the tested Windows VST3 and staged skin pack. This is an automated build/validator result only. FL Studio 20 manual host acceptance and visual pixel-parity approval remain outstanding. The final extracted hero and control artwork must still be integrated before declaring exact reproduction of mockup 01.
+
+## Palette lock correction — 2026-11-21
+
+- Removed the legacy violet #D46BFF accent from the Skin-1 texture, bezel and crest SVGs; the corresponding highlight is now electric blue #6B8CFF.
+- Updated the Skin-1 theme description and glow metadata to describe only the locked graphite / cyan / electric-blue visual language.
+- Added regression checks to tests/test_neon_stage_cover_layout_contract.py for prohibited violet/magenta accent values and the approved theme description.
+- Extended tests/ThemeManagerTests.cpp to assert the canonical graphite background, cyan primary accent and electric-blue secondary accent.
+
+**Verification boundary:** the source files were re-fetched after the changes and the three SVGs contain none of the checked prohibited accent values. The new C++/Python regression tests have been committed but have not yet been run on this exact revision. The reference-matched photographic guitar hero, complete pixel-parity review and FL Studio 20 visual acceptance remain open.
