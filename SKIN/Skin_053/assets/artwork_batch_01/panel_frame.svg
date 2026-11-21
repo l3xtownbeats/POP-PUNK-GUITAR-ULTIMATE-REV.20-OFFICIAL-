@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560">
+<defs>
+ <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#17243A"/><stop offset=".48" stop-color="#101827"/><stop offset="1" stop-color="#080B14"/></linearGradient>
+ <linearGradient id="edge" x2="1" y2="1"><stop stop-color="#00D9FF" stop-opacity=".72"/><stop offset=".52" stop-color="#6B8CFF" stop-opacity=".28"/><stop offset="1" stop-color="#00D9FF" stop-opacity=".10"/></linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#8AA6C8" stroke-opacity=".045"/></pattern>
+</defs>
+<rect x="2" y="2" width="956" height="556" rx="18" fill="#080B14" stroke="#263B57" stroke-width="4"/>
+<rect x="9" y="9" width="942" height="542" rx="14" fill="url(#bg)" stroke="url(#edge)" stroke-width="2"/>
+<rect x="18" y="18" width="924" height="524" rx="10" fill="url(#grid)"/>
+<path d="M34 72V34H112 M848 34H926V112 M34 448V526H112 M848 526H926V448" fill="none" stroke="#00D9FF" stroke-width="2" stroke-opacity=".7" filter="url(#glow)"/>
+<path d="M34 88H926 M34 472H926" stroke="#6B8CFF" stroke-opacity=".18"/>
+<circle cx="27" cy="27" r="3" fill="#00D9FF"/><circle cx="933" cy="27" r="3" fill="#00D9FF"/><circle cx="27" cy="533" r="3" fill="#00D9FF"/><circle cx="933" cy="533" r="3" fill="#00D9FF"/>
+</svg>

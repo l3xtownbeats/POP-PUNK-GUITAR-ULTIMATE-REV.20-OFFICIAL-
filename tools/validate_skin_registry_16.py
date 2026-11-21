@@ -5,6 +5,7 @@ import json
 import struct
 import zlib
 from pathlib import Path
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIN = ROOT / "SKIN"
@@ -62,6 +63,20 @@ def validate_png(path: Path, expected_size: tuple[int, int]) -> None:
         raise SystemExit(f"FAIL: incomplete PNG or trailing data: {path}")
     if dimensions != expected_size:
         raise SystemExit(f"FAIL: PNG dimensions {dimensions!r}, expected {expected_size!r}: {path}")
+    # CRC checks alone do not prove that the compressed image stream decodes.
+    try:
+        with Image.open(path) as image:
+            if image.format != "PNG":
+                raise SystemExit(f"FAIL: Pillow did not identify PNG format: {path}")
+            if image.size != expected_size:
+                raise SystemExit(f"FAIL: decoded PNG dimensions {image.size!r}, expected {expected_size!r}: {path}")
+            image.verify()
+        with Image.open(path) as image:
+            image.load()
+    except SystemExit:
+        raise
+    except Exception as exc:
+        raise SystemExit(f"FAIL: PNG decode verification failed: {path}: {exc}") from exc
 
 
 def main() -> int:

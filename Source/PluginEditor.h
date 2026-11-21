@@ -10,6 +10,7 @@ class PPGUPremiumLookAndFeel final : public juce::LookAndFeel_V4
 {
 public:
     void setPalette(const PPGUThemeManager::Palette& value) { palette = value; setDefaultSansSerifTypefaceName(palette.uiTypeface); }
+    void setAnimationPhase(float value) noexcept { animationPhase = value; }
     void drawRotarySlider(juce::Graphics&, int, int, int, int, float, float, float, juce::Slider&) override;
     void drawLinearSlider(juce::Graphics&, int, int, int, int, float, float, float, juce::Slider::SliderStyle, juce::Slider&) override;
     void drawButtonBackground(juce::Graphics&, juce::Button&, const juce::Colour&, bool, bool) override;
@@ -18,6 +19,7 @@ public:
     void drawTextEditorOutline(juce::Graphics&, int, int, juce::TextEditor&) override;
 private:
     PPGUThemeManager::Palette palette;
+    float animationPhase = 0.0f;
 };
 
 class PPGUPerformanceDisplay;
@@ -61,6 +63,9 @@ private:
     PPGUPremiumLookAndFeel premiumLookAndFeel;
     juce::ApplicationProperties uiProperties;
     bool uiSettingsReady = false;
+    bool resizeSavePending = false;
+    juce::uint32 lastResizeChangeMs = 0;
+    float animationPhase = 0.0f;
     juce::File runtimeSkinRoot;
     juce::TextButton loadButton { "IMPORT GUITAR" }, skinButton { "SKIN  v" }, autoChordsButton { "AUTOCHORDS" }, settingsButton { "SETTINGS" };
     // These REV.18 entry points are intentionally disabled until their real backends exist.

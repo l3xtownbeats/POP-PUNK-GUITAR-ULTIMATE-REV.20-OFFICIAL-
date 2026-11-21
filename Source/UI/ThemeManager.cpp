@@ -134,80 +134,6 @@ namespace
         return true;
     }
 
-    bool loadSafeSvgArtwork(const juce::File& themeRoot,
-                            const juce::String& relativePath,
-                            int width, int height,
-                            juce::Image& destination,
-                            juce::String& error)
-    {
-        if (relativePath.isEmpty() || relativePath.startsWith("/")
-            || relativePath.contains("..") || relativePath.contains(":")
-            || relativePath.contains("\\"))
-        {
-            error = "Theme SVG path is not a safe relative path";
-            return false;
-        }
-
-        const auto file = themeRoot.getChildFile(relativePath);
-        if (!file.existsAsFile() || !file.isAChildOf(themeRoot)
-            || file.getSize() <= 0 || file.getSize() > 256 * 1024)
-        {
-            error = "Theme SVG is missing, outside its theme folder, or exceeds the size limit";
-            return false;
-        }
-        if (file.isSymbolicLink() && !file.getLinkedTarget().isAChildOf(themeRoot))
-        {
-            error = "Theme SVG symbolic link escapes the theme folder";
-            return false;
-        }
-
-        const auto svgText = file.loadFileAsString();
-        if (svgText.isEmpty()
-            || svgText.containsIgnoreCase("<script")
-            || svgText.containsIgnoreCase("<foreignObject")
-            || svgText.containsIgnoreCase("<image")
-            || svgText.containsIgnoreCase("javascript:")
-            || svgText.containsIgnoreCase("href=\"http")
-            || svgText.containsIgnoreCase("href='http")
-            || svgText.containsIgnoreCase("url(http")
-            || svgText.containsIgnoreCase("url(\"http")
-            || svgText.containsIgnoreCase("url('http")
-            || svgText.containsIgnoreCase("xlink:href")
-            || svgText.containsIgnoreCase("<!DOCTYPE")
-            || svgText.containsIgnoreCase("<!ENTITY"))
-        {
-            error = "Theme SVG contains unsupported or external content";
-            return false;
-        }
-
-        auto xml = juce::XmlDocument::parse(svgText);
-        if (xml == nullptr || xml->getTagName() != "svg")
-        {
-            error = "Theme SVG could not be parsed as a safe SVG document";
-            return false;
-        }
-
-        auto drawable = juce::Drawable::createFromSVG(*xml);
-        if (drawable == nullptr)
-        {
-            error = "Theme SVG could not be rendered";
-            return false;
-        }
-
-        juce::Image rendered(juce::Image::ARGB, width, height, true);
-        juce::Graphics graphics(rendered);
-        drawable->drawWithin(graphics, rendered.getBounds().toFloat(),
-                             juce::RectanglePlacement::stretchToFit, 1.0f);
-        if (!rendered.isValid())
-        {
-            error = "Theme SVG produced an invalid artwork image";
-            return false;
-        }
-
-        destination = std::move(rendered);
-        return true;
-    }
-
     bool loadSafePngArtwork(const juce::File& themeRoot,
                             const juce::String& relativePath,
                             int width, int height,
@@ -768,11 +694,11 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
     auto candidate = activePalette;
     juce::String error;
 
-    if (!loadSafeSvgArtwork(themeRoot, assets.getProperty("texture", "").toString(),
+    if (!loadSafePngArtwork(themeRoot, assets.getProperty("texture", "").toString(),
                             512, 512, candidate.textureArtwork, error)
-        || !loadSafeSvgArtwork(themeRoot, assets.getProperty("bezel", "").toString(),
+        || !loadSafePngArtwork(themeRoot, assets.getProperty("bezel", "").toString(),
                                800, 450, candidate.bezelArtwork, error)
-        || !loadSafeSvgArtwork(themeRoot, assets.getProperty("crest", "").toString(),
+        || !loadSafePngArtwork(themeRoot, assets.getProperty("crest", "").toString(),
                                480, 168, candidate.crestArtwork, error))
     {
         lastError = error.isNotEmpty() ? error : "Theme artwork loading failed";
@@ -780,21 +706,19 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         return false;
     }
 
-    // The default NEON STAGE shell has a four-atlas visual package.
-    // Atlases are decoded only on the UI/control thread and never touched by audio code.
+    // NEON STAGE runtime uses individually validated control artwork and
+    // authored material layers. The legacy generated atlas pack is intentionally
+    // not loaded: its manifest belongs to a different prototype palette and
+    // contains generic meter/control artwork that is not the approved REV.20 UI.
+    // Keep atlas fields empty so LookAndFeel uses per-control PNGs and its
+    // native vector fallback for states without an approved individual asset.
     if (id == "skin-053")
     {
-        juce::var spriteSheets;
-        if (!hasObject(assets, "spriteSheets", spriteSheets)
-            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("controls", "").toString(),
-                                  1024, 1024, candidate.controlsSpriteSheet, error)
-            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("meters_sliders", "").toString(),
-                                   1024, 1024, candidate.metersSlidersSpriteSheet, error)
-            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("frames_panels", "").toString(),
-                                   1024, 1024, candidate.framesPanelsSpriteSheet, error)
-            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("icons", "").toString(),
-                                   1024, 1024, candidate.iconsSpriteSheet, error)
-            || !loadSafePngArtwork(themeRoot, "assets/background/main.png",
+        candidate.controlsSpriteSheet = {};
+        candidate.metersSlidersSpriteSheet = {};
+        candidate.framesPanelsSpriteSheet = {};
+        candidate.iconsSpriteSheet = {};
+        if (!loadSafePngArtwork(themeRoot, "assets/background/main.png",
                                    2560, 1440, candidate.backgroundArtwork, error)
             || !loadSafePngArtwork(themeRoot, "assets/textures/material.png",
                                    1024, 1024, candidate.materialArtwork, error)
@@ -805,7 +729,9 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
             || !loadSafePngArtwork(themeRoot, "assets/fx_layers/specular.png",
                                    800, 450, candidate.specularArtwork, error)
             || !loadSafePngArtwork(themeRoot, "assets/fx_layers/shadow.png",
-                                   800, 450, candidate.shadowArtwork, error))
+                                   800, 450, candidate.shadowArtwork, error)
+            || !loadSafePngArtwork(themeRoot, "assets/hero.png",
+                                   800, 450, candidate.heroArtwork, error))
         {
             lastError = error.isNotEmpty() ? error : "NEON STAGE sprite atlas or premium artwork manifest is incomplete";
             resetToDefault();

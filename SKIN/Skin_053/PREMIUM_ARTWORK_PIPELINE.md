@@ -42,3 +42,41 @@ The full stack is drawn only on the main Skin-1 canvas. Floating panels continue
 ## Rollout sequence
 
 Skin-1 is the quality and packaging reference. SKIN-2 through SKIN-16 are intentionally not modified in this phase; their premium asset work starts only after Skin-1 is accepted.
+
+## Reference-01 cover composition integration
+
+The editor cover has been re-composed around the approved 01 NEON STAGE reference while retaining only controls and actions already described by the REV.20 journal:
+
+- Left rail: the real preset category filter, search field and factory preset selector.
+- Centre stage: the two main mode tabs only (MELODY and PATTERN) with the Skin-1 hero image behind them.
+- Right rail: AMP & TONE with the existing four APVTS amp/EQ controls.
+- Centre performance strip: the remaining five existing APVTS controls. The nine existing rotary IDs and ranges are unchanged.
+- FX strip: exactly the seven existing main bypass switches. FLANGER remains in the auxiliary FX EDIT panel.
+- Footer: the existing MIDI keyboard, status and sync selector.
+
+The main cover no longer exposes the unfinished Auto Sound Hunter or Curator actions, an inline chord diagram, a third PUNK GROUP mode, or a fabricated CPU/RAM readout. AutoChords remains an auxiliary PATTERN window. FX EDIT opens as an auxiliary editor from the relevant main FX switch.
+
+**Artwork limitation:** `assets/hero.png` is still the preserved 800×450 legacy placeholder. It is now decoded and drawn in the centre stage, but it is not yet the exact photographic guitar crop from reference 01. The seven approved mockups remain the visual source of truth; the final isolated hero and replacement control artwork are still required before claiming pixel parity.
+
+**Verification status:** source and CTest contracts have been updated on the cover-parity branch. The Windows x64 VST3 build, CTest, pluginval strictness 5 and FL Studio 20 visual/host acceptance are pending for the exact branch head.
+
+## Automated Windows acceptance result — 2026-11-21
+
+The Windows 2022 x64 workflow passed on tested revision `09ebf598ff9119aa35a45276ee2c4ca4a45817a6`:
+
+- CMake configure and VST3/C++ test build — PASS.
+- Full CTest — PASS.
+- Exactly 16 named skins and asset validation — PASS.
+- 16-skin package staging — PASS.
+- pluginval strictness 5 — PASS.
+
+Artifact `PPGU-REV20-Windows-x64-VST3` (GitHub Actions artifact ID `14707315505`) contains the tested Windows VST3 and staged skin pack. This is an automated build/validator result only. FL Studio 20 manual host acceptance and visual pixel-parity approval remain outstanding. The final extracted hero and control artwork must still be integrated before declaring exact reproduction of mockup 01.
+
+## Palette lock correction — 2026-11-21
+
+- Removed the legacy violet #D46BFF accent from the Skin-1 texture, bezel and crest SVGs; the corresponding highlight is now electric blue #6B8CFF.
+- Updated the Skin-1 theme description and glow metadata to describe only the locked graphite / cyan / electric-blue visual language.
+- Added regression checks to tests/test_neon_stage_cover_layout_contract.py for prohibited violet/magenta accent values and the approved theme description.
+- Extended tests/ThemeManagerTests.cpp to assert the canonical graphite background, cyan primary accent and electric-blue secondary accent.
+
+**Verification boundary:** the source files were re-fetched after the changes and the three SVGs contain none of the checked prohibited accent values. The new C++/Python regression tests have been committed but have not yet been run on this exact revision. The reference-matched photographic guitar hero, complete pixel-parity review and FL Studio 20 visual acceptance remain open.

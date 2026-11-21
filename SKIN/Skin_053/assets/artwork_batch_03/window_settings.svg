@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="460" viewBox="0 0 1000 460" role="img" aria-label="WORKSPACE SETTINGS panel artwork">
+<defs>
+ <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#17243A"/><stop offset=".45" stop-color="#101827"/><stop offset="1" stop-color="#080B14"/></linearGradient>
+ <linearGradient id="edge" x2="1"><stop stop-color="#00D9FF" stop-opacity=".7"/><stop offset=".55" stop-color="#6B8CFF" stop-opacity=".28"/><stop offset="1" stop-color="#00D9FF" stop-opacity=".2"/></linearGradient>
+ <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#8AA6C8" stroke-opacity=".035"/></pattern>
+</defs>
+<rect x="2" y="2" width="996" height="456" rx="18" fill="#080B14" stroke="#263B57" stroke-width="4"/>
+<rect x="9" y="9" width="982" height="442" rx="14" fill="url(#bg)" stroke="url(#edge)" stroke-width="2"/>
+<rect x="18" y="18" width="964" height="424" rx="10" fill="url(#grid)"/>
+<path d="M30 82H970" stroke="#00D9FF" stroke-opacity=".38"/>
+<text x="34" y="48" fill="#E8F7FF" font-family="Arial,sans-serif" font-size="23" font-weight="700" letter-spacing="2">WORKSPACE SETTINGS</text>
+<text x="35" y="69" fill="#8DAAC4" font-family="Arial,sans-serif" font-size="10" letter-spacing="1.1">DISPLAY / LAYOUT</text>
+<rect x="30" y="118" width="930" height="290" rx="10" fill="#101827" stroke="#29435E"/>
+<g fill="#A9C4D9" font-family="Arial" font-size="17"><text x="60" y="166">WORKSPACE SCALE</text><text x="60" y="250">PANEL GAP</text></g>
+<g stroke="#29435E" stroke-width="10" stroke-linecap="round"><path d="M300 160H880"/><path d="M300 244H880"/></g>
+<g stroke="#00D9FF" stroke-width="4" stroke-linecap="round"><path d="M300 160H590"/><path d="M300 244H470"/></g>
+<g fill="#D8EAF5" font-family="Arial" font-size="15"><text x="300" y="194">0.5×</text><text x="850" y="194">1.5×</text><text x="300" y="278">0 px</text><text x="850" y="278">32 px</text></g>
+<rect x="60" y="316" width="230" height="48" rx="7" fill="#17243A" stroke="#00D9FF" stroke-opacity=".5"/><text x="82" y="346" fill="#D8EAF5" font-family="Arial" font-size="15">RESTORE DEFAULT</text>
+<rect x="316" y="316" width="230" height="48" rx="7" fill="#17243A" stroke="#00D9FF" stroke-opacity=".5"/><text x="340" y="346" fill="#D8EAF5" font-family="Arial" font-size="15">OPEN SKIN GALLERY</text>
+<path d="M30 430H970" stroke="#6B8CFF" stroke-opacity=".2"/>
+</svg>
