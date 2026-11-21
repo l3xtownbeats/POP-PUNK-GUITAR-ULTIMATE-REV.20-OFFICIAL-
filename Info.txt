@@ -308,3 +308,8 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Проверка содержимого всех трёх workflow подтвердила: producer job содержит upload artifact; Windows consumer зависит от producer и содержит download; Resvg install/render присутствует в producer. Это структурная проверка YAML, не результат завершённого CI run.
 - Исправления: `3e11e6f` (control-state download order), `8f6ce98` (VST3 renderer triggers).
 - Следующий gate: дождаться полного Linux Resvg migration job. До его успешного завершения Windows build jobs должны оставаться skipped/blocked, а PNG pack не считать готовым.
+
+## 2026-11-21 — 16-SKIN PNG DECODE VALIDATION
+- `tools/validate_skin_registry_16.py` дополнен реальной декомпрессией PNG через Pillow после проверки сигнатуры, размеров чанков, CRC и ожидаемых размеров. Для каждого hero/preview всех 16 тем и четырёх NEON STAGE atlases теперь проверяется не только заголовок/CRC, но и успешный `verify()` + `load()` изображения.
+- В `skin1-control-state-ci.yml` добавлена установка Pillow в Windows consumer job; native и REV.20 validation jobs уже устанавливают Pillow. Вызов validator остаётся после сборки/CTest и до упаковки.
+- Изменения: `e467e60` (PNG decode verification), `0a7aaf1` (Pillow dependency). Это усиливает проверку путей/размеров/декодируемости, но не означает, что все 16 тем уже прошли её: требуется завершённый Actions run.
