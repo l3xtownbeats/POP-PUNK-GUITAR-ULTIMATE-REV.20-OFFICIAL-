@@ -13,6 +13,10 @@ This document unifies the immutable visual master, canonical runtime theme, SKIN
 
 The banner is not a second skin. NEON STAGE is not a redesign inspired by it. All runtime surfaces, panels, controls, meters, labels, keyboard, FX modules and details must look like components of the same approved master.
 
+## 2.1 Owner-approved NEON STAGE visual reference
+
+The repository image `01 INTERFACE  NEON STAGE DEFAULT .png` (main-branch Git blob SHA `747207e183c77e8b913a543b2dc40b29829e77da`) is explicitly approved by the project owner in this conversation on 2026-11-21 for use as a NEON STAGE project visual reference and implementation guide. Preserve its layout, proportions, component placement, visual hierarchy, materials and styling when implementing the interface. This approval applies to this exact image only; it does not automatically clear other Meshy/source assets or establish broader third-party rights. The image remains a reference/master input and is not copied into the distributable VST3 package by this documentation change. Keep the immutable SVG master and Skin_053 runtime palette rules below intact.
+
 ## 2. Canonical DEFAULT palette
 
 Use Skin_053 tokens only: graphite `#08090D`, `#14161B`, `#20232B`; control surfaces/borders `#0E1015`, `#292D36`, `#656B76`; text `#F2F0F4`, `#B9B5BF`, `#77727D`; accent/glow `#E6007E`, `#7B2C91`; danger/warning/success `#D7264D`, `#F2A900`, `#55C98A`; LCD/LED `#08090D`, `#F0DCE8`, `#E6007E`, `#38313B`; metal/shadow `#030305`, `#D9D7DF`, `#090A0E`.
