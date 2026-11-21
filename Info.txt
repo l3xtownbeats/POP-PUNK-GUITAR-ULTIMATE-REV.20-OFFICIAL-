@@ -286,3 +286,11 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Новые GitHub Actions runs созданы после обновлений workflow; они ещё должны завершиться. Их наличие не означает, что PNG palette gate пройден.
 - Визуальная диагностика десяти SVG источников показывает повторяющийся тёмный RGB кластер около `(65,38,56)` в заголовках окон и отдельных кнопках/LCD. В SVG literal hex palette список не содержит соответствующего оттенка. Не выполнять массовую замену и не ослаблять audit: требуется проверить SVG filters, embedded styles, text/shadow paint и renderer compositing на точных координатах до изменения исходника.
 - `main` не изменялась; все commits находятся в `work/neon-stage-cover-parity`.
+
+## 2026-11-21 — PNG ARTIFACT HANDOFF: ALL SKIN-1 BUILD WORKFLOWS
+- В `.github/workflows/skin1-control-state-ci.yml` добавлена Linux job `prepare-skin1-png`: мигратор и строгий palette audit выполняются до Windows job; PNG artifact публикуется только после успешного аудита.
+- Windows consumer job теперь зависит от `prepare-skin1-png` и скачивает `ppgu-skin1-png-migration` до CMake configure/build/CTest. Trigger path pull_request включает `tools/migrate_neon_stage_png.py`.
+- Сверены три Windows build workflows: `neon-stage-native-ci.yml`, `rev20-windows-vst3-skin-validation.yml`, `skin1-control-state-ci.yml`. В каждом предусмотрен Linux producer и Windows consumer с dependency/download handoff. `rev20-sound-hunter-import.yml` и `library-manager-tests.yml` не используют Skin-1 runtime artwork и не включены в этот handoff.
+- Commit: `1f38509c57f0a3ea1fe04d84c0f160033bcf3d6a`. Изменение только в `work/neon-stage-cover-parity`; `main` не затрагивалась.
+- Палитровый gate остаётся блокирующим: последний подтверждённый log run `44927820128` на SHA `026e21c...` обнаружил тот же повторяющийся RGB-кластер в областях текста SVG. Ни source artwork, ни порог классификатора не менялись, поскольку пока не доказано, какой paint/render path создаёт эти пиксели.
+- Пакет 1x/2x/3x не объявляется готовым: 153 производных файла созданы во время неуспешного job, но artifact не опубликован из-за строгого аудита.
