@@ -208,3 +208,13 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Main editor initial size is now 1024×700 px; responsive limits are 900×640 through 1600×1100 px, matching the NEON STAGE production specification.
 - Restored-size persistence is clamped to the same approved limits, so older saved 1400×790 bounds cannot silently override the reference baseline.
 - Added these geometry requirements to the journal-driven window-scope CI audit. Exact-SHA Windows build/CTest remains in progress; no pass is claimed yet.
+
+
+## 2026-11-21 — NEON STAGE ANIMATION AND TARGETED REPAINT PASS (branch only)
+
+- Connected the existing 30 Hz editor animation phase to explicit repaint requests for the nine rotary controls, seven FX switches and the two main mode tabs. Rotary pointers continue to track their real APVTS values; they do not spin independently of parameter state.
+- Added a 30 Hz animation-phase update to the auxiliary workspace. Each open auxiliary window now receives a restrained cyan/blue border-breath phase and repaints its animated descendants: sliders, active/toggled/hovered/focused buttons, and hovered/focused selectors/editors.
+- Kept the LCD/harmony scan animation on its existing 20 Hz timer and output level meters on their existing 30 Hz timer.
+- Removed the unconditional full-editor repaint from the 30 Hz animation callback and avoided repainting the hidden inline FX editor. This narrows invalidation to controls and window chrome that actually use animation.
+- Added `tests/test_neon_stage_animation_contract.py` and registered it with CTest to guard timer frequency, targeted knob/button repainting, auxiliary workspace phase propagation, and avoidance of a full-editor repaint in the animation callback.
+- These are source-level and automated build/test gates. No measured CPU/RAM, frame pacing, flicker, window-open latency, or FL Studio 20 host acceptance result is claimed until the Windows CI and manual host measurements complete.
