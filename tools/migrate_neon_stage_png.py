@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Create audited 1x/2x/3x RGBA PNG derivatives for NEON STAGE SVG batches."""
 from __future__ import annotations
-import hashlib, json, re, sys, colorsys, subprocess
+import hashlib, json, re, sys, subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from PIL import Image
+import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "SKIN" / "Skin_053" / "assets"
@@ -29,23 +30,40 @@ def dimensions(root: ET.Element) -> tuple[int, int]:
     return width, height
 
 def purple_pixel_diagnostics(image: Image.Image, limit: int = 12) -> tuple[int, list[str]]:
-    """Return a count plus reproducible pixel coordinates for palette-audit failures."""
+    """Vectorized exact-threshold HSV audit with reproducible pixel samples."""
     rgba = image.convert("RGBA")
-    width, height = rgba.size
-    count = 0
+    pixels = np.asarray(rgba, dtype=np.uint8)
+    rgb = pixels[..., :3].astype(np.float64) / 255.0
+    red, green, blue = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    maximum = rgb.max(axis=2)
+    minimum = rgb.min(axis=2)
+    delta = maximum - minimum
+
+    hue = np.zeros_like(maximum)
+    chroma = delta > 0.0
+    red_max = chroma & (red == maximum)
+    green_max = chroma & (~red_max) & (green == maximum)
+    blue_max = chroma & (~red_max) & (~green_max)
+
+    hue[red_max] = np.mod((green[red_max] - blue[red_max]) / delta[red_max], 6.0) / 6.0
+    hue[green_max] = (2.0 + (blue[green_max] - red[green_max]) / delta[green_max]) / 6.0
+    hue[blue_max] = (4.0 + (red[blue_max] - green[blue_max]) / delta[blue_max]) / 6.0
+
+    saturation = np.divide(delta, maximum, out=np.zeros_like(delta), where=maximum > 0.0)
+    alpha = pixels[..., 3]
+    rejected = (
+        (alpha >= 16) & (saturation >= 0.38) & (maximum >= 0.18)
+        & (hue >= 0.76) & (hue <= 0.94)
+    )
+    count = int(np.count_nonzero(rejected))
     samples: list[str] = []
-    for index, (r, g, b, a) in enumerate(rgba.getdata()):
-        if a < 16:
-            continue
-        h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
-        # Reject saturated violet/purple/magenta accents, not neutral metal or blue/cyan.
-        if s >= 0.38 and v >= 0.18 and 0.76 <= h <= 0.94:
-            count += 1
-            if len(samples) < limit:
-                x, y = index % width, index // width
-                samples.append(
-                    f"(x={x},y={y},rgba={r},{g},{b},{a},hsv={h:.3f},{s:.3f},{v:.3f})"
-                )
+    if count:
+        for y, x in np.argwhere(rejected)[:limit]:
+            r, g, b, a = (int(value) for value in pixels[y, x])
+            h, s, v = float(hue[y, x]), float(saturation[y, x]), float(maximum[y, x])
+            samples.append(
+                f"(x={int(x)},y={int(y)},rgba={r},{g},{b},{a},hsv={h:.3f},{s:.3f},{v:.3f})"
+            )
     return count, samples
 
 
