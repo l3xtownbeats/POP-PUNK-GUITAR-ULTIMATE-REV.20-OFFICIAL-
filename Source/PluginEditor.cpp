@@ -1597,6 +1597,18 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
                 const int diameter = juce::jmax(1, juce::jmin(w, h) - 2);
                 const int destinationX = x + (w - diameter) / 2;
                 const int destinationY = y + (h - diameter) / 2;
+                const float pulse = 0.5f + 0.5f * std::sin(animationPhase);
+                const float haloAlpha = slider.isEnabled()
+                    ? (slider.isMouseOverOrDragging() ? 0.24f + 0.16f * pulse : 0.055f + 0.045f * pulse)
+                    : 0.0f;
+                if (haloAlpha > 0.0f)
+                {
+                    g.setColour(palette.token("accent").withAlpha(haloAlpha));
+                    g.fillEllipse(static_cast<float>(destinationX) - 3.0f,
+                                  static_cast<float>(destinationY) - 3.0f,
+                                  static_cast<float>(diameter) + 6.0f,
+                                  static_cast<float>(diameter) + 6.0f);
+                }
                 g.drawImageWithin(*artwork, destinationX, destinationY, diameter, diameter,
                                   juce::RectanglePlacement::centred);
                 // Artwork remains position-neutral; the live indicator follows APVTS.
@@ -1772,6 +1784,13 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
 
     auto bounds = button.getLocalBounds().toFloat().reduced(0.5f);
     const bool enabled = button.isEnabled();
+    if (enabled && (button.getToggleState() || hovered || down))
+    {
+        const float pulse = 0.5f + 0.5f * std::sin(animationPhase + 0.7f);
+        const float alpha = down ? 0.30f : (button.getToggleState() ? 0.16f + 0.10f * pulse : 0.08f + 0.07f * pulse);
+        g.setColour(palette.token("accent").withAlpha(alpha));
+        g.drawRoundedRectangle(bounds.expanded(1.4f), 7.5f, down ? 2.2f : 1.4f);
+    }
     const bool focused = enabled && button.hasKeyboardFocus(true);
     auto face = button.getToggleState() ? palette.accent : base;
 
@@ -2117,6 +2136,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     uiSettingsReady = true;
     setSize(juce::jlimit(900, 1600, restoredWidth),
             juce::jlimit(640, 1100, restoredHeight));
+    startTimerHz(30);
 }
 
 PopPunkGuitarUltimateAudioProcessorEditor::~PopPunkGuitarUltimateAudioProcessorEditor()
@@ -2128,15 +2148,26 @@ PopPunkGuitarUltimateAudioProcessorEditor::~PopPunkGuitarUltimateAudioProcessorE
 
 void PopPunkGuitarUltimateAudioProcessorEditor::timerCallback()
 {
-    stopTimer();
     if (!uiSettingsReady)
         return;
-    if (auto* settings = uiProperties.getUserSettings())
+
+    animationPhase += 0.035f;
+    if (animationPhase >= juce::MathConstants<float>::twoPi)
+        animationPhase -= juce::MathConstants<float>::twoPi;
+    premiumLookAndFeel.setAnimationPhase(animationPhase);
+
+    if (resizeSavePending
+        && static_cast<juce::uint32>(juce::Time::getMillisecondCounter() - lastResizeChangeMs) >= 450u)
     {
-        settings->setValue("editorWidth", getWidth());
-        settings->setValue("editorHeight", getHeight());
-        settings->saveIfNeeded();
+        if (auto* settings = uiProperties.getUserSettings())
+        {
+            settings->setValue("editorWidth", getWidth());
+            settings->setValue("editorHeight", getHeight());
+            settings->saveIfNeeded();
+        }
+        resizeSavePending = false;
     }
+    repaint();
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::configureKnob(juce::Slider& s, juce::Label& l, const juce::String& name)
@@ -2242,9 +2273,12 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
 
 void PopPunkGuitarUltimateAudioProcessorEditor::resized()
 {
-    // Debounce disk persistence while the user drags the resize corner.
+    // Keep the UI animation clock running; debounce only the eventual settings write.
     if (uiSettingsReady)
-        startTimer(450);
+    {
+        resizeSavePending = true;
+        lastResizeChangeMs = juce::Time::getMillisecondCounter();
+    }
 
     auto bounds = getLocalBounds().reduced(14);
     if (auxiliaryWorkspace != nullptr)
