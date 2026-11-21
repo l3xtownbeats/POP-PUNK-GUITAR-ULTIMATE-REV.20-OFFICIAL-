@@ -25,6 +25,15 @@ int main()
     expect(manager.getPalette().tokens.warning == juce::Colour(0xfff2a900),
            "NEON STAGE fallback warning token matches the approved amber value");
 
+    expect(!manager.loadFromJson({}), "empty theme JSON is rejected");
+    expect(manager.getPalette().usedFallback, "empty JSON restores the safe fallback palette");
+    expect(manager.getLastError().contains("empty"), "empty JSON reports a useful diagnostic");
+
+    const juce::String oversizedManifest(1024 * 1024 + 1, ' ');
+    expect(!manager.loadFromJson(oversizedManifest), "oversized theme JSON is rejected before parsing");
+    expect(manager.getPalette().usedFallback, "oversized JSON restores the safe fallback palette");
+    expect(manager.getLastError().contains("1 MiB"), "oversized JSON reports the configured size limit");
+
     const auto root = juce::File::getCurrentWorkingDirectory();
     const auto skinRoot = root.getChildFile("SKIN");
     const auto registry = juce::JSON::parse(skinRoot.getChildFile("theme_manifest.json").loadFileAsString());
