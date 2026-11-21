@@ -231,6 +231,15 @@ int main()
     expect(manager.getPalette().textureArtwork.isValid(),
            "invalid JSON load preserves last-known-good decoded artwork");
     expect(manager.getLastError().isNotEmpty(), "invalid JSON load keeps a useful diagnostic");
+
+    manager.resetToDefault();
+    expect(manager.getPalette().usedFallback, "resetToDefault restores the canonical NEON STAGE fallback");
+    expect(manager.getPalette().id == "skin-053"
+               && manager.getPalette().name == "NEON STAGE DEFAULT",
+           "resetToDefault restores the immutable NEON STAGE identity");
+    expect(manager.getLastError().isEmpty(),
+           "resetToDefault clears stale load diagnostics");
+
     std::cout << (failures == 0 ? "PASS" : "FAIL")
               << " — REV.20 16-theme registry and NEON STAGE runtime contract" << std::endl;
     return failures == 0 ? 0 : 1;
