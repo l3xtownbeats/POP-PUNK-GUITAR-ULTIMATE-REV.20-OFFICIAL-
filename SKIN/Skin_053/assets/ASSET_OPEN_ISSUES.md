@@ -88,11 +88,14 @@
 - **Current handling:** main editor uses 1024×700 with the approved resize limits. Responsive layout must preserve the reference's visual hierarchy and not crop live controls.
 - **Authority:** master prompt section 4 and current branch journal.
 
-## Open issue 13 — missing/ambiguous auxiliary references
+## Open issue 13 — auxiliary reference pixel review (corrected 2026-11-21)
 
-- **Available and inspected:** exact 01; 03 FX EDIT; 04 multi-window contact sheet; 02/AutoChords variants; contact sheet for 01/02/03/04/06.
-- **Not yet located as standalone exact files:** references 05 and 07. Do not fabricate them from unrelated older concept images.
-- **Current handling:** use the exact master prompt and current runtime source for module behavior until the exact 05/07 images are identified.
+- **Repository presence verified on main:** all seven root reference files 01–07 exist. References 05 and 07 are confirmed as standalone files:
+  - 05 — Git blob SHA `eabdf6b150b81fdf819f31ad9a7d91de3f8c68e2`, 2,239,241 bytes.
+  - 07 — Git blob SHA `bfdc755ea9a3a3f8377f7dc55d9469f0c48ba759`, 2,198,527 bytes.
+- **Additional source inventory:** `Assets/3D/References` is present on main; its button/switch, knob/meter, frame/panel and icon sheets plus the master prompt were inventoried. Duplicate files with identical hashes are not independent source assets.
+- **Pixel-level review status:** 05 and 07 have not yet been inspected visually because the GitHub connector did not return their binary image payloads at these sizes. Presence/hash verification is not visual approval.
+- **Current handling:** treat 01 as the locked main composition reference and 02–07 as mandatory window/state references. Use the master prompt, current runtime source and approved palette to fill missing artwork. Do not derive final production assets from legacy purple/magenta screenshots or unverified source sheets.
 
 ## Production consequence
 
