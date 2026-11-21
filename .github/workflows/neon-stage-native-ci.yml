@@ -3,12 +3,16 @@ name: NEON STAGE native integration CI
 on:
   push:
     branches:
-      - feat/neon-stage-manager-3-native-integration
+      - feat/rev20-neon-stage-graphite-magenta-integration
     paths:
       - "CMakeLists.txt"
       - "Source/**"
       - "tests/**"
       - "SKIN/**"
+      - "assets/NEON_STAGE/**"
+      - "docs/**"
+      - "Assets/3D/References/**"
+      - "tools/validate_neon_stage_svg.py"
       - "tools/package_active_skins.py"
       - "tools/validate_skin_registry_16.py"
       - ".github/workflows/neon-stage-native-ci.yml"
@@ -22,6 +26,10 @@ on:
       - "Source/**"
       - "tests/**"
       - "SKIN/**"
+      - "assets/NEON_STAGE/**"
+      - "docs/**"
+      - "Assets/3D/References/**"
+      - "tools/validate_neon_stage_svg.py"
       - "tools/package_active_skins.py"
       - "tools/validate_skin_registry_16.py"
       - ".github/workflows/neon-stage-native-ci.yml"
@@ -30,7 +38,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: neon-stage-native-pr-${{ github.event.pull_request.number }}
+  group: neon-stage-native-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -69,6 +77,10 @@ jobs:
       - name: Validate 16-skin registry
         shell: pwsh
         run: python tools/validate_skin_registry_16.py
+
+      - name: Validate NEON STAGE SVG library and provenance contract
+        shell: pwsh
+        run: python tools/validate_neon_stage_svg.py
 
       - name: Generate Skin_053 master/runtime visual audit sheets
         shell: pwsh
