@@ -43,6 +43,8 @@ def main() -> int:
     require(theme.get("palette", {}).get("window_bg") == "#080B14", "Wrong NEON STAGE graphite background token.", errors)
     require(theme.get("palette", {}).get("accent") == "#00D9FF", "Wrong NEON STAGE cyan token.", errors)
     require(theme.get("palette", {}).get("accent_glow") == "#6B8CFF", "Wrong NEON STAGE electric-blue token.", errors)
+    require("setSize(1024, 700);" in editor, "Main editor default must be 1024x700.", errors)
+    require("setResizeLimits(900, 640, 1600, 1100);" in editor, "Main editor resize limits must be 900x640 through 1600x1100.", errors)
 
     expected_ids = [
         "preset_browser", "mode_selector",
