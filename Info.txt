@@ -218,3 +218,12 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Removed the unconditional full-editor repaint from the 30 Hz animation callback and avoided repainting the hidden inline FX editor. This narrows invalidation to controls and window chrome that actually use animation.
 - Added `tests/test_neon_stage_animation_contract.py` and registered it with CTest to guard timer frequency, targeted knob/button repainting, auxiliary workspace phase propagation, and avoidance of a full-editor repaint in the animation callback.
 - These are source-level and automated build/test gates. No measured CPU/RAM, frame pacing, flicker, window-open latency, or FL Studio 20 host acceptance result is claimed until the Windows CI and manual host measurements complete.
+
+
+## 2026-11-21 — NEON STAGE WORKSPACE SETTINGS RANGE ALIGNMENT
+- Проверена связь панели WORKSPACE SETTINGS с фактическим runtime workspace.
+- Найдено расхождение: UI ограничивал AUXILIARY PANEL SCALE диапазоном 0.5x–1.5x, а `PPGUMultiWindowWorkspace` принимал до 3.0x; UI ограничивал SPACE BETWEEN PANELS диапазоном 0–32 px, а runtime принимал до 64 px.
+- Исправлено в `Source/UI/PPGUMultiWindowWorkspace.cpp`: runtime clamps теперь совпадают с пользовательскими диапазонами 0.5x–1.5x и 0–32 px. Некорректное non-finite значение масштаба по-прежнему возвращает default 1.0x.
+- Добавлен `tests/test_neon_stage_workspace_settings_contract.py` и регистрация `ppgu_neon_stage_workspace_settings_contract` в CTest.
+- Это исправление согласованности настроек и runtime, а не подтверждение визуального pixel parity или измеренной производительности.
+- Изменения внесены только в `work/neon-stage-cover-parity`; `main` не изменялась.
