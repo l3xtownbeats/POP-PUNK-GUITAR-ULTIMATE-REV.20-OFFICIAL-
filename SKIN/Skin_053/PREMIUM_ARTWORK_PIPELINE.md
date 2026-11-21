@@ -59,3 +59,15 @@ The main cover no longer exposes the unfinished Auto Sound Hunter or Curator act
 **Artwork limitation:** `assets/hero.png` is still the preserved 800×450 legacy placeholder. It is now decoded and drawn in the centre stage, but it is not yet the exact photographic guitar crop from reference 01. The seven approved mockups remain the visual source of truth; the final isolated hero and replacement control artwork are still required before claiming pixel parity.
 
 **Verification status:** source and CTest contracts have been updated on the cover-parity branch. The Windows x64 VST3 build, CTest, pluginval strictness 5 and FL Studio 20 visual/host acceptance are pending for the exact branch head.
+
+## Automated Windows acceptance result — 2026-11-21
+
+The Windows 2022 x64 workflow passed on tested revision `09ebf598ff9119aa35a45276ee2c4ca4a45817a6`:
+
+- CMake configure and VST3/C++ test build — PASS.
+- Full CTest — PASS.
+- Exactly 16 named skins and asset validation — PASS.
+- 16-skin package staging — PASS.
+- pluginval strictness 5 — PASS.
+
+Artifact `PPGU-REV20-Windows-x64-VST3` (GitHub Actions artifact ID `14707315505`) contains the tested Windows VST3 and staged skin pack. This is an automated build/validator result only. FL Studio 20 manual host acceptance and visual pixel-parity approval remain outstanding. The final extracted hero and control artwork must still be integrated before declaring exact reproduction of mockup 01.
