@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Create audited 1x/2x/3x RGBA PNG derivatives for NEON STAGE SVG batches."""
 from __future__ import annotations
-import hashlib, json, re, sys, colorsys
+import hashlib, json, re, sys, colorsys, subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
-import cairosvg
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,6 +52,16 @@ def purple_pixel_diagnostics(image: Image.Image, limit: int = 12) -> tuple[int, 
 def purple_pixels(image: Image.Image) -> int:
     return purple_pixel_diagnostics(image)[0]
 
+
+def render_png(source: Path, output: Path, width: int, height: int) -> None:
+    """Render with resvg so SVG text/gradients are rasterized consistently."""
+    output.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["node", str(ROOT / "tools" / "render_neon_stage_svg.cjs"),
+         str(source), str(output), str(width), str(height)],
+        check=True,
+    )
+
 def main() -> int:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     records, errors, source_count = [], [], 0
@@ -72,8 +81,7 @@ def main() -> int:
                 for scale in SCALES:
                     out = OUTPUT / batch.name / f"{source.stem}{'@'+str(scale)+'x' if scale > 1 else ''}.png"
                     out.parent.mkdir(parents=True, exist_ok=True)
-                    png = cairosvg.svg2png(bytestring=svg, output_width=width*scale, output_height=height*scale)
-                    out.write_bytes(png)
+                    render_png(source, out, width*scale, height*scale)
                     with Image.open(out) as im:
                         im.load()
                         rgba = im.convert("RGBA")
@@ -113,7 +121,7 @@ def main() -> int:
                 raise ValueError("Root XML element is not <svg>")
             out = OUTPUT / "runtime_artwork" / f"{name}.png"
             out.parent.mkdir(parents=True, exist_ok=True)
-            out.write_bytes(cairosvg.svg2png(bytestring=svg, output_width=width, output_height=height))
+            render_png(source, out, width, height)
             with Image.open(out) as im:
                 im.load()
                 rgba = im.convert("RGBA")
