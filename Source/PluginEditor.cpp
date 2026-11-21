@@ -1558,11 +1558,32 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
                 const int destinationY = y + (h - diameter) / 2;
                 g.drawImageWithin(*artwork, destinationX, destinationY, diameter, diameter,
                                   juce::RectanglePlacement::centred);
-                // Artwork remains position-neutral; the live indicator follows APVTS.
+                // Artwork is the authored NEON STAGE knob body. The live arc
+                // and pointer remain native JUCE geometry, driven by the APVTS value.
                 const float cx = static_cast<float>(x) + static_cast<float>(w) * 0.5f;
                 const float cy = static_cast<float>(y) + static_cast<float>(h) * 0.5f;
                 const float radius = static_cast<float>(diameter) * 0.30f;
                 const float angle = start + pos * (end - start);
+
+                juce::Path valueTrack;
+                valueTrack.addCentredArc(cx, cy, radius * 1.18f, radius * 1.18f,
+                                         0.0f, start, end, true);
+                g.setColour(palette.token("control_border").withAlpha(0.78f));
+                g.strokePath(valueTrack, juce::PathStrokeType(2.0f));
+
+                if (pos > 0.001f)
+                {
+                    juce::Path valueArc;
+                    valueArc.addCentredArc(cx, cy, radius * 1.18f, radius * 1.18f,
+                                           0.0f, start, angle, true);
+                    g.setColour(palette.token("accent_glow").withAlpha(0.30f));
+                    g.strokePath(valueArc, juce::PathStrokeType(6.0f,
+                        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                    g.setColour(palette.token("accent"));
+                    g.strokePath(valueArc, juce::PathStrokeType(2.2f,
+                        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                }
+
                 juce::Path pointer;
                 pointer.startNewSubPath(cx, cy);
                 pointer.lineTo(cx + std::sin(angle) * radius,
@@ -1688,6 +1709,44 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                                                    const juce::Colour& base, bool hovered, bool down)
 {
     const auto controlId = button.getComponentID();
+
+    // MELODY/PATTERN are tabs, not FX rocker switches. Reuse the authored
+    // mode-selector tile and add a live cyan active indicator over it.
+    if (controlId == "mode_tab")
+    {
+        const auto stateName = ppguButtonArtworkState(button, hovered, down);
+        const auto artworkState = stateName == "active" ? juce::String("default") : stateName;
+        if (const auto* artwork = palette.findControlArtwork("mode_selector", artworkState))
+            if (artwork->isValid())
+                g.drawImageWithin(*artwork, 0, 0, button.getWidth(), button.getHeight(),
+                                  juce::RectanglePlacement::centred);
+
+        auto bounds = button.getLocalBounds().toFloat().reduced(1.0f);
+        if (button.isEnabled() && button.getToggleState())
+        {
+            const auto glow = palette.token("accent_glow");
+            const auto accent = palette.token("accent");
+            g.setColour(glow.withAlpha(0.24f));
+            g.drawRoundedRectangle(bounds.reduced(1.5f), 7.0f, 5.0f);
+            g.setColour(accent.withAlpha(0.95f));
+            g.fillRoundedRectangle(bounds.getX() + 9.0f, bounds.getBottom() - 4.0f,
+                                   juce::jmax(12.0f, bounds.getWidth() - 18.0f), 2.0f, 1.0f);
+            g.setColour(accent);
+            g.fillEllipse(bounds.getRight() - 11.0f, bounds.getCentreY() - 2.0f, 4.0f, 4.0f);
+        }
+        else if (button.isEnabled() && (hovered || down))
+        {
+            g.setColour(palette.token("accent").withAlpha(down ? 0.75f : 0.42f));
+            g.drawRoundedRectangle(bounds.reduced(1.5f), 7.0f, down ? 2.0f : 1.0f);
+        }
+        else if (!button.isEnabled())
+        {
+            g.setColour(palette.token("window_bg").withAlpha(0.34f));
+            g.fillRoundedRectangle(bounds, 7.0f);
+        }
+        return;
+    }
+
     if (controlId.startsWith("fx_switch"))
     {
         const auto stateName = ppguButtonArtworkState(button, hovered, down);
@@ -1960,6 +2019,10 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     // selected tab with the authored ON/glow state and the other tab OFF.
     melodyTab.setClickingTogglesState(true);
     patternTab.setClickingTogglesState(true);
+    melodyTab.setComponentID("mode_tab");
+    patternTab.setComponentID("mode_tab");
+    melodyTab.setTooltip("Select MELODY mode");
+    patternTab.setTooltip("Select PATTERN mode");
     for (auto* b : { &melodyTab, &patternTab }) {
         b->setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("control_bg"));
         b->setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
