@@ -1,4 +1,5 @@
 #include "ThemeManager.h"
+#include "PPGUControlState.h"
 #include <iostream>
 #include <set>
 #include <string>
@@ -15,6 +16,41 @@ namespace
 int main()
 {
     juce::ScopedJuceInitialiser_GUI juceInitialiser;
+
+    // Interactive control-state contract: visual states must follow the
+    // component's real JUCE state, not a separately cached UI flag.
+    juce::TextButton modeTab("MELODY");
+    modeTab.setClickingTogglesState(true);
+    expect(ppguButtonArtworkState(modeTab, false, false) == "default",
+           "mode tab starts in authored default artwork state");
+    expect(ppguButtonArtworkState(modeTab, true, false) == "hover",
+           "mode tab exposes hover artwork state");
+    expect(ppguButtonArtworkState(modeTab, false, true) == "pressed",
+           "mode tab exposes pressed artwork state");
+    modeTab.setToggleState(true, juce::dontSendNotification);
+    expect(ppguButtonArtworkState(modeTab, false, false) == "active",
+           "selected MELODY/PATTERN tab exposes active illumination state");
+    modeTab.setEnabled(false);
+    expect(ppguButtonArtworkState(modeTab, false, false) == "disabled",
+           "disabled mode tab takes priority over active state");
+
+    juce::TextButton fxSwitch("REVERB");
+    fxSwitch.setClickingTogglesState(true);
+    expect(ppguButtonArtworkState(fxSwitch, false, false) == "default",
+           "FX switch starts OFF in default artwork state");
+    fxSwitch.setToggleState(true, juce::dontSendNotification);
+    expect(ppguButtonArtworkState(fxSwitch, false, false) == "active",
+           "FX switch ON state maps to active artwork");
+    fxSwitch.setEnabled(false);
+    expect(ppguButtonArtworkState(fxSwitch, false, false) == "disabled",
+           "disabled FX switch cannot display a false active state");
+
+    juce::Slider rotary;
+    expect(ppguSliderArtworkState(rotary) == "default",
+           "rotary starts in default artwork state");
+    rotary.setEnabled(false);
+    expect(ppguSliderArtworkState(rotary) == "disabled",
+           "disabled rotary uses disabled artwork state");
     PPGUThemeManager manager;
     expect(manager.getPalette().id == "skin-053", "fallback stable ID is canonical SKIN-1");
     expect(manager.getPalette().name == "NEON STAGE PREMIUM", "fallback name is NEON STAGE PREMIUM");
