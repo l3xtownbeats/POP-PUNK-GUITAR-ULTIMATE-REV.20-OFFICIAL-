@@ -1733,7 +1733,7 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                                                    const juce::Colour& base, bool hovered, bool down)
 {
     const auto controlId = button.getComponentID();
-    if (controlId.startsWith("fx_switch"))
+    if (controlId.isNotEmpty())
     {
         const auto stateName = ppguButtonArtworkState(button, hovered, down);
         if (const auto* artwork = palette.findControlArtwork(controlId, stateName))
