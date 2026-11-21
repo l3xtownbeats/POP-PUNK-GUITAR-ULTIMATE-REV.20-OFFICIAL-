@@ -112,7 +112,7 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
         g.setOpacity(crestOpacity);
         g.drawImageWithin(palette.crestArtwork, crestBounds.getX(), crestBounds.getY(),
                           crestBounds.getWidth(), crestBounds.getHeight(),
-                          juce::RectanglePlacement::centred);
+                          juce::RectanglePlacement::fillDestination);
         g.restoreState();
     }
 }
@@ -2209,7 +2209,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
     drawPanel(g, fxChain, "FX CHAIN");
 
     auto heroArtworkBounds = hero.reduced(12, 8);
-    heroArtworkBounds.removeFromTop(38);
+    heroArtworkBounds.removeFromTop(82);
     if (p.heroArtwork.isValid() && !heroArtworkBounds.isEmpty())
     {
         g.saveState();
@@ -2222,7 +2222,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
 
     auto ampArtworkArea = right.reduced(8, 8);
     ampArtworkArea.removeFromTop(34);
-    drawAmpCabinet(g, ampArtworkArea.removeFromTop(166), p);
+    drawAmpCabinet(g, ampArtworkArea.removeFromTop(110), p);
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::resized()
@@ -2237,9 +2237,9 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
 
     // Header: product identity and only the journal-approved auxiliary actions.
     auto header = bounds.removeFromTop(68);
-    titleLabel.setBounds(header.removeFromLeft(174).reduced(2, 3));
-    subtitleLabel.setBounds(18, 48, 168, 13);
-    header.removeFromLeft(12);
+    titleLabel.setBounds(18, 2, 170, 42);
+    subtitleLabel.setBounds(20, 45, 168, 13);
+    header.removeFromLeft(190);
     skinButton.setBounds(header.removeFromRight(76).reduced(2, 7));
     aboutButton.setBounds(header.removeFromRight(72).reduced(2, 7));
     settingsButton.setBounds(header.removeFromRight(90).reduced(2, 7));
@@ -2299,7 +2299,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
 
     right.removeFromTop(34);
     ampTitle.setVisible(false);
-    right.removeFromTop(166); // Decorative amp head; the live controls remain below.
+    right.removeFromTop(110); // Decorative amp head; the live controls remain below.
     const int ampCellWidth = juce::jmax(1, right.getWidth() / 2);
     const int ampCellHeight = juce::jmax(1, right.getHeight() / 2);
     for (size_t i = 0; i < 4; ++i)
