@@ -89,6 +89,23 @@ target_link_libraries(PPGU PRIVATE
 juce_generate_juce_header(PPGU)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+# Stage the approved factory skin package beside the VST3 bundle. The runtime
+# ThemeManager resolves this sibling directory from the loaded module path.
+# For JUCE's Windows VST3 layout, TARGET_FILE_DIR is Contents/x86_64-win;
+# three parent levels reach the directory containing the .vst3 bundle.
+if (TARGET PPGU_VST3)
+    add_custom_command(TARGET PPGU_VST3 POST_BUILD
+        COMMAND ${Python3_EXECUTABLE}
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/package_active_skins.py"
+            --root "${CMAKE_CURRENT_SOURCE_DIR}/SKIN"
+            --output "$<TARGET_FILE_DIR:PPGU_VST3>/../../../Skins"
+        COMMENT "Staging approved NEON STAGE PREMIUM and factory skin manifests beside VST3"
+        VERBATIM)
+else()
+    message(FATAL_ERROR "JUCE did not create the expected PPGU_VST3 target")
+endif()
+
 enable_testing()
 
 function(ppgu_add_test target source)
