@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">NEON STAGE — Control Asset Set</title><desc id="desc">Reusable vector tabs, illuminated buttons, rotary knobs, switches and sliders derived from the approved master banner.</desc>
+<defs>
+ <linearGradient id="ns-cyan" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#37F2FF"/><stop offset=".5" stop-color="#168CFF"/><stop offset="1" stop-color="#8D5CFF"/></linearGradient>
+ <linearGradient id="ns-pink" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#9B4DFF"/><stop offset=".55" stop-color="#F14BCB"/><stop offset="1" stop-color="#FF6A9B"/></linearGradient>
+ <radialGradient id="ns-knob"><stop stop-color="#1B2A3C"/><stop offset="1" stop-color="#0B1420"/></radialGradient>
+ <filter id="ns-soft"><feGaussianBlur stdDeviation="5"/></filter>
+ <symbol id="ns-tab-active" viewBox="0 0 222 40"><rect x="1" y="1" width="220" height="38" rx="8" fill="#0D3A5A" stroke="#24DFFF" stroke-width="2"/><path d="M12 38H210" stroke="#B8F8FF" opacity=".5"/></symbol>
+ <symbol id="ns-tab-inactive" viewBox="0 0 228 40"><rect x="1" y="1" width="226" height="38" rx="8" fill="#151329" stroke="#7650B5" stroke-width="2"/></symbol>
+ <symbol id="ns-button-primary" viewBox="0 0 174 42"><rect x="1" y="1" width="172" height="40" rx="20" fill="#0B1B2B" stroke="#25DFFF" stroke-opacity=".8" stroke-width="2"/><path d="M18 39H156" stroke="#B8F8FF" opacity=".28"/></symbol>
+ <symbol id="ns-button-secondary" viewBox="0 0 142 42"><rect x="1" y="1" width="140" height="40" rx="20" fill="#17112A" stroke="#B76AFF" stroke-opacity=".8" stroke-width="2"/></symbol>
+ <symbol id="ns-button-pressed" viewBox="0 0 174 42"><rect x="1" y="1" width="172" height="40" rx="20" fill="#102B3D" stroke="#B8F8FF" stroke-width="2"/><rect x="4" y="4" width="166" height="34" rx="17" fill="#071421" opacity=".55"/></symbol>
+ <symbol id="ns-knob-cyan" viewBox="0 0 80 96"><circle cx="40" cy="38" r="30" fill="#0B1420" stroke="#35536E" stroke-width="5"/><circle cx="40" cy="38" r="23" fill="url(#ns-knob)" stroke="#24DFFF" stroke-width="2"/><path d="M40 38L27.3 25.3" stroke="#EAFBFF" stroke-width="3" stroke-linecap="round"/><circle cx="40" cy="38" r="3" fill="#B8F8FF"/><text x="40" y="86" text-anchor="middle" fill="#AFC5DC" font-family="Arial" font-size="11" letter-spacing="1">GAIN</text></symbol>
+ <symbol id="ns-knob-violet" viewBox="0 0 80 96"><circle cx="40" cy="38" r="30" fill="#0B1420" stroke="#35536E" stroke-width="5"/><circle cx="40" cy="38" r="23" fill="url(#ns-knob)" stroke="#AE65F4" stroke-width="2"/><path d="M40 38L40.9 20" stroke="#EAFBFF" stroke-width="3" stroke-linecap="round"/><circle cx="40" cy="38" r="3" fill="#E6C8FF"/><text x="40" y="86" text-anchor="middle" fill="#AFC5DC" font-family="Arial" font-size="11" letter-spacing="1">TONE</text></symbol>
+ <symbol id="ns-toggle" viewBox="0 0 72 34"><rect x="1" y="1" width="70" height="32" rx="16" fill="#071421" stroke="#35536E" stroke-width="2"/><rect x="37" y="4" width="27" height="26" rx="13" fill="#0D3A5A" stroke="#24DFFF" stroke-width="1.5"/><circle cx="50.5" cy="17" r="4" fill="#B8F8FF"/></symbol>
+ <symbol id="ns-slider" viewBox="0 0 240 32"><rect x="4" y="13" width="232" height="6" rx="3" fill="#20364E"/><rect x="4" y="13" width="142" height="6" rx="3" fill="url(#ns-cyan)"/><circle cx="146" cy="16" r="11" fill="#0B1420" stroke="#24DFFF" stroke-width="2"/><circle cx="146" cy="16" r="3" fill="#B8F8FF"/></symbol>
+</defs>
+<rect width="1600" height="900" fill="#05070D"/>
+<g font-family="Arial,Helvetica,sans-serif" fill="#F4F8FF">
+ <text x="48" y="58" font-size="28" font-weight="800" letter-spacing="3">NEON STAGE / CONTROLS</text><text x="48" y="88" font-size="14" fill="#9FB6D4" letter-spacing="2">REUSABLE INTERACTIVE CONTROL GRAPHICS</text>
+ <g transform="translate(60 150)"><use xlink:href="#ns-tab-active" width="222" height="40"/><text x="111" y="26" font-size="14" font-weight="700" text-anchor="middle">MELODY</text><text x="0" y="68" font-size="13" fill="#9FB6D4">ACTIVE TAB</text></g>
+ <g transform="translate(330 150)"><use xlink:href="#ns-tab-inactive" width="228" height="40"/><text x="114" y="26" font-size="14" font-weight="700" text-anchor="middle" fill="#D9C8FF">PATTERN</text><text x="0" y="68" font-size="13" fill="#9FB6D4">INACTIVE TAB</text></g>
+ <g transform="translate(620 150)"><use xlink:href="#ns-button-primary" width="174" height="42"/><text x="87" y="27" font-size="12" font-weight="700" text-anchor="middle">VST3 INSTRUMENT</text><text x="0" y="68" font-size="13" fill="#9FB6D4">PRIMARY ACTION</text></g>
+ <g transform="translate(850 150)"><use xlink:href="#ns-button-secondary" width="142" height="42"/><text x="71" y="27" font-size="12" font-weight="700" text-anchor="middle" fill="#F2DFFF">WINDOWS x64</text><text x="0" y="68" font-size="13" fill="#9FB6D4">SECONDARY ACTION</text></g>
+ <g transform="translate(1100 150)"><use xlink:href="#ns-button-pressed" width="174" height="42"/><text x="87" y="27" font-size="12" font-weight="700" text-anchor="middle">PRESSED</text><text x="0" y="68" font-size="13" fill="#9FB6D4">PRESSED STATE</text></g>
+ <g transform="translate(80 330)"><use xlink:href="#ns-knob-cyan" width="100" height="120"/><text x="50" y="145" text-anchor="middle" font-size="13" fill="#9FB6D4">CYAN KNOB</text></g>
+ <g transform="translate(250 330)"><use xlink:href="#ns-knob-violet" width="100" height="120"/><text x="50" y="145" text-anchor="middle" font-size="13" fill="#9FB6D4">VIOLET KNOB</text></g>
+ <g transform="translate(470 365)"><use xlink:href="#ns-toggle" width="108" height="51"/><text x="0" y="90" font-size="13" fill="#9FB6D4">ILLUMINATED TOGGLE</text></g>
+ <g transform="translate(700 375)"><use xlink:href="#ns-slider" width="360" height="48"/><text x="0" y="82" font-size="13" fill="#9FB6D4">HORIZONTAL SLIDER</text></g>
+ <text x="60" y="650" font-size="14" fill="#8296B2" letter-spacing="2">CONTROL LABELS ARE EXAMPLES ONLY — BIND TO REAL PLUGIN PARAMETERS.</text>
+</g></svg>
