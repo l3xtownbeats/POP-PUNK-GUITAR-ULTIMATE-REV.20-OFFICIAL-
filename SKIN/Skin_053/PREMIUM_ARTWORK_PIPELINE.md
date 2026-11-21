@@ -1,44 +1,73 @@
-# SKIN-1 / NEON STAGE DEFAULT — Premium Artwork Pipeline
+# SKIN-1 / NEON STAGE PREMIUM — Production Artwork Pipeline
 
-**Scope:** first integration phase only: `skin-053` / `Skin_053`. The other 15 themes remain unchanged.
+**Approval:** BASE APPROVED  
+**Theme ID:** `skin-053` (stable)  
+**Scope:** Skin-1 only. Other themes remain untouched.  
+**Visual source of truth:** seven official repository-root PNG references, 01–07, as one unified interface system.
 
-## Runtime artwork stack
+## Non-negotiable production rules
+- Reproduce the seven approved references faithfully. No alternative skin, redesign, simplified substitute or placeholder.
+- PNG is mandatory for production interface artwork. Preserve alpha where compositing is required.
+- Deliver authored high-resolution masters and lossless 2×/4× variants. An upscaled low-resolution placeholder is not a master.
+- Five control states: `default`, `hover`, `pressed`, `disabled`, `active`, where applicable. Record `not_applicable` explicitly for controls that do not support a state.
+- Materials and lighting must be consistent across the seven reference screens.
+- Dynamic text, parameter values, meters and status remain native JUCE controls.
+- Palette: graphite, cyan and electric blue only. No violet, purple or magenta.
+- JPEG is allowed only for genuine photographic content. WEBP is optional. SVG is excluded from the final premium production/runtime pipeline.
+- Do not change APVTS IDs/ranges, DSP, sampler/audio callback, MIDI behaviour, plugin geometry or stable theme identity as part of visual work.
 
-The Skin-1 editor canvas now composites the existing local artwork in this order:
+## Existing runtime artwork inventory
+The existing Skin-1 runtime composite currently uses:
+1. `assets/background/main.png` — 2560×1440.
+2. `assets/textures/material.png` — 1024×1024.
+3. `assets/fx_layers/shadow.png` — 800×450.
+4. `assets/fx_layers/stage_glow.png` — 800×450.
+5. `assets/fx_layers/specular.png` — 800×450.
+6. `svg/texture.svg`, `svg/bezel.svg`, `svg/crest.svg` — legacy layers, pending PNG replacement.
+7. `assets/fx_layers/edge_highlight.png` — 800×450.
 
-1. `assets/background/main.png` — 2560×1440 base stage canvas.
-2. `assets/textures/material.png` — 1024×1024 graphite/material texture.
-3. `assets/fx_layers/shadow.png` — 800×450 depth/shadow pass.
-4. `assets/fx_layers/stage_glow.png` — 800×450 accent-lighting pass.
-5. `assets/fx_layers/specular.png` — 800×450 metallic/specular pass.
-6. Existing SVG texture, bezel and crest layers.
-7. `assets/fx_layers/edge_highlight.png` — 800×450 edge-lighting pass.
+Existing PNG control artwork and four sprite atlases are retained as legacy/runtime assets pending visual comparison against the seven approved references. Their presence does not establish that they match the approved design.
 
-The full stack is drawn only on the main Skin-1 canvas. Floating panels continue to use their existing compact surfaces so the full-screen layers are not repeatedly redrawn into child windows.
+## Known legacy items — not accepted as final
+- `assets/hero.png` (800×450) and `assets/preview.png` (360×240) are legacy artwork; not approved as final premium hero/preview.
+- Existing master hero/preview files were upscaled from legacy runtime images; they are not valid authored high-resolution masters.
+- Existing control states include `dragged` rather than the approved `active` terminology. Do not blindly rename: verify each component's runtime semantics and provide the required active state.
+- Three material SVG layers are still referenced by `theme.json` and loaded by the current ThemeManager. They must remain until verified PNG replacements are integrated and all references/build paths are migrated.
+- SVG icon master sources may exist alongside PNG runtime icons. Audit all SVG files and code paths before declaring the entire theme SVG-free.
 
-## Gallery preview and remaining artwork gate
+## Required asset structure
+```
+NEON_STAGE_PREMIUM/
+  references/                 immutable reference copies + checksums
+  master/screens/              high-resolution screen compositions
+  master/panels/               header, left, centre, right, lower strip, footer
+  master/controls/<control>/   five state masters where applicable
+  master/materials/            graphite, metal, glass, display surfaces
+  master/lighting/              glow, shadow, specular, edge passes
+  runtime/2x/                   lossless PNG runtime assets
+  runtime/4x/                   lossless PNG runtime assets
+  atlases/                      PNG atlases and exact coordinate maps
+  manifests/                    inventory, state matrix, provenance, hashes
+```
 
-- The Skin-1 gallery card now uses `assets/background/main.png` instead of the legacy green `assets/preview.png` placeholder.
-- `assets/hero.png` is still a legacy placeholder and is not treated as final premium hero artwork.
-- The large `Meshy_AI_*` PNG sheets from `SKINS-THEME-` are not copied into this phase: their binary payloads were not available through the repository connector for visual inspection and checksum/license review. The reference JPEGs are composite UI mockups, not isolated production controls.
+## Reference-to-asset workflow
+1. Inspect all seven source images at native resolution. Preserve the originals.
+2. Record SHA-256, dimensions, alpha presence and source provenance.
+3. Map the exact screen composition and component geometry from references 01–07.
+4. Author independent transparent PNG masters; do not extract arbitrary fragments from flattened mockups and call them production-ready without cleanup.
+5. Generate 2×/4× variants from masters. Verify edge quality and alpha fringes.
+6. Build atlases and coordinate maps; validate every rectangle is in bounds and every required state is accounted for.
+7. Replace the three SVG material layers with inspected PNG equivalents. Update theme metadata, manifest, packager and loader together.
+8. Search the full Skin-1 runtime/package for SVG references. Remove SVG loading and SVG assets only when no required references remain.
+9. Validate image decode, dimensions, checksums, alpha, package contents and runtime drawing.
+10. Run Windows x64 VST3 build, CTest, plugin validation and FL Studio 20 host acceptance.
 
-## Runtime and package contract
+## Current execution status
+- Approved specification, asset schema, reference inventory, control-state matrix and atlas schema: committed.
+- Theme identity: changed to NEON STAGE PREMIUM while preserving `skin-053`.
+- Seven binary reference files: known to exist in repository root; their pixel content has not yet been inspected by the repository text connector.
+- New premium master PNG artwork and PNG replacements for the three SVG material layers: not yet authored.
+- SVG loader removal and SVG deletion: intentionally not performed because verified PNG replacements do not yet exist.
+- Build/test status for this branch: not claimed by this artwork-specification commit.
 
-- All PNG files are loaded from the local theme directory by `PPGUThemeManager` on the UI/message thread.
-- The audio callback, DSP, sampler, MIDI processing and scheduler do not access artwork.
-- The runtime packager copies all six layers only for `skin-053`.
-- The runtime packager also stages the complete 27-control × 5-state image set (135 PNGs) and its manifest only for `skin-053`.
-- `PPGUThemeManager` validates the control IDs, state names, record count, safe relative paths and 256×256 PNG dimensions, then caches 128×128 UI images.
-- The nine rotary controls and seven FX switches resolve their authored default/hover/pressed/disabled/dragged images by component ID. Rotary indicators remain driven by the live slider value.
-- The existing four Skin-1 sprite atlases, their manifest, the approved theme identity and the existing parameter bindings are preserved.
-- No APVTS IDs, ranges, audio behaviour, plugin layout geometry or theme IDs are changed.
-
-## Verification
-
-- `ppgu_theme_contracts` checks decoding and the exact dimensions of all six added layers.
-- `ppgu_skin1_premium_artwork_package_contract` stages the factory skin pack and checks the six PNGs are copied byte-for-byte with the expected dimensions.
-- CI build/CTest and FL Studio 20 host acceptance must pass before this phase is called complete.
-
-## Rollout sequence
-
-Skin-1 is the quality and packaging reference. SKIN-2 through SKIN-16 are intentionally not modified in this phase; their premium asset work starts only after Skin-1 is accepted.
+**Completion rule:** NEON STAGE PREMIUM is not complete until the actual reference-matched PNG artwork is authored, integrated, visually reviewed, runtime-validated and the Windows x64 VST3/CTest/FL Studio 20 acceptance gates pass.

@@ -1,0 +1,79 @@
+name: NEON STAGE PREMIUM Windows VST3 Build
+
+on:
+  push:
+    branches:
+      - fix/neon-stage-graphite-cyan-blue
+    paths:
+      - "CMakeLists.txt"
+      - "Source/**"
+      - "SKIN/**"
+      - "tests/**"
+      - "tools/package_active_skins.py"
+      - ".github/workflows/neon-stage-premium-windows.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-stage-premium-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-package:
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned JUCE 7.0.12
+        uses: actions/checkout@v4
+        with:
+          repository: juce-framework/JUCE
+          ref: 7.0.12
+          path: JUCE
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Configure MSVC x64 environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure Windows x64
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: Build VST3 and contract test targets
+        run: cmake --build build --config Release --parallel 2
+
+      - name: Run CTest
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Verify VST3 bundle and staged NEON STAGE PREMIUM
+        shell: pwsh
+        run: |
+          $bundle = Get-ChildItem -Path "build/PPGU_artefacts/Release/VST3" -Directory -Filter "*.vst3" -ErrorAction Stop | Select-Object -First 1
+          if (-not $bundle) { throw "VST3 bundle was not produced." }
+          $skins = Join-Path $bundle.Parent.FullName "Skins"
+          $registry = Join-Path $skins "theme_manifest.json"
+          $theme = Join-Path $skins "Skin_053/theme.json"
+          if (-not (Test-Path $registry)) { throw "Runtime Skins/theme_manifest.json missing beside VST3 bundle." }
+          if (-not (Test-Path $theme)) { throw "Runtime Skin_053/theme.json missing beside VST3 bundle." }
+          $manifest = Get-Content $registry -Raw | ConvertFrom-Json
+          if ($manifest.defaultStableId -ne "skin-053") { throw "Runtime registry defaultStableId is not skin-053." }
+          $skin = Get-Content $theme -Raw | ConvertFrom-Json
+          if ($skin.id -ne "skin-053" -or $skin.name -ne "NEON STAGE PREMIUM") { throw "Runtime Skin-1 identity mismatch." }
+          Write-Host "VST3 bundle: $($bundle.FullName)"
+          Write-Host "Runtime skins: $skins"
+          Write-Host "NEON STAGE PREMIUM identity and package: PASS"
+
+      - name: Upload VST3 bundle with runtime skins
+        uses: actions/upload-artifact@v4
+        with:
+          name: POP-PUNK-GUITAR-ULTIMATE-REV20-NEON-STAGE-PREMIUM-Windows-x64
+          path: build/PPGU_artefacts/Release/VST3/
+          if-no-files-found: error
+          compression-level: 6
+          retention-days: 30

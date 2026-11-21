@@ -37,7 +37,7 @@ public:
         };
 
         juce::String id { "skin-053" };
-        juce::String name { "NEON STAGE DEFAULT" };
+        juce::String name { "NEON STAGE PREMIUM" };
         juce::String uiTypeface { "Segoe UI" };
         juce::String displayTypeface { "Consolas" };
         juce::String typographyWeight { "semibold" };

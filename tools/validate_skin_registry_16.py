@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Validate REV.20's exact 16-theme registry without accepting legacy skins."""
 from __future__ import annotations
+import hashlib
 import json
 import struct
 import zlib
@@ -9,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKIN = ROOT / "SKIN"
 EXPECTED = [
-    ("SKIN-1", "NEON STAGE DEFAULT", "skin-053", 53, "Skin_053"),
+    ("SKIN-1", "NEON STAGE PREMIUM", "skin-053", 53, "Skin_053"),
     ("SKIN-2", "OBSIDIAN GOLD", "skin-103", 103, "Skin_103"),
     ("SKIN-3", "CARBON FORGE", "skin-104", 104, "Skin_104"),
     ("SKIN-4", "MIDNIGHT CRIMSON", "skin-105", 105, "Skin_105"),
@@ -27,12 +28,13 @@ EXPECTED = [
     ("SKIN-16", "VOLCANIC STEEL", "skin-117", 117, "Skin_117"),
 ]
 
-def validate_png(path: Path, expected_size: tuple[int, int]) -> None:
+def validate_png(path: Path, expected_size: tuple[int, int], require_alpha: bool = False) -> None:
     data = path.read_bytes()
     if not data.startswith(b"\x89PNG\r\n\x1a\n"):
         raise SystemExit(f"FAIL: invalid PNG signature: {path}")
     offset = 8
     dimensions = None
+    has_transparency = False
     saw_iend = False
     while offset < len(data):
         if offset + 12 > len(data):
@@ -51,6 +53,9 @@ def validate_png(path: Path, expected_size: tuple[int, int]) -> None:
             if length != 13:
                 raise SystemExit(f"FAIL: invalid PNG IHDR length: {path}")
             dimensions = struct.unpack(">II", chunk_data[:8])
+            has_transparency = chunk_data[9] in (4, 6)
+        if chunk_type == b"tRNS":
+            has_transparency = True
         if chunk_type == b"IEND":
             if length != 0:
                 raise SystemExit(f"FAIL: invalid PNG IEND: {path}")
@@ -62,7 +67,64 @@ def validate_png(path: Path, expected_size: tuple[int, int]) -> None:
         raise SystemExit(f"FAIL: incomplete PNG or trailing data: {path}")
     if dimensions != expected_size:
         raise SystemExit(f"FAIL: PNG dimensions {dimensions!r}, expected {expected_size!r}: {path}")
+    if require_alpha and not has_transparency:
+        raise SystemExit(f"FAIL: PNG must preserve transparency/alpha: {path}")
 
+
+
+def validate_skin_asset_manifest(skin_root: Path) -> int:
+    manifest_path = skin_root / "assets" / "asset_manifest.json"
+    if not manifest_path.is_file():
+        raise SystemExit(f"FAIL: missing NEON STAGE asset manifest: {manifest_path}")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    records = manifest.get("records", [])
+    if manifest.get("schemaVersion") != "1.0.0" or manifest.get("skinId") != "skin-053":
+        raise SystemExit("FAIL: NEON STAGE asset manifest identity/schema mismatch")
+    if manifest.get("assetCount") != len(records) or not records:
+        raise SystemExit("FAIL: NEON STAGE asset manifest count mismatch")
+
+    alpha_categories = {
+        "control-state-master", "control-state-runtime", "topbar-icon-runtime",
+        "topbar-icon-atlas", "stage_glow-master", "stage_glow-runtime",
+        "edge_highlight-master", "edge_highlight-runtime", "specular-master",
+        "specular-runtime", "shadow-master", "shadow-runtime",
+    }
+    seen_paths = set()
+    for record in records:
+        relative = Path(record.get("path", ""))
+        if not record.get("path") or relative.is_absolute() or ".." in relative.parts:
+            raise SystemExit(f"FAIL: unsafe NEON STAGE asset path: {record.get('path')!r}")
+        if relative.as_posix() in seen_paths:
+            raise SystemExit(f"FAIL: duplicate NEON STAGE asset record: {relative}")
+        seen_paths.add(relative.as_posix())
+        asset_path = (skin_root / relative).resolve()
+        try:
+            asset_path.relative_to(skin_root.resolve())
+        except ValueError:
+            raise SystemExit(f"FAIL: asset escapes NEON STAGE root: {relative}") from None
+        if not asset_path.is_file():
+            raise SystemExit(f"FAIL: missing NEON STAGE asset: {asset_path}")
+
+        data = asset_path.read_bytes()
+        if len(data) != record.get("bytes"):
+            raise SystemExit(f"FAIL: asset byte-size mismatch: {relative}")
+        if hashlib.sha256(data).hexdigest() != record.get("sha256", "").lower():
+            raise SystemExit(f"FAIL: asset SHA-256 mismatch: {relative}")
+        if f"{zlib.crc32(data) & 0xFFFFFFFF:08X}" != str(record.get("crc32", "")).upper():
+            raise SystemExit(f"FAIL: asset CRC32 mismatch: {relative}")
+
+        if record.get("format") == "PNG":
+            dimensions = record.get("dimensions", "")
+            try:
+                width, height = (int(value) for value in dimensions.lower().split("x", 1))
+            except (TypeError, ValueError):
+                raise SystemExit(f"FAIL: invalid PNG dimensions in asset manifest: {relative}") from None
+            validate_png(asset_path, (width, height),
+                         require_alpha=record.get("category") in alpha_categories)
+        elif record.get("format") == "SVG":
+            if b"<svg" not in data.lstrip()[:1024].lower():
+                raise SystemExit(f"FAIL: invalid SVG source asset: {relative}")
+    return len(records)
 
 def main() -> int:
     registry = json.loads((SKIN / "theme_manifest.json").read_text(encoding="utf-8"))
@@ -70,7 +132,7 @@ def main() -> int:
     if registry.get("totalSkins") != 16 or len(entries) != 16:
         raise SystemExit("FAIL: runtime registry must contain exactly 16 themes")
     if registry.get("defaultStableId") != "skin-053":
-        raise SystemExit("FAIL: NEON STAGE DEFAULT must remain skin-053")
+        raise SystemExit("FAIL: NEON STAGE PREMIUM must remain skin-053")
     seen = set()
     ready = []
     for position, (entry, expected) in enumerate(zip(entries, EXPECTED, strict=True), 1):
@@ -119,7 +181,10 @@ def main() -> int:
                    if p.is_dir() and p.name.startswith("Skin_")}
     if actual_dirs != expected_dirs:
         raise SystemExit(f"FAIL: only approved 16 theme directories may exist; found {sorted(actual_dirs)}")
-    # NEON STAGE DEFAULT's dedicated sprite atlas package is validated
+    checked_assets = validate_skin_asset_manifest(SKIN / "Skin_053")
+    print(f"PASS: {checked_assets} NEON STAGE asset records match bytes, SHA-256, CRC32, dimensions and required alpha.")
+
+    # NEON STAGE PREMIUM's dedicated sprite atlas package is validated
     # independently from the other 15 skins; the registry remains exactly 16.
     atlas_dir = SKIN / "Skin_053" / "assets" / "spritesheets"
     atlas_names = (
@@ -132,7 +197,7 @@ def main() -> int:
         atlas_path = atlas_dir / atlas_name
         if not atlas_path.is_file():
             raise SystemExit(f"FAIL: missing NEON STAGE sprite atlas: {atlas_path}")
-        validate_png(atlas_path, (1024, 1024))
+        validate_png(atlas_path, (1024, 1024), require_alpha=True)
     atlas_manifest_path = atlas_dir / "neon_stage_spritesheet_manifest.json"
     default_theme = json.loads((SKIN / "Skin_053" / "theme.json").read_text(encoding="utf-8"))
     if default_theme.get("assets", {}).get("spriteSheetManifest") != "assets/spritesheets/neon_stage_spritesheet_manifest.json":
@@ -145,7 +210,7 @@ def main() -> int:
         "metal_border": "#00D2FF",
         "glow_cyan": "#00E5FF",
         "glow_blue": "#0048FF",
-        "accent_magenta": "#FF007F",
+        "accent_blue": "#0048FF",
     }
     if atlas_manifest.get("project") != "NEON_STAGE_MANAGER_3_0" \
             or atlas_manifest.get("theme") != "NEON_STAGE_DEFAULT_SKIN_1" \
@@ -207,7 +272,7 @@ def main() -> int:
             or slider_instances.get("thumb", {}).get("bbox") != [910, 640, 942, 672]:
         raise SystemExit("FAIL: NEON STAGE slider track/thumb geometry mismatch")
     leds = meters.get("status_leds", {})
-    expected_led_states = ["off", "cyan", "blue", "magenta"]
+    expected_led_states = ["off", "cyan", "blue", "electric_blue"]
     if leds.get("round", {}).get("states") != expected_led_states \
             or leds.get("square", {}).get("states") != expected_led_states \
             or leds.get("round", {}).get("row_y") != [810, 920] \

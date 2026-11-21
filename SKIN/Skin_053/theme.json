@@ -2,10 +2,10 @@
   "schemaVersion": "1.0.0",
   "id": "skin-053",
   "index": 53,
-  "name": "NEON STAGE DEFAULT",
+  "name": "NEON STAGE PREMIUM",
   "family": "special",
   "layout": "STUDIO_CONSOLE",
-  "description": "Canonical SKIN-1 visual shell: dark graphite studio console with restrained cyan, electric-blue, violet and magenta stage accents. Default minimal mode; effects are opt-in.",
+  "description": "Approved NEON STAGE PREMIUM visual system based on the seven official interface references 01–07. Graphite, cyan and electric blue only; no violet, purple or magenta. Exact reference-led composition; PNG-first premium artwork pipeline.",
   "palette": {
     "window_bg": "#080B14",
     "panel": "#101827",
@@ -349,12 +349,14 @@
     "layoutChanges": false,
     "audioChanges": false
   },
-  "designStatus": "REV20_RUNTIME_READY_CI_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
+  "designStatus": "NEON_STAGE_PREMIUM_DEFAULT_CONFIGURED; WINDOWS_VST3_BUILD_AND_FL_STUDIO_20_ACCEPTANCE_PENDING",
   "notes": [
-    "[IDENTITY-RULE] SKIN-1 = NEON STAGE DEFAULT = skin-053/Skin_053. Stable asset ID and index 53 are preserved.",
-    "Default display mode is MINIMALISM; premium glow/effects are opt-in only.",
-    "All control IDs and grid metadata are preserved from the REV18 canonical source.",
-    "Visual-only change: no APVTS, DSP, sampler, MIDI, preset or audio callback changes.",
-    "NEON STAGE DEFAULT / SKIN-1 is the canonical default and reset target. REV.20 exact SHA 8cfd11ecce3c8039360c1c194be5251e716c9015 passed Windows x64 VST3 build, full CTest, this theme's texture/bezel/crest SVG decoding, PNG CRC/dimension validation and 16-only package staging (workflow 44717722638). Runtime-ready/selectable in REV.20. FL Studio 20 host acceptance and pluginval remain pending."
+    "[IDENTITY-RULE] SKIN-1 = NEON STAGE PREMIUM = skin-053/Skin_053. Stable asset ID and index 53 are preserved.",
+    "[APPROVED-BASE] The seven official NEON STAGE reference mockups 01–07 are one unified visual authority, not seven skins.",
+    "[FORMAT-RULE] PNG is mandatory for production artwork. Preserve alpha; author high-resolution masters and lossless 2x/4x variants. SVG is to be removed only after verified PNG replacements are integrated.",
+    "[STATE-RULE] Premium controls require default, hover, pressed, disabled and active states where applicable; live text and values remain native JUCE controls.",
+    "[PALETTE-RULE] Graphite, cyan and electric blue only. No violet, purple or magenta.",
+    "[COMPATIBILITY] Existing control IDs, APVTS bindings, DSP/audio behaviour, MIDI behaviour, plugin geometry and theme ID remain unchanged.",
+    "[STATUS] Specification and asset schemas are committed. Final reference inspection, authored premium PNG replacements, SVG migration, build/CTest and FL Studio 20 host acceptance are still pending."
   ]
 }

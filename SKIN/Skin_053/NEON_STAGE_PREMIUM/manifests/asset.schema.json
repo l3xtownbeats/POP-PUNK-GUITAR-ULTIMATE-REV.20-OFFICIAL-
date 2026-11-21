@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "neon-stage-premium-asset.schema.json",
+  "title": "NEON STAGE PREMIUM asset record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "role",
+    "path",
+    "format",
+    "category",
+    "references",
+    "dimensions",
+    "scale",
+    "alpha",
+    "state",
+    "status",
+    "provenance",
+    "sha256"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "screen",
+        "panel",
+        "control",
+        "material",
+        "lighting",
+        "atlas",
+        "photograph"
+      ]
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^(references|master|runtime|atlases)/.+\\.png$"
+    },
+    "format": {
+      "const": "PNG"
+    },
+    "category": {
+      "type": "string"
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "01",
+          "02",
+          "03",
+          "04",
+          "05",
+          "06",
+          "07"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "scale": {
+      "type": "string",
+      "enum": [
+        "master",
+        "1x",
+        "2x",
+        "4x"
+      ]
+    },
+    "alpha": {
+      "type": "boolean"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "none",
+        "default",
+        "hover",
+        "pressed",
+        "disabled",
+        "active",
+        "not_applicable"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "reference_pending_inspection",
+        "planned",
+        "in_authoring",
+        "review",
+        "approved",
+        "runtime_verified"
+      ]
+    },
+    "provenance": {
+      "type": "string"
+    },
+    "sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "atlas": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

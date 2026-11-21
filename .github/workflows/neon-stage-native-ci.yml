@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/neon-stage-manager-3-native-integration
+      - fix/neon-stage-graphite-cyan-blue
     paths:
       - "CMakeLists.txt"
       - "Source/**"
@@ -11,6 +12,8 @@ on:
       - "SKIN/**"
       - "tools/package_active_skins.py"
       - "tools/validate_skin_registry_16.py"
+      - "tools/generate_neon_stage_spritesheets.py"
+      - "tools/validate_neon_stage_ui_contract.py"
       - ".github/workflows/neon-stage-native-ci.yml"
   pull_request:
     branches:
@@ -22,13 +25,14 @@ on:
       - "SKIN/**"
       - "tools/package_active_skins.py"
       - "tools/validate_skin_registry_16.py"
+      - "tools/generate_neon_stage_spritesheets.py"
       - ".github/workflows/neon-stage-native-ci.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: neon-stage-native-pr-${{ github.event.pull_request.number }}
+  group: neon-stage-native-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -47,6 +51,14 @@ jobs:
       - name: Install asset validation dependency
         shell: pwsh
         run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Generate canonical NEON STAGE sprite atlases
+        shell: pwsh
+        run: python tools/generate_neon_stage_spritesheets.py
+
+      - name: Validate NEON STAGE UI bindings and window contract
+        shell: pwsh
+        run: python tools/validate_neon_stage_ui_contract.py
 
       - name: Checkout JUCE 7.0.12
         shell: pwsh

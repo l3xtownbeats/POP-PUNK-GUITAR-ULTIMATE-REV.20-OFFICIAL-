@@ -441,6 +441,95 @@ private:
 };;
 
 // UI-only settings panel: controls the auxiliary workspace and theme preference.
+class PPGUAboutPanel final : public juce::Component, public PPGUThemeAwarePanel
+{
+public:
+    explicit PPGUAboutPanel(PPGUThemeManager::Palette paletteIn)
+        : palette(std::move(paletteIn))
+    {
+        heading.setText("POP PUNK GUITAR ULTIMATE", juce::dontSendNotification);
+        heading.setFont(makeThemeFont(palette, 20.0f, true, true));
+        heading.setColour(juce::Label::textColourId, palette.token("text_primary"));
+        addAndMakeVisible(heading);
+
+        subtitle.setText("NEON STAGE PREMIUM  /  PRODUCT INFORMATION", juce::dontSendNotification);
+        subtitle.setFont(makeThemeFont(palette, 10.0f, false, true));
+        subtitle.setColour(juce::Label::textColourId, palette.token("accent"));
+        addAndMakeVisible(subtitle);
+
+        static const std::array<const char*, 5> information {{
+            "VERSION                 4.0.0",
+            "PLUGIN FORMAT           VST3 INSTRUMENT",
+            "INTERFACE               NEON STAGE PREMIUM  /  SKIN-1",
+            "AUDIO HOST               SAMPLE RATE AND BUFFER CONTROLLED BY THE DAW",
+            "LIBRARY LICENSING       IMPORT ONLY SFZ/WAV CONTENT YOU ARE LICENSED TO USE"
+        }};
+        for (size_t i = 0; i < information.size(); ++i)
+        {
+            rows[i].setText(information[i], juce::dontSendNotification);
+            rows[i].setFont(makeThemeFont(palette, 10.5f, false, i == 0));
+            rows[i].setColour(juce::Label::textColourId,
+                              i == 0 ? palette.token("accent") : palette.token("text_primary"));
+            rows[i].setJustificationType(juce::Justification::centredLeft);
+            addAndMakeVisible(rows[i]);
+        }
+
+        note.setText("Sample libraries are user-managed. No third-party sample content is bundled by this information panel.",
+                     juce::dontSendNotification);
+        note.setFont(makeThemeFont(palette, 9.5f));
+        note.setColour(juce::Label::textColourId, palette.token("text_secondary"));
+        note.setJustificationType(juce::Justification::topLeft);
+        addAndMakeVisible(note);
+    }
+
+    void setThemePalette(const PPGUThemeManager::Palette& value) override
+    {
+        palette = value;
+        heading.setFont(makeThemeFont(palette, 20.0f, true, true));
+        subtitle.setFont(makeThemeFont(palette, 10.0f, false, true));
+        heading.setColour(juce::Label::textColourId, palette.token("text_primary"));
+        subtitle.setColour(juce::Label::textColourId, palette.token("accent"));
+        for (size_t i = 0; i < rows.size(); ++i)
+        {
+            rows[i].setFont(makeThemeFont(palette, 10.5f, false, i == 0));
+            rows[i].setColour(juce::Label::textColourId,
+                              i == 0 ? palette.token("accent") : palette.token("text_primary"));
+        }
+        note.setFont(makeThemeFont(palette, 9.5f));
+        note.setColour(juce::Label::textColourId, palette.token("text_secondary"));
+        repaint();
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.30f, 0.035f);
+        auto bounds = getLocalBounds().toFloat().reduced(8.0f);
+        g.setColour(palette.token("accent").withAlpha(0.35f));
+        g.drawRoundedRectangle(bounds, 8.0f, 1.0f);
+    }
+
+    void resized() override
+    {
+        auto area = getLocalBounds().reduced(20);
+        heading.setBounds(area.removeFromTop(30));
+        subtitle.setBounds(area.removeFromTop(20));
+        area.removeFromTop(18);
+        for (auto& row : rows)
+        {
+            row.setBounds(area.removeFromTop(28));
+            area.removeFromTop(5);
+        }
+        area.removeFromTop(8);
+        note.setBounds(area.removeFromTop(42));
+    }
+
+private:
+    PPGUThemeManager::Palette palette;
+    juce::Label heading, subtitle, note;
+    std::array<juce::Label, 5> rows;
+};
+
 class PPGUSettingsPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
 public:
@@ -1558,11 +1647,32 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
                 const int destinationY = y + (h - diameter) / 2;
                 g.drawImageWithin(*artwork, destinationX, destinationY, diameter, diameter,
                                   juce::RectanglePlacement::centred);
-                // Artwork remains position-neutral; the live indicator follows APVTS.
+                // Artwork is the authored NEON STAGE knob body. The live arc
+                // and pointer remain native JUCE geometry, driven by the APVTS value.
                 const float cx = static_cast<float>(x) + static_cast<float>(w) * 0.5f;
                 const float cy = static_cast<float>(y) + static_cast<float>(h) * 0.5f;
                 const float radius = static_cast<float>(diameter) * 0.30f;
                 const float angle = start + pos * (end - start);
+
+                juce::Path valueTrack;
+                valueTrack.addCentredArc(cx, cy, radius * 1.18f, radius * 1.18f,
+                                         0.0f, start, end, true);
+                g.setColour(palette.token("control_border").withAlpha(0.78f));
+                g.strokePath(valueTrack, juce::PathStrokeType(2.0f));
+
+                if (pos > 0.001f)
+                {
+                    juce::Path valueArc;
+                    valueArc.addCentredArc(cx, cy, radius * 1.18f, radius * 1.18f,
+                                           0.0f, start, angle, true);
+                    g.setColour(palette.token("accent_glow").withAlpha(0.30f));
+                    g.strokePath(valueArc, juce::PathStrokeType(6.0f,
+                        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                    g.setColour(palette.token("accent"));
+                    g.strokePath(valueArc, juce::PathStrokeType(2.2f,
+                        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                }
+
                 juce::Path pointer;
                 pointer.startNewSubPath(cx, cy);
                 pointer.lineTo(cx + std::sin(angle) * radius,
@@ -1688,6 +1798,67 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                                                    const juce::Colour& base, bool hovered, bool down)
 {
     const auto controlId = button.getComponentID();
+
+    // MELODY/PATTERN are tabs, not FX rocker switches. Reuse the authored
+    // mode-selector tile and add a live cyan active indicator over it.
+    if (controlId == "mode_tab")
+    {
+        const auto stateName = ppguButtonArtworkState(button, hovered, down);
+        const auto artworkState = stateName == "active" ? juce::String("default") : stateName;
+        bool drewAuthoredArtwork = false;
+        if (const auto* artwork = palette.findControlArtwork("mode_selector", artworkState))
+        {
+            if (artwork->isValid())
+            {
+                g.drawImageWithin(*artwork, 0, 0, button.getWidth(), button.getHeight(),
+                                  juce::RectanglePlacement::centred);
+                drewAuthoredArtwork = true;
+            }
+        }
+
+        auto bounds = button.getLocalBounds().toFloat().reduced(1.0f);
+        if (!drewAuthoredArtwork)
+        {
+            auto face = button.getToggleState() ? palette.token("panel_elevated")
+                                                : palette.token("control_bg");
+            if (!button.isEnabled())
+                face = palette.token("lowlight");
+            else if (down)
+                face = face.darker(0.14f);
+            else if (hovered)
+                face = face.brighter(0.10f);
+            g.setColour(face);
+            g.fillRoundedRectangle(bounds, 7.0f);
+            g.setColour(button.getToggleState() && button.isEnabled()
+                ? palette.token("accent") : palette.token("control_border"));
+            g.drawRoundedRectangle(bounds, 7.0f, button.hasKeyboardFocus(true) ? 2.0f : 1.0f);
+        }
+
+        if (button.isEnabled() && button.getToggleState())
+        {
+            const auto glow = palette.token("accent_glow");
+            const auto accent = palette.token("accent");
+            g.setColour(glow.withAlpha(0.24f));
+            g.drawRoundedRectangle(bounds.reduced(1.5f), 7.0f, 5.0f);
+            g.setColour(accent.withAlpha(0.95f));
+            g.fillRoundedRectangle(bounds.getX() + 9.0f, bounds.getBottom() - 4.0f,
+                                   juce::jmax(12.0f, bounds.getWidth() - 18.0f), 2.0f, 1.0f);
+            g.setColour(accent);
+            g.fillEllipse(bounds.getRight() - 11.0f, bounds.getCentreY() - 2.0f, 4.0f, 4.0f);
+        }
+        else if (button.isEnabled() && (hovered || down))
+        {
+            g.setColour(palette.token("accent").withAlpha(down ? 0.75f : 0.42f));
+            g.drawRoundedRectangle(bounds.reduced(1.5f), 7.0f, down ? 2.0f : 1.0f);
+        }
+        else if (!button.isEnabled())
+        {
+            g.setColour(palette.token("window_bg").withAlpha(0.34f));
+            g.fillRoundedRectangle(bounds, 7.0f);
+        }
+        return;
+    }
+
     if (controlId.startsWith("fx_switch"))
     {
         const auto stateName = ppguButtonArtworkState(button, hovered, down);
@@ -1930,17 +2101,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     aboutButton.setTooltip("Plugin version, format and runtime information.");
     aboutButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
     aboutButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
-    aboutButton.onClick = [this]
-    {
-        juce::AlertWindow::showMessageBoxAsync(
-            juce::MessageBoxIconType::NoIcon,
-            "ABOUT  /  POP PUNK GUITAR ULTIMATE",
-            juce::String(JucePlugin_Name) + "\nVersion 4.0.0"
-            + "\nVST3 Instrument  /  Windows x64"
-            + "\n\nNEON STAGE interface, MIDI guitar performance, pattern playback and built-in effects."
-            + "\n\nAudio sample rate and buffer size are controlled by the host DAW."
-            + "\n\nSample libraries remain user-managed; use only content whose licence permits your use.");
-    };
+    aboutButton.onClick = [this] { openAboutPanel(); };
     addAndMakeVisible(aboutButton);
     statusLabel.setText("NO LIBRARY LOADED  /  LOAD A LICENSED SFZ INSTRUMENT", juce::dontSendNotification);
     const auto savedSfzPath = processor.getCurrentSfzFilePath();
@@ -1955,8 +2116,15 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     statusLabel.setColour(juce::Label::textColourId, themeManager.getPalette().token("text_secondary"));
     statusLabel.setFont(makeThemeFont(themeManager.getPalette(), 11.0f, false, false));
     addAndMakeVisible(statusLabel);
+    // The APVTS playMode is the only state source. Tabs are momentary
+    // selectors; their visible toggle state is written by modeBox.onChange.
+    // This prevents clicking the already-selected tab from toggling it OFF.
     melodyTab.setClickingTogglesState(false);
     patternTab.setClickingTogglesState(false);
+    melodyTab.setComponentID("mode_tab");
+    patternTab.setComponentID("mode_tab");
+    melodyTab.setTooltip("Select MELODY mode");
+    patternTab.setTooltip("Select PATTERN mode");
     for (auto* b : { &melodyTab, &patternTab }) {
         b->setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("control_bg"));
         b->setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
@@ -1996,13 +2164,20 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     addAndMakeVisible(*keyboard);
     performanceDisplay = std::make_unique<PPGUPerformanceDisplay>(processor);
     addAndMakeVisible(*performanceDisplay);
-    melodyTab.onClick = [this] { modeBox.setSelectedId(1); };
-    patternTab.onClick = [this] { modeBox.setSelectedId(2); openPatternSectionPanel(); };
+    melodyTab.onClick = [this] { modeBox.setSelectedId(1, juce::sendNotification); };
+    patternTab.onClick = [this] { modeBox.setSelectedId(2, juce::sendNotification); openPatternSectionPanel(); };
     modeBox.onChange = [this]
     {
+        const bool patternSelected = modeBox.getSelectedId() == 2;
+        melodyTab.setToggleState(!patternSelected, juce::dontSendNotification);
+        patternTab.setToggleState(patternSelected, juce::dontSendNotification);
+        melodyTab.repaint();
+        patternTab.repaint();
         if (chordDiagram != nullptr)
-            chordDiagram->setVisible(modeBox.getSelectedId() == 2);
+            chordDiagram->setVisible(patternSelected);
     };
+    // Reflect the restored APVTS mode immediately at editor creation.
+    modeBox.onChange();
     for (size_t i = 0; i < knobs.size(); ++i) {
         configureKnob(knobs[i], knobLabels[i], knobNames[i]);
         knobs[i].setComponentID("knob" + juce::String(static_cast<int>(i + 1)).paddedLeft('0', 2));
@@ -2354,6 +2529,18 @@ int PopPunkGuitarUltimateAudioProcessorEditor::getSkinOrdinalForId(const juce::S
 void PopPunkGuitarUltimateAudioProcessorEditor::loadSavedSkin()
 {
     auto* settings = uiProperties.getUserSettings();
+
+    // One-time migration: the first build carrying the approved NEON STAGE
+    // PREMIUM default must open with SKIN-1 even if an older build persisted
+    // another gallery selection. Later user selections remain persistent.
+    constexpr auto defaultSkinMigrationKey = "neonStagePremiumDefaultApplied";
+    if (settings != nullptr && !settings->getBoolValue(defaultSkinMigrationKey, false))
+    {
+        settings->setValue("skinId", "skin-053");
+        settings->setValue(defaultSkinMigrationKey, true);
+        settings->saveIfNeeded();
+    }
+
     const auto id = settings ? settings->getValue("skinId", "skin-053") : juce::String("skin-053");
     const auto ordinal = getSkinOrdinalForId(id);
     if (ordinal < 1 || !loadSkinByIndex(ordinal, false))
@@ -2525,6 +2712,28 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openSettingsPanel()
         spec.minimum = { 420, 260 };
         spec.content = std::move(content);
         auxiliaryWorkspace->openPanel(std::move(spec));
+    }
+
+    auxiliaryWorkspace->setVisible(true);
+    auxiliaryWorkspace->toFront(false);
+}
+
+void PopPunkGuitarUltimateAudioProcessorEditor::openAboutPanel()
+{
+    if (auxiliaryWorkspace == nullptr)
+        return;
+
+    constexpr int aboutPanelId = 8;
+    if (!auxiliaryWorkspace->isPanelOpen(aboutPanelId))
+    {
+        PPGUMultiWindowWorkspace::PanelSpec spec;
+        spec.id = aboutPanelId;
+        spec.title = "ABOUT  /  POP PUNK GUITAR ULTIMATE";
+        spec.desired = { 620, 390 };
+        spec.minimum = { 420, 300 };
+        spec.content = std::make_unique<PPGUAboutPanel>(themeManager.getPalette());
+        if (!auxiliaryWorkspace->openPanel(std::move(spec)))
+            return;
     }
 
     auxiliaryWorkspace->setVisible(true);

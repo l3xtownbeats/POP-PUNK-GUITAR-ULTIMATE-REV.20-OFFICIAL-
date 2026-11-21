@@ -180,14 +180,22 @@ namespace
             return false;
         }
 
+        // JUCE 9.0.5 removed Drawable::createFromSVG(XmlElement) and
+        // replaced it with the LunaSVG-backed string parser. Keep the legacy
+        // XmlElement path for JUCE 7.x so the same source supports both CI
+        // matrix versions without weakening the SVG content/path validation.
+        std::unique_ptr<juce::Drawable> drawable;
+#if JUCE_MAJOR_VERSION >= 9
+        drawable = juce::Drawable::createFromSVGString(svgText);
+#else
         auto xml = juce::XmlDocument::parse(svgText);
         if (xml == nullptr || xml->getTagName() != "svg")
         {
             error = "Theme SVG could not be parsed as a safe SVG document";
             return false;
         }
-
-        auto drawable = juce::Drawable::createFromSVG(*xml);
+        drawable = juce::Drawable::createFromSVG(*xml);
+#endif
         if (drawable == nullptr)
         {
             error = "Theme SVG could not be rendered";

@@ -10,12 +10,12 @@
     {
       "ordinal": 1,
       "label": "SKIN-1",
-      "name": "NEON STAGE DEFAULT",
+      "name": "NEON STAGE PREMIUM",
       "id": "skin-053",
       "index": 53,
       "path": "Skin_053/theme.json",
       "runtimeReady": true,
-      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
+      "status": "NEON_STAGE_PREMIUM_DEFAULT_CONFIGURED; WINDOWS_VST3_BUILD_AND_FL_STUDIO_20_ACCEPTANCE_PENDING",
       "preview": "Skin_053/assets/preview.png",
       "hero": "Skin_053/assets/hero.png"
     },

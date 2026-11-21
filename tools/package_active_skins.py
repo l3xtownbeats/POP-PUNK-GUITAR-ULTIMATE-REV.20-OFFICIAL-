@@ -50,7 +50,7 @@ def main() -> int:
     if registry.get("totalSkins") != 16 or len(entries) != 16:
         raise SystemExit("active registry must contain exactly 16 factory skins")
     if registry.get("defaultStableId") != "skin-053":
-        raise SystemExit("active registry defaultStableId must be skin-053 (NEON STAGE DEFAULT)")
+        raise SystemExit("active registry defaultStableId must be skin-053 (NEON STAGE PREMIUM)")
     if len(approved) != 16:
         raise SystemExit("approved_theme_sequence.json must contain exactly 16 themes")
 
@@ -115,7 +115,7 @@ def main() -> int:
             source_relative = (Path(folder) / relative).as_posix()
             copy_one(root, output, source_relative)
 
-        # NEON STAGE DEFAULT ships four extra runtime atlases. Copy them
+        # NEON STAGE PREMIUM ships four extra runtime atlases. Copy them
         # only for SKIN-1; the other 15 shells retain their existing package.
         if stable_id == "skin-053":
             sprite_sheets = assets.get("spriteSheets", {})
@@ -123,16 +123,16 @@ def main() -> int:
                 "controls", "meters_sliders", "frames_panels", "icons"
             }
             if not isinstance(sprite_sheets, dict) or set(sprite_sheets) != expected_sheets:
-                raise SystemExit("NEON STAGE DEFAULT: spriteSheets must define exactly four atlas paths")
+                raise SystemExit("NEON STAGE PREMIUM: spriteSheets must define exactly four atlas paths")
             for key in sorted(expected_sheets):
                 relative = sprite_sheets.get(key)
                 if not isinstance(relative, str) or not relative:
-                    raise SystemExit(f"NEON STAGE DEFAULT: missing sprite atlas path {key}")
+                    raise SystemExit(f"NEON STAGE PREMIUM: missing sprite atlas path {key}")
                 copy_one(root, output, (Path(folder) / relative).as_posix())
 
             sprite_manifest = assets.get("spriteSheetManifest")
             if sprite_manifest != "assets/spritesheets/neon_stage_spritesheet_manifest.json":
-                raise SystemExit("NEON STAGE DEFAULT: invalid sprite atlas manifest path")
+                raise SystemExit("NEON STAGE PREMIUM: invalid sprite atlas manifest path")
             copy_one(root, output, (Path(folder) / sprite_manifest).as_posix())
 
             # Skin-1's premium canvas is a layered artwork stack, not a single
@@ -164,7 +164,7 @@ def main() -> int:
                     or len(control_ids) != 27 or len(set(control_ids)) != 27
                     or set(states) != expected_states or len(states) != 5
                     or len(records) != len(control_ids) * len(expected_states)):
-                raise SystemExit("NEON STAGE DEFAULT: invalid control-state manifest contract")
+                raise SystemExit("NEON STAGE PREMIUM: invalid control-state manifest contract")
             seen_control_states = set()
             for record in records:
                 control_id = record.get("controlId")
@@ -173,14 +173,14 @@ def main() -> int:
                 if (control_id not in control_ids or state not in expected_states
                         or not isinstance(runtime_rel, str)
                         or not runtime_rel.startswith("assets/controls/")):
-                    raise SystemExit("NEON STAGE DEFAULT: unsafe or unknown control-state record")
+                    raise SystemExit("NEON STAGE PREMIUM: unsafe or unknown control-state record")
                 key = (control_id, state)
                 if key in seen_control_states:
-                    raise SystemExit(f"NEON STAGE DEFAULT: duplicate control-state record {key}")
+                    raise SystemExit(f"NEON STAGE PREMIUM: duplicate control-state record {key}")
                 seen_control_states.add(key)
                 copy_one(root, output, (Path(folder) / runtime_rel).as_posix())
             if len(seen_control_states) != 135:
-                raise SystemExit("NEON STAGE DEFAULT: control-state manifest is incomplete")
+                raise SystemExit("NEON STAGE PREMIUM: control-state manifest is incomplete")
 
         if entry.get("preview") != (Path(folder) / assets["preview"]).as_posix():
             raise SystemExit(f"{name}: registry preview path mismatch")

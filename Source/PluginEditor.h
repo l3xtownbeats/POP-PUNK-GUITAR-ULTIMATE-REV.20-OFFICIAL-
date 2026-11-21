@@ -46,6 +46,7 @@ private:
     bool loadSkinByIndex(int ordinal, bool persist);
     void openSkinGalleryPanel();
     void openSettingsPanel();
+    void openAboutPanel();
     void applyPalette();
     void persistSkinPreference();
     void configureKnob(juce::Slider&, juce::Label&, const juce::String&);
