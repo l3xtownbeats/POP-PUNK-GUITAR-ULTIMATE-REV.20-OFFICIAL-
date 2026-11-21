@@ -76,3 +76,36 @@ These are existing foundations, not proof that every engine is complete. In part
 ## Scope discipline
 
 This BASE authorises implementation of the theme engine only. It does not authorise a second editor, new VST3 target, new musical mode, parameter-ID changes, DSP changes, redistribution of unlicensed art, or merging PR #8 before conflicts and all required checks are resolved.
+
+## Canonical terminology — NEON STAGE (approved BASE)
+
+For REV.20, the following terms are synonyms and refer to one and the same
+canonical concept: **NEON STAGE — the plugin's single main theme/skin**:
+
+- interface / graphical interface;
+- plugin shell / visual shell;
+- theme / skin / main theme;
+- main plugin window / main plugin panel / control panel;
+- visual appearance / visual style / visual identity;
+- graphical presentation / external interface;
+- colour palette and all visual assets.
+
+These terms must not be interpreted as separate products, separate interfaces,
+or independently switchable skins. They are different descriptions of the
+same NEON STAGE visual system.
+
+**SIGNAL FORGE** names the functional control-deck arrangement presented
+inside NEON STAGE. It is not a second theme, a second shell, or a separate
+main interface. NEON STAGE owns and styles the complete presentation of
+SIGNAL FORGE and every plugin panel, control, meter, indicator, graphic,
+texture, typography element, and visual state.
+
+Architecture constraints:
+1. REV.20 has exactly one main visual theme/skin: NEON STAGE.
+2. All plugin GUI surfaces and visual resources belong to NEON STAGE.
+3. E1–E7 are subsystems of the NEON STAGE theme engine; they do not create
+   additional themes or interfaces.
+4. Do not introduce a parallel shell, duplicate main window, independent
+   SIGNAL FORGE skin, or a second visual product.
+5. Palette, assets, control states, fallback, and theme switching must remain
+   coherent across the entire NEON STAGE visual system.
