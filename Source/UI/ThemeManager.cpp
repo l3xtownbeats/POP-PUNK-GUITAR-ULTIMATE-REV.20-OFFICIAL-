@@ -807,7 +807,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
             || !loadSafePngArtwork(themeRoot, "assets/fx_layers/shadow.png",
                                    800, 450, candidate.shadowArtwork, error)
             || !loadSafePngArtwork(themeRoot, "assets/hero.png",
-                                   512, 138, candidate.heroArtwork, error))
+                                   800, 450, candidate.heroArtwork, error))
         {
             lastError = error.isNotEmpty() ? error : "NEON STAGE sprite atlas or premium artwork manifest is incomplete";
             resetToDefault();
