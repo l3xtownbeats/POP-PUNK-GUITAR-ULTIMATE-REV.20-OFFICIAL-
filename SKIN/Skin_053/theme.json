@@ -38,9 +38,9 @@
   },
   "effects": {
     "material": "matte graphite / precision anodized metal",
-    "texture": "svg/texture.svg",
-    "bezel": "svg/bezel.svg",
-    "crest": "svg/crest.svg",
+    "texture": "assets/png_migration/runtime_artwork/texture.png",
+    "bezel": "assets/png_migration/runtime_artwork/bezel.png",
+    "crest": "assets/png_migration/runtime_artwork/crest.png",
     "shadowDepth": 0.28,
     "edgeHighlight": 0.18,
     "glow": "controlled cyan/electric-blue accent lighting; restrained in default mode"

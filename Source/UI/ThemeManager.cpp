@@ -768,11 +768,11 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
     auto candidate = activePalette;
     juce::String error;
 
-    if (!loadSafeSvgArtwork(themeRoot, assets.getProperty("texture", "").toString(),
+    if (!loadSafePngArtwork(themeRoot, assets.getProperty("texture", "").toString(),
                             512, 512, candidate.textureArtwork, error)
-        || !loadSafeSvgArtwork(themeRoot, assets.getProperty("bezel", "").toString(),
+        || !loadSafePngArtwork(themeRoot, assets.getProperty("bezel", "").toString(),
                                800, 450, candidate.bezelArtwork, error)
-        || !loadSafeSvgArtwork(themeRoot, assets.getProperty("crest", "").toString(),
+        || !loadSafePngArtwork(themeRoot, assets.getProperty("crest", "").toString(),
                                480, 168, candidate.crestArtwork, error))
     {
         lastError = error.isNotEmpty() ? error : "Theme artwork loading failed";

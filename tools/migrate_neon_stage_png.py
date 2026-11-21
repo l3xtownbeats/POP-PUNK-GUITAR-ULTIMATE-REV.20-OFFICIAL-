@@ -82,21 +82,58 @@ def main() -> int:
                 records.append(source_record)
             except Exception as exc:
                 errors.append(f"{source.relative_to(ROOT)}: {exc}")
+    # Convert canonical Skin-1 runtime layers to the exact dimensions consumed by ThemeManager.
+    core_artwork = [
+        ("texture", ROOT / "SKIN" / "Skin_053" / "svg" / "texture.svg", 512, 512),
+        ("bezel", ROOT / "SKIN" / "Skin_053" / "svg" / "bezel.svg", 800, 450),
+        ("crest", ROOT / "SKIN" / "Skin_053" / "svg" / "crest.svg", 480, 168),
+    ]
+    core_records = []
+    for name, source, width, height in core_artwork:
+        try:
+            svg = source.read_bytes()
+            root = ET.fromstring(svg)
+            if not root.tag.endswith("svg"):
+                raise ValueError("Root XML element is not <svg>")
+            out = OUTPUT / "runtime_artwork" / f"{name}.png"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes(cairosvg.svg2png(bytestring=svg, output_width=width, output_height=height))
+            with Image.open(out) as im:
+                im.load()
+                rgba = im.convert("RGBA")
+                if rgba.size != (width, height):
+                    raise ValueError(f"runtime dimensions mismatch: {rgba.size}")
+                alpha_min, alpha_max = rgba.getchannel("A").getextrema()
+                bad = purple_pixels(rgba)
+                if bad:
+                    raise ValueError(f"{bad} visible purple/violet/magenta pixels detected")
+                rgba.save(out, format="PNG", optimize=True)
+            payload = out.read_bytes()
+            core_records.append({
+                "name": name, "source": source.relative_to(ROOT).as_posix(),
+                "sourceSha256": sha256(svg), "png": out.relative_to(ROOT).as_posix(),
+                "width": width, "height": height, "format": "PNG", "mode": "RGBA",
+                "alphaExtrema": [alpha_min, alpha_max], "pngSha256": sha256(payload)
+            })
+        except Exception as exc:
+            errors.append(f"{source.relative_to(ROOT)}: {exc}")
     manifest = {"schemaVersion":"1.1.0","skinId":"skin-053","theme":"NEON STAGE DEFAULT",
                 "conversion":"SVG -> PNG RGBA; 1x/2x/3x","sourceCount":source_count,
                 "convertedSourceCount":len(records),"variantCount":sum(len(x["variants"]) for x in records),
-                "records":records}
+                "records":records,"runtimeArtwork":core_records}
     path = OUTPUT / "png_manifest.json"
     path.write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
     print(f"SVG sources: {source_count}; converted sources: {len(records)}; PNG variants: {manifest['variantCount']}")
     print(f"Manifest: {path.relative_to(ROOT)}")
+    print(f"Runtime artwork layers: {len(core_records)}/3")
     if errors:
         print("PNG MIGRATION AUDIT: FAIL")
         for error in errors: print("ERROR:", error)
         return 1
     if source_count == 0: print("PNG MIGRATION AUDIT: FAIL (no SVG sources)"); return 1
-    print("PNG MIGRATION AUDIT: PASS (RGBA, 1x/2x/3x, dimensions, alpha, purple-pixel scan, SHA-256)")
-    print("NOTE: PNGs are not yet wired into JUCE runtime controls.")
+    if len(core_records) != 3: print("PNG MIGRATION AUDIT: FAIL (runtime artwork incomplete)"); return 1
+    print("PNG MIGRATION AUDIT: PASS (batch HiDPI + 3 runtime layers; RGBA, dimensions, alpha, palette scan, SHA-256)")
+    print("Runtime texture/bezel/crest paths are PNG-backed; batch control artwork still requires individual JUCE component bindings.")
     return 0
 
 if __name__ == "__main__": sys.exit(main())
