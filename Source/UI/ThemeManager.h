@@ -44,7 +44,7 @@ public:
         float fontScale = 1.0f;
         float letterSpacing = 0.35f;
         Tokens tokens;
-        // Decoded on the UI/message thread from the active theme's local SVG assets.
+        // Decoded on the UI/message thread from the active theme's validated local PNG assets.
         // juce::Image is reference-counted, so Palette copies share the same pixels.
         juce::Image textureArtwork;
         juce::Image bezelArtwork;
