@@ -26,7 +26,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: rev20-windows-x64-vst3-skin-validation
+  group: rev20-windows-x64-vst3-skin-validation-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -37,7 +37,7 @@ jobs:
     runs-on: windows-2022
     timeout-minutes: 45
     steps:
-      - name: Checkout exact REV.20 main commit
+      - name: Checkout exact REV.20 branch or pull-request commit
         uses: actions/checkout@v4
 
       - name: Set up Python
