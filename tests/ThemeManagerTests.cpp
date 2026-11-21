@@ -22,6 +22,8 @@ int main()
     expect(manager.getPalette().id == "skin-053", "fallback stable ID is canonical SKIN-1");
     expect(manager.getPalette().name == "NEON STAGE DEFAULT", "fallback name is NEON STAGE DEFAULT");
     expect(manager.getPalette().usedFallback, "default palette is safe fallback until manifest load");
+    expect(manager.getPalette().tokens.warning == juce::Colour(0xfff2a900),
+           "NEON STAGE fallback warning token matches the approved amber value");
 
     const auto root = juce::File::getCurrentWorkingDirectory();
     const auto skinRoot = root.getChildFile("SKIN");
