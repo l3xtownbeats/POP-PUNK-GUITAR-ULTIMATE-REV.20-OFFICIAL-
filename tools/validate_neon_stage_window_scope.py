@@ -81,8 +81,8 @@ def main() -> int:
                 f"Missing existing main FX binding: {item}", errors)
     require('"MELODY"' in editor and '"PATTERN"' in editor,
             "Both approved main modes must remain present.", errors)
-    require("FLANGER" in editor and "fx_switch07" in editor,
-            "FX EDIT must retain FLANGER while main chain remains seven switches.", errors)
+    require("FLANGER" in editor and "fx_switch07" in controls.get("controlIds", []),
+            "FX EDIT must retain FLANGER while the control manifest retains exactly seven main switches.", errors)
 
     for panel_class in (
         "PPGUSkinGalleryPanel", "PPGUSettingsPanel", "PPGUImportGuitarPanel",
