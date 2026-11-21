@@ -441,6 +441,95 @@ private:
 };;
 
 // UI-only settings panel: controls the auxiliary workspace and theme preference.
+class PPGUAboutPanel final : public juce::Component, public PPGUThemeAwarePanel
+{
+public:
+    explicit PPGUAboutPanel(PPGUThemeManager::Palette paletteIn)
+        : palette(std::move(paletteIn))
+    {
+        heading.setText("POP PUNK GUITAR ULTIMATE", juce::dontSendNotification);
+        heading.setFont(makeThemeFont(palette, 20.0f, true, true));
+        heading.setColour(juce::Label::textColourId, palette.token("text_primary"));
+        addAndMakeVisible(heading);
+
+        subtitle.setText("NEON STAGE PREMIUM  /  PRODUCT INFORMATION", juce::dontSendNotification);
+        subtitle.setFont(makeThemeFont(palette, 10.0f, false, true));
+        subtitle.setColour(juce::Label::textColourId, palette.token("accent"));
+        addAndMakeVisible(subtitle);
+
+        static const std::array<const char*, 5> information {{
+            "VERSION                 4.0.0",
+            "PLUGIN FORMAT           VST3 INSTRUMENT",
+            "INTERFACE               NEON STAGE PREMIUM  /  SKIN-1",
+            "AUDIO HOST               SAMPLE RATE AND BUFFER CONTROLLED BY THE DAW",
+            "LIBRARY LICENSING       IMPORT ONLY SFZ/WAV CONTENT YOU ARE LICENSED TO USE"
+        }};
+        for (size_t i = 0; i < information.size(); ++i)
+        {
+            rows[i].setText(information[i], juce::dontSendNotification);
+            rows[i].setFont(makeThemeFont(palette, 10.5f, false, i == 0));
+            rows[i].setColour(juce::Label::textColourId,
+                              i == 0 ? palette.token("accent") : palette.token("text_primary"));
+            rows[i].setJustificationType(juce::Justification::centredLeft);
+            addAndMakeVisible(rows[i]);
+        }
+
+        note.setText("Sample libraries are user-managed. No third-party sample content is bundled by this information panel.",
+                     juce::dontSendNotification);
+        note.setFont(makeThemeFont(palette, 9.5f));
+        note.setColour(juce::Label::textColourId, palette.token("text_secondary"));
+        note.setJustificationType(juce::Justification::topLeft);
+        addAndMakeVisible(note);
+    }
+
+    void setThemePalette(const PPGUThemeManager::Palette& value) override
+    {
+        palette = value;
+        heading.setFont(makeThemeFont(palette, 20.0f, true, true));
+        subtitle.setFont(makeThemeFont(palette, 10.0f, false, true));
+        heading.setColour(juce::Label::textColourId, palette.token("text_primary"));
+        subtitle.setColour(juce::Label::textColourId, palette.token("accent"));
+        for (size_t i = 0; i < rows.size(); ++i)
+        {
+            rows[i].setFont(makeThemeFont(palette, 10.5f, false, i == 0));
+            rows[i].setColour(juce::Label::textColourId,
+                              i == 0 ? palette.token("accent") : palette.token("text_primary"));
+        }
+        note.setFont(makeThemeFont(palette, 9.5f));
+        note.setColour(juce::Label::textColourId, palette.token("text_secondary"));
+        repaint();
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.30f, 0.035f);
+        auto bounds = getLocalBounds().toFloat().reduced(8.0f);
+        g.setColour(palette.token("accent").withAlpha(0.35f));
+        g.drawRoundedRectangle(bounds, 8.0f, 1.0f);
+    }
+
+    void resized() override
+    {
+        auto area = getLocalBounds().reduced(20);
+        heading.setBounds(area.removeFromTop(30));
+        subtitle.setBounds(area.removeFromTop(20));
+        area.removeFromTop(18);
+        for (auto& row : rows)
+        {
+            row.setBounds(area.removeFromTop(28));
+            area.removeFromTop(5);
+        }
+        area.removeFromTop(8);
+        note.setBounds(area.removeFromTop(42));
+    }
+
+private:
+    PPGUThemeManager::Palette palette;
+    juce::Label heading, subtitle, note;
+    std::array<juce::Label, 5> rows;
+};
+
 class PPGUSettingsPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
 public:
@@ -2012,17 +2101,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     aboutButton.setTooltip("Plugin version, format and runtime information.");
     aboutButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
     aboutButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
-    aboutButton.onClick = [this]
-    {
-        juce::AlertWindow::showMessageBoxAsync(
-            juce::MessageBoxIconType::NoIcon,
-            "ABOUT  /  POP PUNK GUITAR ULTIMATE",
-            juce::String(JucePlugin_Name) + "\nVersion 4.0.0"
-            + "\nVST3 Instrument  /  Windows x64"
-            + "\n\nNEON STAGE interface, MIDI guitar performance, pattern playback and built-in effects."
-            + "\n\nAudio sample rate and buffer size are controlled by the host DAW."
-            + "\n\nSample libraries remain user-managed; use only content whose licence permits your use.");
-    };
+    aboutButton.onClick = [this] { openAboutPanel(); };
     addAndMakeVisible(aboutButton);
     statusLabel.setText("NO LIBRARY LOADED  /  LOAD A LICENSED SFZ INSTRUMENT", juce::dontSendNotification);
     const auto savedSfzPath = processor.getCurrentSfzFilePath();
@@ -2633,6 +2712,28 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openSettingsPanel()
         spec.minimum = { 420, 260 };
         spec.content = std::move(content);
         auxiliaryWorkspace->openPanel(std::move(spec));
+    }
+
+    auxiliaryWorkspace->setVisible(true);
+    auxiliaryWorkspace->toFront(false);
+}
+
+void PopPunkGuitarUltimateAudioProcessorEditor::openAboutPanel()
+{
+    if (auxiliaryWorkspace == nullptr)
+        return;
+
+    constexpr int aboutPanelId = 8;
+    if (!auxiliaryWorkspace->isPanelOpen(aboutPanelId))
+    {
+        PPGUMultiWindowWorkspace::PanelSpec spec;
+        spec.id = aboutPanelId;
+        spec.title = "ABOUT  /  POP PUNK GUITAR ULTIMATE";
+        spec.desired = { 620, 390 };
+        spec.minimum = { 420, 300 };
+        spec.content = std::make_unique<PPGUAboutPanel>(themeManager.getPalette());
+        if (!auxiliaryWorkspace->openPanel(std::move(spec)))
+            return;
     }
 
     auxiliaryWorkspace->setVisible(true);
