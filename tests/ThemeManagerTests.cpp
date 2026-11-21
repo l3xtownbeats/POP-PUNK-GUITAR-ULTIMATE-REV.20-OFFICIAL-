@@ -190,6 +190,38 @@ int main()
                    juce::String("NEON STAGE token matches approved graphite/magenta value: ")
                        + paletteNames[i]);
     }
+    // A package that passes JSON/schema validation but references an unsafe
+    // artwork path must not publish its candidate palette or discard NEON STAGE.
+    auto tamperedManifest = juce::JSON::parse(neon.loadFileAsString());
+    auto tamperedAssets = tamperedManifest.getProperty("assets", juce::var());
+    if (auto* assetsObject = tamperedAssets.getDynamicObject())
+    {
+        assetsObject->setProperty("texture", "../escape.svg");
+        tamperedManifest.getDynamicObject()->setProperty("assets", tamperedAssets);
+        const auto tempDirectory = juce::File::getSpecialLocation(juce::File::tempDirectory)
+            .getChildFile("ppgu-theme-transaction-" + juce::String(juce::Time::getMillisecondCounter()));
+        const auto madeDirectory = tempDirectory.createDirectory();
+        expect(madeDirectory.wasOk(), "transaction test temporary directory is created");
+        const auto badManifest = tempDirectory.getChildFile("theme.json");
+        expect(badManifest.replaceWithText(juce::JSON::toString(tamperedManifest)),
+               "transaction test manifest is written");
+        const bool badLoad = manager.loadFromFile(badManifest);
+        expect(!badLoad, "unsafe artwork path rejects the complete theme candidate");
+        expect(manager.getPalette().id == "skin-053"
+                   && manager.getPalette().name == "NEON STAGE DEFAULT",
+               "failed file load preserves the last-known-good NEON STAGE palette");
+        expect(manager.getPalette().textureArtwork.isValid(),
+               "failed file load preserves last-known-good decoded artwork");
+        expect(manager.getLastError().isNotEmpty(),
+               "failed transactional load reports a diagnostic");
+        badManifest.deleteFile();
+        tempDirectory.deleteRecursively();
+    }
+    else
+    {
+        expect(false, "transaction test can access manifest assets object");
+    }
+
     const auto invalid = neon.loadFileAsString().replace("\"index\": 53", "\"index\": 54");
     expect(!manager.loadFromJson(invalid), "stable ID/index mismatch is rejected");
     expect(manager.getPalette().usedFallback, "invalid theme restores safe fallback");
