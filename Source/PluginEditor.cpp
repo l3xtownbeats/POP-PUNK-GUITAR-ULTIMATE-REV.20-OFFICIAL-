@@ -1716,12 +1716,35 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
     {
         const auto stateName = ppguButtonArtworkState(button, hovered, down);
         const auto artworkState = stateName == "active" ? juce::String("default") : stateName;
+        bool drewAuthoredArtwork = false;
         if (const auto* artwork = palette.findControlArtwork("mode_selector", artworkState))
+        {
             if (artwork->isValid())
+            {
                 g.drawImageWithin(*artwork, 0, 0, button.getWidth(), button.getHeight(),
                                   juce::RectanglePlacement::centred);
+                drewAuthoredArtwork = true;
+            }
+        }
 
         auto bounds = button.getLocalBounds().toFloat().reduced(1.0f);
+        if (!drewAuthoredArtwork)
+        {
+            auto face = button.getToggleState() ? palette.token("panel_elevated")
+                                                : palette.token("control_bg");
+            if (!button.isEnabled())
+                face = palette.token("lowlight");
+            else if (down)
+                face = face.darker(0.14f);
+            else if (hovered)
+                face = face.brighter(0.10f);
+            g.setColour(face);
+            g.fillRoundedRectangle(bounds, 7.0f);
+            g.setColour(button.getToggleState() && button.isEnabled()
+                ? palette.token("accent") : palette.token("control_border"));
+            g.drawRoundedRectangle(bounds, 7.0f, button.hasKeyboardFocus(true) ? 2.0f : 1.0f);
+        }
+
         if (button.isEnabled() && button.getToggleState())
         {
             const auto glow = palette.token("accent_glow");
