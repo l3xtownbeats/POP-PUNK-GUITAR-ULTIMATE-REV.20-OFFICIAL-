@@ -1017,4 +1017,5 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
 void PPGUThemeManager::resetToDefault() noexcept
 {
     activePalette = Palette{};
+    lastError.clear();
 }
