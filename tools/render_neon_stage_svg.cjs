@@ -25,7 +25,14 @@ input.on("line", (line) => {
     const svg = fs.readFileSync(source);
     const renderer = new Resvg(svg, {
       fitTo: { mode: "width", value: width },
-      font: { loadSystemFonts: true }
+      font: {
+        fontFiles: [
+          "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
+          "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf"
+        ],
+        loadSystemFonts: false,
+        defaultFontFamily: "Liberation Sans"
+      }
     });
     const png = renderer.render().asPng();
     fs.mkdirSync(path.dirname(output), { recursive: true });
