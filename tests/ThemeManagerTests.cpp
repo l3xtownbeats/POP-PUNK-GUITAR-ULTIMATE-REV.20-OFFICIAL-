@@ -29,7 +29,8 @@ int main()
     expect(manager.getPalette().usedFallback, "empty JSON restores the safe fallback palette");
     expect(manager.getLastError().contains("empty"), "empty JSON reports a useful diagnostic");
 
-    const juce::String oversizedManifest(1024 * 1024 + 1, ' ');
+    const auto oversizedBytes = std::string(1024 * 1024 + 1, ' ');
+    const auto oversizedManifest = juce::String::fromUTF8(oversizedBytes.c_str());
     expect(!manager.loadFromJson(oversizedManifest), "oversized theme JSON is rejected before parsing");
     expect(manager.getPalette().usedFallback, "oversized JSON restores the safe fallback palette");
     expect(manager.getLastError().contains("1 MiB"), "oversized JSON reports the configured size limit");
