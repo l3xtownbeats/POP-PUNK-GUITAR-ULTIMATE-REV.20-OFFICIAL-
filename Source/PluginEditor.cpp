@@ -2037,11 +2037,11 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     statusLabel.setColour(juce::Label::textColourId, themeManager.getPalette().token("text_secondary"));
     statusLabel.setFont(makeThemeFont(themeManager.getPalette(), 11.0f, false, false));
     addAndMakeVisible(statusLabel);
-    // Mode tabs are real mutually-exclusive visual toggles. The APVTS
-    // playMode parameter remains authoritative; LookAndFeel renders the
-    // selected tab with the authored ON/glow state and the other tab OFF.
-    melodyTab.setClickingTogglesState(true);
-    patternTab.setClickingTogglesState(true);
+    // The APVTS playMode is the only state source. Tabs are momentary
+    // selectors; their visible toggle state is written by modeBox.onChange.
+    // This prevents clicking the already-selected tab from toggling it OFF.
+    melodyTab.setClickingTogglesState(false);
+    patternTab.setClickingTogglesState(false);
     melodyTab.setComponentID("mode_tab");
     patternTab.setComponentID("mode_tab");
     melodyTab.setTooltip("Select MELODY mode");
