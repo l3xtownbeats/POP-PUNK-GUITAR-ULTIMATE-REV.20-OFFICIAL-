@@ -66,16 +66,16 @@ int main()
             // artwork layers, even while a release/host gate remains pending.
             PPGUThemeManager artworkCandidate;
             const bool artworkLoaded = manifest.existsAsFile() && artworkCandidate.loadFromFile(manifest);
-            expect(artworkLoaded, id + " theme manifest and SVG artwork load"
+            expect(artworkLoaded, id + " theme manifest and local artwork load"
                    + (artworkLoaded ? juce::String{} : ": " + artworkCandidate.getLastError()));
             if (artworkLoaded)
             {
                 expect(artworkCandidate.getPalette().id == id, id + " artwork candidate ID matches");
                 expect(artworkCandidate.getPalette().name == entry.getProperty("name", "").toString(),
                        id + " artwork candidate display name matches");
-                expect(artworkCandidate.getPalette().textureArtwork.isValid(), id + " texture SVG decoded");
-                expect(artworkCandidate.getPalette().bezelArtwork.isValid(), id + " bezel SVG decoded");
-                expect(artworkCandidate.getPalette().crestArtwork.isValid(), id + " crest SVG decoded");
+                expect(artworkCandidate.getPalette().textureArtwork.isValid(), id + " texture artwork decoded");
+                expect(artworkCandidate.getPalette().bezelArtwork.isValid(), id + " bezel artwork decoded");
+                expect(artworkCandidate.getPalette().crestArtwork.isValid(), id + " crest artwork decoded");
                 if (id == "skin-053")
                 {
                     const auto& skinOne = artworkCandidate.getPalette();
