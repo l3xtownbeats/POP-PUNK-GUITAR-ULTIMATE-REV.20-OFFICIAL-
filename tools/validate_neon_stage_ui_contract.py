@@ -52,9 +52,9 @@ require('ButtonAttachment>(processor.parameters, fxParameterIDs[i], b)' in EDITO
         "each FX toggle must bind to its matching APVTS parameter")
 require('ComboBoxAttachment>(processor.parameters, "playMode", modeBox)' in EDITOR,
         "MELODY/PATTERN must share the authoritative APVTS playMode")
-require("melodyTab.setClickingTogglesState(true)" in EDITOR
-        and "patternTab.setClickingTogglesState(true)" in EDITOR,
-        "both mode tabs must be real toggle buttons")
+require("melodyTab.setClickingTogglesState(false)" in EDITOR
+        and "patternTab.setClickingTogglesState(false)" in EDITOR,
+        "mode tabs must be momentary selectors so APVTS alone controls their latched state")
 require('melodyTab.setComponentID("mode_tab")' in EDITOR
         and 'patternTab.setComponentID("mode_tab")' in EDITOR,
         "both mode tabs must use the dedicated mode-tab rendering path")
