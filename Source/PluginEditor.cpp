@@ -112,7 +112,7 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
         g.setOpacity(crestOpacity);
         g.drawImageWithin(palette.crestArtwork, crestBounds.getX(), crestBounds.getY(),
                           crestBounds.getWidth(), crestBounds.getHeight(),
-                          juce::RectanglePlacement::fillDestination);
+                          juce::RectanglePlacement::centred);
         g.restoreState();
     }
 }
@@ -2216,7 +2216,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
         g.setOpacity(0.98f);
         g.drawImageWithin(p.heroArtwork, heroArtworkBounds.getX(), heroArtworkBounds.getY(),
                           heroArtworkBounds.getWidth(), heroArtworkBounds.getHeight(),
-                          juce::RectanglePlacement::centred);
+                          juce::RectanglePlacement::fillDestination);
         g.restoreState();
     }
 
