@@ -100,7 +100,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ppgu-skin1-png-migration
-          path: .
+          path: SKIN
 
       - name: Install asset validation dependency
         shell: pwsh
