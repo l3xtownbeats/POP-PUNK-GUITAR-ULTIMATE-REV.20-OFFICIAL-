@@ -1846,6 +1846,13 @@ void PPGUPremiumLookAndFeel::drawComboBox(juce::Graphics& g, int w, int h, bool 
         {
             if (artwork->isValid())
             {
+                if (enabled && (box.isMouseOver() || box.hasKeyboardFocus(true)))
+                {
+                    const float pulse = 0.5f + 0.5f * std::sin(animationPhase + 1.1f);
+                    g.setColour(palette.token("accent").withAlpha(0.10f + 0.12f * pulse));
+                    g.drawRoundedRectangle(0.5f, 0.5f, static_cast<float>(w) - 1.0f,
+                                            static_cast<float>(h) - 1.0f, 6.0f, 1.8f);
+                }
                 g.drawImageWithin(*artwork, 0, 0, w, h, juce::RectanglePlacement::centred);
                 if (box.hasKeyboardFocus(true) && enabled)
                 {
@@ -2217,13 +2224,16 @@ void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
                                            p.token("panel"),
                                            bounds.getX(), bounds.getBottom(), false));
     g.fillRoundedRectangle(bounds, 12.0f);
-    drawThemeArtworkLayers(g, area, p, 0.10f, 0.42f, 0.0f);
+    const float panelPulse = 0.5f + 0.5f * std::sin(animationPhase + bounds.getX() * 0.002f);
+    drawThemeArtworkLayers(g, area, p, 0.085f + 0.035f * panelPulse, 0.42f, 0.0f);
     if (p.framesPanelsSpriteSheet.isValid())
     {
         const auto header = area.reduced(1, 1).removeFromTop(30);
         g.drawImage(p.framesPanelsSpriteSheet, header.getX(), header.getY(),
                     header.getWidth(), header.getHeight(), 30, 650, 450, 60);
     }
+    g.setColour(p.token("accent").withAlpha(0.045f + 0.055f * panelPulse));
+    g.drawRoundedRectangle(bounds.expanded(1.0f), 12.5f, 2.0f);
     g.setColour(p.token("control_border").withAlpha(0.78f));
     g.drawRoundedRectangle(bounds.reduced(0.5f), 12.0f, 1.0f);
 
