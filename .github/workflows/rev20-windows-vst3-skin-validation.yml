@@ -68,6 +68,10 @@ jobs:
         shell: pwsh
         run: python tools/validate_skin_registry_16.py
 
+      - name: Audit journal-driven NEON STAGE modules and all-window artwork scope
+        shell: pwsh
+        run: python tools/validate_neon_stage_window_scope.py
+
       - name: Stage exactly 16 approved skin folders beside VST3
         shell: pwsh
         run: python tools/package_active_skins.py --root SKIN --output build/PPGU_artefacts/Release/VST3/Skins
