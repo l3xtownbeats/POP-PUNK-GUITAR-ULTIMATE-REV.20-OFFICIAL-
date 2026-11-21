@@ -349,7 +349,7 @@
     "layoutChanges": false,
     "audioChanges": false
   },
-  "designStatus": "REV20_RUNTIME_READY_CI_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
+  "designStatus": "NEON_STAGE_PREMIUM_DEFAULT_CONFIGURED; WINDOWS_VST3_BUILD_AND_FL_STUDIO_20_ACCEPTANCE_PENDING",
   "notes": [
     "[IDENTITY-RULE] SKIN-1 = NEON STAGE PREMIUM = skin-053/Skin_053. Stable asset ID and index 53 are preserved.",
     "[APPROVED-BASE] The seven official NEON STAGE reference mockups 01–07 are one unified visual authority, not seven skins.",
