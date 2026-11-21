@@ -51,6 +51,8 @@ public:
     }
 
     int getPanelId() const noexcept { return panelId; }
+    juce::Component* getContent() noexcept { return content.get(); }
+    const juce::Component* getContent() const noexcept { return content.get(); }
     ppgu::ui::PanelSize getDesiredSize() const noexcept { return desired; }
     ppgu::ui::PanelSize getMinimumSize() const noexcept { return minimum; }
     bool isMaximized() const noexcept { return maximized; }
@@ -358,6 +360,20 @@ bool PPGUMultiWindowWorkspace::isPanelOpen(int id) const noexcept
 {
     return std::any_of(windows.begin(), windows.end(),
         [id](const auto& item) { return item->getPanelId() == id; });
+}
+
+juce::Component* PPGUMultiWindowWorkspace::getPanelContent(int id) noexcept
+{
+    const auto it = std::find_if(windows.begin(), windows.end(),
+        [id](const auto& item) { return item->getPanelId() == id; });
+    return it == windows.end() ? nullptr : (*it)->getContent();
+}
+
+const juce::Component* PPGUMultiWindowWorkspace::getPanelContent(int id) const noexcept
+{
+    const auto it = std::find_if(windows.begin(), windows.end(),
+        [id](const auto& item) { return item->getPanelId() == id; });
+    return it == windows.end() ? nullptr : (*it)->getContent();
 }
 
 int PPGUMultiWindowWorkspace::getOpenPanelCount() const noexcept
