@@ -137,12 +137,20 @@ namespace
     bool isSafeThemeRelativePath(const juce::String& path) noexcept
     {
         if (path.isEmpty() || path.startsWith("/") || path.startsWith("\\")
+            || path.endsWith("/") || path.contains("//")
             || path.contains(":") || path.contains("\\"))
             return false;
 
+        // Reject characters that are invalid or ambiguous on supported Windows
+        // and POSIX filesystems, so a package cannot change meaning by platform.
         for (int i = 0; i < path.length(); ++i)
-            if (path[i] < 0x20 || path[i] == 0x7f)
+        {
+            const auto character = path[i];
+            if (character < 0x20 || character == 0x7f
+                || character == '<' || character == '>' || character == '"'
+                || character == '|' || character == '?' || character == '*')
                 return false;
+        }
 
         juce::StringArray segments;
         segments.addTokens(path, "/", "");
@@ -154,28 +162,58 @@ namespace
         return true;
     }
 
+    // A lexical child check alone is insufficient when any directory in the
+    // path is a symlink. Reject symlinks from the asset itself all the way up
+    // through the selected theme root and its ancestors.
+    bool hasNoSymlinkComponents(juce::File file) noexcept
+    {
+        for (;;)
+        {
+            if (file.isSymbolicLink())
+                return false;
+
+            const auto parent = file.getParentDirectory();
+            if (parent == file)
+                return true;
+            file = parent;
+        }
+    }
+
+    bool isSafeThemeAssetFile(const juce::File& themeRoot,
+                              const juce::String& relativePath,
+                              juce::File& resolvedFile,
+                              juce::String& error,
+                              const juce::String& assetType)
+    {
+        if (!isSafeThemeRelativePath(relativePath))
+        {
+            error = "Theme " + assetType + " path is not a safe relative path";
+            return false;
+        }
+
+        resolvedFile = themeRoot.getChildFile(relativePath);
+        if (!resolvedFile.isAChildOf(themeRoot)
+            || !hasNoSymlinkComponents(resolvedFile))
+        {
+            error = "Theme " + assetType + " resolves outside its package or traverses a symbolic link";
+            return false;
+        }
+        return true;
+    }
+
     bool loadSafeSvgArtwork(const juce::File& themeRoot,
                             const juce::String& relativePath,
                             int width, int height,
                             juce::Image& destination,
                             juce::String& error)
     {
-        if (!isSafeThemeRelativePath(relativePath))
-        {
-            error = "Theme SVG path is not a safe relative path";
+        juce::File file;
+        if (!isSafeThemeAssetFile(themeRoot, relativePath, file, error, "SVG"))
             return false;
-        }
 
-        const auto file = themeRoot.getChildFile(relativePath);
-        if (!file.existsAsFile() || !file.isAChildOf(themeRoot)
-            || file.getSize() <= 0 || file.getSize() > 256 * 1024)
+        if (!file.existsAsFile() || file.getSize() <= 0 || file.getSize() > 256 * 1024)
         {
-            error = "Theme SVG is missing, outside its theme folder, or exceeds the size limit";
-            return false;
-        }
-        if (file.isSymbolicLink() && !file.getLinkedTarget().isAChildOf(themeRoot))
-        {
-            error = "Theme SVG symbolic link escapes the theme folder";
+            error = "Theme SVG is missing or exceeds the size limit";
             return false;
         }
 
@@ -232,22 +270,13 @@ namespace
                             juce::Image& destination,
                             juce::String& error)
     {
-        if (!isSafeThemeRelativePath(relativePath))
-        {
-            error = "Theme PNG path is not a safe relative path";
+        juce::File file;
+        if (!isSafeThemeAssetFile(themeRoot, relativePath, file, error, "PNG"))
             return false;
-        }
 
-        const auto file = themeRoot.getChildFile(relativePath);
-        if (!file.existsAsFile() || !file.isAChildOf(themeRoot)
-            || file.getSize() <= 0 || file.getSize() > 8 * 1024 * 1024)
+        if (!file.existsAsFile() || file.getSize() <= 0 || file.getSize() > 8 * 1024 * 1024)
         {
-            error = "Theme PNG is missing, outside its theme folder, or exceeds the size limit";
-            return false;
-        }
-        if (file.isSymbolicLink() && !file.getLinkedTarget().isAChildOf(themeRoot))
-        {
-            error = "Theme PNG symbolic link escapes the theme folder";
+            error = "Theme PNG is missing or exceeds the size limit";
             return false;
         }
 
@@ -753,7 +782,6 @@ bool PPGUThemeManager::loadFromJson(const juce::String& jsonText)
         lastError = jsonText.isEmpty()
             ? "Theme manifest is empty"
             : "Theme manifest exceeds the 1 MiB parsing limit";
-        resetToDefault();
         return false;
     }
 
@@ -764,7 +792,6 @@ bool PPGUThemeManager::loadFromJson(const juce::String& jsonText)
     if (!validateManifest(root, candidate, error))
     {
         lastError = error.isNotEmpty() ? error : "Theme manifest is invalid JSON or failed validation";
-        resetToDefault();
         return false;
     }
 
@@ -778,7 +805,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
     // Do not follow a manifest symlink: theme manifests must be regular files
     // inside the selected skin package, not pointers to arbitrary user files.
     if (!manifestFile.existsAsFile() || manifestFile.isDirectory()
-        || manifestFile.isSymbolicLink())
+        || !hasNoSymlinkComponents(manifestFile))
     {
         lastError = "Theme manifest is missing, not a regular file, or is a symbolic link";
 
@@ -870,14 +897,20 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
 
         const auto controlManifestFile = themeRoot.getChildFile("assets/controls/control_states_manifest.json");
         if (!controlManifestFile.existsAsFile() || !controlManifestFile.isAChildOf(themeRoot)
-            || controlManifestFile.isSymbolicLink()
+            || !hasNoSymlinkComponents(controlManifestFile)
             || controlManifestFile.getSize() <= 0 || controlManifestFile.getSize() > 512 * 1024)
         {
             lastError = "NEON STAGE control-state manifest is missing or unsafe";
 
             return false;
         }
-        const auto controlManifest = juce::JSON::parse(controlManifestFile.loadFileAsString());
+        const auto controlManifestText = controlManifestFile.loadFileAsString();
+        if (controlManifestText.isEmpty())
+        {
+            lastError = "NEON STAGE control-state manifest could not be read";
+            return false;
+        }
+        const auto controlManifest = juce::JSON::parse(controlManifestText);
         const auto statesVar = controlManifest.getProperty("states", juce::var());
         const auto idsVar = controlManifest.getProperty("controlIds", juce::var());
         const auto recordsVar = controlManifest.getProperty("records", juce::var());
