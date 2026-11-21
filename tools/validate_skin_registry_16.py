@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKIN = ROOT / "SKIN"
 EXPECTED = [
-    ("SKIN-1", "NEON STAGE DEFAULT", "skin-053", 53, "Skin_053"),
+    ("SKIN-1", "NEON STAGE PREMIUM", "skin-053", 53, "Skin_053"),
     ("SKIN-2", "OBSIDIAN GOLD", "skin-103", 103, "Skin_103"),
     ("SKIN-3", "CARBON FORGE", "skin-104", 104, "Skin_104"),
     ("SKIN-4", "MIDNIGHT CRIMSON", "skin-105", 105, "Skin_105"),
@@ -132,7 +132,7 @@ def main() -> int:
     if registry.get("totalSkins") != 16 or len(entries) != 16:
         raise SystemExit("FAIL: runtime registry must contain exactly 16 themes")
     if registry.get("defaultStableId") != "skin-053":
-        raise SystemExit("FAIL: NEON STAGE DEFAULT must remain skin-053")
+        raise SystemExit("FAIL: NEON STAGE PREMIUM must remain skin-053")
     seen = set()
     ready = []
     for position, (entry, expected) in enumerate(zip(entries, EXPECTED, strict=True), 1):
@@ -184,7 +184,7 @@ def main() -> int:
     checked_assets = validate_skin_asset_manifest(SKIN / "Skin_053")
     print(f"PASS: {checked_assets} NEON STAGE asset records match bytes, SHA-256, CRC32, dimensions and required alpha.")
 
-    # NEON STAGE DEFAULT's dedicated sprite atlas package is validated
+    # NEON STAGE PREMIUM's dedicated sprite atlas package is validated
     # independently from the other 15 skins; the registry remains exactly 16.
     atlas_dir = SKIN / "Skin_053" / "assets" / "spritesheets"
     atlas_names = (
