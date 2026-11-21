@@ -76,7 +76,7 @@ PR: #8
 | Knob/meter sheet | `Meshy_AI_neon_stage_knobs_and_meters.png` | `fd639e613f23d96ede299fbe02011e95b54f00c7` |
 | Frames/panels sheet | `Meshy_AI_neon_stage_frames_and_panels.png` | `d7499e74cab2cefa68e6e52fbb7007e0f8230b62` |
 | Knob sheet | `Meshy_AI_neon_stage_knobs_sheet.png` | `ba9aafa398a2d65bcb8ee6ad2a223309e11bd138` |
-| Meter sheet | `Meshy_AI_neon_stage_meters_sheet.png` | `4363e8e2fb901db0a882740e18e433c03456becc` |
+| Meter sheet | `Meshy_AI_neon_stage_meters_sheet.png` | `4363e8e2fb901db0a882cf8c7e9beb2e78600e82` |
 | UI icons sheet | `Meshy_AI_neon_stage_ui_icons_set.png` | `3494a4f2c7be8b5225175d726e933e0f86dde334` |
 
 Повторяющиеся имена с суффиксами (1)/(2) и некоторые `image_*.png` имеют те же blob SHA, что и именованные исходники. Не копировать дубликаты в runtime package.
