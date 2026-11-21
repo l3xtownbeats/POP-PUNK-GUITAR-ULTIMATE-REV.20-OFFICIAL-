@@ -222,6 +222,100 @@ int main()
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
+            // AutoChords OFF in PATTERN must preserve a single incoming pitch.
+            if (!setParameter(processor, "singleMidiNoteAsChordRoot", 0.0f))
+                result = 1;
+            juce::AudioBuffer<float> offBlock(2, 128);
+            juce::MidiBuffer offMidi;
+            offMidi.addEvent(juce::MidiMessage::allNotesOff(1), 0);
+            offMidi.addEvent(juce::MidiMessage::noteOn(1, 60, static_cast<juce::uint8>(100)), 16);
+            processor.processBlock(offBlock, offMidi);
+            if (!processor.getAutoChordDisplayState(autoChordState)
+                || autoChordState.inputNoteCount != 1 || autoChordState.noteCount != 1
+                || autoChordState.generatedNotes[0] != 60 || autoChordState.autoChordApplied)
+            {
+                std::cerr << "AutoChords OFF did not pass through the original MIDI note.\\n";
+                result = 1;
+            }
+
+            // Two simultaneous held notes are treated as a user chord, not
+            // expanded into an additional AutoChord triad.
+            if (!setParameter(processor, "singleMidiNoteAsChordRoot", 1.0f))
+                result = 1;
+            juce::AudioBuffer<float> multiBlock(2, 128);
+            juce::MidiBuffer multiMidi;
+            multiMidi.addEvent(juce::MidiMessage::allNotesOff(1), 0);
+            multiMidi.addEvent(juce::MidiMessage::noteOn(1, 60, static_cast<juce::uint8>(100)), 16);
+            multiMidi.addEvent(juce::MidiMessage::noteOn(1, 64, static_cast<juce::uint8>(100)), 16);
+            processor.processBlock(multiBlock, multiMidi);
+            if (!processor.getAutoChordDisplayState(autoChordState)
+                || autoChordState.inputNoteCount != 2 || autoChordState.noteCount != 2
+                || autoChordState.generatedNotes[0] != 60
+                || autoChordState.generatedNotes[1] != 64
+                || autoChordState.autoChordApplied)
+            {
+                std::cerr << "Multiple held keys were expanded instead of passed through.\\n";
+                result = 1;
+            }
+
+            // Releasing the final held input notes must clear the UI snapshot.
+            juce::AudioBuffer<float> releaseBlock(2, 128);
+            juce::MidiBuffer releaseMidi;
+            releaseMidi.addEvent(juce::MidiMessage::noteOff(1, 60), 16);
+            releaseMidi.addEvent(juce::MidiMessage::noteOff(1, 64), 16);
+            processor.processBlock(releaseBlock, releaseMidi);
+            if (!processor.getAutoChordDisplayState(autoChordState)
+                || autoChordState.active || autoChordState.inputNoteCount != 0
+                || autoChordState.noteCount != 0)
+            {
+                std::cerr << "Releasing the final key did not clear AutoChords display state.\\n";
+                result = 1;
+            }
+
+            // Switching to MELODY must display the original notes only, even
+            // while the AutoChords parameter itself remains ON.
+            if (!setParameter(processor, "playMode", 0.0f))
+                result = 1;
+            juce::AudioBuffer<float> melodyBlock(2, 128);
+            juce::MidiBuffer melodyMidi;
+            melodyMidi.addEvent(juce::MidiMessage::allNotesOff(1), 0);
+            melodyMidi.addEvent(juce::MidiMessage::noteOn(1, 69, static_cast<juce::uint8>(100)), 16);
+            processor.processBlock(melodyBlock, melodyMidi);
+            if (!processor.getAutoChordDisplayState(autoChordState)
+                || autoChordState.playMode != 0 || autoChordState.noteCount != 1
+                || autoChordState.generatedNotes[0] != 69 || autoChordState.autoChordApplied)
+            {
+                std::cerr << "MELODY mode did not preserve one-key/one-note display.\\n";
+                result = 1;
+            }
+
+            // A fresh processor with no sample bank must remain safe and still
+            // publish the input/generation state without crashing.
+            {
+                PopPunkGuitarUltimateAudioProcessor emptyProcessor;
+                emptyProcessor.prepareToPlay(48000.0, 128);
+                if (!setParameter(emptyProcessor, "playMode", 1.0f)
+                    || !setParameter(emptyProcessor, "singleMidiNoteAsChordRoot", 1.0f)
+                    || !setParameter(emptyProcessor, "scaleRoot", 0.0f)
+                    || !setParameter(emptyProcessor, "scaleMode", 1.0f))
+                    result = 1;
+                juce::AudioBuffer<float> emptyBankBlock(2, 128);
+                juce::MidiBuffer emptyBankMidi;
+                emptyBankMidi.addEvent(juce::MidiMessage::noteOn(1, 60, static_cast<juce::uint8>(100)), 16);
+                emptyProcessor.processBlock(emptyBankBlock, emptyBankMidi);
+                ppgu::performance::AutoChordDisplayState emptyBankState;
+                if (!emptyProcessor.getAutoChordDisplayState(emptyBankState)
+                    || emptyBankState.noteCount != 3 || !emptyBankState.autoChordApplied)
+                {
+                    std::cerr << "AutoChords failed safely when no SFZ library was loaded.\\n";
+                    result = 1;
+                }
+            }
+
+            // Restore PATTERN mode before the existing transition/audio assertions.
+            if (!setParameter(processor, "playMode", 1.0f))
+                result = 1;
+
             // One real processor block contains two distinct chord replacements.
             // The second replacement must not expose a transient empty chord or
             // restart the pattern cycle. The third chord should drive step 2.

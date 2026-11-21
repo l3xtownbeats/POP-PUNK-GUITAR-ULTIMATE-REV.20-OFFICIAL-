@@ -368,6 +368,7 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
         snapshot.enabled = autoChordsEnabled;
         snapshot.active = snapshot.inputNoteCount > 0 && snapshot.noteCount > 0;
         snapshot.autoChordApplied = autoChordApplied;
+        snapshot.generation = ++autoChordDisplayGeneration;
         (void) autoChordDisplayState.publish(snapshot);
     };
 

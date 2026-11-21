@@ -1582,6 +1582,8 @@ private:
     {
         if (count <= 0)
             return "WAITING FOR MIDI";
+        if (count == 1)
+            return noteName(notes[0]);
         std::array<bool, 12> present {};
         int pitchCount = 0;
         for (int i = 0; i < juce::jlimit(0, 6, count); ++i)

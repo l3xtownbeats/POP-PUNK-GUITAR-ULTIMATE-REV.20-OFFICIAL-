@@ -99,6 +99,7 @@ private:
     std::array<std::array<std::atomic<bool>, 128>, 16> displayHeldNotes {};
     std::array<std::atomic<float>, 2> outputPeakMeters {};
     ppgu::performance::AutoChordDisplayStateStore autoChordDisplayState;
+    std::uint32_t autoChordDisplayGeneration = 0;
     double currentSampleRate = 44100.0;
     int maximumBlockSize = 512;
     ppgu::sampler::SamplerEngine sampler;
