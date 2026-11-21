@@ -19,7 +19,7 @@ P = {
     "metal_border": "#00D2FF",
     "glow_cyan": "#00E5FF",
     "glow_blue": "#0048FF",
-    "accent_magenta": "#FF007F",
+    "accent_blue": "#0048FF",
     "metal": "#101622",
     "metal_light": "#1B2A3B",
     "text": "#FFFFFF",
@@ -62,7 +62,7 @@ manifest = {
   "base_palette":{
     "background":P["background"], "metal_border":P["metal_border"],
     "glow_cyan":P["glow_cyan"], "glow_blue":P["glow_blue"],
-    "accent_magenta":P["accent_magenta"]
+    "accent_blue":P["accent_blue"]
   },
   "sheets":{}
 }
@@ -150,7 +150,7 @@ for i in range(8):
     active=i+1
     for seg in range(8):
         sy=y+h-20-(seg*31)
-        col=P["glow_cyan"] if seg<5 else (P["glow_blue"] if seg<7 else P["accent_magenta"])
+        col=P["glow_cyan"] if seg<5 else (P["glow_blue"] if seg<7 else P["accent_blue"])
         d.rounded_rectangle((x+17,sy,x+w-17,sy+18),radius=3,
                             fill=rgba(col,255 if seg<active else 30),
                             outline=rgba(col,100 if seg<active else 25),width=1)
@@ -173,8 +173,8 @@ d=ImageDraw.Draw(im)
 d.ellipse(thumb_box,fill=rgba("#19334A"),outline=rgba(P["glow_cyan"]),width=3)
 slider_boxes["thumb"]={"bbox":thumb_box}
 label(ImageDraw.Draw(im),(30,755,970,780),"STATUS LEDS / ROUND + SQUARE",P["text"],12)
-led_states=["off","cyan","blue","magenta"]
-led_colors={"off":"#344354","cyan":P["glow_cyan"],"blue":P["glow_blue"],"magenta":P["accent_magenta"]}
+led_states=["off","cyan","blue","white"]
+led_colors={"off":"#344354","cyan":P["glow_cyan"],"blue":P["glow_blue"],"white":"#EAFBFF"}
 led_boxes={"round":{},"square":{}}
 for shape,x_start in (("round",50),("square",570)):
     for y in (810,920):
@@ -341,7 +341,7 @@ def draw_icon(name,box):
         d.arc((cx-48,cy-72,cx+48,cy+23),205,335,fill=col,width=4)
     elif name=="palette":
         d.ellipse((cx-43,cy-38,cx+43,cy+39),outline=col,width=5)
-        for ox,oy,cc in [(-20,-12,P["accent_magenta"]),(7,-22,P["glow_blue"]),(25,4,P["glow_cyan"]),(-12,22,"#FFFFFF")]:
+        for ox,oy,cc in [(-20,-12,P["accent_blue"]),(7,-22,P["glow_blue"]),(25,4,P["glow_cyan"]),(-12,22,"#FFFFFF")]:
             d.ellipse((cx+ox-6,cy+oy-6,cx+ox+6,cy+oy+6),fill=rgba(cc))
     elif name=="play":
         d.polygon([(cx-22,cy-38),(cx+38,cy),(cx-22,cy+38)],fill=col)

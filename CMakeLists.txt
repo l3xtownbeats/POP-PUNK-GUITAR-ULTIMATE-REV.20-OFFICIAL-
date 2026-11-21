@@ -200,6 +200,9 @@ target_link_libraries(ppgu_processor_pattern_tests PRIVATE
 juce_generate_juce_header(ppgu_processor_pattern_tests)
 add_test(NAME ppgu_processor_pattern_tests COMMAND ppgu_processor_pattern_tests)
 
+add_test(NAME ppgu_neon_stage_asset_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_neon_stage_contract.py)
+
 add_test(NAME ppgu_skin1_premium_artwork_package_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_skin1_premium_artwork_package.py)
 
