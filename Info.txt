@@ -301,3 +301,10 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Все три Skin-1 Windows build workflows (`neon-stage-native-ci`, `rev20-windows-vst3-skin-validation`, `skin1-control-state-ci`) теперь устанавливают Resvg в Linux preparation job до генерации и публикации artifact. Windows jobs продолжают скачивать только успешно проверенный artifact до configure/build/CTest.
 - Это диагностический renderer correction, а не подтверждённый palette fix: следующий Linux CI result должен показать, исчез ли аномальный пиксельный кластер. Если кластер сохранится, точечная правка source artwork останется обязательной.
 - `main` не изменялась; все изменения этой серии в `work/neon-stage-cover-parity`.
+
+## 2026-11-21 — CI HANDOFF ORDER RE-CHECK
+- Повторно проверены все три Skin-1 workflows после внедрения Resvg. Исправлено размещение `download-artifact` в `skin1-control-state-ci.yml`: download находится в Windows consumer job, а не в Linux producer job.
+- В `rev20-windows-vst3-skin-validation.yml` добавлены path triggers для `tools/migrate_neon_stage_png.py` и `tools/render_neon_stage_svg.cjs`, чтобы изменения renderer/migrator действительно запускали validation.
+- Проверка содержимого всех трёх workflow подтвердила: producer job содержит upload artifact; Windows consumer зависит от producer и содержит download; Resvg install/render присутствует в producer. Это структурная проверка YAML, не результат завершённого CI run.
+- Исправления: `3e11e6f` (control-state download order), `8f6ce98` (VST3 renderer triggers).
+- Следующий gate: дождаться полного Linux Resvg migration job. До его успешного завершения Windows build jobs должны оставаться skipped/blocked, а PNG pack не считать готовым.
