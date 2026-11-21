@@ -202,3 +202,9 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Added `tools/validate_neon_stage_window_scope.py` to audit the 27-control map, current per-control PNG coverage, nine main parameter bindings, seven FX bindings, auxiliary module presence, disabled/unavailable semantics and exclusion of the legacy atlas generator.
 - This pass is structural/runtime integration, not a declaration of completed artwork. Open production tasks: dedicated ACTIVE/ON and FOCUS state art (current manifest contains default/hover/pressed/disabled/dragged only); separate 9-slice panel art for every main/auxiliary window; final approved photographic guitar hero artwork (current hero remains the preserved legacy placeholder); visual audit against all seven references; exact-SHA Windows build/CTest/pluginval and manual FL Studio 20 acceptance.
 - No DSP, sampler, MIDI, APVTS IDs/ranges, preset catalog, SoundBank or audio callback changes are intended. `main` remains untouched.
+
+## 2026-11-21 — APPROVED MAIN EDITOR GEOMETRY RESTORED (branch only)
+
+- Main editor initial size is now 1024×700 px; responsive limits are 900×640 through 1600×1100 px, matching the NEON STAGE production specification.
+- Restored-size persistence is clamped to the same approved limits, so older saved 1400×790 bounds cannot silently override the reference baseline.
+- Added these geometry requirements to the journal-driven window-scope CI audit. Exact-SHA Windows build/CTest remains in progress; no pass is claimed yet.
