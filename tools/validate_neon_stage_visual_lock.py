@@ -53,7 +53,7 @@ def fail(message: str) -> None:
 if not MOCKUP.is_file():
     fail("approved main mockup is missing")
 blob = MOCKUP.read_bytes()
-git_blob_sha = hashlib.sha1(b"blob " + str(len(blob)).encode("ascii") + b"\\0" + blob).hexdigest()
+git_blob_sha = hashlib.sha1(b"blob " + str(len(blob)).encode("ascii") + b"\0" + blob).hexdigest()
 if git_blob_sha != EXPECTED_GIT_BLOB_SHA:
     fail(f"approved mockup changed unexpectedly: {git_blob_sha}")
 
