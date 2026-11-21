@@ -1836,6 +1836,12 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     presetBox.setColour(juce::ComboBox::textColourId, themeManager.getPalette().token("text_primary"));
     presetBox.setColour(juce::ComboBox::outlineColourId, themeManager.getPalette().token("accent").withAlpha(0.5f));
     addAndMakeVisible(presetBox);
+    for (auto* button : { &previousPresetButton, &nextPresetButton })
+    {
+        button->setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
+        button->setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
+        addAndMakeVisible(*button);
+    }
     categoryBox.addItem("ALL PRESETS", 1);
     categoryBox.addItem("MELODY", 2);
     categoryBox.addItem("PATTERN", 3);
@@ -1850,6 +1856,22 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     addAndMakeVisible(presetSearch);
     loadFactoryPresetCatalog();
     presetBox.onChange = [this] { if (presetBox.getSelectedId() > 0 && presetBox.getSelectedId() <= static_cast<int>(visiblePresetIndices.size())) applyFactoryPreset(visiblePresetIndices[static_cast<size_t>(presetBox.getSelectedId()-1)]); };
+    previousPresetButton.onClick = [this]
+    {
+        const int count = static_cast<int>(visiblePresetIndices.size());
+        if (count <= 0) return;
+        const int current = presetBox.getSelectedId();
+        const int previous = current <= 1 ? count : current - 1;
+        presetBox.setSelectedId(previous, juce::sendNotification);
+    };
+    nextPresetButton.onClick = [this]
+    {
+        const int count = static_cast<int>(visiblePresetIndices.size());
+        if (count <= 0) return;
+        const int current = presetBox.getSelectedId();
+        const int next = current <= 0 || current >= count ? 1 : current + 1;
+        presetBox.setSelectedId(next, juce::sendNotification);
+    };
     auto refreshPresetList = [this] {
         // Keep the current sound selected when it remains in the filtered list.
         // Filtering must never silently load a different preset.
@@ -2223,6 +2245,10 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     presetSearch.setBounds(left.removeFromTop(34).reduced(4, 2));
     left.removeFromTop(4);
     presetBox.setBounds(left.removeFromTop(40).reduced(4, 2));
+    left.removeFromTop(4);
+    auto presetNavigationRow = left.removeFromTop(30);
+    previousPresetButton.setBounds(presetNavigationRow.removeFromLeft(presetNavigationRow.getWidth() / 2).reduced(4, 2));
+    nextPresetButton.setBounds(presetNavigationRow.reduced(4, 2));
     left.removeFromTop(6);
     if (chordDiagram != nullptr)
     {
