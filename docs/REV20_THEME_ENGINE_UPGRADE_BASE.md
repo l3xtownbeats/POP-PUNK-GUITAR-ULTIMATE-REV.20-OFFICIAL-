@@ -2,8 +2,8 @@
 
 Status: APPROVED / implementation contract  
 Product: POP PUNK GUITAR ULTIMATE REV.20  
-Visual system: NEON STAGE  
-Main visual theme / skin / complete plugin GUI: NEON STAGE
+Canonical theme: NEON STAGE  
+NEON STAGE is the one unified theme for the complete plugin interface
 
 ## Non-negotiable architecture
 
@@ -77,52 +77,38 @@ These are existing foundations, not proof that every engine is complete. In part
 
 This BASE authorises implementation of the theme engine only. It does not authorise a second editor, new VST3 target, new musical mode, parameter-ID changes, DSP changes, redistribution of unlicensed art, or merging PR #8 before conflicts and all required checks are resolved.
 
-## Canonical architecture — NEON STAGE (approved BASE)
+## Canonical architecture — NEON STAGE (final approved definition)
 
-**NEON STAGE** is the unified top-level system for the plugin's complete
-visual theme, functional interface controls and the internal engineering
-modules that manage and support the system.
+**NEON STAGE IS THE THEME.** These names are equivalent: NEON STAGE = THEME.
+There is no separate parent system, nested THEME layer, second skin system or
+parallel interface. NEON STAGE is the one unified theme of POP PUNK GUITAR
+ULTIMATE REV.20.
 
-**THEME** is the single unified visual component within NEON STAGE. The term
-THEME includes all of the following visual responsibilities; they are not
-separate theme products, parallel skins or independent interfaces:
+All of the following are components of the same NEON STAGE theme:
 
-- **MAIN THEME** — the main visual identity and presentation.
-- **SKIN** — the complete visual appearance and graphical styling.
-- **GUI** — the complete graphical presentation and layout of the plugin.
-- **ASSETS** — images, textures, artwork, icons, atlases and other visual
-  resources used by the theme.
-- **PALETTE** — the shared semantic colour-token system used throughout
-  the theme.
-- **STATES** — visual states such as Default, Hover, Pressed, Disabled and
-  Dragged, including their visual feedback and fallback presentation.
-- **ANIMATIONS & EFFECTS** — visual animations, transitions, lighting and
-  presentation effects.
-
-**CONTROLS** are the functional interactive elements presented by the GUI,
-including knobs, buttons, switches, sliders, selectors and indicators. Their
-visual appearance and states are governed by THEME, while their interaction
-remains connected to real plugin functionality.
-
-**E1–E7** are the internal engineering modules that validate, load, manage,
-render, switch, optimise and recover NEON STAGE and its THEME.
-
-**Functional rule:** NEON STAGE is not decorative artwork alone. Its GUI
-controls must remain connected to the plugin's real, existing functionality.
-Adding a graphical element or a functional control to the plugin interface
-means adding and integrating it as a component of NEON STAGE.
+- **MAIN THEME** — visual identity and presentation.
+- **SKIN** — complete visual styling and graphical appearance.
+- **GUI** — the plugin's complete graphical interface and layout.
+- **CONTROLS** — all functional interactive controls and indicators; their
+  visual design and states are part of NEON STAGE, and each control remains
+  bound to its real existing plugin function.
+- **ASSETS** — artwork, images, textures, icons, atlases and visual resources.
+- **PALETTE** — semantic colour tokens and their shared resolution.
+- **STATES** — Default, Hover, Pressed, Disabled and Dragged presentation.
+- **ANIMATIONS & EFFECTS** — transitions, lighting, glow and visual effects.
+- **E1–E7** — internal engineering modules that validate, load, manage,
+  render, switch, optimise and recover the NEON STAGE theme.
 
 Architecture constraints:
-1. REV.20 has one unified NEON STAGE system and one unified THEME component.
-2. MAIN THEME, SKIN, GUI, ASSETS, PALETTE, STATES and ANIMATIONS & EFFECTS
-   are all included within THEME; do not model them as separate themes,
-   skins or independent visual systems.
-3. CONTROLS are functional NEON STAGE interface elements whose visual
-   presentation is governed by THEME.
-4. E1–E7 are internal NEON STAGE subsystems; they do not create additional
-   themes, skins, shells, panels or interfaces.
-5. Do not introduce a parallel shell, duplicate main window, separately
-   branded control-deck interface, or second visual product.
-6. Keep all NEON STAGE components coherent and integrated while preserving
-   the existing plugin parameter IDs, processor state, DSP, MIDI scheduling
-   and audio-thread constraints.
+1. NEON STAGE is the single theme and the complete visual/functional interface
+   system. NEON STAGE = THEME.
+2. MAIN THEME, SKIN, GUI, CONTROLS, ASSETS, PALETTE, STATES,
+   ANIMATIONS & EFFECTS and E1–E7 are all components of that same theme.
+3. Do not model any listed component as a separate theme, product, shell,
+   control deck, GUI or parallel visual system.
+4. CONTROLS must remain functional and connected to existing plugin
+   functionality; visual changes must not create decorative fake controls.
+5. E1–E7 are internal modules of NEON STAGE, not external systems or
+   additional theme layers.
+6. Preserve existing APVTS parameter IDs, processor state, DSP, sampler,
+   MIDI scheduling and audio-thread constraints.
