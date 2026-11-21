@@ -19,6 +19,7 @@ RUNTIME_ASSETS = {
     "assets/fx_layers/edge_highlight.png": (800, 450),
     "assets/fx_layers/specular.png": (800, 450),
     "assets/fx_layers/shadow.png": (800, 450),
+    "assets/hero.png": (512, 138),
 }
 
 
