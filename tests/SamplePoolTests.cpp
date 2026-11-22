@@ -425,7 +425,7 @@ int main()
         || keyswitchEngine.setKeySwitch(41, 1)
         || keyswitchEngine.getActiveKeySwitch(1) != 38
         || keyswitchEngine.getActiveKeySwitch(1) != 38
-        || keyswitchEngine.getActiveArticulationLabel(1) != "PalmMute")
+        || keyswitchEngine.getActiveKeySwitchLabel(1) != "PalmMute")
     {
         std::cerr << "SamplerEngine did not initialize or safely update per-channel keyswitch state.\n";
         return 1;

@@ -245,3 +245,5 @@ The following audio-path wiring has now been selectively ported into REV.20 (tar
 - PluginProcessor passes the existing threshold in both MELODY and PATTERN. The selection is channel-local and still passes through normal note/velocity/channel region matching.
 - If the loaded bank has no Palm-labeled switch zone, the feature safely does nothing; no synthetic Palm Mute sample is created. Tests cover low/high velocity selection and channel isolation.
 - Still required: validate with a real, licensed guitar bank that has correctly mapped Palm Mute and open articulations; audition transitions in FL Studio 20; verify whether a source bank uses another label convention and document explicit aliases only after inspection.
+
+- Follow-up hardening: Palm label detection is case-insensitive and the sampler regression uses the public active-label query.

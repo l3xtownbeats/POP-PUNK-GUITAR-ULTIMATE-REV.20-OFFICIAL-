@@ -272,3 +272,5 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - SamplerEngine noteOn accepts the existing palmMuteThreshold parameter. When a matching Palm-labeled switch exists, velocities at/below threshold select that articulation; higher velocities restore the SFZ bank's sw_default. The active switch is channel-local and the selected region must still match the note/velocity ranges in the loaded SFZ map.
 - PluginProcessor passes the threshold for both MELODY MIDI notes and PATTERN-generated notes. If no Palm-labeled switch exists, velocity behavior is unchanged and no fake Palm Mute layer is synthesized.
 - Added regression checks for low-velocity Palm Mute selection, high-velocity return to default, active-label publication and MIDI-channel isolation. Runtime audition with a legally distributable bank containing real Palm Mute recordings remains required.
+
+- Follow-up hardening: Palm label detection is case-insensitive; the runtime test asserts the actual SamplerEngine active label API.

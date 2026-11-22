@@ -1,6 +1,7 @@
 #include "SamplePool.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <filesystem>
 #include <limits>
@@ -338,8 +339,15 @@ LoadReport SamplePool::loadSfz(const juce::File& sfzFile,
                 candidateSnapshot->keySwitchNoteMask[static_cast<std::size_t>(keySwitch)] = true;
         if (candidateSnapshot->defaultKeySwitch < 0 && region.switchDefault >= 0)
             candidateSnapshot->defaultKeySwitch = region.switchDefault;
+        const auto labelContainsPalm = std::search(
+            region.switchLabel.begin(), region.switchLabel.end(),
+            std::string("palm").begin(), std::string("palm").end(),
+            [](unsigned char lhs, unsigned char rhs)
+            {
+                return std::tolower(lhs) == std::tolower(rhs);
+            }) != region.switchLabel.end();
         if (candidateSnapshot->palmMuteKeySwitch < 0 && region.switchLast >= 0
-            && region.switchLabel.find("Palm") != std::string::npos)
+            && labelContainsPalm)
             candidateSnapshot->palmMuteKeySwitch = region.switchLast;
         samplesUsed.insert(key);
     }
