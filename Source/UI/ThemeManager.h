@@ -63,6 +63,9 @@ public:
         juce::Image metersSlidersSpriteSheet;
         juce::Image framesPanelsSpriteSheet;
         juce::Image iconsSpriteSheet;
+        // Dedicated 61-frame rotary atlas (8x8 cells, 128px each).
+        // Decoded on the message thread; never accessed by the audio callback.
+        juce::Image rotarySpriteSheet;
         // Skin-1 authored state images are decoded on the UI thread and cached
         // at 128px to keep the editor's resident artwork footprint bounded.
         std::map<std::string, juce::Image> controlStateArtwork;
