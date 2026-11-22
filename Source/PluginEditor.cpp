@@ -2962,6 +2962,10 @@ void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
     const auto& p = themeManager.getPalette();
     const auto bounds = area.toFloat();
 
+    // Layered graphite chassis: a restrained soft shadow separates each
+    // module from the stage without introducing a fake animated highlight.
+    juce::DropShadow(p.token("shadow").withAlpha(0.78f), 14, { 0, 5 })
+        .drawForRectangle(g, area);
     g.setGradientFill(juce::ColourGradient(p.token("panel_elevated"),
                                            bounds.getX(), bounds.getY(),
                                            p.token("panel"),
@@ -2974,8 +2978,18 @@ void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
         g.drawImage(p.framesPanelsSpriteSheet, header.getX(), header.getY(),
                     header.getWidth(), header.getHeight(), 30, 650, 450, 60);
     }
+
+    // Machined double-bezel: cool upper specular edge, dark lower bevel and
+    // a fine inner contour. All colours come from the active skin palette.
+    g.setColour(p.token("highlight").withAlpha(0.30f));
+    g.drawRoundedRectangle(bounds.reduced(1.0f), 11.0f, 1.0f);
+    g.setColour(p.token("lowlight").withAlpha(0.92f));
+    g.drawLine(bounds.getX() + 12.0f, bounds.getBottom() - 1.5f,
+               bounds.getRight() - 12.0f, bounds.getBottom() - 1.5f, 1.2f);
     g.setColour(p.token("control_border").withAlpha(0.78f));
     g.drawRoundedRectangle(bounds.reduced(0.5f), 12.0f, 1.0f);
+    g.setColour(p.token("highlight").withAlpha(0.12f));
+    g.drawRoundedRectangle(bounds.reduced(3.0f), 9.0f, 0.7f);
     drawNineSliceFrame(g, p.framesPanelsSpriteSheet, area, 0.58f);
 
     // Section chrome belongs to the visual shell; it does not create or
