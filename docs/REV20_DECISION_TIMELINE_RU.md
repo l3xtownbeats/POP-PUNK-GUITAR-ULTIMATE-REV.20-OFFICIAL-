@@ -762,3 +762,54 @@ Session Guitarist учитывается не только как абстрак
 3. Session Guitarist – Electric Sunburst Deluxe — дополнительный референс премиального исполнения, организации гитарного интерфейса, навигации, контролов и UX.
 
 **Статус: USER APPROVED / CONFIRMED / BASELINE LOCKED.** Набор референсов обязателен для дальнейшей визуальной разработки NEON STAGE и применяется совместно с ранее утверждённым разрешением на обоснованные улучшения композиции, материалов, анимации и UX. Сохраняются оригинальность NEON STAGE, фирменная палитра, реальная функциональность, производительность и стабильность.
+
+
+## 2026-11-22 — ВИЗУАЛЬНЫЙ ПРОХОД NEON STAGE: ПРИОРИТЕТ ОБОЛОЧКИ, АНИМАЦИИ И PERFORMANCE QA
+
+Пользователь повторно подтвердил: до закрытия визуальной приёмки запрещено переключать приоритет на аудиодвижок, DSP или расширение библиотеки сэмплов. Текущий этап — исключительно внешний вид, тема/скин, материалы, рамки, контролы, вспомогательные окна, анимация, state binding и производительность графической оболочки.
+
+### Приоритет референсов
+- Макеты 01–07 — основные образцы NEON STAGE; дополнительные макеты, assets, Sprite/SpriteSheets и manifest — обязательная исходная база визуального анализа.
+- Session Guitarist – Electric Sunburst Deluxe — референс коммерческого уровня исполнения, понятности гитарного workflow, навигации и тактильности контролов. Использовать принципы UX, не копировать чужую композицию, брендинг, artwork или защищённые материалы.
+- Более позднее пользовательское решение разрешает улучшать композицию/пропорции, интервалы и организацию рабочих областей, когда это даёт проверяемый выигрыш в UX/читаемости. Старый запрет на изменение геометрии макета считать отменённым.
+- Фирменная палитра: graphite, cyan #00D9FF, electric blue #6B8CFF; purple/pink запрещены. Amber/red — только реальные warning/error.
+
+### Обязательный контракт состояний и анимации
+- Rotary: плавное визуальное следование непрерывному значению APVTS; sprite frame, value arc, tooltip и automation должны быть согласованы. Не добавлять фальшивое движение при неизменном значении.
+- Switch/button: независимые Normal/Hover/Pressed/Active/Selected/Focused/Disabled; короткая плавная реакция допустима, но состояние LED всегда отражает реальное состояние функции.
+- FX ON/OFF: яркая cyan индикация только при ON, OFF — приглушённый LED.
+- MELODY/PATTERN: выбранный режим выделен и синхронизирован с реальным состоянием.
+- MIDI keyboard/input: подсветка только на реальные note-on/note-off; корректно очищать удерживаемые ноты при all-notes-off.
+- Performance display и meters: только реальные MIDI/audio данные, никаких fake telemetry/peak/progress.
+- FX EDIT: выбранная группа, POWER и параметры синхронизированы с соответствующим эффектом.
+- SFZ import: STANDBY/LOADING/READY/ERROR только по фактическому процессу/результату.
+- Auxiliary windows: плавные, но лёгкие переходы; close/maximize/restore/resize/focus работают, геометрия сохраняется, окна не перекрывают рабочие контролы.
+
+### Производительность — обязательная матрица проверки
+1. Idle repaint/CPU: при отсутствии взаимодействия не должно быть постоянного тяжёлого repaint без необходимости.
+2. Rotary drag: визуальная реакция непрерывная, без заметного запаздывания; изменение значения не должно запускать тяжёлую загрузку изображений.
+3. MIDI activity: LED/key states обновляются без блокировки аудиопотока и без аллокаций/тяжёлой работы на audio thread.
+4. Meter/display refresh: ограниченная частота обновления, без избыточного декодирования artwork.
+5. Window open/close: измерять задержку первого открытия, повторного открытия и переключения между окнами.
+6. Skin Gallery: сохранять lazy-loading previews; не декодировать все карточки при открытии.
+7. DPI/layout: проверить 1x/2x/3x, min/max window, resize, длинные подписи и отсутствие clipping/hit-area regressions.
+8. Regression: повторно запустить Windows x64 VST3 build, CTest, skin/artwork validators и pluginval; отдельно отметить, что CI не заменяет ручной FL Studio 20 host test.
+
+### Порядок реализации и приёмки
+A. Корпус/главная оболочка, материалы, 9-slice рамки, фоновые слои и палитра.
+B. Девять rotary, два режима, hover/pressed/focus/disabled и непрерывная value feedback.
+C. Семь FX switches и реальные LED.
+D. Все восемь FX EDIT групп и параметры.
+E. MIDI keyboard, Performance Display и Output Meters.
+F. PRESETS и PATTERN: навигация, выбор, preview/apply/cancel.
+G. AUTOCHORDS и Import Guitar status.
+H. Все 16 skins: preview/apply/cancel, typography, assets и согласованность palette.
+I. Settings/About и все auxiliary windows.
+J. DPI, стабильность, runtime и performance acceptance.
+
+Для каждого модуля обязательны четыре независимых результата: (1) artwork/layout review по референсу с записью обоснования layout deviations; (2) interaction; (3) state binding; (4) runtime/performance. Нельзя объявлять модуль завершённым только по наличию исходного кода. В отчёте отдельно указывать SOURCE IMPLEMENTED, CI PASS и HOST VERIFIED.
+
+### Инвентаризация ресурсов и текущий source baseline
+На main подтверждено наличие семи PNG-макетов 01–07, Skin_053 premium artwork pipeline, control state artwork, FX layers, 9-slice frame/controls/meters/icons/61-frame rotary atlases, 16-theme registry и исходников PluginEditor/ThemeManager/MultiWindowWorkspace. В PluginEditor уже присутствуют 61-frame rotary rendering с реальной value arc, linear slider state rendering, FX toggle LED, иконки из atlas, live MIDI/performance monitor и SFZ status polling; Skin Gallery использует lazy-loaded card previews. Это фиксирует исходный baseline, но само по себе не закрывает полную визуальную, host или performance приёмку.
+
+**Статус этапа:** VISUAL-FIRST / IN PROGRESS. Аудиодвижок и сэмпловые задачи отложены до закрытия визуального acceptance matrix. Никаких заявлений о 100% визуальном совпадении, ручном FL Studio 20 тесте или измеренных performance numbers без соответствующих артефактов.
