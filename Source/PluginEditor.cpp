@@ -1635,7 +1635,7 @@ private:
                 performanceLabel, performanceValue, sectionLabel, patternLabel, status;
     juce::ComboBox sectionBox, patternBox;
     std::array<juce::TextButton, 8> patternCards;
-
+    juce::TextButton importSource, openAutoChords, preview, apply, cancel;
 };
 
 class PPGUChordDiagram final : public juce::Component, public PPGUThemeAwarePanel
