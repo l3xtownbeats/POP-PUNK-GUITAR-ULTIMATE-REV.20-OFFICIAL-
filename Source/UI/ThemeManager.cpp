@@ -794,6 +794,8 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
                                    1024, 1024, candidate.framesPanelsSpriteSheet, error)
             || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("icons", "").toString(),
                                    1024, 1024, candidate.iconsSpriteSheet, error)
+            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("rotary", "").toString(),
+                                   1024, 1024, candidate.rotarySpriteSheet, error)
             || !loadSafePngArtwork(themeRoot, "assets/background/main.png",
                                    2560, 1440, candidate.backgroundArtwork, error)
             || !loadSafePngArtwork(themeRoot, "assets/textures/material.png",
