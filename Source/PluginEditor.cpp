@@ -1360,10 +1360,12 @@ public:
     PPGUPatternSectionPanel(PopPunkGuitarUltimateAudioProcessor& processorIn,
                             juce::String selectedTonePreset,
                             std::function<void()> importGuitarAction,
-                            std::function<void()> openAutoChordsAction)
+                            std::function<void()> openAutoChordsAction,
+                            std::function<void()> openPlayingStyleWindowAction)
         : processor(processorIn), originalSection(processorIn.getSelectedSongSection()),
           tonePresetName(std::move(selectedTonePreset)), importAction(std::move(importGuitarAction)),
-          autoChordsAction(std::move(openAutoChordsAction))
+          autoChordsAction(std::move(openAutoChordsAction)),
+          playingStyleAction(std::move(openPlayingStyleWindowAction))
     {
         title.setText("PATTERN  /  SONG SECTION ROUTING", juce::dontSendNotification);
         title.setFont(makeThemeFont(palette, 19.0f, false, true));
@@ -1372,16 +1374,20 @@ public:
         patternLabel.setText("RHYTHM CATALOG", juce::dontSendNotification);
         sourceLabel.setText("GUITAR / INSTRUMENT SOURCE", juce::dontSendNotification);
         toneLabel.setText("TONE PRESET", juce::dontSendNotification);
-        performanceLabel.setText("PLAYING STYLE / ARTICULATION", juce::dontSendNotification);
+        performanceLabel.setText("PLAYING STYLE", juce::dontSendNotification);
+        openPlayingStyle.setButtonText("OPEN PLAYING STYLE  >");
+        openPlayingStyle.setTooltip("Open the coordinated second PATTERN window: playing style and verified articulations.");
+        openPlayingStyle.onClick = [this] { if (playingStyleAction) playingStyleAction(); };
+        addAndMakeVisible(openPlayingStyle);
         sourceValue.setJustificationType(juce::Justification::centredLeft);
         sourceValue.setText("NO SFZ INSTRUMENT LOADED", juce::dontSendNotification);
         toneValue.setJustificationType(juce::Justification::centredLeft);
         toneValue.setText(tonePresetName.isNotEmpty() ? tonePresetName : "SELECT A FACTORY PRESET",
                              juce::dontSendNotification);
         performanceValue.setJustificationType(juce::Justification::centredLeft);
-        performanceValue.setText("NO RECORDED ARTICULATION MAP",
+        performanceValue.setText("SECOND WINDOW  /  STYLE & MAPPING STATUS",
                                  juce::dontSendNotification);
-        performanceValue.setTooltip("Only source-authored SFZ keyswitch labels are shown here. No mapped label means no verified articulation is exposed.");
+        performanceValue.setTooltip("Playing-style and articulation selection are managed in the coordinated second PATTERN window.");
         importSource.setButtonText("IMPORT GUITAR");
         importSource.onClick = [this] { if (importAction) importAction(); };
         for (auto* label : { &sectionLabel, &patternLabel, &sourceLabel, &toneLabel,
@@ -1491,6 +1497,9 @@ public:
         }
         openAutoChords.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
         openAutoChords.setColour(juce::TextButton::textColourOffId, palette.token("accent"));
+        openPlayingStyle.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
+        openPlayingStyle.setColour(juce::TextButton::textColourOffId, palette.token("accent"));
+        openPlayingStyle.setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
 
         for (auto& card : patternCards)
         {
@@ -1527,7 +1536,10 @@ public:
         toneValue.setBounds(area.removeFromTop(21));
         area.removeFromTop(3);
         performanceLabel.setBounds(area.removeFromTop(12));
-        performanceValue.setBounds(area.removeFromTop(21));
+        auto styleRow = area.removeFromTop(25);
+        openPlayingStyle.setBounds(styleRow.removeFromRight(176));
+        styleRow.removeFromRight(8);
+        performanceValue.setBounds(styleRow);
 
         area.removeFromTop(5);
         auto sectionRow = area.removeFromTop(29);
@@ -1630,12 +1642,115 @@ private:
     int originalSection = 0;
     PPGUThemeManager::Palette palette;
     juce::String tonePresetName;
-    std::function<void()> importAction, autoChordsAction;
+    std::function<void()> importAction, autoChordsAction, playingStyleAction;
     juce::Label title, sourceLabel, sourceValue, toneLabel, toneValue,
                 performanceLabel, performanceValue, sectionLabel, patternLabel, status;
     juce::ComboBox sectionBox, patternBox;
     std::array<juce::TextButton, 8> patternCards;
-    juce::TextButton importSource, openAutoChords, preview, apply, cancel;
+    juce::TextButton importSource, openAutoChords, openPlayingStyle, preview, apply, cancel;
+};
+
+class PPGUPlayingStylePanel final : public juce::Component,
+                                    public PPGUThemeAwarePanel,
+                                    private juce::Timer
+{
+public:
+    explicit PPGUPlayingStylePanel(PopPunkGuitarUltimateAudioProcessor& processorIn)
+        : processor(processorIn)
+    {
+        title.setText("PLAYING STYLE  /  PERFORMANCE WORKSPACE", juce::dontSendNotification);
+        subtitle.setText("PATTERN  /  ARTICULATION CATALOG", juce::dontSendNotification);
+        styleLabel.setText("PLAYING STYLE", juce::dontSendNotification);
+        articulationLabel.setText("ARTICULATION", juce::dontSendNotification);
+        styleEntry.setButtonText("PALM MUTE - 8TH");
+        styleEntry.setTooltip("Requested catalog entry. It remains unavailable until a real, licensed recording and its SFZ/MIDI mappings are verified.");
+        styleEntry.setEnabled(false);
+        availability.setText("UNAVAILABLE  /  VERIFIED SOURCE MAPPING REQUIRED", juce::dontSendNotification);
+        availability.setTooltip("No playable recording and complete mapping have been verified for PALM MUTE - 8TH. No synthetic substitute is used.");
+        activeLabel.setText("ACTIVE PERFORMANCE  /  NONE VERIFIED", juce::dontSendNotification);
+        sourceLabel.setText("INSTRUMENT SOURCE  /  " + (processor.getCurrentSfzFilePath().isNotEmpty()
+            ? juce::File(processor.getCurrentSfzFilePath()).getFileName()
+            : juce::String("NO SFZ INSTRUMENT LOADED")), juce::dontSendNotification);
+        for (auto* c : { static_cast<juce::Component*>(&title), &subtitle, &styleLabel,
+                         &articulationLabel, &availability, &activeLabel, &sourceLabel })
+            addAndMakeVisible(*c);
+        addAndMakeVisible(styleEntry);
+        setThemePalette(palette);
+        startTimerHz(2);
+    }
+
+    void setThemePalette(const PPGUThemeManager::Palette& value) override
+    {
+        palette = value;
+        title.setFont(makeThemeFont(palette, 19.0f, false, true));
+        subtitle.setFont(makeThemeFont(palette, 10.0f, false, true));
+        for (auto* label : { &title, &subtitle, &styleLabel, &articulationLabel,
+                             &availability, &activeLabel, &sourceLabel })
+            label->setColour(juce::Label::textColourId,
+                label == &title ? palette.token("text_primary")
+                : (label == &availability ? palette.token("warning") : palette.token("text_secondary")));
+        styleLabel.setFont(makeThemeFont(palette, 9.5f, false, true));
+        articulationLabel.setFont(makeThemeFont(palette, 9.5f, false, true));
+        for (auto* label : { &availability, &activeLabel, &sourceLabel })
+            label->setFont(makeThemeFont(palette, 11.0f));
+        styleEntry.setColour(juce::TextButton::buttonColourId, palette.token("lowlight"));
+        styleEntry.setColour(juce::TextButton::textColourOffId, palette.token("text_disabled"));
+        styleEntry.setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
+        repaint();
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.30f, 0.035f);
+        auto card = getLocalBounds().reduced(18, 112).toFloat();
+        g.setColour(palette.token("panel"));
+        g.fillRoundedRectangle(card, 9.0f);
+        g.setColour(palette.token("control_border"));
+        g.drawRoundedRectangle(card, 9.0f, 1.0f);
+    }
+
+    void resized() override
+    {
+        auto area = getLocalBounds().reduced(30, 20);
+        title.setBounds(area.removeFromTop(30));
+        subtitle.setBounds(area.removeFromTop(20));
+        area.removeFromTop(28);
+        styleLabel.setBounds(area.removeFromTop(15));
+        styleEntry.setBounds(area.removeFromTop(42).removeFromLeft(300));
+        area.removeFromTop(24);
+        articulationLabel.setBounds(area.removeFromTop(15));
+        availability.setBounds(area.removeFromTop(30));
+        area.removeFromTop(18);
+        activeLabel.setBounds(area.removeFromTop(24));
+        sourceLabel.setBounds(area.removeFromTop(24));
+    }
+
+private:
+    void timerCallback() override
+    {
+        const auto path = processor.getCurrentSfzFilePath();
+        const auto source = path.isNotEmpty() ? juce::File(path).getFileName()
+                                               : juce::String("NO SFZ INSTRUMENT LOADED");
+        const auto sourceText = "INSTRUMENT SOURCE  /  " + source;
+        if (sourceLabel.getText() != sourceText)
+            sourceLabel.setText(sourceText, juce::dontSendNotification);
+
+        // A keyswitch label alone is not proof of a playable zone/mapping.
+        // Keep the catalog item unavailable until a verified source-map registry exists.
+        const int switchNote = processor.getActiveArticulationSwitch(1);
+        const auto switchLabel = processor.getActiveArticulationLabel(1);
+        const auto activeText = switchNote >= 0 && switchLabel.isNotEmpty()
+            ? "SOURCE SWITCH  /  " + switchLabel + "  [KEY " + juce::String(switchNote) + "]"
+            : "ACTIVE PERFORMANCE  /  NONE VERIFIED";
+        if (activeLabel.getText() != activeText)
+            activeLabel.setText(activeText, juce::dontSendNotification);
+    }
+
+    PopPunkGuitarUltimateAudioProcessor& processor;
+    PPGUThemeManager::Palette palette;
+    juce::Label title, subtitle, styleLabel, articulationLabel, availability, activeLabel, sourceLabel;
+    juce::TextButton styleEntry;
 };
 
 class PPGUChordDiagram final : public juce::Component, public PPGUThemeAwarePanel
@@ -3231,7 +3346,28 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openPatternSectionPanel()
         spec.content = std::make_unique<PPGUPatternSectionPanel>(
             processor, presetBox.getText(),
             [safeThis] { if (safeThis != nullptr) safeThis->openImportGuitarPanel(); },
-            [safeThis] { if (safeThis != nullptr) safeThis->openAutoChordsPanel(); });
+            [safeThis] { if (safeThis != nullptr) safeThis->openAutoChordsPanel(); },
+            [safeThis] { if (safeThis != nullptr) safeThis->openPlayingStylePanel(); });
+        if (!auxiliaryWorkspace->openPanel(std::move(spec)))
+            return;
+    }
+    auxiliaryWorkspace->setVisible(true);
+    auxiliaryWorkspace->toFront(false);
+}
+
+void PopPunkGuitarUltimateAudioProcessorEditor::openPlayingStylePanel()
+{
+    if (auxiliaryWorkspace == nullptr)
+        return;
+    constexpr int playingStylePanelId = 2104;
+    if (!auxiliaryWorkspace->isPanelOpen(playingStylePanelId))
+    {
+        PPGUMultiWindowWorkspace::PanelSpec spec;
+        spec.id = playingStylePanelId;
+        spec.title = "PLAYING STYLE  /  ARTICULATION";
+        spec.desired = { 760, 500 };
+        spec.minimum = { 520, 380 };
+        spec.content = std::make_unique<PPGUPlayingStylePanel>(processor);
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
