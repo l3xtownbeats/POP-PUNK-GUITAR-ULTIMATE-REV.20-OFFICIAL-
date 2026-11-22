@@ -497,7 +497,7 @@ public:
         description.setJustificationType(juce::Justification::topLeft);
         addAndMakeVisible(description);
 
-        scaleLabel.setText("AUXILIARY PANEL SCALE", juce::dontSendNotification);
+        scaleLabel.setText("AUXILIARY PANEL SCALE  /  1x · 2x · 3x", juce::dontSendNotification);
         gapLabel.setText("SPACE BETWEEN PANELS", juce::dontSendNotification);
         for (auto* label : { &scaleLabel, &gapLabel })
         {
@@ -506,7 +506,7 @@ public:
             addAndMakeVisible(*label);
         }
 
-        configureSlider(scaleSlider, 0.5, 1.5, 0.05, panelScaleIn);
+        configureSlider(scaleSlider, 0.5, 3.0, 0.05, panelScaleIn);
         scaleSlider.setTextValueSuffix(" x");
         scaleSlider.onValueChange = [this]
         {
@@ -548,7 +548,7 @@ public:
         description.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         scaleLabel.setColour(juce::Label::textColourId, palette.token("accent"));
         gapLabel.setColour(juce::Label::textColourId, palette.token("accent"));
-        configureSlider(scaleSlider, 0.5, 1.5, 0.05, scaleSlider.getValue());
+        configureSlider(scaleSlider, 0.5, 3.0, 0.05, scaleSlider.getValue());
         configureSlider(gapSlider, 0.0, 32.0, 1.0, gapSlider.getValue());
         restoreButton.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
         restoreButton.setColour(juce::TextButton::textColourOffId, palette.token("text_primary"));
