@@ -780,6 +780,23 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         return false;
     }
 
+    // Optional extended artwork layers. Older manifests remain compatible; when a
+    // path is declared it must pass the same sandboxed SVG validation as core layers.
+    const auto loadOptionalSvg = [&themeRoot, &assets, &error](const char* key, juce::Image& target,
+                                                               int width, int height)
+    {
+        const auto path = assets.getProperty(key, "").toString();
+        return path.isEmpty() || loadSafeSvgArtwork(themeRoot, path, width, height, target, error);
+    };
+    if (!loadOptionalSvg("controls", candidate.controlsArtwork, 1024, 1024)
+        || !loadOptionalSvg("fxLayers", candidate.fxLayerArtwork, 800, 450)
+        || !loadOptionalSvg("decorative", candidate.decorativeArtwork, 800, 450))
+    {
+        lastError = error.isNotEmpty() ? error : "Optional theme artwork loading failed";
+        resetToDefault();
+        return false;
+    }
+
     // Every approved Skin Studio theme supplies an 800x450 hero image.
     // Decode it once on the UI thread; the audio processor never accesses artwork.
     if (!loadSafePngArtwork(themeRoot, assets.getProperty("hero", "").toString(),
