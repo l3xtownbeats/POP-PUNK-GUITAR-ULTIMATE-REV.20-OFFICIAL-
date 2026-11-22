@@ -1207,7 +1207,8 @@ public:
         sourceValue.setJustificationType(juce::Justification::centredLeft);
         sourceValue.setText("NO SFZ INSTRUMENT LOADED", juce::dontSendNotification);
         toneValue.setJustificationType(juce::Justification::centredLeft);
-        toneValue.setText(tonePresetName.isNotEmpty() ? tonePresetName : "SELECT A FACTORY PRESET");
+        toneValue.setText(tonePresetName.isNotEmpty() ? tonePresetName : "SELECT A FACTORY PRESET",
+                             juce::dontSendNotification);
         performanceValue.setJustificationType(juce::Justification::centredLeft);
         performanceValue.setText("RECORDED MAP STATUS: VERIFY BEFORE EXPOSING VARIATIONS",
                                  juce::dontSendNotification);
