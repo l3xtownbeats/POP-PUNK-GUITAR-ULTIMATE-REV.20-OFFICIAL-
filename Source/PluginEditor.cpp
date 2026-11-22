@@ -1670,6 +1670,34 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         g.drawImage(palette.rotarySpriteSheet, destinationX, destinationY,
                     diameter, diameter, sourceX, sourceY, cellSize, cellSize);
 
+        // A live luminous value arc surrounds the physical rotary control.
+        // It follows the Slider/APVTS normalized value rather than an animation.
+        if (slider.isEnabled())
+        {
+            const float centreX = static_cast<float>(destinationX) + diameter * 0.5f;
+            const float centreY = static_cast<float>(destinationY) + diameter * 0.5f;
+            const float arcRadius = static_cast<float>(diameter) * 0.455f;
+            const float valueAngle = start + pos * (end - start);
+            juce::Path arcTrack;
+            arcTrack.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                                   0.0f, start, end, true);
+            g.setColour(palette.token("control_border").withAlpha(0.82f));
+            g.strokePath(arcTrack, juce::PathStrokeType(3.2f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            if (pos > 0.0001f)
+            {
+                juce::Path valueArc;
+                valueArc.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                                       0.0f, start, valueAngle, true);
+                g.setColour(palette.token("accent_glow").withAlpha(0.34f));
+                g.strokePath(valueArc, juce::PathStrokeType(7.0f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                g.setColour(palette.token("accent").withAlpha(0.98f));
+                g.strokePath(valueArc, juce::PathStrokeType(2.8f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            }
+        }
+
         // Every knob keeps its continuous 61-frame rotary animation, while its
         // dedicated five-state PNG remains part of the live visual state stack.
         // State art is a restrained overlay so it cannot obscure the moving
@@ -1860,6 +1888,23 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         g.drawRoundedRectangle(focusBounds, 5.0f, 1.6f);
     };
 
+    const auto drawFxActiveIndicator = [&g, &button, this, controlId]
+    {
+        // FX LED follows the attached APVTS toggle; bypassed modules stay dark.
+        if (!controlId.startsWith("fx_switch") || !button.isEnabled()
+            || !button.getToggleState())
+            return;
+        const auto bounds = button.getLocalBounds().toFloat();
+        const float cx = bounds.getRight() - 10.0f;
+        const float cy = bounds.getCentreY();
+        g.setColour(palette.token("accent_glow").withAlpha(0.36f));
+        g.fillEllipse(cx - 7.0f, cy - 7.0f, 14.0f, 14.0f);
+        g.setColour(palette.token("accent").withAlpha(0.98f));
+        g.fillEllipse(cx - 3.0f, cy - 3.0f, 6.0f, 6.0f);
+        g.setColour(palette.token("text_primary").withAlpha(0.92f));
+        g.drawEllipse(cx - 3.0f, cy - 3.0f, 6.0f, 6.0f, 0.7f);
+    };
+
     const auto drawAtlasIcon = [&g, &button, this, controlId]
     {
         if (! palette.iconsSpriteSheet.isValid())
@@ -1915,6 +1960,7 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                 // State artwork supplies the physical switch; the atlas icon
                 // is layered independently so labels and hit targets remain live.
                 drawAtlasIcon();
+                drawFxActiveIndicator();
                 drawKeyboardFocus();
                 return;
             }
@@ -1945,6 +1991,7 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                     bounds.getWidth(), bounds.getHeight(), sourceX, sourceY,
                     sourceWidth, sourceHeight);
         drawAtlasIcon();
+        drawFxActiveIndicator();
         drawKeyboardFocus();
         return;
     }
@@ -2794,7 +2841,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette()
  presetSearch.setColour(juce::TextEditor::backgroundColourId,p.token("control_bg"));presetSearch.setColour(juce::TextEditor::textColourId,p.token("text_primary"));presetSearch.setColour(juce::TextEditor::outlineColourId,p.token("control_border"));presetSearch.setColour(juce::TextEditor::focusedOutlineColourId,p.token("highlight"));presetSearch.setColour(juce::TextEditor::highlightColourId,p.token("accent").withAlpha(.3f));
  loadButton.setColour(juce::TextButton::buttonColourId,p.token("accent"));loadButton.setColour(juce::TextButton::textColourOffId,p.token("window_bg"));settingsButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));settingsButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));skinButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setTooltip("Active skin: "+p.name+"  /  Ctrl+K");
  for (auto* unavailable : { &autoSoundHunterButton, &curatorButton }) { unavailable->setColour(juce::TextButton::buttonColourId,p.token("lowlight")); unavailable->setColour(juce::TextButton::textColourOffId,p.token("text_disabled")); unavailable->setEnabled(false); }
- aboutButton.setEnabled(false); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("lowlight")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_disabled"));
+ aboutButton.setEnabled(true); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("lowlight")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_disabled"));
  for(auto* b:{&melodyTab,&patternTab}){b->setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b->setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b->setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b->setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
  for(auto& s:knobs){s.setColour(juce::Slider::rotarySliderFillColourId,p.token("accent"));s.setColour(juce::Slider::rotarySliderOutlineColourId,p.token("control_border"));s.setColour(juce::Slider::thumbColourId,p.token("text_primary"));s.setColour(juce::Slider::textBoxTextColourId,p.token("text_primary"));}
  for(auto& l:knobLabels){l.setFont(makeThemeFont(p,9.5f,false,true));l.setColour(juce::Label::textColourId,p.token("text_secondary"));}
