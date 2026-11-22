@@ -611,7 +611,8 @@ class PPGUImportGuitarPanel final : public juce::Component,
                                          private juce::Timer
 {
 public:
-    explicit PPGUImportGuitarPanel(std::function<void(juce::Label*, juce::Button*)> loadActionIn)
+    explicit PPGUImportGuitarPanel(std::function<void(juce::Label*, juce::Button*)> loadActionIn,
+                                  juce::String initialStatus)
         : loadAction(std::move(loadActionIn))
     {
         heading.setText("LICENSED GUITAR LIBRARY", juce::dontSendNotification);
@@ -624,7 +625,8 @@ public:
         description.setJustificationType(juce::Justification::topLeft);
         description.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(description);
-        status.setText("No SFZ library loaded in this session.", juce::dontSendNotification);
+        status.setText(initialStatus.isNotEmpty() ? initialStatus
+            : juce::String("No SFZ library loaded in this session."), juce::dontSendNotification);
         status.setJustificationType(juce::Justification::topLeft);
         status.setColour(juce::Label::textColourId, palette.token("lcd_text"));
         addAndMakeVisible(status);
@@ -710,13 +712,19 @@ private:
     {
         const auto message = status.getText().trim();
         LoadState next = LoadState::standby;
-        if (!loadButton.isEnabled() || message.startsWithIgnoreCase("Loading SFZ"))
+        if (!loadButton.isEnabled() || message.startsWithIgnoreCase("Loading SFZ")
+            || message.startsWithIgnoreCase("LOADING SFZ"))
             next = LoadState::loading;
-        else if (message.startsWithIgnoreCase("READY"))
+        else if (message.startsWithIgnoreCase("READY")
+                 || message.startsWithIgnoreCase("SAVED LIBRARY"))
             next = LoadState::ready;
+        else if (message.startsWithIgnoreCase("LIBRARY FILE NOT FOUND")
+                 || message.containsIgnoreCase("FAILED")
+                 || message.containsIgnoreCase("ERROR")
+                 || message.containsIgnoreCase("NOT FOUND"))
+            next = LoadState::error;
         else if (message.isNotEmpty()
-                 && message != "No SFZ library loaded in this session."
-                 && !message.startsWithIgnoreCase("SAVED LIBRARY"))
+                 && message != "No SFZ library loaded in this session.")
             next = LoadState::error;
         if (next != loadState)
         {
@@ -3232,12 +3240,21 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openImportGuitarPanel()
         spec.title = "IMPORT GUITAR";
         spec.desired = { 560, 360 };
         spec.minimum = { 300, 220 };
+        const auto currentSfzPath = processor.getCurrentSfzFilePath();
+        juce::String initialImportStatus;
+        if (currentSfzPath.isNotEmpty())
+        {
+            const juce::File currentSfz(currentSfzPath);
+            initialImportStatus = currentSfz.existsAsFile()
+                ? "SAVED LIBRARY  /  " + currentSfz.getFileName()
+                : "LIBRARY FILE NOT FOUND  /  " + currentSfz.getFileName();
+        }
         spec.content = std::make_unique<PPGUImportGuitarPanel>(
             [safeThis](juce::Label* targetStatus, juce::Button* targetButton)
             {
                 if (safeThis != nullptr)
                     safeThis->chooseSfzFile(targetStatus, targetButton);
-            });
+            }, initialImportStatus);
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
