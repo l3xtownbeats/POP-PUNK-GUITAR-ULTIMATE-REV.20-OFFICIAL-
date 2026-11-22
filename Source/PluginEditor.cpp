@@ -2120,11 +2120,38 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
                 const int destinationY = y + (h - diameter) / 2;
                 g.drawImageWithin(*artwork, destinationX, destinationY, diameter, diameter,
                                   juce::RectanglePlacement::centred);
-                // Artwork remains position-neutral; the live indicator follows APVTS.
+                // The artwork is the physical knob face; the value arc and pointer
+                // are live overlays driven by the attached APVTS slider value.
                 const float cx = static_cast<float>(x) + static_cast<float>(w) * 0.5f;
                 const float cy = static_cast<float>(y) + static_cast<float>(h) * 0.5f;
                 const float radius = static_cast<float>(diameter) * 0.30f;
+                const float arcRadius = static_cast<float>(diameter) * 0.405f;
                 const float angle = start + pos * (end - start);
+                const bool enabled = slider.isEnabled();
+                const bool hovered = enabled && slider.isMouseOverOrDragging();
+                const bool focused = enabled && slider.hasKeyboardFocus(true);
+
+                juce::Path arcTrack;
+                arcTrack.addCentredArc(cx, cy, arcRadius, arcRadius, 0.0f,
+                                       start, end, true);
+                g.setColour(enabled ? palette.token("led_off").withAlpha(0.92f)
+                                    : palette.token("text_disabled").withAlpha(0.42f));
+                g.strokePath(arcTrack, juce::PathStrokeType(3.0f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+                juce::Path valueArc;
+                valueArc.addCentredArc(cx, cy, arcRadius, arcRadius, 0.0f,
+                                       start, angle, true);
+                if (enabled && pos > 0.0001f)
+                {
+                    g.setColour(palette.token("accent_glow").withAlpha(hovered ? 0.58f : 0.34f));
+                    g.strokePath(valueArc, juce::PathStrokeType(6.0f,
+                        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                    g.setColour(focused ? palette.token("highlight") : palette.token("accent"));
+                    g.strokePath(valueArc, juce::PathStrokeType(2.7f,
+                        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                }
+
                 juce::Path pointer;
                 pointer.startNewSubPath(cx, cy);
                 pointer.lineTo(cx + std::sin(angle) * radius,
