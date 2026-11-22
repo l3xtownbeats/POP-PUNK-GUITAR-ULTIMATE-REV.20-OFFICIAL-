@@ -198,3 +198,17 @@ Workflow 44722586113 (SHA 9ed8a44...) executed the imported Sound Hunter pipelin
 Workflow 44729083554 on exact SHA `10b05a0117366cf33afeb194b3c28456f30fef80` completed SUCCESS. It passed Windows x64 VST3 build, full 19/19 CTest, exact 16-theme validator, 16-only package staging and pluginval strictness 5. Artifact 14625308194 / SHA-256 `72e31eb39e36301c2f3dfa070e9ef277c6d5a360d2907db12f4e4a25e219e864`.
 
 This is the latest automated baseline. Host/manual and content gates remain separate.
+
+
+## 2026-11-22 — user approval: NEON STAGE / Session Guitarist-inspired guitar workflow
+
+The user explicitly approved and locked the functional direction. The approved reference is limited to the usability concept of Session Guitarist – Electric Sunburst Deluxe/Vintage; NEON STAGE DEFAULT remains the only approved visual source of truth. No NI branding, artwork, proprietary presets, recordings, riffs or protected UI composition may be copied.
+
+- Exactly two top-level modes remain: MELODY and PATTERN. Auxiliary functions/windows do not become additional modes.
+- PATTERN keeps instrument source/profile, tone preset, and recorded performance articulation/variation as three independent choices. Tone/FX never replace playing technique.
+- Only recorded, mapped, legally usable articulations may be exposed as available. Unmapped techniques remain unavailable; no synthetic substitute may be represented as recorded guitar.
+- Original pop-punk vocabulary, host-sync switching, clean transitions, bounded polyphony and optional non-default layering remain binding.
+- Preserve the approved NEON STAGE palette, composition, controls, parameter IDs and visual language. All new UI must be native to that system.
+- UI checkpoint commits: dbb05b8872746ad31fd0bce3103bb94e6f45358a, a9021d4a16fb3d4a7a1b3fa186acee3b49fd123c. This does not mean the audio performance engine is complete.
+- Current static audit confirms articulation and palmMuteThreshold are declared in APVTS but were not found consumed by the processor audio path. Next engineering workstream is recorded articulation metadata/routing into SamplerEngine and PatternScheduler with velocity selection and note lifecycle tests.
+- CI run 44997292780 for source SHA a9021d4a16fb3d4a7a1b3fa186acee3b49fd123c was in progress at the time of this entry; no exact-HEAD pass, pluginval pass or FL Studio 20 host acceptance is claimed.
