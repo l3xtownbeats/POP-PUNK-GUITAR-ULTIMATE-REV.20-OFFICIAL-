@@ -585,3 +585,23 @@ Implementation note: an earlier source experiment added a standalone ARTICULATIO
 The user supplied the exact entry/path label: **PLAYING / PATTERN — PALM MUTE - 8TH**. Treat PALM MUTE - 8TH as a requested PATTERN playing-style/articulation entry in the second **PLAYING STYLE / ARTICULATION** window, not as a separate top-level mode or a control in the PATTERN PRESETS window.
 
 The label is a user-approved catalog requirement, not proof that a playable recording or mapping currently exists. Show it as selectable/available only after a real, legally usable palm-muted eighth-note performance recording and its note/range/velocity/keyswitch mappings have been inspected and verified. Until then, preserve the requested entry in the catalog specification but show an honest unavailable / source mapping required state in the UI. Do not synthesize a false READY state or imply that the audio engine already plays it.
+
+
+## 2026-11-22 — NEON STAGE PATTERN: первый source-level проход двухоконной навигации
+
+### Реализовано в review branch `visual/neon-stage-playing-style-window`
+
+- В первом окне PATTERN добавлен явный переход **OPEN PLAYING STYLE**. Он открывает отдельную рабочую область второго окна через общий `PPGUMultiWindowWorkspace`, с собственным ID, заголовком, минимальным и желаемым размером.
+- Первое окно сохраняет назначение PATTERN PRESETS / song-section routing; информация о playing style больше не представлена как отдельная вкладка/кнопка ARTICULATION.
+- Создано второе окно **PLAYING STYLE / ARTICULATION** с темой NEON STAGE, общей системой панелей/рамок workspace и отдельными визуальными областями PLAYING STYLE и ARTICULATION.
+- Каталожная позиция **PALM MUTE - 8TH** отображается как явно недоступная. Она не активируется, пока не будет проверена реальная легальная запись и полный mapping. Никакие синтетические подмены или фиктивный READY не используются.
+- Источник SFZ и сведения о switch label обновляются из processor. Наличие одного keyswitch label не трактуется как доказательство существующей playable zone; статус позиции остаётся unavailable до появления проверяемого source-map registry.
+- Добавлена точка входа редактора `openPlayingStylePanel()`; окно не создаётся повторно при повторном открытии, если уже существует в workspace.
+
+### Границы текущего результата
+
+Это первый вертикальный source-level проход навигации и визуального каркаса второго окна, а не завершение всей PATTERN архитектуры и не закрытие общего NEON STAGE visual acceptance. В первом окне ещё предстоит полноценная реализация групп пресетов/фрагментов и сохранение выбора между переходами; независимое persistent-state для группы/фрагмента/паттерна/артикуляции также остаётся отдельной задачей. Визуальная pixel-сверка с макетами 01–07, взаимодействие мышью/клавиатурой, смена skin на уже открытом окне, resize/DPI и runtime performance ещё не подтверждены.
+
+### Проверки
+
+Изменены `Source/PluginEditor.cpp` и `Source/PluginEditor.h`. Изменение опубликовано в review branch; на момент записи exact-HEAD Windows CI, CTest, skin validation, pluginval и FL Studio 20 host acceptance ещё не подтверждены. Не считать это окно CI PASS или HOST VERIFIED.
