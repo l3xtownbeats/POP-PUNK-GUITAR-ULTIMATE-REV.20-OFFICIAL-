@@ -354,3 +354,12 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - Изменение: commit `afb637c44764342d589e0dd846cd5d6a428f47dc`. Путь: `Source/PluginEditor.cpp`.
 - Runtime PNG mapping остаётся через Skin-1 `control_states_manifest.json` и `ThemeManager.cpp`; FX switch states уже рисуются через индивидуальные control artwork и реальные JUCE button states.
 - Это source-level integration, а не заявление о пройденной Windows-сборке. Требуется дождаться CI на актуальном SHA и проверить CTest/pluginval/визуально в FL Studio 20.
+
+
+## 2026-11-22 — runtime-подключение atlas icons к управляющим кнопкам
+
+- В `Source/PluginEditor.cpp`, внутри `PPGUPremiumLookAndFeel::drawButtonBackground`, добавлен renderer `drawAtlasIcon`, читающий `Palette::iconsSpriteSheet` и использующий подтверждённые координаты из `SKIN/Skin_053/assets/spritesheets/neon_stage_spritesheet_manifest.json`.
+- Подключены иконки FX: wave/EQ/distortion/chorus/delay/reverb/cabinet к семи `fx_switch01…07`; навигационные иконки settings/info/palette/guitar/antenna/crown к соответствующим кнопкам Settings/About/SKIN_button/Import_Guitar/Auto_Discover/Curator. Иконка рисуется поверх фонового state PNG, текст кнопки и JUCE hit target остаются штатными.
+- Источник: `SKIN/Skin_053/assets/spritesheets/neon_stage_icons_sheet.png`, 1024×1024; atlas decoded уже существующим загрузчиком `ThemeManager.cpp`. Никакие PNG-источники не изменялись.
+- Коммит: `48ccf027f69d782e86345b5dd04965c5202e8d56`.
+- Это runtime source integration; требуется Windows CI и проверка компоновки/контраста в host. Контролы без активного backend остаются disabled; наличие иконки не активирует недоступную функцию.
