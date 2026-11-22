@@ -2170,7 +2170,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
         };
         addAndMakeVisible(b);
     }
-    ampTitle.setText("AMP / PERFORMANCE", juce::dontSendNotification);
+    ampTitle.setText("AMP & TONE", juce::dontSendNotification);
     fxTitle.setText("FX CHAIN", juce::dontSendNotification);
     playbackTitle.setText("PLAYBACK", juce::dontSendNotification);
     for (auto* l : { &ampTitle, &fxTitle, &playbackTitle }) {
