@@ -127,6 +127,7 @@ def main() -> int:
         "neon_stage_meters_sliders_sheet.png",
         "neon_stage_frames_panels_sheet.png",
         "neon_stage_icons_sheet.png",
+        "neon_stage_rotary_61frame_atlas.png",
     )
     for atlas_name in atlas_names:
         atlas_path = atlas_dir / atlas_name
@@ -155,6 +156,13 @@ def main() -> int:
     sheets = atlas_manifest.get("sheets", {})
     if set(sheets) != set(atlas_names):
         raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly four sheets")
+    if sheets.get("neon_stage_rotary_61frame_atlas.png", {}).get("resolution") != [1024, 1024] \
+            or sheets["neon_stage_rotary_61frame_atlas.png"].get("cell_size") != [128, 128] \
+            or sheets["neon_stage_rotary_61frame_atlas.png"].get("grid") != [8, 8] \
+            or sheets["neon_stage_rotary_61frame_atlas.png"].get("frame_count") != 61 \
+            or sheets["neon_stage_rotary_61frame_atlas.png"].get("angle_range_deg") != [-135, 135] \
+            or sheets["neon_stage_rotary_61frame_atlas.png"].get("angle_step_deg") != 4.5:
+        raise SystemExit("FAIL: NEON STAGE 61-frame rotary atlas geometry mismatch")
     controls = sheets["neon_stage_controls_spritesheet.png"]["elements"]
     if controls.get("knobs", {}).get("frames") != 8 \
             or controls.get("knobs", {}).get("angle_step_deg") != 45 \

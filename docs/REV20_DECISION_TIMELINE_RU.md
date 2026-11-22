@@ -374,3 +374,20 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - Commit исправления: `38ba76fbe1e10c4860bf01d0fe49340c013ab977`.
 - Важно: исходный run остаётся failed по validator; это исправление ещё должно пройти новый полный Windows workflow на новом HEAD. Pluginval strictness 5 и VST3 artifact пока не подтверждены.
 - Дополнительно проверено подключение визуальных атласов: `framesPanelsSpriteSheet` уже используется в `drawPanel()` для header chrome; `metersSlidersSpriteSheet` уже используется в `drawLinearSlider()` для track/thumb; `iconsSpriteSheet` подключён к FX/navigation controls. Performance display пока рисует собственную живую harmony/status информацию JUCE, а не отдельный VU meter atlas — не подменять его декоративным фейковым измерителем.
+
+
+## 2026-11-22 — утверждена визуальная база NEON STAGE и следующий этап реализации
+
+Пользователь явно подтвердил и зафиксировал как обязательную базу следующие требования:
+
+- Главное окно воспроизводит утверждённый корневой макет `01 INTERFACE  NEON STAGE DEFAULT .png` без изменения его композиции и геометрии. Это единственный source of truth для главного экрана.
+- Все органы управления должны иметь реальное взаимодействие: непрерывное изменение параметров ручек с визуальным вращением, состояния ON/OFF переключателей, реакцию кнопок, hover/focus/pressed/disabled и dragged там, где состояние применимо.
+- Рамки, панели, разделители, дисплеи, металлические поверхности и световые акценты должны быть интегрированы как единая тема NEON STAGE, а не как несвязанные декоративные элементы.
+- MIDI-клавиатура должна визуально отражать реальные MIDI key-down/key-up события.
+- Вспомогательные окна AutoChords, FX EDIT, Import Guitar, Settings, Skin Gallery, Pattern Section и About должны пройти отдельную проверку оформления, размеров, интерактивных элементов и доступности управления.
+- Все изменения должны соответствовать ранее утверждённым макетам и описаниям этого журнала. Для функционального UX допустимо использовать NI Session Guitarist – Electric Sunburst Deluxe/Vintage как ориентир удобства и поведения инструментов; не копировать их брендинг, графику, пресеты, записи или музыкальный материал.
+- Визуальный этап приоритетен: не переходить к расширению звукового backend до завершения и проверки темы, главного окна, состояний контролов и вспомогательных окон. Auto Sound Hunter и Curator остаются disabled, пока их backend не готов.
+
+**CI checkpoint:** run `45006282828` на SHA `38ba76fbe1e10c4860bf01d0fe49340c013ab977`: Windows x64 configure — success; VST3 и C++ build — success; CTest — 22/22 success. Skin validation остановилась на ошибочном условии валидатора: он ожидал ровно четыре sprite sheets, хотя canonical manifest и ThemeManager содержат пять, включая `neon_stage_rotary_61frame_atlas.png`. Исправление валидатора должно учитывать пятый 61-frame atlas и проверять его геометрию. Из-за остановки на этом шаге staging, pluginval strictness 5 и upload artifact не запускались; VST3 build success не равен pluginval/release acceptance.
+
+**Следующий этап:** устранить только validator mismatch, повторить полный Windows workflow, затем продолжить visual implementation: FX EDIT selection update при уже открытом окне; проверка/подключение LCD, LED и MIDI-keyboard artwork с реальными состояниями; поочерёдный аудит всех auxiliary windows; pixel/geometry review по canonical mockup и журналу. Не заявлять визуальное завершение до реальной проверки.
