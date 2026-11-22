@@ -1210,8 +1210,9 @@ public:
         toneValue.setText(tonePresetName.isNotEmpty() ? tonePresetName : "SELECT A FACTORY PRESET",
                              juce::dontSendNotification);
         performanceValue.setJustificationType(juce::Justification::centredLeft);
-        performanceValue.setText("RECORDED MAP STATUS: VERIFY BEFORE EXPOSING VARIATIONS",
+        performanceValue.setText("NO RECORDED ARTICULATION MAP",
                                  juce::dontSendNotification);
+        performanceValue.setTooltip("Only source-authored SFZ keyswitch labels are shown here. No mapped label means no verified articulation is exposed.");
         importSource.setButtonText("IMPORT GUITAR");
         importSource.onClick = [this] { if (importAction) importAction(); };
         for (auto* label : { &sectionLabel, &patternLabel, &sourceLabel, &toneLabel,
@@ -1339,7 +1340,11 @@ public:
     }
 
 private:
-    void timerCallback() override { refreshInstrumentSource(); }
+    void timerCallback() override
+    {
+        refreshInstrumentSource();
+        refreshActiveArticulation();
+    }
     void refreshInstrumentSource()
     {
         const auto currentPath = processor.getCurrentSfzFilePath();
@@ -1349,6 +1354,24 @@ private:
         if (sourceValue.getText() != display)
             sourceValue.setText(display, juce::dontSendNotification);
         sourceValue.setTooltip(currentPath);
+    }
+    void refreshActiveArticulation()
+    {
+        const int switchNote = processor.getActiveArticulationSwitch(1);
+        const auto label = processor.getActiveArticulationLabel(1);
+        juce::String display;
+        if (switchNote < 0)
+            display = "NO RECORDED ARTICULATION MAP";
+        else if (label.isNotEmpty())
+            display = "ACTIVE  /  " + label + "   [KEY " + juce::String(switchNote) + "]";
+        else
+            display = "ACTIVE SWITCH " + juce::String(switchNote)
+                + "  /  SOURCE LABEL NOT PROVIDED";
+        if (performanceValue.getText() != display)
+            performanceValue.setText(display, juce::dontSendNotification);
+        performanceValue.setTooltip(label.isNotEmpty()
+            ? "Read from the loaded SFZ sw_label metadata. Availability still depends on a matching recorded zone."
+            : "The loaded SFZ declares a switch, but does not provide a matching sw_label for this position.");
     }
     void selectSection()
     {

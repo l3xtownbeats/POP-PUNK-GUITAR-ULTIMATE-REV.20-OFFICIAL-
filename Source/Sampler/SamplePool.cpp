@@ -452,6 +452,17 @@ int SamplePool::getDefaultKeySwitch() const noexcept
     return snapshot != nullptr ? snapshot->defaultKeySwitch : -1;
 }
 
+std::string SamplePool::getKeySwitchLabel(int switchNote) const
+{
+    const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
+    if (snapshot == nullptr || switchNote < 0)
+        return {};
+    for (const auto& region : snapshot->regions)
+        if (region.switchLast == switchNote && !region.switchLabel.empty())
+            return region.switchLabel;
+    return {};
+}
+
 std::size_t SamplePool::getRegionCount() const noexcept
 {
     const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
@@ -520,6 +531,11 @@ int SamplerEngine::getActiveKeySwitch(int midiChannel) const noexcept
 {
     const int channel = juce::jlimit(1, 16, midiChannel);
     return activeKeySwitches[static_cast<std::size_t>(channel - 1)].load(std::memory_order_acquire);
+}
+
+std::string SamplerEngine::getActiveKeySwitchLabel(int midiChannel) const
+{
+    return pool.getKeySwitchLabel(getActiveKeySwitch(midiChannel));
 }
 
 bool SamplerEngine::noteOn(int midiNote, int velocity, int maximumActiveVoices, int midiChannel, double globalTuningSemitones) noexcept

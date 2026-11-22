@@ -230,3 +230,10 @@ The following audio-path wiring has now been selectively ported into REV.20 (tar
 ## 2026-11-22 — Real-time keyswitch lookup optimization
 
 - SFZ snapshot construction now precomputes a fixed 128-note keyswitch mask and default selector. processBlock queries this immutable mask in O(1), avoiding a linear scan of large sample maps for each MIDI event. No allocation or lock is introduced on the audio thread.
+
+
+## 2026-11-22 — Live articulation label in PATTERN workspace
+
+- SamplerEngine/SamplePool expose the source-authored sw_label corresponding to the active per-channel switch; the processor publishes it as a read-only UI query.
+- PATTERN workspace now refreshes the active articulation label and switch note using its existing 2 Hz timer. If no switch map exists, it explicitly displays NO RECORDED ARTICULATION MAP. If a switch exists without sw_label, it says SOURCE LABEL NOT PROVIDED.
+- This is metadata visibility only; no invented technique names. The label does not certify recording provenance, license, or technique fidelity. Those require source-bank inspection and runtime audition.

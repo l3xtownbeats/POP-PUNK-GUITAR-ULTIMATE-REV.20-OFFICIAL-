@@ -48,6 +48,8 @@ public:
     void loadSfzFileAsync(const juce::File& sfzFile,
                           std::function<void(ppgu::sampler::LoadReport)> completion);
     [[nodiscard]] juce::String getCurrentSfzFilePath() const;
+    [[nodiscard]] juce::String getActiveArticulationLabel(int midiChannel = 1) const;
+    [[nodiscard]] int getActiveArticulationSwitch(int midiChannel = 1) const noexcept;
 
     // Section-first pattern routing. -1 means inherit the legacy global patternSlot.
     static constexpr int songSectionCount = 5;

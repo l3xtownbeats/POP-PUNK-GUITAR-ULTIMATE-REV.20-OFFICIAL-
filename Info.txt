@@ -259,3 +259,9 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 ## 2026-11-22 — Real-time keyswitch lookup bounded
 - Replaced per-MIDI-event linear region scanning for keyswitch detection with a 128-entry immutable note mask precomputed while the SFZ snapshot is built off the audio thread. Active default keyswitch is also cached in the published snapshot.
 - PluginProcessor keyswitch detection is therefore O(1) per event and does not allocate, lock or scan the full sample map in processBlock.
+
+
+## 2026-11-22 — Live articulation label publication in PATTERN workspace
+- Added a read-only sampler query for the sw_label associated with the active per-channel SFZ keyswitch. The query reads the retained immutable sample snapshot; it does not modify playback state.
+- Published active switch note and source-authored label through the processor UI read model. PATTERN workspace refreshes at its existing 2 Hz timer and displays the actual active articulation label, or an explicit NO RECORDED ARTICULATION MAP / SOURCE LABEL NOT PROVIDED state.
+- No labels or articulations are invented. Displayed metadata originates from the currently loaded SFZ map. This does not yet prove that the mapped sample file is licensed for distribution or that a given label contains the intended guitar technique; bank content validation remains required.

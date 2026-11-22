@@ -98,6 +98,7 @@ public:
                                                int activeSwitch = -1) noexcept;
     [[nodiscard]] bool isKeySwitchNote(int midiNote) const noexcept;
     [[nodiscard]] int getDefaultKeySwitch() const noexcept;
+    [[nodiscard]] std::string getKeySwitchLabel(int switchNote) const;
     [[nodiscard]] std::size_t getRegionCount() const noexcept;
     [[nodiscard]] std::size_t getSampleCount() const noexcept;
 
@@ -138,6 +139,7 @@ public:
     [[nodiscard]] bool setKeySwitch(int midiNote, int midiChannel = 1) noexcept;
     [[nodiscard]] bool isKeySwitchNote(int midiNote) const noexcept;
     [[nodiscard]] int getActiveKeySwitch(int midiChannel = 1) const noexcept;
+    [[nodiscard]] std::string getActiveKeySwitchLabel(int midiChannel = 1) const;
     void noteOff(int midiNote, int midiChannel = 1) noexcept;
     void allNotesOff() noexcept;
     void panic(int fadeSamples) noexcept;

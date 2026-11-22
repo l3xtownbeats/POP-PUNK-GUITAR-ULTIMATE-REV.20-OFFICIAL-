@@ -1068,6 +1068,17 @@ juce::String PopPunkGuitarUltimateAudioProcessor::getCurrentSfzFilePath() const
     return currentSfzFilePath;
 }
 
+juce::String PopPunkGuitarUltimateAudioProcessor::getActiveArticulationLabel(int midiChannel) const
+{
+    const auto label = sampler.getActiveKeySwitchLabel(midiChannel);
+    return juce::String(label);
+}
+
+int PopPunkGuitarUltimateAudioProcessor::getActiveArticulationSwitch(int midiChannel) const noexcept
+{
+    return sampler.getActiveKeySwitch(midiChannel);
+}
+
 void PopPunkGuitarUltimateAudioProcessor::loadSfzFileAsync(
     const juce::File& sfzFile, std::function<void(ppgu::sampler::LoadReport)> completion)
 {
