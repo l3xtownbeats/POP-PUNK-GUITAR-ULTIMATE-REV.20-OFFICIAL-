@@ -2085,6 +2085,10 @@ namespace { void getPluginModuleAnchor() {} }
 void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int w, int h,
                                                     float pos, float start, float end, juce::Slider& slider)
 {
+    // Render authored PNG knob faces with the highest JUCE resampling mode.
+    // This is evaluated only when the control repaints; it does not add timers,
+    // interpolation work to the audio thread, or alter the APVTS value.
+    g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
     const auto controlId = slider.getComponentID();
     if (palette.rotarySpriteSheet.isValid())
     {
