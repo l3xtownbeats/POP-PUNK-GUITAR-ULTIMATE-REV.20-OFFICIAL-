@@ -1811,7 +1811,10 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         g.setColour(palette.token("highlight").withAlpha(0.88f));
         g.drawRoundedRectangle(focusBounds, 5.0f, 1.6f);
     };
-    if (controlId.startsWith("fx_switch"))
+    if (controlId.startsWith("fx_switch") || controlId == "Import_Guitar"
+        || controlId == "Auto_Discover" || controlId == "Curator"
+        || controlId == "Settings" || controlId == "About"
+        || controlId == "SKIN_button")
     {
         const auto stateName = ppguButtonArtworkState(button, hovered, down);
         if (const auto* artwork = palette.findControlArtwork(controlId, stateName))
@@ -2018,6 +2021,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     categoryBox.onChange = refreshPresetList;
     presetSearch.onTextChange = refreshPresetList;
     refreshPresetList();
+    loadButton.setComponentID("Import_Guitar");
     loadButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("accent"));
     loadButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("window_bg"));
     loadButton.onClick = [this] { openImportGuitarPanel(); };
@@ -2028,11 +2032,13 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
         themeManager.getPalette().token("accent"), themeManager.getPalette().token("text_primary"));
     addAndMakeVisible(*auxiliaryWorkspace);
     auxiliaryWorkspace->setVisible(false);
+    settingsButton.setComponentID("Settings");
     settingsButton.setTooltip("Workspace scale, panel spacing and visual defaults.");
     settingsButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
     settingsButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
     settingsButton.onClick = [this] { openSettingsPanel(); };
     addAndMakeVisible(settingsButton);
+    skinButton.setComponentID("SKIN_button");
     skinButton.setTooltip("Open the premium visual skin gallery. Ctrl+K.");
     skinButton.onClick = [this] { openSkinGalleryPanel(); };
     addAndMakeVisible(skinButton);
@@ -2043,6 +2049,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     addAndMakeVisible(autoChordsButton);
 
     // Local discovery and curation remain gated until their safe backends are ready.
+    autoSoundHunterButton.setComponentID("Auto_Discover");
+    curatorButton.setComponentID("Curator");
     for (auto* unavailable : { &autoSoundHunterButton, &curatorButton })
     {
         unavailable->setEnabled(false);
@@ -2053,6 +2061,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     autoSoundHunterButton.setTooltip("AUTO SOUND HUNTER is not implemented yet. No search or auto-import action is available.");
     curatorButton.setTooltip("CURATOR is not implemented yet. No asset is marked approved.");
 
+    aboutButton.setComponentID("About");
     aboutButton.setEnabled(false);
     aboutButton.setTooltip("ABOUT is intentionally disabled in REV.20 until its verified information panel is implemented.");
     aboutButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
