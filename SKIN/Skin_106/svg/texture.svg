@@ -1,1 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><defs><linearGradient id="surface" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#09121A"/><stop offset="1" stop-color="#203441"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#surface)"/><g fill="none" stroke="#BDEBFF" stroke-opacity=".13"><path d="M-80 220L1100 0M-80 420L1100 200M-80 620L1100 400M-80 820L1100 600M-80 1020L1100 800" stroke-width="2"/></g><g fill="#F0FCFF" opacity=".08"><circle cx="820" cy="170" r="150"/><circle cx="170" cy="850" r="190"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="platinum" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#08131C"/><stop offset=".48" stop-color="#14222D"/><stop offset="1" stop-color="#203441"/></linearGradient>
+    <radialGradient id="frost" cx=".22" cy=".12" r=".95"><stop stop-color="#F0FCFF" stop-opacity=".22"/><stop offset=".42" stop-color="#BDEBFF" stop-opacity=".07"/><stop offset="1" stop-color="#09121A" stop-opacity="0"/></radialGradient>
+    <linearGradient id="iceEdge"><stop stop-color="#F0FCFF" stop-opacity="0"/><stop offset=".5" stop-color="#BDEBFF" stop-opacity=".34"/><stop offset="1" stop-color="#F0FCFF" stop-opacity="0"/></linearGradient>
+    <pattern id="frostGrain" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M0 4H18M0 13H18" stroke="#F4FBFF" stroke-opacity=".035" stroke-width="1"/></pattern>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#platinum)"/><rect width="1024" height="1024" fill="url(#frost)"/><rect width="1024" height="1024" fill="url(#frostGrain)"/>
+  <g fill="none" stroke="#BDEBFF" stroke-opacity=".13"><path d="M-80 300L1100 0M-80 520L1100 220M-80 740L1100 440M-80 960L1100 660" stroke-width="1.4"/><path d="M120 0L1024 904M0 240L784 1024" stroke="#F0FCFF" stroke-opacity=".06" stroke-width="2"/></g>
+  <path d="M0 154H1024M0 870H1024" stroke="url(#iceEdge)" stroke-width="2"/>
+  <path d="M0 0L1024 1024" stroke="#F4FBFF" stroke-opacity=".035" stroke-width="26"/>
+  <g fill="#F0FCFF" opacity=".22"><circle cx="168" cy="154" r="2"/><circle cx="858" cy="870" r="2"/></g>
+</svg>
