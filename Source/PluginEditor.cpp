@@ -2377,7 +2377,7 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
                                                juce::Slider::SliderStyle style, juce::Slider& slider)
 {
     juce::ignoreUnused(minSliderPos, maxSliderPos);
-    if (style != juce::Slider::LinearHorizontal || !palette.metersSlidersSpriteSheet.isValid())
+    if (style != juce::Slider::LinearHorizontal)
     {
         juce::LookAndFeel_V4::drawLinearSlider(g, x, y, width, height,
                                                sliderPos, minSliderPos, maxSliderPos, style, slider);
@@ -2389,55 +2389,82 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
     const bool focused = enabled && slider.hasKeyboardFocus(true);
     const bool dragging = enabled && slider.isMouseButtonDown();
     const bool useLongTrack = width >= 420;
-    const int sourceX = 60;
-    const int sourceY = useLongTrack ? 445 : 570;
-    const int sourceWidth = useLongTrack ? 820 : 390;
-    const int sourceHeight = 22;
-    const auto track = juce::Rectangle<int>(x + 4, y + (height - 12) / 2,
-                                             juce::jmax(1, width - 8), 12);
-    g.drawImage(palette.metersSlidersSpriteSheet, track.getX(), track.getY(),
-                track.getWidth(), track.getHeight(), sourceX, sourceY, sourceWidth, sourceHeight);
-
+    const auto track = juce::Rectangle<float>(
+        static_cast<float>(x + 4), static_cast<float>(y + (height - 12) / 2),
+        static_cast<float>(juce::jmax(1, width - 8)), 12.0f);
     const float proportion = juce::jlimit(0.0f, 1.0f,
-        (sliderPos - static_cast<float>(x + 4)) / static_cast<float>(juce::jmax(1, width - 8)));
-    const int fillWidth = juce::jlimit(0, track.getWidth(),
-        juce::roundToInt(static_cast<float>(track.getWidth()) * proportion));
-    if (enabled && fillWidth > 0)
+        (sliderPos - static_cast<float>(x + 4))
+            / static_cast<float>(juce::jmax(1, width - 8)));
+    const float thumbSize = static_cast<float>(juce::jlimit(16, 30, height + 8));
+    const float thumbX = juce::jlimit(track.getX() - thumbSize * 0.5f,
+        track.getRight() - thumbSize * 0.5f,
+        sliderPos - thumbSize * 0.5f);
+    const float thumbY = track.getCentreY() - thumbSize * 0.5f;
+
+    if (palette.metersSlidersSpriteSheet.isValid())
     {
-        g.setColour(palette.token("accent_glow").withAlpha(0.72f));
-        g.fillRoundedRectangle(track.withWidth(fillWidth).toFloat().reduced(1.0f), 4.0f);
-        g.setColour(palette.token("accent").withAlpha(0.92f));
-        g.fillRoundedRectangle(track.withWidth(fillWidth).toFloat().reduced(1.0f, 4.0f), 2.0f);
+        g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
+        const int sourceX = 60;
+        const int sourceY = useLongTrack ? 445 : 570;
+        const int sourceWidth = useLongTrack ? 820 : 390;
+        g.drawImage(palette.metersSlidersSpriteSheet,
+                    track.getX(), track.getY(), track.getWidth(), track.getHeight(),
+                    sourceX, sourceY, sourceWidth, 22);
+        g.drawImage(palette.metersSlidersSpriteSheet,
+                    static_cast<int>(thumbX), static_cast<int>(thumbY),
+                    static_cast<int>(thumbSize), static_cast<int>(thumbSize),
+                    910, 640, 32, 32);
+    }
+    else
+    {
+        const auto trackTop = enabled ? palette.token("control_face")
+                                      : palette.token("lowlight");
+        const auto trackBottom = palette.token("window_bg");
+        g.setGradientFill(juce::ColourGradient(trackTop, track.getX(), track.getY(),
+                                               trackBottom, track.getX(), track.getBottom(), false));
+        g.fillRoundedRectangle(track, 6.0f);
+        g.setColour(palette.token("control_border").withAlpha(enabled ? 0.92f : 0.42f));
+        g.drawRoundedRectangle(track, 6.0f, 1.0f);
     }
 
-    const int thumbSize = juce::jlimit(16, 30, height + 8);
-    const int thumbX = juce::jlimit(track.getX() - thumbSize / 2,
-        track.getRight() - thumbSize / 2,
-        juce::roundToInt(sliderPos) - thumbSize / 2);
-    const int thumbY = track.getCentreY() - thumbSize / 2;
-    g.drawImage(palette.metersSlidersSpriteSheet, thumbX, thumbY, thumbSize, thumbSize,
-                910, 640, 32, 32);
+    const float fillWidth = track.getWidth() * proportion;
+    if (enabled && fillWidth > 0.0f)
+    {
+        const auto fill = track.withWidth(fillWidth).reduced(1.0f);
+        g.setColour(palette.token("accent_glow").withAlpha(hovered || dragging ? 0.70f : 0.38f));
+        g.fillRoundedRectangle(fill.expanded(1.0f, 1.5f), 5.0f);
+        g.setColour(focused ? palette.token("highlight") : palette.token("accent"));
+        g.fillRoundedRectangle(fill.reduced(0.0f, 3.5f), 2.5f);
+    }
 
-    // Match the rotary/button state language: the live slider value remains
-    // unchanged, while hover, drag, keyboard focus and disabled are visible.
+    if (!palette.metersSlidersSpriteSheet.isValid())
+    {
+        const auto thumbTop = enabled ? palette.token("highlight") : palette.token("text_disabled");
+        const auto thumbBottom = enabled ? palette.token("control_face") : palette.token("lowlight");
+        g.setGradientFill(juce::ColourGradient(thumbTop, thumbX, thumbY,
+                                               thumbBottom, thumbX, thumbY + thumbSize, false));
+        g.fillEllipse(thumbX, thumbY, thumbSize, thumbSize);
+        g.setColour(focused ? palette.token("highlight") : palette.token("control_border"));
+        g.drawEllipse(thumbX, thumbY, thumbSize, thumbSize, focused ? 2.0f : 1.1f);
+        g.setColour(enabled ? palette.token("accent") : palette.token("text_disabled"));
+        g.fillEllipse(thumbX + thumbSize * 0.39f, thumbY + thumbSize * 0.39f,
+                      thumbSize * 0.22f, thumbSize * 0.22f);
+    }
+
     if (!enabled)
     {
-        g.setColour(palette.token("window_bg").withAlpha(0.48f));
-        g.fillRoundedRectangle(track.toFloat().expanded(1.0f), 6.0f);
-        g.fillEllipse(static_cast<float>(thumbX), static_cast<float>(thumbY),
-                      static_cast<float>(thumbSize), static_cast<float>(thumbSize));
+        g.setColour(palette.token("window_bg").withAlpha(0.42f));
+        g.fillRoundedRectangle(track.expanded(1.0f), 6.0f);
+        g.fillEllipse(thumbX, thumbY, thumbSize, thumbSize);
     }
     else if (hovered || focused || dragging)
     {
         const auto stateColour = focused ? palette.token("highlight")
             : (dragging ? palette.token("accent") : palette.token("accent_glow"));
-        g.setColour(stateColour.withAlpha(focused ? 0.82f : 0.62f));
-        g.drawRoundedRectangle(track.toFloat().expanded(2.0f), 6.0f,
-                               focused ? 1.8f : 1.25f);
-        g.drawEllipse(static_cast<float>(thumbX) - 1.5f,
-                      static_cast<float>(thumbY) - 1.5f,
-                      static_cast<float>(thumbSize) + 3.0f,
-                      static_cast<float>(thumbSize) + 3.0f,
+        g.setColour(stateColour.withAlpha(focused ? 0.82f : 0.58f));
+        g.drawRoundedRectangle(track.expanded(2.0f), 6.0f, focused ? 1.8f : 1.2f);
+        g.drawEllipse(thumbX - 1.5f, thumbY - 1.5f,
+                      thumbSize + 3.0f, thumbSize + 3.0f,
                       dragging ? 2.0f : 1.25f);
     }
 }
