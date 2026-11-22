@@ -38,6 +38,7 @@ private:
     void chooseSfzFile(juce::Label* panelStatus = nullptr, juce::Button* panelLoadButton = nullptr);
     void openImportGuitarPanel();
     void openFxEditPanel(int selectedEffect);
+    void openMelodyWorkspacePanel();
     void openAutoChordsPanel();
     void openPatternSectionPanel();
     juce::File getRuntimeSkinRoot() const;
