@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="460" viewBox="0 0 1000 460" role="img" aria-label="PATTERN / SONG SECTION ROUTING panel artwork">
+<defs>
+ <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#17243A"/><stop offset=".45" stop-color="#101827"/><stop offset="1" stop-color="#080B14"/></linearGradient>
+ <linearGradient id="edge" x2="1"><stop stop-color="#00D9FF" stop-opacity=".7"/><stop offset=".55" stop-color="#6B8CFF" stop-opacity=".28"/><stop offset="1" stop-color="#00D9FF" stop-opacity=".2"/></linearGradient>
+ <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#8AA6C8" stroke-opacity=".035"/></pattern>
+</defs>
+<rect x="2" y="2" width="996" height="456" rx="18" fill="#080B14" stroke="#263B57" stroke-width="4"/>
+<rect x="9" y="9" width="982" height="442" rx="14" fill="url(#bg)" stroke="url(#edge)" stroke-width="2"/>
+<rect x="18" y="18" width="964" height="424" rx="10" fill="url(#grid)"/>
+<path d="M30 82H970" stroke="#00D9FF" stroke-opacity=".38"/>
+<text x="34" y="48" fill="#E8F7FF" font-family="Arial,sans-serif" font-size="23" font-weight="700" letter-spacing="2">PATTERN / SONG SECTION ROUTING</text>
+<text x="35" y="69" fill="#8DAAC4" font-family="Arial,sans-serif" font-size="10" letter-spacing="1.1">SECTION ASSIGNMENT / RHYTHM CATALOG</text>
+<g fill="#101827" stroke="#29435E"><rect x="30" y="118" width="300" height="290" rx="10"/><rect x="350" y="118" width="610" height="290" rx="10"/></g>
+<g fill="#00D9FF" opacity=".8"><rect x="48" y="144" width="264" height="4"/><rect x="368" y="144" width="574" height="4"/></g>
+<g fill="#A9C4D9" font-family="Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="1"><text x="50" y="178">SONG SECTION</text><text x="370" y="178">RHYTHM CATALOG</text></g>
+<g fill="#17243A" stroke="#42617F">
+ <rect x="50" y="198" width="260" height="38" rx="6"/><rect x="50" y="244" width="260" height="38" rx="6"/><rect x="50" y="290" width="260" height="38" rx="6"/><rect x="50" y="336" width="260" height="38" rx="6"/>
+</g>
+<g fill="#D8EAF5" font-family="Arial,sans-serif" font-size="14">
+ <text x="68" y="222">INTRO</text><text x="68" y="268">VERSE</text><text x="68" y="314">CHORUS</text><text x="68" y="360">BRIDGE / OUTRO</text>
+</g>
+<g fill="#17243A" stroke="#42617F">
+ <rect x="370" y="198" width="128" height="70" rx="7"/><rect x="510" y="198" width="128" height="70" rx="7"/><rect x="650" y="198" width="128" height="70" rx="7"/><rect x="790" y="198" width="128" height="70" rx="7"/>
+ <rect x="370" y="282" width="128" height="70" rx="7"/><rect x="510" y="282" width="128" height="70" rx="7"/><rect x="650" y="282" width="128" height="70" rx="7"/><rect x="790" y="282" width="128" height="70" rx="7"/>
+</g>
+<g fill="#D8EAF5" font-family="Arial,sans-serif" font-size="13" text-anchor="middle">
+ <text x="434" y="238">PATTERN 1</text><text x="574" y="238">PATTERN 2</text><text x="714" y="238">PATTERN 3</text><text x="854" y="238">PATTERN 4</text>
+ <text x="434" y="322">PATTERN 5</text><text x="574" y="322">PATTERN 6</text><text x="714" y="322">PATTERN 7</text><text x="854" y="322">PATTERN 8</text>
+</g>
+<path d="M30 430H970" stroke="#6B8CFF" stroke-opacity=".2"/>
+</svg>
