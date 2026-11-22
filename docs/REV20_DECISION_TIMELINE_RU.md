@@ -551,3 +551,30 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 Это затрагивает общую оболочку всех auxiliary modules, а не только один экран. Коммит: `aa55dc3bf50289f5e2e6267e02ec7b90f0e1246d`.
 
 **Проверка:** изменение опубликовано в review branch; Windows CI для этого нового SHA ещё должен завершиться. Отдельно остаются host-проверка keyboard focus, hover/pressed rendering, resize/maximize/restore и DPI. Предыдущие успешные workflow относятся к предыдущему checkpoint и не являются доказательством компиляции этого нового коммита.
+
+
+## 2026-11-22 — user-locked PATTERN two-window architecture (canonical)
+
+The user explicitly approved and fixed this as the baseline. This supersedes the earlier interpretation that ARTICULATION should be a standalone button or a third subsection/tab inside the PATTERN window.
+
+PATTERN is one of the two top-level product modes. Its workflow is organised into **two coordinated working windows**:
+
+1. **PATTERN PRESETS** — first window:
+   - choose a preset group/category;
+   - show the fragments belonging to the selected group;
+   - select a specific fragment;
+   - preview and select the required pattern;
+   - preserve the selected group, fragment and pattern when navigating between the two PATTERN windows or returning to the mode.
+
+2. **PLAYING STYLE / ARTICULATION** — second window:
+   - choose the playing style;
+   - browse the articulations belonging to the selected style/source;
+   - select an articulation for performance;
+   - visibly show the genuinely active selection/state;
+   - expose as available only articulations backed by real, verified, legally usable recordings and valid mappings. Missing/unverified mappings must remain unavailable and must never be represented by fabricated names, synthetic substitutes or false READY states.
+
+The two windows are coordinated parts of PATTERN, not extra top-level modes. **ARTICULATION is a functional area within the second PLAYING STYLE window, not a separate button in the first PATTERN/PATTERN PRESETS window.** The first window owns group/fragment/pattern selection; the second owns playing style/articulation selection. Keep tone preset, pattern/fragment choice and performance articulation independent; changing one must not silently overwrite the others.
+
+Both windows must follow the approved NEON STAGE visual system and the complete per-element acceptance contract: graphite materials and frames, approved cyan/electric-blue palette, real active/hover/pressed/focus/disabled states, keyboard/mouse parity, persistence and return transitions, accessible hit areas/tooltips, responsive layout/DPI, and performance-conscious animation. Session Guitarist remains a workflow/UX quality reference only; do not copy its UI, assets, branding or content.
+
+Implementation note: an earlier source experiment added a standalone ARTICULATION button to the pattern panel. The user corrected that interpretation. That standalone button is explicitly rejected and must not be retained as the architecture. The source branch cleanup removes that button; the two coordinated windows described above are the canonical target. This decision records the approved architecture, not a claim that both windows are already implemented or host-verified.
