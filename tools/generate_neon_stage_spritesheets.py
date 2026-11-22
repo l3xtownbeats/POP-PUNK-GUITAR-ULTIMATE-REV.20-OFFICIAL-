@@ -23,6 +23,7 @@ P = {
     "accent_warning": "#FFB454",
     "metal": "#101622",
     "metal_light": "#1B2A3B",
+    "dim": "#7A8C9E",
 }
 def rgba(value, alpha=255):
     value = value.lstrip("#")
