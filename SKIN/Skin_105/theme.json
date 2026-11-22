@@ -335,7 +335,9 @@
     "texture": "svg/texture.svg",
     "bezel": "svg/bezel.svg",
     "crest": "svg/crest.svg",
-    "controls": "svg/controls.svg"
+    "controls": "svg/controls.svg",
+    "fxLayers": "svg/fx_layers.svg",
+    "decorative": "svg/decorative.svg"
   },
   "compatibility": {
     "minimumPluginVersion": "4.0.0",
