@@ -1639,17 +1639,34 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         g.drawImage(palette.rotarySpriteSheet, destinationX, destinationY,
                     diameter, diameter, sourceX, sourceY, cellSize, cellSize);
 
+        // Every knob keeps its continuous 61-frame rotary animation, while its
+        // dedicated five-state PNG remains part of the live visual state stack.
+        // State art is a restrained overlay so it cannot obscure the moving
+        // pointer or quantize the APVTS value.
+        if (controlId.startsWith("knob"))
+        {
+            const auto stateName = ppguSliderArtworkState(slider);
+            if (const auto* stateArtwork = palette.findControlArtwork(controlId, stateName))
+            {
+                if (stateArtwork->isValid() && stateName != "default")
+                {
+                    g.saveState();
+                    g.setOpacity(stateName == "disabled" ? 0.42f : 0.18f);
+                    g.drawImageWithin(*stateArtwork, destinationX, destinationY,
+                                      diameter, diameter, juce::RectanglePlacement::centred);
+                    g.restoreState();
+                }
+            }
+        }
+
         if (! slider.isEnabled())
         {
-            g.setColour(palette.token("window_bg").withAlpha(0.46f));
+            g.setColour(palette.token("window_bg").withAlpha(0.30f));
             g.fillEllipse(static_cast<float>(destinationX), static_cast<float>(destinationY),
                           static_cast<float>(diameter), static_cast<float>(diameter));
         }
         else if (slider.isMouseOverOrDragging() || slider.hasKeyboardFocus(true))
         {
-            // Keep the authored rotary frame intact; express interaction state
-            // as a restrained live JUCE ring rather than swapping in a static
-            // state PNG that would hide the 61-position animation.
             const auto ringColour = slider.isMouseOverOrDragging()
                 ? palette.token("accent") : palette.token("highlight");
             g.setColour(ringColour.withAlpha(slider.isMouseOverOrDragging() ? 0.82f : 0.58f));
