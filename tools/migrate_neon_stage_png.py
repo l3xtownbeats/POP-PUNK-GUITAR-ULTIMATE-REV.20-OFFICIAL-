@@ -202,12 +202,6 @@ def main() -> int:
             })
         except Exception as exc:
             errors.append(f"{source.relative_to(ROOT)}: {exc}")
-    if _RENDERER is not None:
-        try:
-            _RENDERER.close()
-        except Exception as exc:
-            errors.append(f"Resvg worker shutdown: {exc}")
-
     # Dedicated 13-piece production panel library. SVG sources stay editable;
     # runtime receives deterministic transparent PNGs at 1x/2x/3x.
     panel_names = [
@@ -262,6 +256,12 @@ def main() -> int:
             panel_records.append(record)
         except Exception as exc:
             errors.append(f"panel {name}: {exc}")
+
+    if _RENDERER is not None:
+        try:
+            _RENDERER.close()
+        except Exception as exc:
+            errors.append(f"Resvg worker shutdown: {exc}")
 
     manifest = {"schemaVersion":"1.1.0","skinId":"skin-053","theme":"NEON STAGE DEFAULT",
                 "conversion":"SVG -> PNG RGBA; 1x/2x/3x","sourceCount":source_count,
