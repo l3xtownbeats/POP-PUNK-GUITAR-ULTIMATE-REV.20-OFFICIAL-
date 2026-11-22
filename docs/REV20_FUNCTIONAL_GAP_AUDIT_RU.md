@@ -237,3 +237,11 @@ The following audio-path wiring has now been selectively ported into REV.20 (tar
 - SamplerEngine/SamplePool expose the source-authored sw_label corresponding to the active per-channel switch; the processor publishes it as a read-only UI query.
 - PATTERN workspace now refreshes the active articulation label and switch note using its existing 2 Hz timer. If no switch map exists, it explicitly displays NO RECORDED ARTICULATION MAP. If a switch exists without sw_label, it says SOURCE LABEL NOT PROVIDED.
 - This is metadata visibility only; no invented technique names. The label does not certify recording provenance, license, or technique fidelity. Those require source-bank inspection and runtime audition.
+
+
+## 2026-11-22 — Velocity-triggered Palm Mute routing (implementation checkpoint)
+
+- The immutable SFZ snapshot caches a Palm Mute selector only when a region declares a source-authored sw_label containing "Palm". SamplerEngine noteOn selects this switch for velocities at/below palmMuteThreshold and restores sw_default for higher velocities.
+- PluginProcessor passes the existing threshold in both MELODY and PATTERN. The selection is channel-local and still passes through normal note/velocity/channel region matching.
+- If the loaded bank has no Palm-labeled switch zone, the feature safely does nothing; no synthetic Palm Mute sample is created. Tests cover low/high velocity selection and channel isolation.
+- Still required: validate with a real, licensed guitar bank that has correctly mapped Palm Mute and open articulations; audition transitions in FL Studio 20; verify whether a source bank uses another label convention and document explicit aliases only after inspection.

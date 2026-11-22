@@ -90,6 +90,7 @@ public:
         // Precomputed O(1) control-note lookup for the real-time MIDI path.
         std::array<bool, 128> keySwitchNoteMask {};
         int defaultKeySwitch = -1;
+        int palmMuteKeySwitch = -1;
         // Audio-thread-owned cursors: [RR set][MIDI channel][MIDI note].
         mutable std::vector<std::uint32_t> roundRobinCounters;
     };
@@ -98,6 +99,7 @@ public:
                                                int activeSwitch = -1) noexcept;
     [[nodiscard]] bool isKeySwitchNote(int midiNote) const noexcept;
     [[nodiscard]] int getDefaultKeySwitch() const noexcept;
+    [[nodiscard]] int getPalmMuteKeySwitch() const noexcept;
     [[nodiscard]] std::string getKeySwitchLabel(int switchNote) const;
     [[nodiscard]] std::size_t getRegionCount() const noexcept;
     [[nodiscard]] std::size_t getSampleCount() const noexcept;
@@ -135,7 +137,9 @@ public:
     [[nodiscard]] LoadReport loadSfz(const juce::File& sfzFile,
         const std::atomic<std::uint64_t>* requestGeneration = nullptr,
         std::uint64_t expectedGeneration = 0);
-    [[nodiscard]] bool noteOn(int midiNote, int velocity, int maximumActiveVoices = maximumVoices, int midiChannel = 1, double globalTuningSemitones = 0.0) noexcept;
+    [[nodiscard]] bool noteOn(int midiNote, int velocity, int maximumActiveVoices = maximumVoices,
+                              int midiChannel = 1, double globalTuningSemitones = 0.0,
+                              int palmMuteVelocityThreshold = 0) noexcept;
     [[nodiscard]] bool setKeySwitch(int midiNote, int midiChannel = 1) noexcept;
     [[nodiscard]] bool isKeySwitchNote(int midiNote) const noexcept;
     [[nodiscard]] int getActiveKeySwitch(int midiChannel = 1) const noexcept;

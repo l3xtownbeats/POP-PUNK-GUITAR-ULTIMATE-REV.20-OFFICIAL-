@@ -265,3 +265,10 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - Added a read-only sampler query for the sw_label associated with the active per-channel SFZ keyswitch. The query reads the retained immutable sample snapshot; it does not modify playback state.
 - Published active switch note and source-authored label through the processor UI read model. PATTERN workspace refreshes at its existing 2 Hz timer and displays the actual active articulation label, or an explicit NO RECORDED ARTICULATION MAP / SOURCE LABEL NOT PROVIDED state.
 - No labels or articulations are invented. Displayed metadata originates from the currently loaded SFZ map. This does not yet prove that the mapped sample file is licensed for distribution or that a given label contains the intended guitar technique; bank content validation remains required.
+
+
+## 2026-11-22 — Velocity-triggered Palm Mute from source-authored SFZ map
+- Snapshot build now detects a Palm Mute articulation only from a region's source-authored sw_label containing "Palm" and caches its sw_last selector off the audio thread.
+- SamplerEngine noteOn accepts the existing palmMuteThreshold parameter. When a matching Palm-labeled switch exists, velocities at/below threshold select that articulation; higher velocities restore the SFZ bank's sw_default. The active switch is channel-local and the selected region must still match the note/velocity ranges in the loaded SFZ map.
+- PluginProcessor passes the threshold for both MELODY MIDI notes and PATTERN-generated notes. If no Palm-labeled switch exists, velocity behavior is unchanged and no fake Palm Mute layer is synthesized.
+- Added regression checks for low-velocity Palm Mute selection, high-velocity return to default, active-label publication and MIDI-channel isolation. Runtime audition with a legally distributable bank containing real Palm Mute recordings remains required.

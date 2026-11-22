@@ -423,9 +423,25 @@ int main()
         || keyswitchEngine.getActiveKeySwitch(2) != 40
         || keyswitchEngine.getActiveKeySwitch(1) != 38
         || keyswitchEngine.setKeySwitch(41, 1)
-        || keyswitchEngine.getActiveKeySwitch(1) != 38)
+        || keyswitchEngine.getActiveKeySwitch(1) != 38
+        || keyswitchEngine.getActiveKeySwitch(1) != 38
+        || keyswitchEngine.getActiveArticulationLabel(1) != "PalmMute")
     {
         std::cerr << "SamplerEngine did not initialize or safely update per-channel keyswitch state.\n";
+        return 1;
+    }
+
+    // A low velocity automatically selects the source-authored PalmMute
+    // keyswitch; a higher velocity restores the bank's default articulation.
+    if (!keyswitchEngine.noteOn(67, 42, ppgu::sampler::SamplerEngine::maximumVoices,
+                                1, 0.0, 55)
+        || keyswitchEngine.getActiveKeySwitch(1) != 38
+        || !keyswitchEngine.noteOn(67, 100, ppgu::sampler::SamplerEngine::maximumVoices,
+                                   1, 0.0, 55)
+        || keyswitchEngine.getActiveKeySwitch(1) != 36
+        || keyswitchEngine.getActiveKeySwitch(2) != 40)
+    {
+        std::cerr << "Velocity-triggered PalmMute selection or channel isolation failed.\n";
         return 1;
     }
 

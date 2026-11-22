@@ -338,6 +338,9 @@ LoadReport SamplePool::loadSfz(const juce::File& sfzFile,
                 candidateSnapshot->keySwitchNoteMask[static_cast<std::size_t>(keySwitch)] = true;
         if (candidateSnapshot->defaultKeySwitch < 0 && region.switchDefault >= 0)
             candidateSnapshot->defaultKeySwitch = region.switchDefault;
+        if (candidateSnapshot->palmMuteKeySwitch < 0 && region.switchLast >= 0
+            && region.switchLabel.find("Palm") != std::string::npos)
+            candidateSnapshot->palmMuteKeySwitch = region.switchLast;
         samplesUsed.insert(key);
     }
 
@@ -452,6 +455,12 @@ int SamplePool::getDefaultKeySwitch() const noexcept
     return snapshot != nullptr ? snapshot->defaultKeySwitch : -1;
 }
 
+int SamplePool::getPalmMuteKeySwitch() const noexcept
+{
+    const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
+    return snapshot != nullptr ? snapshot->palmMuteKeySwitch : -1;
+}
+
 std::string SamplePool::getKeySwitchLabel(int switchNote) const
 {
     const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
@@ -538,10 +547,26 @@ std::string SamplerEngine::getActiveKeySwitchLabel(int midiChannel) const
     return pool.getKeySwitchLabel(getActiveKeySwitch(midiChannel));
 }
 
-bool SamplerEngine::noteOn(int midiNote, int velocity, int maximumActiveVoices, int midiChannel, double globalTuningSemitones) noexcept
+bool SamplerEngine::noteOn(int midiNote, int velocity, int maximumActiveVoices, int midiChannel,
+                            double globalTuningSemitones, int palmMuteVelocityThreshold) noexcept
 {
     const int channel = juce::jlimit(1, 16, midiChannel);
-    const int activeSwitch = getActiveKeySwitch(channel);
+    int activeSwitch = getActiveKeySwitch(channel);
+    const int palmMuteSwitch = pool.getPalmMuteKeySwitch();
+    // Velocity-triggered palm mute is enabled only when the loaded SFZ bank
+    // explicitly labels a mapped switch zone with "Palm". No synthetic
+    // articulation or filename-based guess is used.
+    if (palmMuteVelocityThreshold > 0 && palmMuteSwitch >= 0)
+    {
+        const int selectedSwitch = velocity <= juce::jlimit(1, 127, palmMuteVelocityThreshold)
+            ? palmMuteSwitch : pool.getDefaultKeySwitch();
+        if (selectedSwitch >= 0)
+        {
+            activeKeySwitches[static_cast<std::size_t>(channel - 1)].store(
+                selectedSwitch, std::memory_order_release);
+            activeSwitch = selectedSwitch;
+        }
+    }
     const auto* region = pool.findRegion(midiNote, velocity, channel, activeSwitch);
     if (region == nullptr || (region->audio == nullptr && region->streaming == nullptr) || velocity <= 0)
         return false;
