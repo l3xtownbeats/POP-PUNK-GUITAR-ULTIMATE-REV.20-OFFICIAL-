@@ -120,6 +120,13 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
     if (palette.fxLayerArtwork.isValid())
         drawLayer(palette.fxLayerArtwork, 0.16f);
 
+    // Per-theme control ornament layer is deliberately subtle and shell-only:
+    // it enriches the control surface without covering live JUCE controls or
+    // changing their hit regions, parameter bindings, or accessibility.
+    if (palette.controlsArtwork.isValid()
+        && bounds.getWidth() >= 640 && bounds.getHeight() >= 360)
+        drawLayer(palette.controlsArtwork, 0.10f);
+
     if (palette.decorativeArtwork.isValid() && bounds.getWidth() >= 640 && bounds.getHeight() >= 360)
         drawLayer(palette.decorativeArtwork, 0.12f);
 
