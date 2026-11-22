@@ -53,18 +53,30 @@ public:
         title.setInterceptsMouseClicks(false, false);
         addAndMakeVisible(title);
 
+        // Give every workspace window the same explicit, keyboard-accessible
+        // hardware-control states as the main NEON STAGE surface.
         closeButton.setButtonText(juce::String::charToString(0x00d7));
+        closeButton.setName("Close " + spec.title);
+        closeButton.setComponentID("workspace_close");
         closeButton.setTooltip("Close panel");
+        closeButton.setWantsKeyboardFocus(true);
         closeButton.setColour(juce::TextButton::buttonColourId, panel.darker(0.2f));
-        closeButton.setColour(juce::TextButton::textColourOffId, text);
         closeButton.setColour(juce::TextButton::buttonOnColourId, border);
+        closeButton.setColour(juce::TextButton::textColourOffId, text);
+        closeButton.setColour(juce::TextButton::textColourOnId, text);
+        closeButton.setColour(juce::TextButton::buttonOnColourId, border);
+        closeButton.setColour(juce::TextButton::buttonColourId, panel.darker(0.2f));
         closeButton.onClick = [this] { owner.handleClose(panelId); };
         addAndMakeVisible(closeButton);
 
         maximizeButton.setButtonText("□");
+        maximizeButton.setName("Maximize or restore " + spec.title);
+        maximizeButton.setComponentID("workspace_maximize");
         maximizeButton.setTooltip("MAXIMIZE / RESTORE");
+        maximizeButton.setWantsKeyboardFocus(true);
         maximizeButton.setColour(juce::TextButton::buttonColourId, panel.darker(0.2f));
         maximizeButton.setColour(juce::TextButton::textColourOffId, text);
+        maximizeButton.setColour(juce::TextButton::textColourOnId, text);
         maximizeButton.onClick = [this] { toggleMaximize(); };
         addAndMakeVisible(maximizeButton);
         boundsConstrainer.setMinimumSize(static_cast<int>(minimum.width), static_cast<int>(minimum.height));
@@ -92,6 +104,19 @@ public:
     {
         themePalette = palette;
         hasThemePalette = true;
+        const auto uiTypeface = palette.uiTypeface.isNotEmpty() ? palette.uiTypeface : juce::String("Arial");
+        const auto weight = palette.typographyWeight.equalsIgnoreCase("normal")
+            ? juce::Font::plain : juce::Font::bold;
+        title.setFont(juce::Font(uiTypeface, 14.0f * palette.fontScale, weight)
+                          .withExtraKerningFactor(palette.letterSpacing));
+        title.setColour(juce::Label::textColourId, palette.token("text_primary"));
+        for (auto* button : { &closeButton, &maximizeButton })
+        {
+            button->setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
+            button->setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
+            button->setColour(juce::TextButton::textColourOffId, palette.token("text_primary"));
+            button->setColour(juce::TextButton::textColourOnId, palette.token("window_bg"));
+        }
         if (content != nullptr)
             if (auto* themed = dynamic_cast<PPGUThemeAwarePanel*>(content.get()))
                 themed->setThemePalette(palette);
@@ -109,6 +134,7 @@ public:
         closeButton.setColour(juce::TextButton::buttonOnColourId, border);
         maximizeButton.setColour(juce::TextButton::buttonColourId, panel.darker(0.2f));
         maximizeButton.setColour(juce::TextButton::textColourOffId, text);
+        maximizeButton.setColour(juce::TextButton::buttonOnColourId, border);
         repaint();
     }
 
