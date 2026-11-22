@@ -208,21 +208,78 @@ def main() -> int:
         except Exception as exc:
             errors.append(f"Resvg worker shutdown: {exc}")
 
+    # Dedicated 13-piece production panel library. SVG sources stay editable;
+    # runtime receives deterministic transparent PNGs at 1x/2x/3x.
+    panel_names = [
+        "PPGU_SKIN053_PANEL_HEADER",
+        "PPGU_SKIN053_PANEL_PRESET_BROWSER",
+        "PPGU_SKIN053_PANEL_PLAYING_CORE",
+        "PPGU_SKIN053_PANEL_AMP_FX_RACK",
+        "PPGU_SKIN053_PANEL_PERFORMANCE_STRIP",
+        "PPGU_SKIN053_PANEL_MIDI_KEYBOARD_BAY",
+        "PPGU_SKIN053_PANEL_STATUS_FOOTER",
+        "PPGU_SKIN053_PANEL_IMPORT_GUITAR",
+        "PPGU_SKIN053_PANEL_FX_EDIT",
+        "PPGU_SKIN053_PANEL_PATTERN_ROUTING",
+        "PPGU_SKIN053_PANEL_AUTOCHORDS",
+        "PPGU_SKIN053_PANEL_WORKSPACE_SETTINGS",
+        "PPGU_SKIN053_PANEL_SKIN_GALLERY",
+    ]
+    panel_records = []
+    for name in panel_names:
+        source = ASSETS / "panel_sources" / f"{name}.svg"
+        try:
+            svg = source.read_bytes()
+            root = ET.fromstring(svg)
+            if not root.tag.endswith("svg"):
+                raise ValueError("SVG root element is invalid")
+            width, height = dimensions(root)
+            record = {"name": name, "source": source.relative_to(ROOT).as_posix(),
+                      "sourceSha256": sha256(svg), "variants": []}
+            for scale in SCALES:
+                suffix = "" if scale == 1 else f"@{scale}x"
+                out = ASSETS / "panels" / f"{name}{suffix}.png"
+                out.parent.mkdir(parents=True, exist_ok=True)
+                render_png(source, out, width * scale, height * scale)
+                with Image.open(out) as im:
+                    im.load()
+                    rgba = im.convert("RGBA")
+                    if rgba.size != (width * scale, height * scale):
+                        raise ValueError(f"{scale}x dimensions mismatch: {rgba.size}")
+                    alpha_min, alpha_max = rgba.getchannel("A").getextrema()
+                    bad, samples = purple_pixel_diagnostics(rgba)
+                    if bad:
+                        raise ValueError(f"{bad} forbidden purple pixels: {'; '.join(samples)}")
+                    rgba.save(out, format="PNG", optimize=True)
+                payload = out.read_bytes()
+                record["variants"].append({
+                    "scale": f"{scale}x", "png": out.relative_to(ROOT).as_posix(),
+                    "width": width * scale, "height": height * scale,
+                    "format": "PNG", "mode": "RGBA",
+                    "alphaExtrema": [alpha_min, alpha_max],
+                    "purplePixelCount": 0, "pngSha256": sha256(payload)
+                })
+            panel_records.append(record)
+        except Exception as exc:
+            errors.append(f"panel {name}: {exc}")
+
     manifest = {"schemaVersion":"1.1.0","skinId":"skin-053","theme":"NEON STAGE DEFAULT",
                 "conversion":"SVG -> PNG RGBA; 1x/2x/3x","sourceCount":source_count,
                 "convertedSourceCount":len(records),"variantCount":sum(len(x["variants"]) for x in records),
-                "records":records,"runtimeArtwork":core_records}
+                "records":records,"runtimeArtwork":core_records,"productionPanels":panel_records}
     path = OUTPUT / "png_manifest.json"
     path.write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
     print(f"SVG sources: {source_count}; converted sources: {len(records)}; PNG variants: {manifest['variantCount']}")
     print(f"Manifest: {path.relative_to(ROOT)}")
     print(f"Runtime artwork layers: {len(core_records)}/3")
+    print(f"Dedicated production panels: {len(panel_records)}/{len(panel_names)}; PNG variants: {sum(len(x['variants']) for x in panel_records)}")
     if errors:
         print("PNG MIGRATION AUDIT: FAIL")
         for error in errors: print("ERROR:", error)
         return 1
     if source_count == 0: print("PNG MIGRATION AUDIT: FAIL (no SVG sources)"); return 1
     if len(core_records) != 3: print("PNG MIGRATION AUDIT: FAIL (runtime artwork incomplete)"); return 1
+    if len(panel_records) != len(panel_names): print("PNG MIGRATION AUDIT: FAIL (production panel library incomplete)"); return 1
     print("PNG MIGRATION AUDIT: PASS (batch HiDPI + 3 runtime layers; RGBA, dimensions, alpha, palette scan, SHA-256)")
     print("Runtime texture/bezel/crest paths are PNG-backed; batch control artwork still requires individual JUCE component bindings.")
     return 0
