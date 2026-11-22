@@ -19,7 +19,7 @@ P = {
     "background": "#05070E",
     "metal_border": "#00D2FF",
     "glow_cyan": "#00E5FF",
-    "glow_blue": "#0048FF",
+    "glow_blue": "#6B8CFF",
     "accent_warning": "#FFB454",
     "metal": "#101622",
     "metal_light": "#1B2A3B",
