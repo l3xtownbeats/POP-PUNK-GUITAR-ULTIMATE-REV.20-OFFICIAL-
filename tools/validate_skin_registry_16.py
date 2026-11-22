@@ -100,7 +100,7 @@ def validate_neon_stage_asset_manifest() -> int:
         # metadata describes the canonical Git blob, so normalize checkout-only
         # line-ending conversion before checking byte count and digests.
         if record.get("format") in ("JSON", "SVG"):
-            data = data.replace(b"\\r\\n", b"\\n")
+            data = data.replace(b"\r\n", b"\n")
         if len(data) != record.get("bytes"):
             raise SystemExit(f"FAIL: asset byte count mismatch: {asset}")
         if hashlib.sha256(data).hexdigest() != record.get("sha256"):
