@@ -226,3 +226,41 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - The canonical 1024×700 initial editor size and existing resize limits remain unchanged. No new visual layout, parameter, or control ID was invented.
 
 **Verification status:** source changes committed to main; Windows x64 VST3 build, CTest, pluginval and FL Studio 20 host acceptance remain pending. This is a visual-source checkpoint, not a release-ready claim.
+
+
+## 2026-11-22 — Постоянный индекс расположения исходников и утверждённых материалов (обязательная точка входа)
+
+Пользователь потребовал фиксировать в журнале точные пути к исходникам и материалам, чтобы не запрашивать повторно уже имеющиеся в репозитории файлы. Проверено непосредственно по GitHub API: репозиторий `l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-`, ветка `main`.
+
+**Корень проекта:** `/` (корень указанного GitHub-репозитория).
+
+**Главный утверждённый визуальный макет — уже находится в репозитории, повторно у пользователя не запрашивать:**
+- `/01 INTERFACE  NEON STAGE DEFAULT .png` — canonical NEON STAGE DEFAULT, единственный visual source of truth. Git blob SHA: `747207e183c77e8b913a543b2dc40b29829e77da`.
+- Дополнительные утверждённые экраны: `/02 INTERFACE  NEON STAGE DEFAULT AUTOCHORDS .png`, `/03 INTERFACE  NEON STAGE DEFAULT .png`, `/04 INTERFACE  NEON STAGE DEFAULT .png`, `/05 INTERFACE  NEON STAGE DEFAULT .png`, `/06 INTERFACE  NEON STAGE DEFAULT .png`, `/07 INTERFACE  NEON STAGE DEFAULT .png`. Это отдельные reference/mockup-файлы; не подменять ими главный экран 01.
+
+**Ключевые исходники приложения:**
+- `/CMakeLists.txt` — корневая конфигурация сборки.
+- `/Source/PluginEditor.cpp`, `/Source/PluginEditor.h` — главный JUCE editor и UI.
+- `/Source/PluginProcessor.cpp`, `/Source/PluginProcessor.h` — audio processor/APVTS/MIDI integration.
+- `/Source/UI/` — UI/workspace/theme/sprite/control-state implementation: `AuxiliaryPanelLayout.*`, `PPGUControlState.h`, `PPGUDiscoveryRadar.*`, `PPGUMultiWindowWorkspace.*`, `PPGUStageSpriteSheet.*`, `SkinGallerySelection.h`, `ThemeManager.*`.
+- `/Source/Performance/` — `AutoChordGenerator.h`, `ChordTransitionPolicy.h`, `ChordTransitionTimeline.h`, `PatternScheduler.h`.
+- `/Source/Sampler/` — SFZ parser, SamplePool, metadata index, streaming service/readers, PageCache and bounded queue; конкретные файлы перечислены в дереве этой папки.
+- `/Assets/3D/References/` — authored 3D/UI source references and master prompt `PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt`. Не считать все файлы в References финальными runtime assets без проверки.
+- `/SKINS/` — skin artwork/source package tree.
+- `/assets/` — product/library/sound-asset registry sources; включая `assets/library/library_tiers.json`, `assets/sound_hunter/registry.json` и `assets/POP_PUNK_GUITAR_ULTIMATE_BANNER.svg`.
+- `/presets/` — factory/examples/binding-plan sources; включая `presets/factory_bank_300.json`, `presets/rev20_sound_hunter_binding_plan.json`, `presets/examples/`.
+- `/tests/` — C++ и Python tests, включая SFZ/Sampler/Pattern/UI/Theme/FX/skin/library contracts.
+- `/tools/` — build, inventory, sprite generation, packaging, validation and audit scripts.
+- `/docs/` — технические спецификации, решения, аудиты, acceptance checklists и журналы проекта.
+- `/.github/workflows/` — CI/workflows: `neon-stage-native-ci.yml`, `rev20-windows-vst3-skin-validation.yml`, `rev20-sound-hunter-import.yml`, `skin1-control-state-ci.yml`, `library-manager-tests.yml`.
+
+**Основные журналы/контрольные документы:**
+- `/docs/REV20_DECISION_TIMELINE_RU.md` — основной журнал решений и истории изменений.
+- `/docs/REV20_FUNCTIONAL_GAP_AUDIT_RU.md` — функциональный аудит и незакрытые gaps.
+- `/docs/REV20_ENGINEERING_WORKSTREAM_REGISTER_RU.md` — реестр инженерных направлений.
+- `/docs/REV20_FL20_ACCEPTANCE_CHECKLIST_RU.md` — проверка FL Studio 20.
+- `/docs/REV20_ACCEPTED_BASELINE_RU.md` — принятая базовая конфигурация.
+- `/docs/PPGU_REFERENCE_DESIGN_ASSET_REGISTER.md` — реестр визуальных исходников.
+- `/docs/NEON_STAGE_NATIVE_INTEGRATION_RU.md` — интеграция NEON STAGE.
+
+**Рабочее правило для всех следующих сессий:** прежде чем просить пользователя повторно приложить файл или сообщать, что файл отсутствует, проверить этот индекс, GitHub tree и Library. Canonical 01 PNG уже подтверждён в корне репозитория; не запрашивать его повторно. Если инструмент не умеет отобразить бинарный PNG, это ограничение чтения/рендеринга инструмента, а не отсутствие файла. Для анализа сначала получить/открыть уже существующий GitHub/Library asset доступным способом. Новые точные пути, созданные файлы, commit SHA, CI run IDs и статусы дописывать сюда же.
