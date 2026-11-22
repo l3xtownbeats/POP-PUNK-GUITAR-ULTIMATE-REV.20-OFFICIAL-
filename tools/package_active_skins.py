@@ -120,7 +120,7 @@ def main() -> int:
         if stable_id == "skin-053":
             sprite_sheets = assets.get("spriteSheets", {})
             expected_sheets = {
-                "controls", "meters_sliders", "frames_panels", "icons"
+                "controls", "meters_sliders", "frames_panels", "icons", "rotary"
             }
             if not isinstance(sprite_sheets, dict) or set(sprite_sheets) != expected_sheets:
                 raise SystemExit("NEON STAGE DEFAULT: spriteSheets must define exactly four atlas paths")
@@ -197,7 +197,7 @@ def main() -> int:
         raise SystemExit(f"expected 16 staged skin folders, found {len(actual_folders)}")
 
     print("ACTIVE SKIN PACKAGE: PASS")
-    print("Staged exactly 16 registry-referenced premium graphical shells; NEON STAGE also includes its four runtime sprite atlases and atlas manifest.")
+    print("Staged exactly 16 registry-referenced premium graphical shells; NEON STAGE also includes its five runtime sprite atlases and atlas manifest.")
     print("Legacy folders, archive manifests and unregistered themes are excluded.")
     print(f"Output: {output}")
     return 0
