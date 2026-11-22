@@ -197,7 +197,7 @@
       "frames": [
         {
           "frame": 0,
-          "angle_deg": -135.0,
+          "angle_deg": -135,
           "bbox": [
             0,
             0,
@@ -217,7 +217,7 @@
         },
         {
           "frame": 2,
-          "angle_deg": -126.0,
+          "angle_deg": -126,
           "bbox": [
             256,
             0,
@@ -237,7 +237,7 @@
         },
         {
           "frame": 4,
-          "angle_deg": -117.0,
+          "angle_deg": -117,
           "bbox": [
             512,
             0,
@@ -257,7 +257,7 @@
         },
         {
           "frame": 6,
-          "angle_deg": -108.0,
+          "angle_deg": -108,
           "bbox": [
             768,
             0,
@@ -277,7 +277,7 @@
         },
         {
           "frame": 8,
-          "angle_deg": -99.0,
+          "angle_deg": -99,
           "bbox": [
             0,
             128,
@@ -297,7 +297,7 @@
         },
         {
           "frame": 10,
-          "angle_deg": -90.0,
+          "angle_deg": -90,
           "bbox": [
             256,
             128,
@@ -317,7 +317,7 @@
         },
         {
           "frame": 12,
-          "angle_deg": -81.0,
+          "angle_deg": -81,
           "bbox": [
             512,
             128,
@@ -337,7 +337,7 @@
         },
         {
           "frame": 14,
-          "angle_deg": -72.0,
+          "angle_deg": -72,
           "bbox": [
             768,
             128,
@@ -357,7 +357,7 @@
         },
         {
           "frame": 16,
-          "angle_deg": -63.0,
+          "angle_deg": -63,
           "bbox": [
             0,
             256,
@@ -377,7 +377,7 @@
         },
         {
           "frame": 18,
-          "angle_deg": -54.0,
+          "angle_deg": -54,
           "bbox": [
             256,
             256,
@@ -397,7 +397,7 @@
         },
         {
           "frame": 20,
-          "angle_deg": -45.0,
+          "angle_deg": -45,
           "bbox": [
             512,
             256,
@@ -417,7 +417,7 @@
         },
         {
           "frame": 22,
-          "angle_deg": -36.0,
+          "angle_deg": -36,
           "bbox": [
             768,
             256,
@@ -437,7 +437,7 @@
         },
         {
           "frame": 24,
-          "angle_deg": -27.0,
+          "angle_deg": -27,
           "bbox": [
             0,
             384,
@@ -457,7 +457,7 @@
         },
         {
           "frame": 26,
-          "angle_deg": -18.0,
+          "angle_deg": -18,
           "bbox": [
             256,
             384,
@@ -477,7 +477,7 @@
         },
         {
           "frame": 28,
-          "angle_deg": -9.0,
+          "angle_deg": -9,
           "bbox": [
             512,
             384,
@@ -497,7 +497,7 @@
         },
         {
           "frame": 30,
-          "angle_deg": 0.0,
+          "angle_deg": 0,
           "bbox": [
             768,
             384,
@@ -517,7 +517,7 @@
         },
         {
           "frame": 32,
-          "angle_deg": 9.0,
+          "angle_deg": 9,
           "bbox": [
             0,
             512,
@@ -537,7 +537,7 @@
         },
         {
           "frame": 34,
-          "angle_deg": 18.0,
+          "angle_deg": 18,
           "bbox": [
             256,
             512,
@@ -557,7 +557,7 @@
         },
         {
           "frame": 36,
-          "angle_deg": 27.0,
+          "angle_deg": 27,
           "bbox": [
             512,
             512,
@@ -577,7 +577,7 @@
         },
         {
           "frame": 38,
-          "angle_deg": 36.0,
+          "angle_deg": 36,
           "bbox": [
             768,
             512,
@@ -597,7 +597,7 @@
         },
         {
           "frame": 40,
-          "angle_deg": 45.0,
+          "angle_deg": 45,
           "bbox": [
             0,
             640,
@@ -617,7 +617,7 @@
         },
         {
           "frame": 42,
-          "angle_deg": 54.0,
+          "angle_deg": 54,
           "bbox": [
             256,
             640,
@@ -637,7 +637,7 @@
         },
         {
           "frame": 44,
-          "angle_deg": 63.0,
+          "angle_deg": 63,
           "bbox": [
             512,
             640,
@@ -657,7 +657,7 @@
         },
         {
           "frame": 46,
-          "angle_deg": 72.0,
+          "angle_deg": 72,
           "bbox": [
             768,
             640,
@@ -677,7 +677,7 @@
         },
         {
           "frame": 48,
-          "angle_deg": 81.0,
+          "angle_deg": 81,
           "bbox": [
             0,
             768,
@@ -697,7 +697,7 @@
         },
         {
           "frame": 50,
-          "angle_deg": 90.0,
+          "angle_deg": 90,
           "bbox": [
             256,
             768,
@@ -717,7 +717,7 @@
         },
         {
           "frame": 52,
-          "angle_deg": 99.0,
+          "angle_deg": 99,
           "bbox": [
             512,
             768,
@@ -737,7 +737,7 @@
         },
         {
           "frame": 54,
-          "angle_deg": 108.0,
+          "angle_deg": 108,
           "bbox": [
             768,
             768,
@@ -757,7 +757,7 @@
         },
         {
           "frame": 56,
-          "angle_deg": 117.0,
+          "angle_deg": 117,
           "bbox": [
             0,
             896,
@@ -777,7 +777,7 @@
         },
         {
           "frame": 58,
-          "angle_deg": 126.0,
+          "angle_deg": 126,
           "bbox": [
             256,
             896,
@@ -797,7 +797,7 @@
         },
         {
           "frame": 60,
-          "angle_deg": 135.0,
+          "angle_deg": 135,
           "bbox": [
             512,
             896,
@@ -805,7 +805,28 @@
             1024
           ]
         }
-      ]
+      ],
+      "artworkProfile": {
+        "source": "SKIN/Skin_053/assets/vector/rotary_knob_master.svg",
+        "renderer": "tools/generate_neon_stage_spritesheets.py:draw_premium_rotary",
+        "construction": [
+          "machined graphite-steel bezel",
+          "inset dark enamel face",
+          "radial metal index marks",
+          "restrained cyan sweep",
+          "metal pointer with cyan highlight",
+          "illuminated center hub"
+        ],
+        "renderScale": 2,
+        "outputCell": [
+          128,
+          128
+        ],
+        "frameCount": 61,
+        "transparentRGBA": true,
+        "labelsBaked": false,
+        "continuousParameterValue": true
+      }
     },
     "neon_stage_meters_sliders_sheet.png": {
       "resolution": [
