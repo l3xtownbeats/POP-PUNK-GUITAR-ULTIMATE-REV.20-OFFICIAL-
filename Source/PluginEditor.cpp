@@ -2698,6 +2698,71 @@ void PPGUPremiumLookAndFeel::drawComboBox(juce::Graphics& g, int w, int h, bool 
                                               juce::PathStrokeType::rounded));
 }
 
+
+void PPGUPremiumLookAndFeel::drawToggleButton(juce::Graphics& g,
+                                               juce::ToggleButton& button,
+                                               bool highlighted, bool down)
+{
+    const auto bounds = button.getLocalBounds().toFloat();
+    if (bounds.isEmpty())
+        return;
+
+    const bool enabled = button.isEnabled();
+    const bool active = enabled && button.getToggleState();
+    const bool focused = enabled && button.hasKeyboardFocus(true);
+    const bool hovered = enabled && (highlighted || button.isMouseOver());
+    const float scale = juce::jlimit(0.75f, 1.25f,
+        bounds.getHeight() / 28.0f);
+    const float switchWidth = 34.0f * scale;
+    const float switchHeight = 18.0f * scale;
+    const float switchX = bounds.getX() + 2.0f * scale;
+    const float switchY = bounds.getCentreY() - switchHeight * 0.5f;
+    const auto switchBounds = juce::Rectangle<float>(switchX, switchY,
+                                                       switchWidth, switchHeight);
+
+    const auto trackColour = !enabled ? palette.token("lowlight")
+        : active ? palette.token("accent").withAlpha(0.92f)
+        : hovered ? palette.token("control_face").brighter(0.12f)
+        : palette.token("control_bg");
+    g.setColour(trackColour);
+    g.fillRoundedRectangle(switchBounds, switchHeight * 0.5f);
+
+    g.setColour(focused ? palette.token("highlight")
+                        : palette.token("control_border").withAlpha(enabled ? 0.95f : 0.42f));
+    g.drawRoundedRectangle(switchBounds, switchHeight * 0.5f,
+                           focused ? 1.8f : 1.0f);
+
+    const float knobDiameter = switchHeight - 5.0f * scale;
+    const float knobTravel = switchWidth - knobDiameter - 5.0f * scale;
+    const float knobX = switchX + 2.5f * scale
+        + (active ? knobTravel : 0.0f);
+    const float knobY = switchY + 2.5f * scale;
+    const auto knobBounds = juce::Rectangle<float>(knobX, knobY,
+                                                     knobDiameter, knobDiameter);
+    g.setColour(enabled ? palette.token("highlight") : palette.token("text_disabled"));
+    g.fillEllipse(knobBounds);
+    g.setColour(palette.token("shadow").withAlpha(0.35f));
+    g.drawEllipse(knobBounds, 0.8f);
+
+    if (hovered || down || focused)
+    {
+        const auto stateColour = focused ? palette.token("highlight")
+            : (down ? palette.token("accent") : palette.token("accent_glow"));
+        g.setColour(stateColour.withAlpha(focused ? 0.58f : 0.30f));
+        g.drawRoundedRectangle(switchBounds.expanded(2.0f * scale),
+                               switchHeight * 0.6f, focused ? 1.5f : 1.0f);
+    }
+
+    const auto textBounds = bounds.withLeft(switchBounds.getRight() + 9.0f * scale)
+                                  .reduced(0.0f, 1.0f);
+    g.setColour(enabled ? palette.token("text_primary")
+                        : palette.token("text_disabled"));
+    g.setFont(makeThemeFont(palette, juce::jmax(10.0f,
+        juce::jmin(15.0f, bounds.getHeight() * 0.52f)), false, active));
+    g.drawFittedText(button.getButtonText(), textBounds.toNearestInt(),
+                     juce::Justification::centredLeft, 1);
+}
+
 void PPGUPremiumLookAndFeel::fillTextEditorBackground(juce::Graphics& g, int width, int height,
                                                             juce::TextEditor& editor)
 {
