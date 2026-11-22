@@ -2053,8 +2053,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     autoSoundHunterButton.setTooltip("AUTO SOUND HUNTER is not implemented yet. No search or auto-import action is available.");
     curatorButton.setTooltip("CURATOR is not implemented yet. No asset is marked approved.");
 
-    aboutButton.setEnabled(true);
-    aboutButton.setTooltip("Plugin version, format and runtime information.");
+    aboutButton.setEnabled(false);
+    aboutButton.setTooltip("ABOUT is intentionally disabled in REV.20 until its verified information panel is implemented.");
     aboutButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
     aboutButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
     aboutButton.onClick = [this]
@@ -2127,9 +2127,15 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     patternTab.onClick = [this] { modeBox.setSelectedId(2); openPatternSectionPanel(); };
     modeBox.onChange = [this]
     {
+        const bool isMelody = modeBox.getSelectedId() == 1;
+        melodyTab.setToggleState(isMelody, juce::dontSendNotification);
+        patternTab.setToggleState(!isMelody, juce::dontSendNotification);
         if (chordDiagram != nullptr)
-            chordDiagram->setVisible(modeBox.getSelectedId() == 2);
+            chordDiagram->setVisible(!isMelody);
+        melodyTab.repaint();
+        patternTab.repaint();
     };
+    modeBox.onChange();
     for (size_t i = 0; i < knobs.size(); ++i) {
         configureKnob(knobs[i], knobLabels[i], knobNames[i]);
         knobs[i].setComponentID("knob" + juce::String(static_cast<int>(i + 1)).paddedLeft('0', 2));
@@ -2276,8 +2282,8 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
     auto right = area.removeFromRight(rightWidth);
     area.removeFromRight(10);
 
-    drawPanel(g, left, "AUTOCHORDS  /  PRESETS");
-    drawPanel(g, area, "FX EDIT  /  NEON STAGE");
+    drawPanel(g, left, "PRESETS");
+    drawPanel(g, area, "PLAYING CORE");
     drawPanel(g, right, "AMP & TONE");
     drawPanel(g, fxChain, "FX CHAIN");
 }
@@ -2678,7 +2684,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette()
  presetSearch.setColour(juce::TextEditor::backgroundColourId,p.token("control_bg"));presetSearch.setColour(juce::TextEditor::textColourId,p.token("text_primary"));presetSearch.setColour(juce::TextEditor::outlineColourId,p.token("control_border"));presetSearch.setColour(juce::TextEditor::focusedOutlineColourId,p.token("highlight"));presetSearch.setColour(juce::TextEditor::highlightColourId,p.token("accent").withAlpha(.3f));
  loadButton.setColour(juce::TextButton::buttonColourId,p.token("accent"));loadButton.setColour(juce::TextButton::textColourOffId,p.token("window_bg"));settingsButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));settingsButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));skinButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setTooltip("Active skin: "+p.name+"  /  Ctrl+K");
  for (auto* unavailable : { &autoSoundHunterButton, &curatorButton }) { unavailable->setColour(juce::TextButton::buttonColourId,p.token("lowlight")); unavailable->setColour(juce::TextButton::textColourOffId,p.token("text_disabled")); unavailable->setEnabled(false); }
- aboutButton.setEnabled(true); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));
+ aboutButton.setEnabled(false); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("lowlight")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_disabled"));
  for(auto* b:{&melodyTab,&patternTab}){b->setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b->setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b->setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b->setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
  for(auto& s:knobs){s.setColour(juce::Slider::rotarySliderFillColourId,p.token("accent"));s.setColour(juce::Slider::rotarySliderOutlineColourId,p.token("control_border"));s.setColour(juce::Slider::thumbColourId,p.token("text_primary"));s.setColour(juce::Slider::textBoxTextColourId,p.token("text_primary"));}
  for(auto& l:knobLabels){l.setFont(makeThemeFont(p,9.5f,false,true));l.setColour(juce::Label::textColourId,p.token("text_secondary"));}
