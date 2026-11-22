@@ -192,3 +192,11 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Correction: the dedicated 61-frame 8x8/128px atlas now has priority in rotary rendering. Slider position selects frames 0–60 while APVTS remains continuous. Disabled dimming remains; hover/drag and keyboard focus receive a restrained live JUCE ring so the atlas is not hidden by a static state image. Existing fallback state artwork remains for cases where the rotary atlas is unavailable.
 - Scope: UI rendering only. No APVTS IDs, parameter ranges, DSP, sampler, MIDI, preset data, layout geometry or approved mockup composition changed.
 - Verification status: source update is on `main` (HEAD `3edbcd25142d023071183771685c0e093aaf87c1`). Exact-SHA Windows VST3/CTest/skin validation for this commit is PENDING; FL Studio 20 visual/DPI acceptance is NOT VERIFIED. Do not inherit earlier CI results from different SHAs.
+
+
+## 2026-11-22 — NEON STAGE FX switch focus-state rendering
+- Continued from the approved NEON STAGE DEFAULT mockup and REV.20 master prompt; no layout, label, control ID, palette or feature scope changes.
+- Audit of `control_states_manifest.json` confirms the current five authored raster states across 27 controls (135 records): default, hover, pressed, disabled, dragged. The runtime enum also defines Active, but the five-state manifest does not provide a sixth raster state. Active FX state is represented by the live APVTS toggle and the existing ON switch atlas; do not fabricate duplicate active PNGs from the migration archive. Keyboard focus is a live JUCE overlay, not a baked image state.
+- Found a rendering gap: FX button artwork and atlas branches returned before drawing keyboard-focus feedback. Updated `Source/PluginEditor.cpp` so both the authored per-control artwork path and shared switch-atlas path draw a restrained highlight focus ring after the physical switch image. Existing vector fallback already draws focus and is unchanged.
+- Source commit: `68ebacfa9a94183b1f2997d523684d93a7dd4c4c`; file blob SHA: `a848a13b8971e3a55a296360e1dfdb431d595155`.
+- Scope: visual-state rendering only. APVTS toggle/parameter attachments and DSP behavior are unchanged. No claims of build, CTest, pluginval or FL Studio 20 acceptance until exact-SHA checks complete.
