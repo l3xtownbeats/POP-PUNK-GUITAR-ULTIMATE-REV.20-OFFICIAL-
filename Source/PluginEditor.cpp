@@ -110,6 +110,10 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
         drawLayer(palette.specularArtwork, 0.16f);
     }
 
+    // Every approved skin contributes its own hero artwork to the shared shell.
+    // Keep this global wash subtle so controls retain contrast and readability.
+    drawLayer(palette.heroArtwork, includePremiumStageLayers ? 0.035f : 0.055f);
+
     if (palette.textureArtwork.isValid() && textureOpacity > 0.0f)
     {
         g.saveState();
