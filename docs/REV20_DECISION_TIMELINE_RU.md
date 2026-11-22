@@ -605,3 +605,36 @@ The label is a user-approved catalog requirement, not proof that a playable reco
 ### Проверки
 
 Изменены `Source/PluginEditor.cpp` и `Source/PluginEditor.h`. Изменение опубликовано в review branch; на момент записи exact-HEAD Windows CI, CTest, skin validation, pluginval и FL Studio 20 host acceptance ещё не подтверждены. Не считать это окно CI PASS или HOST VERIFIED.
+
+
+## 2026-11-22 — user correction: canonical two-mode hierarchy (MELODY / PATTERN)
+
+This entry clarifies and takes precedence over any wording that could imply PATTERN is the only mode or that the two PATTERN workspaces are the two top-level modes. The product has exactly **two top-level modes**. Each mode has its own preset context and its own playing/performance workflow.
+
+### MODE 1 — MELODY
+
+1. **PRESETS** — choose a musical preset family/style and song-part context. Example requested catalog path: `POP PUNK → BLINK-182 → CHORUS`.
+2. **PLAYING** — choose the lead/performance approach for that melody preset. Examples include `LEAD`, `OPEN CHORDS`, and other verified playing approaches.
+
+### MODE 2 — PATTERN
+
+1. **PRESETS** — choose a rhythmic/song-section preset context. Example requested catalog path: `POP PUNK → BLINK-182 → VERSE`.
+2. **PLAYING / PATTERN / ARTICULATIONS** — choose the playing style, rhythmic figure/pattern and articulation used to perform the selected PATTERN preset. Examples/catalog entries include `PALM MUTE - 8TH` and other styles/figures as they are actually supported by verified source recordings and mappings.
+
+### Interaction and state rules
+
+- The top-level mode switch is exactly **MELODY ↔ PATTERN**.
+- MELODY and PATTERN have separate PRESETS contexts. Selecting `BLINK-182 → CHORUS` in MELODY must not overwrite `BLINK-182 → VERSE` in PATTERN, and vice versa.
+- MELODY's PLAYING selection is independent of its PRESETS selection.
+- PATTERN's PLAYING / PATTERN / ARTICULATIONS selection is independent of its PRESETS selection.
+- Switching between MELODY and PATTERN preserves each mode's last selected preset, song section, playing style, and relevant UI state. Returning to a mode restores its context.
+- `ARTICULATIONS` is a functional catalog/selection area within PATTERN's second workflow. It is not a third top-level mode and not a standalone top-level tab.
+- The two-window implementation detail for PATTERN remains valid: PATTERN PRESETS is the preset/section/pattern workspace; PLAYING / PATTERN / ARTICULATIONS is the coordinated performance workspace. These are two workspaces **inside PATTERN**, not the product's two top-level modes.
+- Session Guitarist may inform quality of navigation, responsiveness and workflow only. NEON STAGE retains its own approved 01–07 layouts, artwork, branding, palette and control design.
+- A playing style, pattern or articulation may be shown as available only when its underlying playable content and mappings are verified. Requested catalog labels such as `PALM MUTE - 8TH` remain visible as unavailable until evidence exists; do not fabricate playback or active states.
+
+### Required visual hierarchy
+
+The main shell must visibly communicate the two top-level modes, with each mode exposing the correct PRESETS and PLAYING workflow. Labels, active cyan/electric-blue illumination, selected-state borders, display text, focus/hover/pressed/disabled states and window navigation must make the current mode and current sub-workspace unambiguous. Mode-specific preset and playing selections must not leak across modes.
+
+This is the canonical user-approved information architecture for further NEON STAGE visual implementation. It does not claim that the full hierarchy, persistent state model, visual parity, performance QA or host acceptance is already implemented.
