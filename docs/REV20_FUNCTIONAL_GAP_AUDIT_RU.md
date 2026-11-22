@@ -249,3 +249,17 @@ The following audio-path wiring has now been selectively ported into REV.20 (tar
 - Follow-up hardening: Palm label detection is case-insensitive and the sampler regression uses the public active-label query.
 
 - Case-insensitive label matching normalizes the copied SFZ label string during off-thread snapshot construction; no temporary-iterator lifetime issue remains.
+
+
+## 2026-11-22 — UI visual checkpoint supplement
+
+The main-window visual pass has addressed the following source-level gaps without changing the approved geometry or audio contracts:
+
+- Corrected the visible main panel titles to PRESETS, PLAYING CORE, AMP & TONE and FX CHAIN.
+- Corrected AUTO DISCOVER naming and retained its disabled state; CURATOR remains disabled.
+- Disabled ABOUT until a verified About panel exists.
+- Added real selected-state feedback to the MELODY/PATTERN tabs, synchronized from the attached playMode ComboBox/APVTS state.
+- Connected the existing Skin-1 default/hover/pressed/disabled artwork lookup to the Import Guitar, Auto Discover, Curator, Settings, About and SKIN header controls.
+- Preserved the 1024×700 launch size, current responsive layout, 9 APVTS rotary bindings, 7 FX bindings, 16-theme registry and Skin-1 asset set.
+
+Still open: visually inspect the actual canonical 01 INTERFACE image against a runtime screenshot at 1024×700; verify the 27-control state map end-to-end (including preset browser, mode selector, keyboard, LCD and LED); test 100/125/150% scaling and resizing; then pass exact-HEAD Windows x64 build, CTest, pluginval strictness 5 and FL Studio 20 host acceptance. No visual or build gate is marked complete solely from these source edits.
