@@ -322,3 +322,15 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - Canonical layout `/01 INTERFACE  NEON STAGE DEFAULT .png` остаётся неизменным. Не добавлялись baked labels и не менялись control geometry, APVTS, DSP или аудио-путь.
 - Изменения генератора: commit `a89904886c7d54c46c74c63fb6d8f4ebf78792e9`. Manifest: commit `7d02e657ad385a95d95296df87f4778651c5d3e8`.
 - Генератор ещё должен быть исполнен CI; обновлённый PNG atlas и визуальная сверка результата не объявляются готовыми до успешной генерации и проверки артефакта.
+
+
+## 2026-11-22 — аудит FX controls и генерация production sprite atlases
+
+Проверено текущее дерево GitHub на main HEAD `0b8aa7df2be3c302a07b257a386aee2b237ab8ca`.
+
+- Подтверждено наличие семи отдельных FX switches и пяти runtime states для каждого: `default`, `hover`, `pressed`, `dragged`, `disabled`. Пути: `SKIN/Skin_053/assets/controls/fx_switch01_*.png` … `fx_switch07_*.png`.
+- Для тех же семи switches существуют отдельные master PNG в `SKIN/Skin_053/assets/master/controls/`; это 35 master + 35 runtime изображений. Существующие ассеты и manifests сохраняются, повторно не генерируются и не заменяются без pixel-level сравнения с canonical mockup.
+- Control state registry `SKIN/Skin_053/assets/controls/control_states_manifest.json` перечисляет 27 control IDs и пять состояний. Artwork manifest `SKIN/Skin_053/assets/artwork_manifest.json` описывает master/runtime layers и основные графические ресурсы.
+- GitHub Actions run `45001532775`, workflow `rev20-windows-vst3-skin-validation.yml`: шаги установки Python, Pillow, генерации NEON STAGE atlas и commit generated atlases завершились success. Автоматический commit генератора: `0b8aa7df2be3c302a07b257a386aee2b237ab8ca`; rotary atlas PNG присутствует в дереве: `SKIN/Skin_053/assets/spritesheets/neon_stage_rotary_61frame_atlas.png` (1024×1024, 61 кадр по manifest).
+- На момент записи Windows configure ещё выполнялся; build VST3, CTest, 16-skin validation, pluginval strictness 5 и upload artifact ещё не завершены. Этот этап не объявляется release-ready.
+- Главный visual reference остаётся неизменным: `/01 INTERFACE  NEON STAGE DEFAULT .png`. Все новые runtime assets должны быть разложены по отдельным master/runtime fragments и states, без baked labels/values, с сохранением реальных JUCE/APVTS state bindings.
