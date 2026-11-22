@@ -2588,6 +2588,32 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
     {
         g.setColour(palette.accentSecondary);
         g.fillRoundedRectangle(bounds.removeFromLeft(3.0f), 1.5f);
+
+        // Active toggle state is visible across all 16 themes, including skins
+        // that do not ship a dedicated PNG state atlas.
+        const auto activeBounds = button.getLocalBounds().toFloat().reduced(2.0f);
+        g.setColour(palette.token("accent_glow").withAlpha(0.18f));
+        g.drawRoundedRectangle(activeBounds, 6.0f, 2.0f);
+    }
+
+    if (enabled && down)
+    {
+        // Pressed controls gain a restrained inset edge rather than changing
+        // component bounds or interfering with JUCE's hit-testing.
+        const auto inset = button.getLocalBounds().toFloat().reduced(2.5f);
+        g.setColour(palette.token("lowlight").withAlpha(0.72f));
+        g.drawRoundedRectangle(inset, 5.0f, 1.25f);
+        g.setColour(palette.token("highlight").withAlpha(0.16f));
+        g.drawLine(inset.getX() + 4.0f, inset.getY() + 1.0f,
+                   inset.getRight() - 4.0f, inset.getY() + 1.0f, 0.8f);
+    }
+
+    if (!enabled)
+    {
+        // Consistent disabled veil for themes without authored disabled frames.
+        const auto disabledBounds = button.getLocalBounds().toFloat().reduced(1.0f);
+        g.setColour(palette.token("window_bg").withAlpha(0.22f));
+        g.fillRoundedRectangle(disabledBounds, 6.0f);
     }
 
     // Keep functional feedback available even when optional button atlases
