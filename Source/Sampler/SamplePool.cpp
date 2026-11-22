@@ -333,6 +333,11 @@ LoadReport SamplePool::loadSfz(const juce::File& sfzFile,
         view.pan = region.pan;
         view.releaseSeconds = region.releaseSeconds;
         candidateSnapshot->regions.push_back(view);
+        if (region.switchLowKey >= 0)
+            for (int keySwitch = region.switchLowKey; keySwitch <= region.switchHighKey; ++keySwitch)
+                candidateSnapshot->keySwitchNoteMask[static_cast<std::size_t>(keySwitch)] = true;
+        if (candidateSnapshot->defaultKeySwitch < 0 && region.switchDefault >= 0)
+            candidateSnapshot->defaultKeySwitch = region.switchDefault;
         samplesUsed.insert(key);
     }
 
@@ -437,24 +442,14 @@ bool SamplePool::isKeySwitchNote(int midiNote) const noexcept
     if (midiNote < 0 || midiNote > 127)
         return false;
     const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
-    if (snapshot == nullptr)
-        return false;
-    for (const auto& region : snapshot->regions)
-        if (region.switchLowKey >= 0 && midiNote >= region.switchLowKey
-            && midiNote <= region.switchHighKey)
-            return true;
-    return false;
+    return snapshot != nullptr
+        && snapshot->keySwitchNoteMask[static_cast<std::size_t>(midiNote)];
 }
 
 int SamplePool::getDefaultKeySwitch() const noexcept
 {
     const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
-    if (snapshot == nullptr)
-        return -1;
-    for (const auto& region : snapshot->regions)
-        if (region.switchDefault >= 0)
-            return region.switchDefault;
-    return -1;
+    return snapshot != nullptr ? snapshot->defaultKeySwitch : -1;
 }
 
 std::size_t SamplePool::getRegionCount() const noexcept

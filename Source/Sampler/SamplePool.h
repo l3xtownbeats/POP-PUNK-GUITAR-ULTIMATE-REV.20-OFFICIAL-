@@ -87,6 +87,9 @@ public:
     struct Snapshot
     {
         std::vector<RegionView> regions;
+        // Precomputed O(1) control-note lookup for the real-time MIDI path.
+        std::array<bool, 128> keySwitchNoteMask {};
+        int defaultKeySwitch = -1;
         // Audio-thread-owned cursors: [RR set][MIDI channel][MIDI note].
         mutable std::vector<std::uint32_t> roundRobinCounters;
     };

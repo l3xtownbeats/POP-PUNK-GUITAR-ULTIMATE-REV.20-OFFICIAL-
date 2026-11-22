@@ -225,3 +225,8 @@ The following audio-path wiring has now been selectively ported into REV.20 (tar
 - JUCE keyboard held-state and the editor's held-note snapshot clear/exclude these control notes.
 - Sampler tests now check independent per-channel switch state.
 - Still open: expose the current sw_label in the UI, validate complete real-bank articulation zones/velocity maps, and test switching while host-synced pattern events are already scheduled. FL Studio 20 host acceptance remains pending.
+
+
+## 2026-11-22 — Real-time keyswitch lookup optimization
+
+- SFZ snapshot construction now precomputes a fixed 128-note keyswitch mask and default selector. processBlock queries this immutable mask in O(1), avoiding a linear scan of large sample maps for each MIDI event. No allocation or lock is introduced on the audio thread.

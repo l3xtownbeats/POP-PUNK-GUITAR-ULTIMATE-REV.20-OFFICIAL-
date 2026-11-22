@@ -254,3 +254,8 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - Extended sampler regression coverage to verify independent keyswitch states across MIDI channels.
 - The feature is data-driven: if the loaded SFZ has no declared switch range, no keyswitch note is intercepted. If a bank declares a switch range but lacks a matching recorded zone for the selected sw_last, noteOn safely returns no region rather than substituting an unrelated articulation.
 - UI label publication and host-side FL Studio 20 verification remain open. No claim that any bundled guitar library currently supplies palm-mute/legato/slide maps.
+
+
+## 2026-11-22 — Real-time keyswitch lookup bounded
+- Replaced per-MIDI-event linear region scanning for keyswitch detection with a 128-entry immutable note mask precomputed while the SFZ snapshot is built off the audio thread. Active default keyswitch is also cached in the published snapshot.
+- PluginProcessor keyswitch detection is therefore O(1) per event and does not allocate, lock or scan the full sample map in processBlock.
