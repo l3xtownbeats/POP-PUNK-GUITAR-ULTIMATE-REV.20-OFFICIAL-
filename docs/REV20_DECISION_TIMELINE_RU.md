@@ -551,3 +551,332 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 Это затрагивает общую оболочку всех auxiliary modules, а не только один экран. Коммит: `aa55dc3bf50289f5e2e6267e02ec7b90f0e1246d`.
 
 **Проверка:** изменение опубликовано в review branch; Windows CI для этого нового SHA ещё должен завершиться. Отдельно остаются host-проверка keyboard focus, hover/pressed rendering, resize/maximize/restore и DPI. Предыдущие успешные workflow относятся к предыдущему checkpoint и не являются доказательством компиляции этого нового коммита.
+
+
+## 2026-11-22 — user-locked PATTERN two-window architecture (canonical)
+
+The user explicitly approved and fixed this as the baseline. This supersedes the earlier interpretation that ARTICULATION should be a standalone button or a third subsection/tab inside the PATTERN window.
+
+PATTERN is one of the two top-level product modes. Its workflow is organised into **two coordinated working windows**:
+
+1. **PATTERN PRESETS** — first window:
+   - choose a preset group/category;
+   - show the fragments belonging to the selected group;
+   - select a specific fragment;
+   - preview and select the required pattern;
+   - preserve the selected group, fragment and pattern when navigating between the two PATTERN windows or returning to the mode.
+
+2. **PLAYING STYLE / ARTICULATION** — second window:
+   - choose the playing style;
+   - browse the articulations belonging to the selected style/source;
+   - select an articulation for performance;
+   - visibly show the genuinely active selection/state;
+   - expose as available only articulations backed by real, verified, legally usable recordings and valid mappings. Missing/unverified mappings must remain unavailable and must never be represented by fabricated names, synthetic substitutes or false READY states.
+
+The two windows are coordinated parts of PATTERN, not extra top-level modes. **ARTICULATION is a functional area within the second PLAYING STYLE window, not a separate button in the first PATTERN/PATTERN PRESETS window.** The first window owns group/fragment/pattern selection; the second owns playing style/articulation selection. Keep tone preset, pattern/fragment choice and performance articulation independent; changing one must not silently overwrite the others.
+
+Both windows must follow the approved NEON STAGE visual system and the complete per-element acceptance contract: graphite materials and frames, approved cyan/electric-blue palette, real active/hover/pressed/focus/disabled states, keyboard/mouse parity, persistence and return transitions, accessible hit areas/tooltips, responsive layout/DPI, and performance-conscious animation. Session Guitarist remains a workflow/UX quality reference only; do not copy its UI, assets, branding or content.
+
+Implementation note: an earlier source experiment added a standalone ARTICULATION button to the pattern panel. The user corrected that interpretation. That standalone button is explicitly rejected and must not be retained as the architecture. The source branch cleanup removes that button; the two coordinated windows described above are the canonical target. This decision records the approved architecture, not a claim that both windows are already implemented or host-verified.
+
+
+## 2026-11-22 — PATTERN playing-style entry requested: PALM MUTE - 8TH
+
+The user supplied the exact entry/path label: **PLAYING / PATTERN — PALM MUTE - 8TH**. Treat PALM MUTE - 8TH as a requested PATTERN playing-style/articulation entry in the second **PLAYING STYLE / ARTICULATION** window, not as a separate top-level mode or a control in the PATTERN PRESETS window.
+
+The label is a user-approved catalog requirement, not proof that a playable recording or mapping currently exists. Show it as selectable/available only after a real, legally usable palm-muted eighth-note performance recording and its note/range/velocity/keyswitch mappings have been inspected and verified. Until then, preserve the requested entry in the catalog specification but show an honest unavailable / source mapping required state in the UI. Do not synthesize a false READY state or imply that the audio engine already plays it.
+
+
+## 2026-11-22 — NEON STAGE PATTERN: первый source-level проход двухоконной навигации
+
+### Реализовано в review branch `visual/neon-stage-playing-style-window`
+
+- В первом окне PATTERN добавлен явный переход **OPEN PLAYING STYLE**. Он открывает отдельную рабочую область второго окна через общий `PPGUMultiWindowWorkspace`, с собственным ID, заголовком, минимальным и желаемым размером.
+- Первое окно сохраняет назначение PATTERN PRESETS / song-section routing; информация о playing style больше не представлена как отдельная вкладка/кнопка ARTICULATION.
+- Создано второе окно **PLAYING STYLE / ARTICULATION** с темой NEON STAGE, общей системой панелей/рамок workspace и отдельными визуальными областями PLAYING STYLE и ARTICULATION.
+- Каталожная позиция **PALM MUTE - 8TH** отображается как явно недоступная. Она не активируется, пока не будет проверена реальная легальная запись и полный mapping. Никакие синтетические подмены или фиктивный READY не используются.
+- Источник SFZ и сведения о switch label обновляются из processor. Наличие одного keyswitch label не трактуется как доказательство существующей playable zone; статус позиции остаётся unavailable до появления проверяемого source-map registry.
+- Добавлена точка входа редактора `openPlayingStylePanel()`; окно не создаётся повторно при повторном открытии, если уже существует в workspace.
+
+### Границы текущего результата
+
+Это первый вертикальный source-level проход навигации и визуального каркаса второго окна, а не завершение всей PATTERN архитектуры и не закрытие общего NEON STAGE visual acceptance. В первом окне ещё предстоит полноценная реализация групп пресетов/фрагментов и сохранение выбора между переходами; независимое persistent-state для группы/фрагмента/паттерна/артикуляции также остаётся отдельной задачей. Визуальная pixel-сверка с макетами 01–07, взаимодействие мышью/клавиатурой, смена skin на уже открытом окне, resize/DPI и runtime performance ещё не подтверждены.
+
+### Проверки
+
+Изменены `Source/PluginEditor.cpp` и `Source/PluginEditor.h`. Изменение опубликовано в review branch; на момент записи exact-HEAD Windows CI, CTest, skin validation, pluginval и FL Studio 20 host acceptance ещё не подтверждены. Не считать это окно CI PASS или HOST VERIFIED.
+
+
+## 2026-11-22 — user correction: canonical two-mode hierarchy (MELODY / PATTERN)
+
+This entry clarifies and takes precedence over any wording that could imply PATTERN is the only mode or that the two PATTERN workspaces are the two top-level modes. The product has exactly **two top-level modes**. Each mode has its own preset context and its own playing/performance workflow.
+
+### MODE 1 — MELODY
+
+1. **PRESETS** — choose a musical preset family/style and song-part context. Example requested catalog path: `POP PUNK → BLINK-182 → CHORUS`.
+2. **PLAYING** — choose the lead/performance approach for that melody preset. Examples include `LEAD`, `OPEN CHORDS`, and other verified playing approaches.
+
+### MODE 2 — PATTERN
+
+1. **PRESETS** — choose a rhythmic/song-section preset context. Example requested catalog path: `POP PUNK → BLINK-182 → VERSE`.
+2. **PLAYING / PATTERN / ARTICULATIONS** — choose the playing style, rhythmic figure/pattern and articulation used to perform the selected PATTERN preset. Examples/catalog entries include `PALM MUTE - 8TH` and other styles/figures as they are actually supported by verified source recordings and mappings.
+
+### Interaction and state rules
+
+- The top-level mode switch is exactly **MELODY ↔ PATTERN**.
+- MELODY and PATTERN have separate PRESETS contexts. Selecting `BLINK-182 → CHORUS` in MELODY must not overwrite `BLINK-182 → VERSE` in PATTERN, and vice versa.
+- MELODY's PLAYING selection is independent of its PRESETS selection.
+- PATTERN's PLAYING / PATTERN / ARTICULATIONS selection is independent of its PRESETS selection.
+- Switching between MELODY and PATTERN preserves each mode's last selected preset, song section, playing style, and relevant UI state. Returning to a mode restores its context.
+- `ARTICULATIONS` is a functional catalog/selection area within PATTERN's second workflow. It is not a third top-level mode and not a standalone top-level tab.
+- The two-window implementation detail for PATTERN remains valid: PATTERN PRESETS is the preset/section/pattern workspace; PLAYING / PATTERN / ARTICULATIONS is the coordinated performance workspace. These are two workspaces **inside PATTERN**, not the product's two top-level modes.
+- Session Guitarist may inform quality of navigation, responsiveness and workflow only. NEON STAGE retains its own approved 01–07 layouts, artwork, branding, palette and control design.
+- A playing style, pattern or articulation may be shown as available only when its underlying playable content and mappings are verified. Requested catalog labels such as `PALM MUTE - 8TH` remain visible as unavailable until evidence exists; do not fabricate playback or active states.
+
+### Required visual hierarchy
+
+The main shell must visibly communicate the two top-level modes, with each mode exposing the correct PRESETS and PLAYING workflow. Labels, active cyan/electric-blue illumination, selected-state borders, display text, focus/hover/pressed/disabled states and window navigation must make the current mode and current sub-workspace unambiguous. Mode-specific preset and playing selections must not leak across modes.
+
+This is the canonical user-approved information architecture for further NEON STAGE visual implementation. It does not claim that the full hierarchy, persistent state model, visual parity, performance QA or host acceptance is already implemented.
+
+
+## 2026-11-22 — пользователь утвердил расширенный MASTER STANDARD MELODY / PATTERN
+
+Пользователь явно подтвердил и зафиксировал расширенную редакцию требований NEON STAGE. Эта запись является обязательным уточнением канонической архитектуры MELODY / PATTERN и дополняет предыдущую запись о двух верхнеуровневых режимах.
+
+### Утверждённая структура
+
+**Ровно два верхнеуровневых режима:**
+- **MELODY** — собственный PRESETS workflow (музыкальное направление → стиль/исполнитель → композиция/часть) и независимый PLAYING workflow (например, LEAD, OPEN CHORDS и другие подтверждённые варианты).
+- **PATTERN** — собственный PRESETS workflow (направление → стиль/исполнитель → композиция/часть/ритмический пресет) и независимый performance workflow PLAYING / PATTERN / ARTICULATIONS.
+
+В PATTERN сохраняется координация двух рабочих окон: PATTERN PRESETS отвечает за группу/фрагмент/паттерн; PLAYING STYLE / ARTICULATION отвечает за стиль исполнения и артикуляции. Это внутренние рабочие окна PATTERN, а не дополнительные верхнеуровневые режимы.
+
+### Обязательные правила независимого состояния
+
+- Контексты PRESETS у MELODY и PATTERN независимы и не перезаписывают друг друга.
+- PLAYING не изменяет выбранный PRESETS.
+- PATTERN pattern/articulation не изменяют выбранную группу/фрагмент PRESETS.
+- Переключение MELODY ↔ PATTERN сохраняет последний контекст каждого режима и восстанавливает его при возвращении.
+- Изменение одного параметра не должно молча сбрасывать или изменять другой параметр.
+- Состояния выбора и геометрия рабочих окон должны сохраняться в рамках поддерживаемой модели состояния проекта.
+
+### Достоверность доступности
+
+Playing styles, patterns и articulations разрешено показывать как доступные только при подтверждённых playable recordings, корректных диапазонах нот, velocity layers (если применимо), полных MIDI/SFZ mappings и правах на использование/распространение. Непроверенные позиции остаются явно недоступными с объяснением причины. Запрещены фиктивные READY/ACTIVE состояния, вымышленные mappings и незаявленная синтетическая подмена.
+
+### Визуальный и интерактивный контракт
+
+- Активный верхнеуровневый режим должен быть мгновенно различим по реальному selected/active state и утверждённой cyan/electric-blue подсветке.
+- Для каждого интерактивного элемента независимы NORMAL, HOVER, PRESSED, ACTIVE, SELECTED, FOCUSED, DISABLED, LOADING и ERROR там, где состояние применимо.
+- Подсветка, LED, подписи и дисплеи обязаны отражать фактическое состояние функции; декоративная имитация состояния запрещена.
+- Сохраняются утверждённые макеты 01–07, палитра, оригинальная идентичность NEON STAGE и правила использования Session Guitarist только как UX/workflow ориентира.
+- Навигация должна быть понятна мышью и клавиатурой; окна должны поддерживать корректное открытие/закрытие, повторное открытие, resize, maximize/restore, DPI и восстановление контекста.
+- Анимации допустимы только как производительная визуализация реального состояния/перехода; не создавать fake progress, meters или waveform.
+
+### Критерии завершения и доказательства
+
+Архитектура не считается реализованной только по факту документации или статического макета. Для каждого модуля отдельно подтверждаются: (1) artwork/layout относительно утверждённых макетов; (2) реальные interaction states и hit areas; (3) binding визуального состояния к реальным параметрам/processor/backend; (4) runtime-проверка Windows VST3, размеров окна, DPI и повторного открытия с фиксируемыми результатами.
+
+Приёмка включает независимость и восстановление контекстов MELODY/PATTERN, независимость PRESETS/PLAYING, корректность навигации, подсветки и disabled/unavailable состояний, а затем точный Windows x64 build, contract tests, CTest, skin validation/staging, pluginval strictness 5 и отдельную ручную host-проверку в FL Studio 20.
+
+**Порядок работ остаётся неизменным: сначала полная визуальная оболочка NEON STAGE и её проверка; аудиодвижок, DSP и интеграция сэмплов не входят в этот этап и не должны начинаться до завершения визуального этапа.**
+
+**Статус записи:** пользовательское утверждение требований зафиксировано. Это фиксация спецификации, а не заявление о завершённой реализации или успешной приёмке.
+
+
+## 2026-11-22 — пользователь утвердил окончательную структуру PATTERN: два рабочих раздела
+
+Пользователь явно подтвердил и зафиксировал следующую структуру PATTERN. Она уточняет ранее утверждённую двухоконную архитектуру и становится обязательной информационной базой для дальнейшей визуальной реализации.
+
+```text
+PATTERN
+│
+├── 01 PRESETS
+│   ├── GENRE
+│   ├── STYLE
+│   ├── ARTIST / SOUND
+│   └── SECTION
+│
+└── 02 PLAYING / PATTERN / ARTICULATIONS
+    ├── PLAYING
+    ├── PATTERN
+    └── ARTICULATIONS
+```
+
+### Назначение разделов
+
+**01 PRESETS — что выбрать / какой музыкальный материал использовать**
+- GENRE — жанровая категория.
+- STYLE — музыкальное направление или характер звучания.
+- ARTIST / SOUND — оригинальная стилистическая подборка/звуковая направленность; не копировать защищённые записи, риффы, пресеты, брендинг или оформление исполнителей.
+- SECTION — композиционная часть: INTRO, VERSE, PRE-CHORUS, CHORUS, BRIDGE, OUTRO и другие фактически поддерживаемые разделы.
+
+**02 PLAYING / PATTERN / ARTICULATIONS — как исполнять выбранный материал**
+- PLAYING — характер и техника исполнения.
+- PATTERN — конкретный ритмический рисунок и его параметры.
+- ARTICULATIONS — артикуляции и способы звукоизвлечения.
+
+### Архитектурные правила
+
+- В продукте остаются ровно два верхнеуровневых режима: MELODY и PATTERN.
+- У PATTERN ровно два основных рабочих раздела: **01 PRESETS** и **02 PLAYING / PATTERN / ARTICULATIONS**.
+- GENRE, STYLE, ARTIST / SOUND и SECTION являются подразделами каталога PRESETS.
+- PLAYING, PATTERN и ARTICULATIONS являются функциональными областями второго рабочего раздела, а не дополнительными верхнеуровневыми режимами.
+- Сохраняется ранее утверждённая координация двух рабочих окон PATTERN: окно PRESETS отвечает за выбор каталога/раздела материала; второе рабочее окно — за PLAYING, PATTERN и ARTICULATIONS. Оба окна принадлежат режиму PATTERN.
+- Выбор в PRESETS не должен молча перезаписывать настройки исполнения; изменения PLAYING, PATTERN или ARTICULATIONS не должны изменять выбранный PRESETS.
+- Состояния выбора должны сохраняться при переходах между окнами и режимами MELODY ↔ PATTERN.
+- Доступность PATTERN/ARTICULATIONS определяется только реально проверенными записями, законностью использования и корректными playable mappings. Непроверенные позиции остаются unavailable; фиктивные READY/ACTIVE состояния запрещены.
+- Визуальная реализация следует утверждённым макетам NEON STAGE 01–07, палитре и правилам реальных интерактивных состояний. Session Guitarist остаётся только UX/workflow ориентиром.
+
+**Статус:** структура утверждена пользователем и зафиксирована как обязательная база. Эта запись фиксирует архитектуру и требования, но сама по себе не означает, что все перечисленные каталоги, состояния и взаимодействия уже реализованы или прошли runtime/host-приёмку. Аудиодвижок и сэмплы остаются вне текущего визуального этапа.
+
+
+## 2026-11-22 — NEON STAGE visual UX reference: SESSION GUITARIST – ELECTRIC SUNBURST DELUXE
+
+Пользователь подтвердил **SESSION GUITARIST – ELECTRIC SUNBURST DELUXE** как основной ориентир качества UX/workflow для дальнейшей визуальной реализации NEON STAGE. Это уточнение не заменяет и не отменяет утверждённые макеты NEON STAGE 01–07, дополнительные assets/Sprite/SpriteSheets, палитру, оригинальную композицию и ранее утверждённую архитектуру MELODY/PATTERN.
+
+### Что перенимаем как UX-принципы
+
+1. **Song / Preset Browser:** быстрый поиск, понятная группировка музыкального материала, быстрый выбор song/preset-контекста, видимое текущее значение и быстрый возврат в каталог.
+2. **Pattern Browser:** быстрый поиск ритмических рисунков по атрибутам (жанр, стиль исполнения, размер/ритмическая сетка и другие реально поддерживаемые метаданные); понятное разделение каталога и выбранного рисунка; карточки/слоты с однозначным selected state.
+3. **Song Sections / Pattern Slots:** удобная организация материала по INTRO, VERSE, PRE-CHORUS, CHORUS, BRIDGE, OUTRO; быстрый просмотр и смена рисунка в контексте выбранной части; Preview до Apply и явный Cancel.
+4. **Разделение свободной мелодической игры и pattern-based workflow:** MELODY и PATTERN остаются двумя верхнеуровневыми режимами NEON STAGE с независимым состоянием. У PATTERN остаётся утверждённая структура:
+   - 01 PRESETS: GENRE → STYLE → ARTIST / SOUND → SECTION.
+   - 02 PLAYING / PATTERN / ARTICULATIONS: PLAYING, PATTERN, ARTICULATIONS.
+5. **Performance controls:** крупные, быстро читаемые органы управления; мгновенная обратная связь; понятные значения и диапазоны; плавные переходы; точная реакция на MIDI и изменение параметров.
+6. **Guitar / Playback settings:** логично сгруппированные параметры исполнения и воспроизведения, включая timing, swing/humanize, latch/sync и tempo ratio — только если соответствующие функции реально реализованы и привязаны к processor/APVTS.
+7. **Effects workflow:** ясная цепочка эффектов, быстрый переход к подробной настройке выбранного эффекта, отчётливые ON/OFF состояния и реальные LED-индикаторы.
+8. **Info / Mapping feedback:** контекстная информация о выбранном паттерне, его диапазоне/назначении и доступных mappings. Не показывать несуществующие mappings или ложную доступность.
+9. **MIDI / preview workflow:** мгновенная и достоверная реакция на ноты, клавиши, preview и transport; отсутствие фиктивных индикаторов активности.
+
+### Что НЕ копируем
+
+- Не копировать графический интерфейс, расположение экранов, artwork, иконки, названия, брендинг, типографику, цветовую схему, визуальные ассеты или proprietary content Native Instruments.
+- Не копировать паттерны, риффы, MIDI, аудиозаписи, пресеты, mappings или sample content Session Guitarist.
+- Не менять утверждённую NEON STAGE композицию и макеты 01–07 ради визуального сходства с референсом.
+- Session Guitarist — только ориентир удобства, логики навигации, скорости работы и полноты feedback. Визуальная идентичность NEON STAGE остаётся оригинальной.
+
+### Приоритет визуального этапа
+
+Работать по утверждённым макетам 01–07 и дополнительным ресурсам проекта. Для каждого элемента довести до завершённого состояния:
+- точную геометрию, пропорции, материалы, рамки, фаски, тени и световые слои;
+- реалистичные ручки, кнопки, реле/переключатели, дисплеи, LED и индикаторы;
+- реальные NORMAL / HOVER / PRESSED / ACTIVE / SELECTED / FOCUSED / DISABLED / LOADING / ERROR состояния там, где они применимы;
+- динамическую cyan/electric-blue подсветку, привязанную к фактическому состоянию;
+- mouse/keyboard interaction parity, tooltips, hit areas и доступную навигацию;
+- корректную работу при resize, повторном открытии окон и DPI scaling;
+- экономные анимации без лишней перерисовки и без фиктивной активности.
+
+### Порядок и критерии завершения
+
+Визуальный этап остаётся первым и обязательным. Не переходить к аудиодвижку, DSP, сэмплам или новым аудиофункциям до завершения визуальной оболочки и её проверок.
+
+Для каждого из 14 модулей отдельно нужны доказательства artwork/layout, interaction, state binding и Windows VST3 runtime. Финальное визуальное завершение требует сверки с исходными макетами/ресурсами, прохождения релевантных automated checks, проверки размеров/DPI/окон и ручной приёмки в FL Studio 20. Документация или статический макет не считаются завершённой реализацией.
+
+**Статус:** пользователь утвердил SESSION GUITARIST – ELECTRIC SUNBURST DELUXE как UX/workflow reference. Эта запись фиксирует применяемые принципы и ограничения; она не заявляет о завершении визуальной реализации или runtime QA.
+
+
+## 2026-11-22 — ПОДТВЕРЖДЕНИЕ ПОЛЬЗОВАТЕЛЯ: ПРОСТАЯ ОРГАНИЗАЦИЯ NEON STAGE
+
+Пользователь подтвердил визуальную базу повторно. Дополнительное обязательное условие: интерфейс должен быть легко организован и понятен, несмотря на богатую коммерческую графику.
+
+- Сохранять утверждённую композицию макетов NEON STAGE 01–07 и связанные assets/Sprite/SpriteSheets.
+- Верхний уровень: только MELODY и PATTERN.
+- В PATTERN: 01 PRESETS (GENRE, STYLE, ARTIST / SOUND, SECTION) и 02 PLAYING / PATTERN / ARTICULATIONS (PLAYING, PATTERN, ARTICULATIONS).
+- Не вводить лишние уровни каталога, дублирующие вкладки или ненужные промежуточные окна.
+- Всегда показывать понятный текущий раздел, выбранный preset и фактические состояния функций.
+- Переключение режимов и окон сохраняет независимый контекст и параметры; PLAYING не меняет PRESETS.
+- Основные действия должны быть доступны очевидно и с минимальным количеством переходов; названия и назначение контролов читаемы, значения параметров доступны сразу.
+- Preview / Apply / Cancel должны иметь ясную и последовательную семантику.
+- Session Guitarist – Electric Sunburst Deluxe используется только как UX/workflow reference: удобство навигации, preview, организации библиотек, управления исполнением и обратной связи. Не копировать его графику, брендинг, компоновку или защищённый контент.
+- Все состояния, подсветка, LED, дисплеи и анимации отображают реальные данные. Никакой декоративной имитации активности.
+
+**Статус:** требование утверждено как часть визуального контракта. Это фиксация требований, а не заявление о завершённой реализации или runtime-приёмке.
+
+
+## 2026-11-22 — NEON STAGE: визуальная иерархия второго окна PATTERN
+
+В `PPGUPlayingStylePanel` добавлена трёхколоночная рабочая композиция с отдельными карточками:
+- `01 / PLAYING` — отдельная функциональная область исполнения;
+- `02 / PATTERN` — отдельная область ритмического рисунка; пока без подтверждённого каталога отображается честный статус `NO VERIFIED PATTERN DATA`;
+- `03 / ARTICULATIONS` — статус доступности артикуляций, активного исполнения и текущего источника.
+
+Карточки получили общую глубину, тонкую металлическую рамку и верхнюю cyan/electric-blue маркировку; центральная область визуально выделена как рабочий фокус. Существующая палитра и архитектура двух окон PATTERN сохранены. Не добавлялись фиктивные selectable элементы, playable patterns или articulation mappings.
+
+**Статус проверки:** изменение записано в код и ожидает CI. Визуальная pixel-parity сверка, Windows VST3 runtime, DPI/resize и ручная проверка в FL Studio 20 ещё не подтверждены. Это ограниченное улучшение иерархии, не завершение визуального этапа.
+
+## 2026-11-22 — NEON STAGE: премиальная отделка карточек PERFORMANCE WORKSPACE
+
+В PPGUPlayingStylePanel::paint() улучшена материальная отделка трёх рабочих карточек:
+- вертикальный графитовый градиент между panel_elevated и panel;
+- тонкая верхняя грань и внутренняя затемнённая рамка для металлической глубины;
+- отдельная акцентная кромка центральной карточки electric-blue и cyan для боковых карточек;
+- свечение ограничено контуром карточки и не имитирует состояние функции.
+
+Изменение не затрагивает DSP, параметры, sample playback или неподтверждённые mappings. Используются существующие theme tokens, поэтому отделка остаётся совместимой с темизацией.
+
+**Статус проверки:** исходник обновлён в PR #17. Компиляция и Windows VST3 runtime для нового коммита ожидают CI; визуальная проверка в FL Studio 20, DPI и resize не выполнены. Предыдущие CI-запуски на SHA 4e4af10 не являются проверкой нового коммита.
+
+## 2026-11-22 — NEON STAGE: отделка селекторов и обратная связь взаимодействия
+
+В PPGUPremiumLookAndFeel::drawComboBox() обновлена отрисовка выпадающих селекторов:
+- вертикальный градиент поверхности с отдельной реакцией на нажатие и disabled;
+- тонкая верхняя фаска и внутренняя затемнённая кромка;
+- усиленная cyan/electric-blue подсветка стрелки при keyboard focus или нажатии;
+- hover/focus/pressed остаются привязаны к реальным состояниям JUCE, значение выбора и APVTS не подменяются графикой.
+
+Изменение относится к визуальному слою и не меняет DSP или аудиопоток. Применяется единообразно ко всем ComboBox, использующим PPGUPremiumLookAndFeel.
+
+**Статус проверки:** код записан в PR #17. Требуются CI для нового SHA, визуальная проверка на всех размерах окна и DPI, а также ручная приёмка в FL Studio 20. Динамические состояния пока не объявляются runtime-проверенными.
+
+## 2026-11-22 — NEON STAGE fallback palette parity
+
+Исправлены значения резервной палитры PPGUThemeManager::Palette::Tokens в Source/UI/ThemeManager.h: danger теперь #FF665E, warning — #FFB454. До исправления fallback palette расходилась с каноническим SKIN/Skin_053/theme.json и использовала розово-красный оттенок для danger. Это затрагивало состояние сброса темы/резервной палитры, а не загруженные корректные JSON-темы.
+
+Изменение сохраняет утверждённый cyan/graphite визуальный язык и приводит fallback к значениям канонического SKIN-1. Аудиодвижок, DSP, MIDI, APVTS и bindings не затронуты.
+
+**Проверка:** исходный diff и соответствующие HEX-значения сверены с SKIN/Skin_053/theme.json. Коммит исходника: 2aa3ecd29e5b96a7e86511999716ebf2250f44d0. Компиляция и Windows CI для этого SHA ещё не подтверждены; runtime/FL Studio 20 визуальная приёмка не выполнялась.
+
+## 2026-11-22 — SKIN-1 artwork palette cleanup
+
+В трёх канонических SVG-ресурсах SKIN-1 убраны пурпурные акценты D46BFF: texture.svg, bezel.svg и crest.svg. Они приведены к утверждённому electric-blue #6B8CFF. В sprite-sheet manifest значение glow_blue #0048FF также приведено к #6B8CFF, чтобы спецификация атласов не противоречила канонической теме.
+
+Вместе с предыдущей правкой fallback danger/warning это устраняет обнаруженные расхождения между частью artwork/manifest/fallback и утверждённой палитрой NEON STAGE DEFAULT. Это точечная очистка Skin-1, а не заявление о завершении аудита всех 16 тем.
+
+**Проверка:** все четыре исходных файла повторно получены с рабочей ветки и обновлены последовательными GitHub commits. Проверено отсутствие заменяемых прежних HEX в соответствующих исходных строках. Проверка рендеринга SVG в JUCE, компиляция Windows и runtime visual acceptance ещё не выполнены.
+
+## 2026-11-22 — NEON STAGE: исправление переноса строки в статусе PLAYING
+
+В пустом состоянии карточки `01 / PLAYING` исправлена строка статуса: вместо отображения буквальной последовательности `\\n` теперь используется корректный перевод строки C++, чтобы две строки сообщения отображались раздельно внутри карточки. Текст и смысл статуса не менялись; неподтверждённые playing maps по-прежнему не выдаются за доступную функциональность.
+
+**Проверка:** исходник повторно получен из ветки PR #17; после исправления подтверждено, что C++-строка содержит escape-последовательность перевода строки `\\n`, а не двойное экранирование. Коммит исправления: `c94fc0580cb60c4ae4c39c2258e6d3e88c43324e`. CI для этого нового SHA пока не найден; ранее запущенные Windows jobs продолжают проверять предыдущую ревизию PR. Runtime, визуальная проверка размеров/DPI и FL Studio 20 ещё не подтверждены.
+
+
+## 2026-11-22 — NEON STAGE: fallback-обратная связь кнопок без графических атласов
+
+В резервной ветке отрисовки `PPGUPremiumLookAndFeel::drawButtonBackground()` добавлен тот же вывод FX LED и клавиатурного focus-ring, который уже присутствует в artwork/atlas-ветках. Теперь отсутствие необязательного button artwork/controls sprite atlas не должно скрывать реальное включённое состояние FX или визуальный фокус клавиатурной навигации. LED по-прежнему загорается только при включённом toggle и доступном контроле; отключённый или bypass-контрол не выдаётся за активный.
+
+**Проверка:** изменение внесено в `Source/PluginEditor.cpp` коммитом `1581b9af48f4c588f51514b067eeb747f147dbb8`. Проверена структура fallback-ветки и наличие вызовов общего state-feedback после базовой отрисовки. Компиляция, проверка сценария с реально отсутствующими атласами, Windows runtime, DPI и FL Studio 20 пока не подтверждены.
+
+
+## 2026-11-22 — NEON STAGE: полная обратная связь ручек в legacy rotary fallback
+
+В резервной ветке `drawRotarySlider()`, которая использует старый 8-кадровый controls atlas при недоступности 61-frame rotary atlas и отдельных control artwork, устранён визуальный разрыв: ранее ветка рисовала только дискретный кадр корпуса ручки и сразу завершалась. Теперь поверх корпуса отображаются:
+- непрерывная световая дуга фактического значения параметра;
+- указатель, соответствующий текущему углу Slider/APVTS;
+- отдельная подсветка hover и keyboard focus;
+- приглушённое состояние disabled без ложного активного свечения.
+
+Восемь кадров по-прежнему отвечают только за внешний вид корпуса; значение параметра не квантуется и не изменяется от отрисовки. Это приводит fallback-путь к тем же базовым правилам feedback, что и основной 61-frame atlas.
+
+**Проверка:** исходник обновлён коммитом `c24ffc7eb5538557564db4264b500651ae25bea7`. Проверена структура fallback-ветки, наличие live value arc, pointer и hover/focus/disabled ветвей. Компиляция, проверка искусственно отключённого 61-frame atlas, screenshot parity, DPI/resize и FL Studio 20 runtime пока не подтверждены.
+
+
+## 2026-11-22 — NEON STAGE: устранён фиктивный график в FX EDIT
+
+В рабочей области FX EDIT обнаружена декоративная статическая кривая PROCESS RESPONSE: она не получала телеметрию DSP и выглядела как измеренный отклик, хотя не отражала реальную обработку. В соответствии с утверждённым правилом «дисплеи показывают реальные данные, без фиктивной активности» кривая удалена. Заголовок теперь прямо сообщает `RESPONSE DISPLAY / LIVE DATA NOT CONNECTED`, а в области графика отображается честное состояние `LIVE RESPONSE DATA NOT AVAILABLE` на фоне сохранённой сетки и графитовой панели.
+
+Изменение не добавляет и не меняет DSP, аудиопоток, параметры или обработку звука. Оно устраняет ложное визуальное обещание до появления настоящей телеметрии.
+
+**Проверка:** изменение исходника зафиксировано коммитом `7e3995e2e4719a2d7ca862eeb602e28f6a355a8a`. Проверено текстовое содержимое патча и удаление статической кривой; Windows CI для нового SHA ещё не получен. Runtime, pixel-parity, DPI/resize и FL Studio 20 визуальная приёмка остаются открытыми.

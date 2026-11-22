@@ -1118,7 +1118,7 @@ public:
         powerButton.setButtonText("POWER");
         powerButton.setClickingTogglesState(true);
         addAndMakeVisible(powerButton);
-        graphCaption.setText("PROCESS RESPONSE  /  VISUAL GUIDE", juce::dontSendNotification);
+        graphCaption.setText("RESPONSE DISPLAY  /  LIVE DATA NOT CONNECTED", juce::dontSendNotification);
         graphCaption.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(graphCaption);
         status.setText("Controls are attached to the existing APVTS parameters.", juce::dontSendNotification);
@@ -1229,13 +1229,13 @@ public:
                 g.drawHorizontalLine(graphArea.getY() + graphArea.getHeight() * i / 5, graphArea.getX(), graphArea.getRight());
             for (int i = 1; i < 9; ++i)
                 g.drawVerticalLine(graphArea.getX() + graphArea.getWidth() * i / 9, graphArea.getY(), graphArea.getBottom());
-            juce::Path curve;
-            curve.startNewSubPath(static_cast<float>(graphArea.getX()), static_cast<float>(graphArea.getCentreY()));
-            curve.cubicTo(graphArea.getX() + graphArea.getWidth() * 0.28f, graphArea.getY() + graphArea.getHeight() * 0.78f,
-                          graphArea.getX() + graphArea.getWidth() * 0.62f, graphArea.getY() + graphArea.getHeight() * 0.22f,
-                          static_cast<float>(graphArea.getRight()), static_cast<float>(graphArea.getCentreY()));
-            g.setColour(palette.token("accent"));
-            g.strokePath(curve, juce::PathStrokeType(2.0f));
+            // Do not draw a fabricated response curve: no live DSP response
+            // telemetry is currently exposed to this visual workspace.
+            g.setColour(palette.token("text_secondary").withAlpha(0.82f));
+            g.setFont(makeThemeFont(palette, 9.0f, false, true));
+            g.drawFittedText("LIVE RESPONSE DATA NOT AVAILABLE",
+                             graphArea.reduced(10, 4),
+                             juce::Justification::centred, 1);
         }
     }
 
@@ -1360,10 +1360,12 @@ public:
     PPGUPatternSectionPanel(PopPunkGuitarUltimateAudioProcessor& processorIn,
                             juce::String selectedTonePreset,
                             std::function<void()> importGuitarAction,
-                            std::function<void()> openAutoChordsAction)
+                            std::function<void()> openAutoChordsAction,
+                            std::function<void()> openPlayingStyleWindowAction)
         : processor(processorIn), originalSection(processorIn.getSelectedSongSection()),
           tonePresetName(std::move(selectedTonePreset)), importAction(std::move(importGuitarAction)),
-          autoChordsAction(std::move(openAutoChordsAction))
+          autoChordsAction(std::move(openAutoChordsAction)),
+          playingStyleAction(std::move(openPlayingStyleWindowAction))
     {
         title.setText("PATTERN  /  SONG SECTION ROUTING", juce::dontSendNotification);
         title.setFont(makeThemeFont(palette, 19.0f, false, true));
@@ -1372,16 +1374,20 @@ public:
         patternLabel.setText("RHYTHM CATALOG", juce::dontSendNotification);
         sourceLabel.setText("GUITAR / INSTRUMENT SOURCE", juce::dontSendNotification);
         toneLabel.setText("TONE PRESET", juce::dontSendNotification);
-        performanceLabel.setText("PERFORMANCE ARTICULATION", juce::dontSendNotification);
+        performanceLabel.setText("PLAYING STYLE", juce::dontSendNotification);
+        openPlayingStyle.setButtonText("OPEN PLAYING STYLE  >");
+        openPlayingStyle.setTooltip("Open the coordinated second PATTERN window: playing style and verified articulations.");
+        openPlayingStyle.onClick = [this] { if (playingStyleAction) playingStyleAction(); };
+        addAndMakeVisible(openPlayingStyle);
         sourceValue.setJustificationType(juce::Justification::centredLeft);
         sourceValue.setText("NO SFZ INSTRUMENT LOADED", juce::dontSendNotification);
         toneValue.setJustificationType(juce::Justification::centredLeft);
         toneValue.setText(tonePresetName.isNotEmpty() ? tonePresetName : "SELECT A FACTORY PRESET",
                              juce::dontSendNotification);
         performanceValue.setJustificationType(juce::Justification::centredLeft);
-        performanceValue.setText("NO RECORDED ARTICULATION MAP",
+        performanceValue.setText("SECOND WINDOW  /  STYLE & MAPPING STATUS",
                                  juce::dontSendNotification);
-        performanceValue.setTooltip("Only source-authored SFZ keyswitch labels are shown here. No mapped label means no verified articulation is exposed.");
+        performanceValue.setTooltip("Playing-style and articulation selection are managed in the coordinated second PATTERN window.");
         importSource.setButtonText("IMPORT GUITAR");
         importSource.onClick = [this] { if (importAction) importAction(); };
         for (auto* label : { &sectionLabel, &patternLabel, &sourceLabel, &toneLabel,
@@ -1391,6 +1397,7 @@ public:
         openAutoChords.setButtonText("OPEN AUTOCHORDS");
         openAutoChords.onClick = [this] { if (autoChordsAction) autoChordsAction(); };
         addAndMakeVisible(openAutoChords);
+
         for (int i = 0; i < static_cast<int>(patternCards.size()); ++i)
         {
             auto& card = patternCards[static_cast<size_t>(i)];
@@ -1490,6 +1497,10 @@ public:
         }
         openAutoChords.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
         openAutoChords.setColour(juce::TextButton::textColourOffId, palette.token("accent"));
+        openPlayingStyle.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
+        openPlayingStyle.setColour(juce::TextButton::textColourOffId, palette.token("accent"));
+        openPlayingStyle.setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
+
         for (auto& card : patternCards)
         {
             card.setColour(juce::TextButton::buttonColourId, palette.token("control_bg"));
@@ -1525,7 +1536,10 @@ public:
         toneValue.setBounds(area.removeFromTop(21));
         area.removeFromTop(3);
         performanceLabel.setBounds(area.removeFromTop(12));
-        performanceValue.setBounds(area.removeFromTop(21));
+        auto styleRow = area.removeFromTop(25);
+        openPlayingStyle.setBounds(styleRow.removeFromRight(176));
+        styleRow.removeFromRight(8);
+        performanceValue.setBounds(styleRow);
 
         area.removeFromTop(5);
         auto sectionRow = area.removeFromTop(29);
@@ -1534,8 +1548,9 @@ public:
 
         area.removeFromTop(5);
         auto patternHeader = area.removeFromTop(24);
-        patternLabel.setBounds(patternHeader.removeFromLeft(180));
-        openAutoChords.setBounds(patternHeader.removeFromRight(174).reduced(0, 1));
+        patternLabel.setBounds(patternHeader.removeFromLeft(150));
+        openAutoChords.setBounds(patternHeader.removeFromRight(150).reduced(0, 1));
+
 
         area.removeFromTop(3);
         const int cardGap = 7;
@@ -1627,12 +1642,178 @@ private:
     int originalSection = 0;
     PPGUThemeManager::Palette palette;
     juce::String tonePresetName;
-    std::function<void()> importAction, autoChordsAction;
+    std::function<void()> importAction, autoChordsAction, playingStyleAction;
     juce::Label title, sourceLabel, sourceValue, toneLabel, toneValue,
                 performanceLabel, performanceValue, sectionLabel, patternLabel, status;
     juce::ComboBox sectionBox, patternBox;
     std::array<juce::TextButton, 8> patternCards;
-    juce::TextButton importSource, openAutoChords, preview, apply, cancel;
+    juce::TextButton importSource, openAutoChords, openPlayingStyle, preview, apply, cancel;
+};
+
+class PPGUPlayingStylePanel final : public juce::Component,
+                                    public PPGUThemeAwarePanel,
+                                    private juce::Timer
+{
+public:
+    explicit PPGUPlayingStylePanel(PopPunkGuitarUltimateAudioProcessor& processorIn)
+        : processor(processorIn)
+    {
+        title.setText("PLAYING STYLE  /  PERFORMANCE WORKSPACE", juce::dontSendNotification);
+        subtitle.setText("PATTERN  /  ARTICULATION CATALOG", juce::dontSendNotification);
+        styleLabel.setText("PLAYING STYLE", juce::dontSendNotification);
+        articulationLabel.setText("ARTICULATION", juce::dontSendNotification);
+        // Candidate articulation names are deliberately not rendered here.
+        // A name may enter the UI only after the loaded instrument provides both
+        // playable sample material and a complete, validated articulation mapping.
+        styleEntry.setVisible(false);
+        styleLabel.setVisible(false);
+        playingStatus.setText("NO VERIFIED PLAYING MAP\nLOAD A SOURCE WITH VALIDATED PERFORMANCE DATA",
+                              juce::dontSendNotification);
+        playingStatus.setTooltip("Playing techniques remain unavailable until the loaded instrument provides validated sample zones and performance mappings.");
+        availability.setText("NO VERIFIED ARTICULATIONS AVAILABLE", juce::dontSendNotification);
+        availability.setTooltip("Articulation names are hidden until the loaded source has playable sample zones and complete, validated SFZ/MIDI mappings. A switch label alone is insufficient.");
+        activeLabel.setText("ACTIVE PERFORMANCE  /  NONE VERIFIED", juce::dontSendNotification);
+        sourceLabel.setText("INSTRUMENT SOURCE  /  " + (processor.getCurrentSfzFilePath().isNotEmpty()
+            ? juce::File(processor.getCurrentSfzFilePath()).getFileName()
+            : juce::String("NO SFZ INSTRUMENT LOADED")), juce::dontSendNotification);
+        addAndMakeVisible(title);
+        addAndMakeVisible(subtitle);
+        styleLabel.setText("01  /  PLAYING", juce::dontSendNotification);
+        articulationLabel.setText("03  /  ARTICULATIONS", juce::dontSendNotification);
+        patternLabel.setText("02  /  PATTERN", juce::dontSendNotification);
+        patternStatus.setText("NO VERIFIED PATTERN DATA", juce::dontSendNotification);
+        addAndMakeVisible(styleLabel);
+        addAndMakeVisible(playingStatus);
+        addAndMakeVisible(patternLabel);
+        addAndMakeVisible(patternStatus);
+        addAndMakeVisible(articulationLabel);
+        addAndMakeVisible(availability);
+        addAndMakeVisible(activeLabel);
+        addAndMakeVisible(sourceLabel);
+        // Keep the candidate list empty until a source-map registry can prove availability.
+        setThemePalette(palette);
+        startTimerHz(2);
+    }
+
+    void setThemePalette(const PPGUThemeManager::Palette& value) override
+    {
+        palette = value;
+        title.setFont(makeThemeFont(palette, 19.0f, false, true));
+        subtitle.setFont(makeThemeFont(palette, 10.0f, false, true));
+        for (auto* label : { &title, &subtitle, &styleLabel, &playingStatus, &patternLabel,
+                             &patternStatus, &articulationLabel, &availability, &activeLabel, &sourceLabel })
+            label->setColour(juce::Label::textColourId,
+                label == &title ? palette.token("text_primary")
+                : ((label == &availability || label == &patternStatus)
+                    ? palette.token("warning") : palette.token("text_secondary")));
+        for (auto* label : { &styleLabel, &patternLabel, &articulationLabel })
+            label->setFont(makeThemeFont(palette, 10.0f, false, true));
+        for (auto* label : { &playingStatus, &patternStatus, &availability, &activeLabel, &sourceLabel })
+            label->setFont(makeThemeFont(palette, 11.0f));
+        styleEntry.setColour(juce::TextButton::buttonColourId, palette.token("lowlight"));
+        styleEntry.setColour(juce::TextButton::textColourOffId, palette.token("text_disabled"));
+        styleEntry.setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
+        repaint();
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.30f, 0.035f);
+        auto area = getLocalBounds().reduced(22, 104);
+        const int gap = 12;
+        const int cardWidth = (area.getWidth() - gap * 2) / 3;
+        const std::array<juce::Rectangle<int>, 3> cards {
+            area.removeFromLeft(cardWidth), juce::Rectangle<int>(), juce::Rectangle<int>()
+        };
+        auto remaining = area;
+        auto second = remaining.removeFromLeft(gap);
+        juce::ignoreUnused(second);
+        auto card2 = remaining.removeFromLeft(cardWidth);
+        remaining.removeFromLeft(gap);
+        auto card3 = remaining;
+        const std::array<juce::Rectangle<int>, 3> panels { cards[0], card2, card3 };
+        for (int i = 0; i < static_cast<int>(panels.size()); ++i)
+        {
+            auto card = panels[static_cast<size_t>(i)].toFloat();
+            g.setColour(palette.token("shadow").withAlpha(0.55f));
+            g.fillRoundedRectangle(card.translated(0.0f, 3.0f), 8.0f);
+            const auto panelTop = palette.token("panel_elevated");
+            const auto panelBottom = palette.token("panel");
+            g.setGradientFill(juce::ColourGradient(panelTop.withAlpha(0.98f),
+                card.getX(), card.getY(), panelBottom, card.getX(), card.getBottom(), false));
+            g.fillRoundedRectangle(card, 8.0f);
+
+            // Restrained metallic bevel: a soft upper edge and a darker inner
+            // boundary give the card depth without introducing fake activity.
+            auto inner = card.reduced(1.0f);
+            g.setColour(palette.token("highlight").withAlpha(0.13f));
+            g.drawRoundedRectangle(inner.removeFromTop(1.0f), 0.5f, 1.0f);
+            g.setColour(palette.token("control_border").withAlpha(0.92f));
+            g.drawRoundedRectangle(card, 8.0f, 1.0f);
+            g.setColour(palette.token("lowlight").withAlpha(0.62f));
+            g.drawRoundedRectangle(card.reduced(2.0f), 6.0f, 0.7f);
+
+            auto top = card.removeFromTop(3.0f);
+            const auto accent = i == 1 ? palette.token("accent_glow")
+                                       : palette.token("accent").withAlpha(0.78f);
+            g.setColour(accent.withAlpha(0.16f));
+            g.fillRoundedRectangle(top.expanded(2.0f, 1.0f), 2.0f);
+            g.setColour(accent);
+            g.fillRoundedRectangle(top, 1.5f);
+        }
+    }
+
+    void resized() override
+    {
+        auto area = getLocalBounds().reduced(22, 18);
+        title.setBounds(area.removeFromTop(30));
+        subtitle.setBounds(area.removeFromTop(18));
+        area.removeFromTop(22);
+        const int gap = 12;
+        const int cardWidth = (area.getWidth() - gap * 2) / 3;
+        auto first = area.removeFromLeft(cardWidth).reduced(14, 12);
+        area.removeFromLeft(gap);
+        auto second = area.removeFromLeft(cardWidth).reduced(14, 12);
+        area.removeFromLeft(gap);
+        auto third = area.reduced(14, 12);
+        styleLabel.setBounds(first.removeFromTop(22));
+        first.removeFromTop(12);
+        playingStatus.setBounds(first.removeFromTop(54));
+        patternLabel.setBounds(second.removeFromTop(22));
+        second.removeFromTop(12);
+        patternStatus.setBounds(second.removeFromTop(30));
+        articulationLabel.setBounds(third.removeFromTop(22));
+        third.removeFromTop(12);
+        availability.setBounds(third.removeFromTop(30));
+        third.removeFromTop(16);
+        activeLabel.setBounds(third.removeFromTop(24));
+        sourceLabel.setBounds(third.removeFromTop(24));
+    }
+
+private:
+    void timerCallback() override
+    {
+        const auto path = processor.getCurrentSfzFilePath();
+        const auto source = path.isNotEmpty() ? juce::File(path).getFileName()
+                                               : juce::String("NO SFZ INSTRUMENT LOADED");
+        const auto sourceText = "INSTRUMENT SOURCE  /  " + source;
+        if (sourceLabel.getText() != sourceText)
+            sourceLabel.setText(sourceText, juce::dontSendNotification);
+
+        // Do not expose raw keyswitch metadata as a playable articulation.
+        // Until sample-zone and mapping validation is available, no articulation
+        // can be declared active or selectable.
+        const juce::String activeText("ACTIVE PERFORMANCE  /  NONE VERIFIED");
+        if (activeLabel.getText() != activeText)
+            activeLabel.setText(activeText, juce::dontSendNotification);
+    }
+
+    PopPunkGuitarUltimateAudioProcessor& processor;
+    PPGUThemeManager::Palette palette;
+    juce::Label title, subtitle, styleLabel, playingStatus, patternLabel, patternStatus,
+                articulationLabel, availability, activeLabel, sourceLabel;
+    juce::TextButton styleEntry;
 };
 
 class PPGUChordDiagram final : public juce::Component, public PPGUThemeAwarePanel
@@ -1920,32 +2101,36 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         g.drawImage(palette.rotarySpriteSheet, destinationX, destinationY,
                     diameter, diameter, sourceX, sourceY, cellSize, cellSize);
 
-        // A live luminous value arc surrounds the physical rotary control.
-        // It follows the Slider/APVTS normalized value rather than an animation.
-        if (slider.isEnabled())
+        // Premium value ring: its position is the real APVTS value, while
+        // hover/focus only change the optical response (never the parameter).
+        const bool rotaryEnabled = slider.isEnabled();
+        const bool rotaryHovered = rotaryEnabled && slider.isMouseOverOrDragging();
+        const bool rotaryFocused = rotaryEnabled && slider.hasKeyboardFocus(true);
+        const float centreX = static_cast<float>(destinationX) + diameter * 0.5f;
+        const float centreY = static_cast<float>(destinationY) + diameter * 0.5f;
+        const float arcRadius = static_cast<float>(diameter) * 0.455f;
+        const float valueAngle = start + pos * (end - start);
+        juce::Path arcTrack;
+        arcTrack.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                               0.0f, start, end, true);
+        g.setColour(rotaryEnabled ? palette.token("control_border").withAlpha(0.88f)
+                                  : palette.token("text_disabled").withAlpha(0.45f));
+        g.strokePath(arcTrack, juce::PathStrokeType(3.2f,
+            juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+        if (rotaryEnabled && pos > 0.0001f)
         {
-            const float centreX = static_cast<float>(destinationX) + diameter * 0.5f;
-            const float centreY = static_cast<float>(destinationY) + diameter * 0.5f;
-            const float arcRadius = static_cast<float>(diameter) * 0.455f;
-            const float valueAngle = start + pos * (end - start);
-            juce::Path arcTrack;
-            arcTrack.addCentredArc(centreX, centreY, arcRadius, arcRadius,
-                                   0.0f, start, end, true);
-            g.setColour(palette.token("control_border").withAlpha(0.82f));
-            g.strokePath(arcTrack, juce::PathStrokeType(3.2f,
+            juce::Path valueArc;
+            valueArc.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                                   0.0f, start, valueAngle, true);
+            const auto liveAccent = rotaryFocused ? palette.token("highlight")
+                : (rotaryHovered ? palette.token("accent") : palette.token("accent_glow"));
+            g.setColour(liveAccent.withAlpha(rotaryHovered ? 0.58f : 0.38f));
+            g.strokePath(valueArc, juce::PathStrokeType(rotaryHovered ? 9.0f : 7.0f,
                 juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-            if (pos > 0.0001f)
-            {
-                juce::Path valueArc;
-                valueArc.addCentredArc(centreX, centreY, arcRadius, arcRadius,
-                                       0.0f, start, valueAngle, true);
-                g.setColour(palette.token("accent_glow").withAlpha(0.34f));
-                g.strokePath(valueArc, juce::PathStrokeType(7.0f,
-                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-                g.setColour(palette.token("accent").withAlpha(0.98f));
-                g.strokePath(valueArc, juce::PathStrokeType(2.8f,
-                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-            }
+            g.setColour(rotaryFocused ? palette.token("highlight")
+                                      : palette.token("accent").withAlpha(0.99f));
+            g.strokePath(valueArc, juce::PathStrokeType(rotaryHovered ? 3.4f : 2.8f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
         }
 
         // Every knob keeps its continuous 61-frame rotary animation, while its
@@ -1999,11 +2184,38 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
                 const int destinationY = y + (h - diameter) / 2;
                 g.drawImageWithin(*artwork, destinationX, destinationY, diameter, diameter,
                                   juce::RectanglePlacement::centred);
-                // Artwork remains position-neutral; the live indicator follows APVTS.
+                // The artwork is the physical knob face; the value arc and pointer
+                // are live overlays driven by the attached APVTS slider value.
                 const float cx = static_cast<float>(x) + static_cast<float>(w) * 0.5f;
                 const float cy = static_cast<float>(y) + static_cast<float>(h) * 0.5f;
                 const float radius = static_cast<float>(diameter) * 0.30f;
+                const float arcRadius = static_cast<float>(diameter) * 0.405f;
                 const float angle = start + pos * (end - start);
+                const bool enabled = slider.isEnabled();
+                const bool hovered = enabled && slider.isMouseOverOrDragging();
+                const bool focused = enabled && slider.hasKeyboardFocus(true);
+
+                juce::Path arcTrack;
+                arcTrack.addCentredArc(cx, cy, arcRadius, arcRadius, 0.0f,
+                                       start, end, true);
+                g.setColour(enabled ? palette.token("led_off").withAlpha(0.92f)
+                                    : palette.token("text_disabled").withAlpha(0.42f));
+                g.strokePath(arcTrack, juce::PathStrokeType(3.0f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+                juce::Path valueArc;
+                valueArc.addCentredArc(cx, cy, arcRadius, arcRadius, 0.0f,
+                                       start, angle, true);
+                if (enabled && pos > 0.0001f)
+                {
+                    g.setColour(palette.token("accent_glow").withAlpha(hovered ? 0.58f : 0.34f));
+                    g.strokePath(valueArc, juce::PathStrokeType(6.0f,
+                        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                    g.setColour(focused ? palette.token("highlight") : palette.token("accent"));
+                    g.strokePath(valueArc, juce::PathStrokeType(2.7f,
+                        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                }
+
                 juce::Path pointer;
                 pointer.startNewSubPath(cx, cy);
                 pointer.lineTo(cx + std::sin(angle) * radius,
@@ -2029,11 +2241,63 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         const int destinationY = y + (h - diameter) / 2;
         g.drawImage(palette.controlsSpriteSheet, destinationX, destinationY,
                     diameter, diameter, sourceX, sourceY, 100, 100);
-        if (!slider.isEnabled())
+
+        // The legacy 8-frame atlas is only the physical knob face. Keep the
+        // continuous parameter value and interaction state visible above it.
+        const float cx = static_cast<float>(destinationX) + diameter * 0.5f;
+        const float cy = static_cast<float>(destinationY) + diameter * 0.5f;
+        const float radius = static_cast<float>(diameter) * 0.30f;
+        const float arcRadius = static_cast<float>(diameter) * 0.455f;
+        const float angle = start + pos * (end - start);
+        const bool enabled = slider.isEnabled();
+        const bool hovered = enabled && slider.isMouseOverOrDragging();
+        const bool focused = enabled && slider.hasKeyboardFocus(true);
+
+        juce::Path arcTrack;
+        arcTrack.addCentredArc(cx, cy, arcRadius, arcRadius, 0.0f,
+                               start, end, true);
+        g.setColour(enabled ? palette.token("control_border").withAlpha(0.92f)
+                            : palette.token("text_disabled").withAlpha(0.48f));
+        g.strokePath(arcTrack, juce::PathStrokeType(3.0f,
+            juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        if (enabled && pos > 0.0001f)
+        {
+            juce::Path valueArc;
+            valueArc.addCentredArc(cx, cy, arcRadius, arcRadius, 0.0f,
+                                   start, angle, true);
+            g.setColour(palette.token("accent_glow").withAlpha(hovered ? 0.62f : 0.36f));
+            g.strokePath(valueArc, juce::PathStrokeType(hovered ? 8.0f : 6.0f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            g.setColour(focused ? palette.token("highlight") : palette.token("accent"));
+            g.strokePath(valueArc, juce::PathStrokeType(hovered ? 3.5f : 2.8f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+        }
+
+        juce::Path pointer;
+        pointer.startNewSubPath(cx, cy);
+        pointer.lineTo(cx + std::sin(angle) * radius,
+                       cy - std::cos(angle) * radius);
+        g.setColour(enabled ? palette.token("text_primary")
+                            : palette.token("text_disabled"));
+        g.strokePath(pointer, juce::PathStrokeType(2.2f,
+            juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        if (!enabled)
         {
             g.setColour(palette.token("window_bg").withAlpha(0.48f));
             g.fillEllipse(static_cast<float>(destinationX), static_cast<float>(destinationY),
                           static_cast<float>(diameter), static_cast<float>(diameter));
+        }
+        else if (hovered || focused)
+        {
+            const auto stateColour = focused ? palette.token("highlight")
+                                             : palette.token("accent");
+            g.setColour(stateColour.withAlpha(hovered ? 0.78f : 0.58f));
+            g.drawEllipse(static_cast<float>(destinationX) + 1.5f,
+                          static_cast<float>(destinationY) + 1.5f,
+                          static_cast<float>(diameter) - 3.0f,
+                          static_cast<float>(diameter) - 3.0f, 1.5f);
         }
         return;
     }
@@ -2299,6 +2563,12 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         g.setColour(palette.accentSecondary);
         g.fillRoundedRectangle(bounds.removeFromLeft(3.0f), 1.5f);
     }
+
+    // Keep functional feedback available even when optional button atlases
+    // are absent: active FX still gets its real-state LED and keyboard users
+    // retain the same visible focus ring as the artwork-backed path.
+    drawFxActiveIndicator();
+    drawKeyboardFocus();
 }
 
 void PPGUPremiumLookAndFeel::drawComboBox(juce::Graphics& g, int w, int h, bool down,
@@ -2314,8 +2584,21 @@ void PPGUPremiumLookAndFeel::drawComboBox(juce::Graphics& g, int w, int h, bool 
     else if (down || box.isMouseOver())
         face = face.brighter(0.08f);
 
-    g.setColour(face);
+    const auto topFace = enabled ? face.brighter(down ? 0.015f : 0.075f)
+                                 : face.brighter(0.025f);
+    const auto bottomFace = enabled ? face.darker(down ? 0.22f : 0.15f)
+                                    : face.darker(0.08f);
+    g.setGradientFill(juce::ColourGradient(topFace, bounds.getX(), bounds.getY(),
+                                           bottomFace, bounds.getX(), bounds.getBottom(), false));
     g.fillRoundedRectangle(bounds, 7.0f);
+
+    // Fine upper bevel and inset edge make the selector read as a machined
+    // control, while hover/press/focus remain driven by JUCE's real state.
+    auto inner = bounds.reduced(1.0f);
+    g.setColour(palette.token("highlight").withAlpha(enabled ? (box.isMouseOver() ? 0.24f : 0.13f) : 0.05f));
+    g.drawRoundedRectangle(inner, 6.0f, 0.8f);
+    g.setColour(palette.token("lowlight").withAlpha(0.72f));
+    g.drawRoundedRectangle(bounds.reduced(2.0f), 5.0f, 0.65f);
     g.setColour(focused ? palette.focus : (enabled ? palette.border : palette.token("lowlight")));
     g.drawRoundedRectangle(bounds, 7.0f, focused ? 2.0f : 1.0f);
 
@@ -2325,6 +2608,12 @@ void PPGUPremiumLookAndFeel::drawComboBox(juce::Graphics& g, int w, int h, bool 
     arrow.startNewSubPath(cx - 4.0f, cy - 2.0f);
     arrow.lineTo(cx, cy + 2.0f);
     arrow.lineTo(cx + 4.0f, cy - 2.0f);
+    if (focused || down)
+    {
+        g.setColour(palette.token("accent_glow").withAlpha(0.28f));
+        g.strokePath(arrow, juce::PathStrokeType(4.0f, juce::PathStrokeType::curved,
+                                                  juce::PathStrokeType::rounded));
+    }
     g.setColour(enabled ? palette.accent : palette.token("text_disabled"));
     g.strokePath(arrow, juce::PathStrokeType(1.8f, juce::PathStrokeType::curved,
                                               juce::PathStrokeType::rounded));
@@ -3228,7 +3517,28 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openPatternSectionPanel()
         spec.content = std::make_unique<PPGUPatternSectionPanel>(
             processor, presetBox.getText(),
             [safeThis] { if (safeThis != nullptr) safeThis->openImportGuitarPanel(); },
-            [safeThis] { if (safeThis != nullptr) safeThis->openAutoChordsPanel(); });
+            [safeThis] { if (safeThis != nullptr) safeThis->openAutoChordsPanel(); },
+            [safeThis] { if (safeThis != nullptr) safeThis->openPlayingStylePanel(); });
+        if (!auxiliaryWorkspace->openPanel(std::move(spec)))
+            return;
+    }
+    auxiliaryWorkspace->setVisible(true);
+    auxiliaryWorkspace->toFront(false);
+}
+
+void PopPunkGuitarUltimateAudioProcessorEditor::openPlayingStylePanel()
+{
+    if (auxiliaryWorkspace == nullptr)
+        return;
+    constexpr int playingStylePanelId = 2104;
+    if (!auxiliaryWorkspace->isPanelOpen(playingStylePanelId))
+    {
+        PPGUMultiWindowWorkspace::PanelSpec spec;
+        spec.id = playingStylePanelId;
+        spec.title = "PLAYING STYLE  /  ARTICULATION";
+        spec.desired = { 760, 500 };
+        spec.minimum = { 520, 380 };
+        spec.content = std::make_unique<PPGUPlayingStylePanel>(processor);
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
