@@ -5,6 +5,37 @@
 #include <cstdint>
 #include <limits>
 
+namespace
+{
+    void drawFrameArtwork(juce::Graphics& g, const juce::Image& atlas,
+                          juce::Rectangle<int> bounds)
+    {
+        if (!atlas.isValid() || bounds.getWidth() < 40 || bounds.getHeight() < 40)
+            return;
+        constexpr int corner = 22, edge = 8;
+        const int x = bounds.getX(), y = bounds.getY();
+        const int r = bounds.getRight(), b = bounds.getBottom();
+        const int mw = juce::jmax(1, bounds.getWidth() - corner * 2);
+        const int mh = juce::jmax(1, bounds.getHeight() - corner * 2);
+        g.saveState();
+        g.setOpacity(0.62f);
+        const auto draw = [&g, &atlas](juce::Rectangle<int> dst, juce::Rectangle<int> src)
+        {
+            g.drawImage(atlas, dst.getX(), dst.getY(), dst.getWidth(), dst.getHeight(),
+                        src.getX(), src.getY(), src.getWidth(), src.getHeight());
+        };
+        draw({x,y,corner,corner},{30,60,92,92});
+        draw({r-corner,y,corner,corner},{160,60,92,92});
+        draw({x,b-corner,corner,corner},{290,60,92,92});
+        draw({r-corner,b-corner,corner,corner},{420,60,92,92});
+        draw({x+corner,y+2,mw,edge},{30,230,440,22});
+        draw({x+corner,b-edge-2,mw,edge},{30,270,440,22});
+        draw({x+2,y+corner,edge,mh},{510,220,22,180});
+        draw({r-edge-2,y+corner,edge,mh},{570,220,22,180});
+        g.restoreState();
+    }
+}
+
 class PPGUMultiWindowWorkspace::Window final : public juce::Component
 {
 public:
@@ -51,6 +82,7 @@ public:
     }
 
     int getPanelId() const noexcept { return panelId; }
+    juce::Component* getContentComponent() const noexcept { return content.get(); }
     ppgu::ui::PanelSize getDesiredSize() const noexcept { return desired; }
     ppgu::ui::PanelSize getMinimumSize() const noexcept { return minimum; }
     bool isMaximized() const noexcept { return maximized; }
@@ -170,6 +202,8 @@ public:
 
         g.setColour(borderColour);
         g.drawRoundedRectangle(area.reduced(0.5f), 8.0f, 1.0f);
+        if (hasThemePalette)
+            drawFrameArtwork(g, themePalette.framesPanelsSpriteSheet, getLocalBounds());
         g.setColour(borderColour.withAlpha(0.55f));
         g.drawLine(8.0f, 42.0f, static_cast<float>(getWidth() - 8), 42.0f, 1.0f);
     }
@@ -314,6 +348,13 @@ bool PPGUMultiWindowWorkspace::isPanelOpen(int id) const noexcept
 {
     return std::any_of(windows.begin(), windows.end(),
         [id](const auto& item) { return item->getPanelId() == id; });
+}
+
+juce::Component* PPGUMultiWindowWorkspace::getPanelContent(int id) const noexcept
+{
+    const auto it = std::find_if(windows.begin(), windows.end(),
+        [id](const auto& item) { return item->getPanelId() == id; });
+    return it != windows.end() ? (*it)->getContentComponent() : nullptr;
 }
 
 int PPGUMultiWindowWorkspace::getOpenPanelCount() const noexcept

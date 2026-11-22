@@ -46,6 +46,37 @@ juce::Font makeThemeFont(const PPGUThemeManager::Palette& palette, float baseSiz
         .withExtraKerningFactor(palette.letterSpacing);
 }
 
+void drawNineSliceFrame(juce::Graphics& g, const juce::Image& atlas,
+                        juce::Rectangle<int> bounds, float opacity = 0.72f)
+{
+    if (!atlas.isValid() || bounds.getWidth() < 40 || bounds.getHeight() < 40)
+        return;
+
+    constexpr int corner = 24;
+    constexpr int edge = 10;
+    const int x = bounds.getX(), y = bounds.getY();
+    const int right = bounds.getRight(), bottom = bounds.getBottom();
+    const int middleWidth = juce::jmax(1, bounds.getWidth() - corner * 2);
+    const int middleHeight = juce::jmax(1, bounds.getHeight() - corner * 2);
+
+    g.saveState();
+    g.setOpacity(opacity);
+    const auto draw = [&g, &atlas](juce::Rectangle<int> dst, juce::Rectangle<int> src)
+    {
+        g.drawImage(atlas, dst.getX(), dst.getY(), dst.getWidth(), dst.getHeight(),
+                    src.getX(), src.getY(), src.getWidth(), src.getHeight());
+    };
+    draw({x,y,corner,corner}, {30,60,92,92});
+    draw({right-corner,y,corner,corner}, {160,60,92,92});
+    draw({x,bottom-corner,corner,corner}, {290,60,92,92});
+    draw({right-corner,bottom-corner,corner,corner}, {420,60,92,92});
+    draw({x+corner,y+2,middleWidth,edge}, {30,230,440,22});
+    draw({x+corner,bottom-edge-2,middleWidth,edge}, {30,270,440,22});
+    draw({x+2,y+corner,edge,middleHeight}, {510,220,22,180});
+    draw({right-edge-2,y+corner,edge,middleHeight}, {570,220,22,180});
+    g.restoreState();
+}
+
 void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
                             const PPGUThemeManager::Palette& palette,
                             float textureOpacity = 0.10f,
@@ -2121,8 +2152,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     curatorButton.setTooltip("CURATOR is not implemented yet. No asset is marked approved.");
 
     aboutButton.setComponentID("About");
-    aboutButton.setEnabled(false);
-    aboutButton.setTooltip("ABOUT is intentionally disabled in REV.20 until its verified information panel is implemented.");
+    aboutButton.setEnabled(true);
+    aboutButton.setTooltip("ABOUT — verified product and build information.");
     aboutButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
     aboutButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
     aboutButton.onClick = [this]
@@ -2330,6 +2361,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
     }
     g.setColour(p.token("control_border").withAlpha(0.78f));
     g.drawRoundedRectangle(bounds.reduced(0.5f), 12.0f, 1.0f);
+    drawNineSliceFrame(g, p.framesPanelsSpriteSheet, area, 0.58f);
 
     // Section chrome belongs to the visual shell; it does not create or
     // reassign controls and follows the active theme's semantic palette.
@@ -2832,7 +2864,13 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openFxEditPanel(int selectedEffe
     if (auxiliaryWorkspace == nullptr)
         return;
     constexpr int fxEditPanelId = 2101;
-    if (!auxiliaryWorkspace->isPanelOpen(fxEditPanelId))
+    if (auxiliaryWorkspace->isPanelOpen(fxEditPanelId))
+    {
+        if (auto* content = auxiliaryWorkspace->getPanelContent(fxEditPanelId))
+            if (auto* panel = dynamic_cast<PPGUFXEditPanel*>(content))
+                panel->setSelectedGroup(selectedEffect);
+    }
+    else
     {
         PPGUMultiWindowWorkspace::PanelSpec spec;
         spec.id = fxEditPanelId;
