@@ -145,7 +145,7 @@ def main() -> int:
         "metal_border": "#00D2FF",
         "glow_cyan": "#00E5FF",
         "glow_blue": "#0048FF",
-        "accent_magenta": "#FF007F",
+        "semantic_warning": "#FFB454",
     }
     if atlas_manifest.get("project") != "NEON_STAGE_MANAGER_3_0" \
             or atlas_manifest.get("theme") != "NEON_STAGE_DEFAULT_SKIN_1" \
