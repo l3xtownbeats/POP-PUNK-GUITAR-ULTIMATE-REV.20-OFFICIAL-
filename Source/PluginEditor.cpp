@@ -2511,6 +2511,12 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         g.setColour(palette.accentSecondary);
         g.fillRoundedRectangle(bounds.removeFromLeft(3.0f), 1.5f);
     }
+
+    // Keep functional feedback available even when optional button atlases
+    // are absent: active FX still gets its real-state LED and keyboard users
+    // retain the same visible focus ring as the artwork-backed path.
+    drawFxActiveIndicator();
+    drawKeyboardFocus();
 }
 
 void PPGUPremiumLookAndFeel::drawComboBox(juce::Graphics& g, int w, int h, bool down,
