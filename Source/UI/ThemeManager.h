@@ -49,6 +49,10 @@ public:
         juce::Image textureArtwork;
         juce::Image bezelArtwork;
         juce::Image crestArtwork;
+        // Optional premium vector layers shared by all approved skins.
+        juce::Image controlsArtwork;
+        juce::Image fxLayerArtwork;
+        juce::Image decorativeArtwork;
         // High-resolution Skin-1 stage stack. These images are decoded only while
         // the visual theme is loaded on the message thread; audio code never sees them.
         juce::Image backgroundArtwork;
