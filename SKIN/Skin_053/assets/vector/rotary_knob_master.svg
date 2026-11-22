@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="shadow" cx="50%" cy="48%" r="52%"><stop offset=".68" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".72"/></radialGradient>
+    <linearGradient id="outerMetal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#E2EDF4"/><stop offset=".16" stop-color="#526477"/><stop offset=".36" stop-color="#182431"/><stop offset=".58" stop-color="#8294A5"/><stop offset=".78" stop-color="#202E3D"/><stop offset="1" stop-color="#070D15"/></linearGradient>
+    <linearGradient id="bezel" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#AFC1D0"/><stop offset=".18" stop-color="#26394A"/><stop offset=".48" stop-color="#0A111B"/><stop offset=".76" stop-color="#34495B"/><stop offset="1" stop-color="#050A11"/></linearGradient>
+    <radialGradient id="face" cx="34%" cy="24%" r="78%"><stop stop-color="#26394C"/><stop offset=".38" stop-color="#101C2A"/><stop offset=".78" stop-color="#080F19"/><stop offset="1" stop-color="#02060B"/></radialGradient>
+    <linearGradient id="pointer" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#F7FDFF"/><stop offset=".55" stop-color="#A9C4D4"/><stop offset="1" stop-color="#00D9FF"/></linearGradient>
+    <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="drop" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="10"/><feOffset dy="12"/><feComponentTransfer><feFuncA type="linear" slope=".62"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g filter="url(#drop)">
+    <circle cx="256" cy="256" r="222" fill="#02050A" stroke="#000" stroke-width="8"/>
+    <circle cx="256" cy="256" r="214" fill="url(#outerMetal)" stroke="#D4E2EA" stroke-opacity=".65" stroke-width="3"/>
+    <circle cx="256" cy="256" r="199" fill="url(#bezel)" stroke="#050A10" stroke-width="8"/>
+    <circle cx="256" cy="256" r="181" fill="#050B13" stroke="#72899C" stroke-opacity=".72" stroke-width="3"/>
+    <circle cx="256" cy="256" r="169" fill="url(#face)" stroke="#1D3447" stroke-width="4"/>
+    <circle cx="256" cy="256" r="156" fill="none" stroke="#7890A4" stroke-opacity=".22" stroke-width="1.5"/>
+    <g stroke-linecap="round">
+      <path d="M256 55 A201 201 0 0 1 457 256" fill="none" stroke="#00D9FF" stroke-width="5" opacity=".2" filter="url(#softGlow)"/>
+      <path d="M256 55 A201 201 0 0 1 457 256" fill="none" stroke="#00D9FF" stroke-width="2" opacity=".55"/>
+      <path d="M256 55 A201 201 0 0 0 55 256" fill="none" stroke="#71889A" stroke-width="2" opacity=".45"/>
+    </g>
+    <g stroke="#A9BDCC" stroke-linecap="round">
+      <path d="M256 77 V98" stroke-width="4"/>
+      <path d="M166 98 L176 116 M102 166 L120 176 M77 256 H99 M102 346 L120 336 M166 414 L176 396 M346 414 L336 396 M410 346 L392 336 M435 256 H413 M410 166 L392 176 M346 98 L336 116" stroke-width="3" opacity=".75"/>
+    </g>
+    <g stroke="#50697D" stroke-width="2" opacity=".8">
+      <path d="M211 82 L216 96 M121 121 L135 135 M82 211 L96 216 M82 301 L96 296 M121 391 L135 377 M211 430 L216 416 M301 430 L296 416 M391 391 L377 377 M430 301 L416 296 M430 211 L416 216 M391 121 L377 135 M301 82 L296 96"/>
+    </g>
+    <circle cx="256" cy="256" r="126" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="3"/>
+    <path d="M256 256 L244 139 Q256 125 268 139 L264 256 Z" fill="url(#pointer)" stroke="#F3FCFF" stroke-width="2"/>
+    <path d="M256 256 L256 145" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="2"/>
+    <circle cx="256" cy="256" r="25" fill="url(#outerMetal)" stroke="#D9F7FF" stroke-width="3"/>
+    <circle cx="256" cy="256" r="14" fill="#07121D" stroke="#00D9FF" stroke-width="3"/>
+    <circle cx="256" cy="256" r="5" fill="#DDFBFF"/>
+    <path d="M113 165 A174 174 0 0 1 399 112" fill="none" stroke="#FFFFFF" stroke-opacity=".11" stroke-width="3"/>
+    <circle cx="256" cy="256" r="214" fill="url(#shadow)"/>
+  </g>
+</svg>
