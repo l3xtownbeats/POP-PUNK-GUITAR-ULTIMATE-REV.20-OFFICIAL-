@@ -303,3 +303,12 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - Существующая state artwork pipeline (default/hover/pressed/dragged/disabled), sprite atlas и APVTS toggle bindings сохранены.
 
 Проверка run 45001201289 на HEAD 6c495692fba2cdeb99e4c8fb841027ffe16930e6: sprite atlas generation прошла; Windows configure выполнялся. Этот run не включает последующие layout/documentation/tooltip commits. Требуется CI на актуальном HEAD d5a750d6896797cdd4cf8cdda4721b7992c41312. Не заявлять сборку успешной до точного HEAD check.
+
+## 2026-11-22 — подготовка production-вектора для rotary controls NEON STAGE
+
+- Сверена структура существующих ассетов Skin_053: `assets/asset_manifest.json` содержит 308 записей; имеется 27-control × 5-state система (135 PNG), включая девять knob01…knob09; master-контроли 512×512 и runtime 256×256.
+- Существующий `neon_stage_rotary_61frame_atlas.png` — 1024×1024, 61 кадр, 128×128 ячейка, диапазон −135°…+135° с шагом 4,5°. Он уже используется в rotary renderer; нельзя подменять его отдельной статичной ручкой или накладывать второй указатель поверх существующего кадра.
+- Добавлен масштабируемый векторный мастер `SKIN/Skin_053/assets/vector/rotary_knob_master.svg` (512×512, прозрачный фон): многослойный графитово-стальной корпус, фаска, тёмная эмаль, шкала, сдержанная cyan-подсветка и металлический указатель. Текст и значения не запечены в графику.
+- Добавлена спецификация `SKIN/Skin_053/assets/vector/ROTARY_ARTWORK_PRODUCTION_SPEC.md`: состояния default/hover/pressed/dragged/disabled, размеры master/runtime, правила экспорта, список существующих PNG/atlas и обязательные проверки перед заменой.
+- Канонический внешний ориентир не меняется: `/01 INTERFACE  NEON STAGE DEFAULT .png`. Новый SVG — исходный производственный компонент, а не новый макет/скин. Перед интеграцией необходимо визуальное сравнение PNG-экспорта с canonical mockup и обновление SHA-256/CRC/asset manifests.
+- Изменения не затрагивают JUCE bindings, APVTS, DSP и аудио-путь. Это source artwork/spec addition; не считать production runtime asset integration или visual acceptance завершёнными.
