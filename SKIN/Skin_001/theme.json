@@ -330,18 +330,19 @@
     }
   },
   "assets": {
+    "background": "assets/background/main.png",
     "preview": "assets/preview.png",
-    "hero": "assets/hero.png",
+    "hero": "assets/hero/hero.png",
     "texture": "svg/texture.svg",
     "bezel": "svg/bezel.svg",
     "crest": "svg/crest.svg",
     "spriteSheets": {
-      "controls": "assets/spritesheets/signals_controls.png",
-      "meters_sliders": "assets/spritesheets/signals_meters.png",
-      "frames_panels": "assets/spritesheets/signals_panels.png",
-      "icons": "assets/spritesheets/signals_icons.png"
+      "controls": "assets/controls/signals_controls_sheet.png",
+      "knobs": "assets/spritesheets/signals_knobs_9x3.png",
+      "meters": "assets/spritesheets/signals_meters_8frame.png",
+      "fx": "assets/fx_layers/signals_fx_7tile.png"
     },
-    "spriteSheetManifest": "assets/spritesheets/signals_spritesheet_manifest.json"
+    "artworkManifest": "assets/artwork_manifest.json"
   },
   "compatibility": {
     "minimumPluginVersion": "4.0.0",
@@ -349,12 +350,14 @@
     "layoutChanges": false,
     "audioChanges": false
   },
-  "designStatus": "DESIGN_FOUNDATION_CREATED_ARTWORK_AND_RUNTIME_INTEGRATION_PENDING",
+  "designStatus": "ARTWORK_PACK_GENERATED; RUNTIME_INTEGRATION_AND_HOST_ACCEPTANCE_PENDING",
   "notes": [
     "Independent selectable theme slot SKIN-001 / SIGNALS. Never replace, rename or repurpose SKIN-053 / NEON STAGE DEFAULT.",
     "Art direction is based on the user's supplied reference mockup 01 INTERFACE NEON STAGE DEFAULT.png; create original SIGNALS artwork rather than copying the reference image as a finished skin.",
     "Keep the 27 required control IDs plus sync_selector metadata and all runtime bindings from the REV.20 control schema.",
     "Visual-only: no APVTS, DSP, sampler, MIDI, preset, parameter-ID, or audio callback changes.",
-    "Do not mark runtime-ready until registry, ThemeManager/gallery, packaging, validators, CI, Windows x64 build and CTest all include the 17th theme."
+    "Do not mark runtime-ready until registry, ThemeManager/gallery, packaging, validators, CI, Windows x64 build and CTest all include the 17th theme.",
+    "PNG artwork pack generated separately; verify binary assets are present in repository before packaging.",
+    "Preserve all 16 existing themes and keep skin-053 / Skin_053 as NEON STAGE DEFAULT and default."
   ]
 }
