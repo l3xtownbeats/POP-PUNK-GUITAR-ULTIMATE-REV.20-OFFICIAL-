@@ -119,6 +119,46 @@ manifest["sheets"]["neon_stage_controls_spritesheet.png"]={
  }
 }
 
+# Dedicated high-resolution rotary atlas: 61 positions across the full -135°..+135° sweep.
+# Each frame is isolated in a 128x128 RGBA cell; live value text remains in JUCE.
+rotary_size = 128
+rotary_columns = 8
+rotary_rows = 8
+rotary_frames = []
+rotary_sheet = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
+for frame in range(61):
+    angle = -135.0 + frame * 4.5
+    tile = Image.new("RGBA", (100, 100), (0, 0, 0, 0))
+    tile = add_glow(tile, lambda dd, cc: dd.ellipse((8, 8, 92, 92), outline=cc, width=4), P["glow_blue"], 7)
+    dd = ImageDraw.Draw(tile)
+    dd.ellipse((9, 9, 91, 91), fill=rgba("#24364A"), outline=rgba("#B8C8D8"), width=3)
+    dd.ellipse((16, 16, 84, 84), fill=rgba("#09121F"), outline=rgba(P["metal_border"]), width=2)
+    dd.ellipse((23, 23, 77, 77), fill=rgba("#14263A"), outline=rgba("#60788E"), width=1)
+    for tick in range(-135, 136, 15):
+        rad = math.radians(tick)
+        dd.line((50+34*math.cos(rad), 50+34*math.sin(rad),
+                 50+39*math.cos(rad), 50+39*math.sin(rad)), fill=rgba(P["dim"]), width=1)
+    rad = math.radians(angle)
+    dd.line((50+7*math.cos(rad), 50+7*math.sin(rad),
+             50+29*math.cos(rad), 50+29*math.sin(rad)), fill=rgba("#FFFFFF"), width=4)
+    dd.ellipse((44, 44, 56, 56), fill=rgba(P["glow_cyan"]), outline=rgba("#FFFFFF"), width=1)
+    tile = tile.resize((120, 120), Image.Resampling.LANCZOS)
+    col, row = frame % rotary_columns, frame // rotary_columns
+    x, y = col * rotary_size, row * rotary_size
+    rotary_sheet.alpha_composite(tile, (x + 4, y + 4))
+    rotary_frames.append({"frame": frame, "angle_deg": angle, "bbox": [x, y, x+rotary_size, y+rotary_size]})
+save(rotary_sheet, "neon_stage_rotary_61frame_atlas.png")
+manifest["sheets"]["neon_stage_rotary_61frame_atlas.png"] = {
+    "resolution": [1024, 1024],
+    "cell_size": [128, 128],
+    "grid": [rotary_columns, rotary_rows],
+    "frame_count": 61,
+    "angle_range_deg": [-135, 135],
+    "angle_step_deg": 4.5,
+    "interpolation": "nearest_frame_for_visual_feedback; parameter value remains continuous in JUCE",
+    "frames": rotary_frames
+}
+
 # ---------------------------------------------------------------------------
 # 2. Eight-segment VU meters, long/short sliders, round/square status LEDs.
 # ---------------------------------------------------------------------------
