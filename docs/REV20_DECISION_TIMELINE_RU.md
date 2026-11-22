@@ -345,3 +345,12 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - Текущий `Source/PluginEditor.cpp` уже имеет три зоны, 9 APVTS knobs, 7 FX switches, нижний performance strip и MIDI keyboard; однако в нём пока не найдено подключение отдельного `heroArtwork` в центральной зоне. Полное pixel parity с макетом 01 не подтверждено.
 - Открытые PR #11/#12 описывают дополнительные visual QA и main-editor gaps, но не слиты в main; не объявлять их функции внедрёнными. Текущий Windows run `45001532775` ещё выполняет build на SHA `7d02e657ad385a95d95296df87f4778651c5d3e8`; CTest, 16-skin package и pluginval ожидают.
 - Пути: `/01 INTERFACE  NEON STAGE DEFAULT .png` … `/07 INTERFACE  NEON STAGE DEFAULT .png`; `/02 INTERFACE  NEON STAGE DEFAULT AUTOCHORDS .png`; `/Assets/3D/References/`; `/SKIN/Skin_053/assets/`; `/Source/PluginEditor.cpp`; `/Source/UI/`; `/docs/PPGU_REFERENCE_DESIGN_ASSET_REGISTER.md`.
+
+
+## 2026-11-22 — подключение индивидуальных PNG-состояний девяти rotary controls
+
+- Исправлен приоритет отрисовки в `Source/PluginEditor.cpp`: раньше ветка 61-frame rotary atlas завершалась `return` до поиска индивидуальных `knob01…knob09` state PNG. В результате atlas вращался, но PNG-состояния ручек не участвовали в рендеринге при наличии rotary atlas.
+- Теперь для каждого knob runtime сохраняет 61-позиционную непрерывную анимацию атласа, а его state artwork из `PPGUThemeManager::Palette::findControlArtwork(controlId, stateName)` добавляется как отдельный прозрачный overlay для hover/pressed/dragged/disabled. Default не накладывается повторно; disabled дополнительно получает читаемое затемнение. APVTS value и pointer animation не меняются.
+- Изменение: commit `afb637c44764342d589e0dd846cd5d6a428f47dc`. Путь: `Source/PluginEditor.cpp`.
+- Runtime PNG mapping остаётся через Skin-1 `control_states_manifest.json` и `ThemeManager.cpp`; FX switch states уже рисуются через индивидуальные control artwork и реальные JUCE button states.
+- Это source-level integration, а не заявление о пройденной Windows-сборке. Требуется дождаться CI на актуальном SHA и проверить CTest/pluginval/визуально в FL Studio 20.
