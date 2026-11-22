@@ -813,3 +813,24 @@ J. DPI, стабильность, runtime и performance acceptance.
 На main подтверждено наличие семи PNG-макетов 01–07, Skin_053 premium artwork pipeline, control state artwork, FX layers, 9-slice frame/controls/meters/icons/61-frame rotary atlases, 16-theme registry и исходников PluginEditor/ThemeManager/MultiWindowWorkspace. В PluginEditor уже присутствуют 61-frame rotary rendering с реальной value arc, linear slider state rendering, FX toggle LED, иконки из atlas, live MIDI/performance monitor и SFZ status polling; Skin Gallery использует lazy-loaded card previews. Это фиксирует исходный baseline, но само по себе не закрывает полную визуальную, host или performance приёмку.
 
 **Статус этапа:** VISUAL-FIRST / IN PROGRESS. Аудиодвижок и сэмпловые задачи отложены до закрытия визуального acceptance matrix. Никаких заявлений о 100% визуальном совпадении, ручном FL Studio 20 тесте или измеренных performance numbers без соответствующих артефактов.
+
+
+## 2026-11-22 — УТВЕРЖДЁННАЯ СТРУКТУРА ДВУХ РЕЖИМОВ PLAYING CORE
+
+Пользователь утвердил точное назначение двух режимов. Это обязательная база навигации и визуального состояния NEON STAGE:
+
+1. **MELODY** — рабочая цепочка/представление: **PRESETS / PLAYING / PATTERN**. В режиме MELODY доступны выбор пресета, обычное исполнение (PLAYING) и переход к PATTERN как к связанному разделу рабочего процесса. Выбранный подраздел должен быть однозначно виден, подсвечен и синхронизирован с активной панелью.
+2. **PATTERN** — отдельный режим/рабочая цепочка: **PRESETS / PLAYING-PATTERN**. В нём PRESETS относится к паттерновому workflow, а PLAYING-PATTERN — к исполнению выбранного паттерна. Не подменять этот режим обычным PLAYING и не показывать элементы обычного исполнения как активные, если они не относятся к паттерновому режиму.
+
+**Ключевое различие:** MELODY содержит три представления PRESETS, PLAYING и PATTERN; PATTERN содержит два представления PRESETS и PLAYING-PATTERN. Это не две одинаковые вкладки и не просто два визуальных скина. Переключение MELODY ↔ PATTERN обязано менять доступную навигацию/рабочее представление и отражать фактический выбранный режим.
+
+### Поведение интерфейса и проверка
+- Две основные кнопки MELODY и PATTERN имеют независимые состояния hover/pressed/focus и однозначную подсветку активного режима.
+- В MELODY отображаются/доступны PRESETS, PLAYING, PATTERN; активный подраздел выделяется cyan-состоянием.
+- В PATTERN отображаются/доступны PRESETS и PLAYING-PATTERN; активный подраздел выделяется cyan-состоянием.
+- При переключении режима не теряются выбранный пресет, выбранный pattern slot и релевантные настройки; состояние не должно случайно переноситься между обычным PLAYING и PLAYING-PATTERN.
+- Навигация клавиатурой и мышью должна приводить к тому же состоянию, что и нажатие кнопки; фокус не равен активному режиму.
+- LED/индикаторы показывают реальное состояние режима и активности, а не только hover или декоративное свечение.
+- Artwork/layout, interaction, state binding и runtime проверяются отдельно для обеих цепочек. В тестах обязательно проверить все переходы: MELODY→PRESETS, MELODY→PLAYING, MELODY→PATTERN, PATTERN→PRESETS, PATTERN→PLAYING-PATTERN и MELODY↔PATTERN.
+
+Эта запись уточняет прежнюю краткую формулировку «два режима PLAYING CORE»: точная структура выше имеет приоритет при дальнейшей реализации и приёмке.
