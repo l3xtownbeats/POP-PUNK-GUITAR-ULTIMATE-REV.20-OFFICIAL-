@@ -101,9 +101,9 @@ int main()
     CHECK(channelMap.regions[1].group == 2 && channelMap.regions[1].offBy == 2);
 
     const auto keyswitchMap = parseText(
-        "<global> sw_lokey=36 sw_hikey=40 sw_default=36\\n"
-        "<region> sample=picked.wav key=60 sw_last=36 sw_label=Picked\\n"
-        "<region> sample=palm-muted.wav key=60 sw_last=38 sw_label=PalmMute\\n", base);
+        "<global> sw_lokey=36 sw_hikey=40 sw_default=36\n"
+        "<region> sample=picked.wav key=60 sw_last=36 sw_label=Picked\n"
+        "<region> sample=palm-muted.wav key=60 sw_last=38 sw_label=PalmMute\n", base);
     CHECK(keyswitchMap.succeeded());
     CHECK(keyswitchMap.regions.size() == 2);
     CHECK(keyswitchMap.regions[0].switchLowKey == 36 && keyswitchMap.regions[0].switchHighKey == 40);
@@ -112,8 +112,8 @@ int main()
     CHECK(keyswitchMap.regions[0].switchLabel == "Picked");
     CHECK(keyswitchMap.regions[1].switchLabel == "PalmMute");
     const auto invalidKeyswitch = parseText(
-        "<global> sw_lokey=36 sw_hikey=40\\n"
-        "<region> sample=bad.wav key=60 sw_last=41\\n", base);
+        "<global> sw_lokey=36 sw_hikey=40\n"
+        "<region> sample=bad.wav key=60 sw_last=41\n", base);
     CHECK(!invalidKeyswitch.succeeded());
 
     const auto loopMap = parseText("<region> sample=loop.wav key=60 loop_mode=loop_sustain loop_start=32 loop_end=400\n", base);
