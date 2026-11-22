@@ -1241,6 +1241,101 @@ private:
 };
 
 
+class PPGUMelodyWorkspacePanel final : public juce::Component, public PPGUThemeAwarePanel
+{
+public:
+    explicit PPGUMelodyWorkspacePanel(const juce::String& activeInstrumentPath)
+    {
+        title.setText("MELODY  /  PERFORMANCE MAP", juce::dontSendNotification);
+        addAndMakeVisible(title);
+        const auto file = juce::File(activeInstrumentPath);
+        instrumentValue.setText(activeInstrumentPath.isNotEmpty()
+            ? file.getFileName() : "NO LICENSED SFZ INSTRUMENT LOADED", juce::dontSendNotification);
+        instrumentDetail.setText(activeInstrumentPath.isNotEmpty()
+            ? file.getFullPathName() : "Load a licensed SFZ bank using IMPORT GUITAR. The existing PRESETS browser remains the only preset catalog.",
+            juce::dontSendNotification);
+        articulationValue.setText("MAPPING DATA NOT EXPOSED", juce::dontSendNotification);
+        articulationDetail.setText("The current UI-facing sampler API does not expose per-bank articulation mappings. No articulation is advertised as available until that metadata is queryable.",
+                                   juce::dontSendNotification);
+        noteMapValue.setText("MAPPED CLIP DATA NOT EXPOSED", juce::dontSendNotification);
+        noteMapDetail.setText("Velocity layers, round-robin takes and per-note mapped clips are not surfaced by the current UI mapping API. No phrase or loop preview is offered here.",
+                              juce::dontSendNotification);
+        for (auto* label : { &title, &instrumentHeading, &instrumentValue, &instrumentDetail,
+                             &articulationHeading, &articulationValue, &articulationDetail,
+                             &noteMapHeading, &noteMapValue, &noteMapDetail })
+            addAndMakeVisible(*label);
+        instrumentHeading.setText("INSTRUMENT / MELODY PRESET", juce::dontSendNotification);
+        articulationHeading.setText("ARTICULATION", juce::dontSendNotification);
+        noteMapHeading.setText("NOTE / PERFORMANCE MAP", juce::dontSendNotification);
+        setThemePalette(palette);
+    }
+
+    void setThemePalette(const PPGUThemeManager::Palette& value) override
+    {
+        palette = value;
+        title.setFont(makeThemeFont(palette, 19.0f, false, true));
+        title.setColour(juce::Label::textColourId, palette.token("text_primary"));
+        for (auto* label : { &instrumentHeading, &articulationHeading, &noteMapHeading })
+        {
+            label->setFont(makeThemeFont(palette, 10.0f, false, true));
+            label->setColour(juce::Label::textColourId, palette.token("accent"));
+        }
+        for (auto* label : { &instrumentValue, &articulationValue, &noteMapValue })
+        {
+            label->setFont(makeThemeFont(palette, 12.0f, false, true));
+            label->setColour(juce::Label::textColourId, palette.token("text_primary"));
+        }
+        for (auto* label : { &instrumentDetail, &articulationDetail, &noteMapDetail })
+        {
+            label->setFont(makeThemeFont(palette, 10.0f));
+            label->setColour(juce::Label::textColourId, palette.token("text_secondary"));
+        }
+        repaint();
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(palette.token("window_bg"));
+        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.08f, 0.26f, 0.02f);
+        g.setColour(palette.token("control_border"));
+        g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(12.0f), 9.0f, 1.0f);
+    }
+
+    void resized() override
+    {
+        auto area = getLocalBounds().reduced(22);
+        title.setBounds(area.removeFromTop(38));
+        area.removeFromTop(18);
+        const int gap = 16;
+        const int width = (area.getWidth() - 2 * gap) / 3;
+        auto instrument = area.removeFromLeft(width);
+        area.removeFromLeft(gap);
+        auto articulation = area.removeFromLeft(width);
+        area.removeFromLeft(gap);
+        auto noteMap = area;
+        layoutColumn(instrument, instrumentHeading, instrumentValue, instrumentDetail);
+        layoutColumn(articulation, articulationHeading, articulationValue, articulationDetail);
+        layoutColumn(noteMap, noteMapHeading, noteMapValue, noteMapDetail);
+    }
+
+private:
+    void layoutColumn(juce::Rectangle<int> area, juce::Label& heading,
+                      juce::Label& value, juce::Label& detail)
+    {
+        heading.setBounds(area.removeFromTop(30));
+        area.removeFromTop(12);
+        value.setBounds(area.removeFromTop(48));
+        area.removeFromTop(10);
+        detail.setBounds(area);
+        detail.setJustificationType(juce::Justification::topLeft);
+    }
+
+    PPGUThemeManager::Palette palette;
+    juce::Label title, instrumentHeading, instrumentValue, instrumentDetail,
+                articulationHeading, articulationValue, articulationDetail,
+                noteMapHeading, noteMapValue, noteMapDetail;
+};
+
 class PPGUPatternSectionPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
 public:
@@ -2139,7 +2234,7 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     performanceDisplay = std::make_unique<PPGUPerformanceDisplay>(processor);
     addAndMakeVisible(*performanceDisplay);
     performanceDisplay->setVisible(false); // Main cover follows the approved reference; no extra harmony monitor.
-    melodyTab.onClick = [this] { modeBox.setSelectedId(1); };
+    melodyTab.onClick = [this] { modeBox.setSelectedId(1); openMelodyWorkspacePanel(); };
     patternTab.onClick = [this] { modeBox.setSelectedId(2); openPatternSectionPanel(); };
     modeBox.onChange = [this]
     {
@@ -2855,6 +2950,26 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openFxEditPanel(int selectedEffe
     auxiliaryWorkspace->toFront(false);
 }
 
+
+void PopPunkGuitarUltimateAudioProcessorEditor::openMelodyWorkspacePanel()
+{
+    if (auxiliaryWorkspace == nullptr)
+        return;
+    constexpr int melodyWorkspacePanelId = 2104;
+    if (!auxiliaryWorkspace->isPanelOpen(melodyWorkspacePanelId))
+    {
+        PPGUMultiWindowWorkspace::PanelSpec spec;
+        spec.id = melodyWorkspacePanelId;
+        spec.title = "MELODY  /  PERFORMANCE MAP";
+        spec.desired = { 900, 520 };
+        spec.minimum = { 700, 420 };
+        spec.content = std::make_unique<PPGUMelodyWorkspacePanel>(processor.getCurrentSfzFilePath());
+        if (!auxiliaryWorkspace->openPanel(std::move(spec)))
+            return;
+    }
+    auxiliaryWorkspace->setVisible(true);
+    auxiliaryWorkspace->toFront(false);
+}
 
 void PopPunkGuitarUltimateAudioProcessorEditor::openPatternSectionPanel()
 {
