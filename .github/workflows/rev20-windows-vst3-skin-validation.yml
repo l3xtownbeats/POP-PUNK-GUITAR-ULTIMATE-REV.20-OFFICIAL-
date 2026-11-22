@@ -71,6 +71,7 @@ jobs:
           name: ppgu-skin1-png-migration
           path: |
             SKIN/Skin_053/assets/png_migration/
+            SKIN/Skin_053/assets/panels/
             SKIN/Skin_*/assets/png_migration/**
             SKIN/Skin_*/theme.json
             SKIN/skin_studio_png_migration_manifest.json
