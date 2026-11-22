@@ -363,3 +363,14 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - Источник: `SKIN/Skin_053/assets/spritesheets/neon_stage_icons_sheet.png`, 1024×1024; atlas decoded уже существующим загрузчиком `ThemeManager.cpp`. Никакие PNG-источники не изменялись.
 - Коммит: `48ccf027f69d782e86345b5dd04965c5202e8d56`.
 - Это runtime source integration; требуется Windows CI и проверка компоновки/контраста в host. Контролы без активного backend остаются disabled; наличие иконки не активирует недоступную функцию.
+
+
+## 2026-11-22 — исправление расхождения палитры NEON STAGE в skin validator
+
+- Проверен Windows workflow run `45002098314` на source SHA `48ccf027f69d782e86345b5dd04965c5202e8d56`.
+- Windows x64 configure и build завершились успешно; все 22/22 CTest прошли. Workflow остановился на шаге `tools/validate_skin_registry_16.py`, до staging/package/pluginval/upload, из-за устаревшего ожидания `accent_magenta: #FF007F`.
+- Реальный canonical manifest `SKIN/Skin_053/assets/spritesheets/neon_stage_spritesheet_manifest.json` уже задаёт утверждённую палитру `semantic_warning: #FFB454` и не содержит magenta в base palette. Ошибка была в validator, не в runtime artwork.
+- Исправлен `tools/validate_skin_registry_16.py`: ожидаемый palette token теперь `semantic_warning: #FFB454`, в точном соответствии с manifest и утверждённым правилом: cyan/blue основной UI, amber/red только warning/error, без purple/magenta.
+- Commit исправления: `38ba76fbe1e10c4860bf01d0fe49340c013ab977`.
+- Важно: исходный run остаётся failed по validator; это исправление ещё должно пройти новый полный Windows workflow на новом HEAD. Pluginval strictness 5 и VST3 artifact пока не подтверждены.
+- Дополнительно проверено подключение визуальных атласов: `framesPanelsSpriteSheet` уже используется в `drawPanel()` для header chrome; `metersSlidersSpriteSheet` уже используется в `drawLinearSlider()` для track/thumb; `iconsSpriteSheet` подключён к FX/navigation controls. Performance display пока рисует собственную живую harmony/status информацию JUCE, а не отдельный VU meter atlas — не подменять его декоративным фейковым измерителем.
