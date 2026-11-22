@@ -1667,7 +1667,7 @@ public:
         // playable sample material and a complete, validated articulation mapping.
         styleEntry.setVisible(false);
         styleLabel.setVisible(false);
-        playingStatus.setText("NO VERIFIED PLAYING MAP\\nLOAD A SOURCE WITH VALIDATED PERFORMANCE DATA",
+        playingStatus.setText("NO VERIFIED PLAYING MAP\nLOAD A SOURCE WITH VALIDATED PERFORMANCE DATA",
                               juce::dontSendNotification);
         playingStatus.setTooltip("Playing techniques remain unavailable until the loaded instrument provides validated sample zones and performance mappings.");
         availability.setText("NO VERIFIED ARTICULATIONS AVAILABLE", juce::dontSendNotification);
