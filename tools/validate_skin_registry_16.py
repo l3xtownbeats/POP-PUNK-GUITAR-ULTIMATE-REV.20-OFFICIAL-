@@ -155,7 +155,7 @@ def main() -> int:
         raise SystemExit("FAIL: NEON STAGE sprite atlas manifest identity/palette mismatch")
     sheets = atlas_manifest.get("sheets", {})
     if set(sheets) != set(atlas_names):
-        raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly four sheets")
+        raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly five sheets")
     if sheets.get("neon_stage_rotary_61frame_atlas.png", {}).get("resolution") != [1024, 1024] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("cell_size") != [128, 128] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("grid") != [8, 8] \
@@ -215,7 +215,7 @@ def main() -> int:
             or slider_instances.get("thumb", {}).get("bbox") != [910, 640, 942, 672]:
         raise SystemExit("FAIL: NEON STAGE slider track/thumb geometry mismatch")
     leds = meters.get("status_leds", {})
-    expected_led_states = ["off", "cyan", "blue", "magenta"]
+    expected_led_states = ["off", "cyan", "blue", "warning"]
     if leds.get("round", {}).get("states") != expected_led_states \
             or leds.get("square", {}).get("states") != expected_led_states \
             or leds.get("round", {}).get("row_y") != [810, 920] \
@@ -247,7 +247,7 @@ def main() -> int:
     expected_ready = [item[2] for item in EXPECTED]
     if ready != expected_ready:
         raise SystemExit(f"FAIL: all 16 approved themes must be runtime-ready after exact-SHA SVG decode/package validation; got {ready}")
-    print("PASS: exactly 16 runtime-ready themes; all theme artwork/SVGs; four 1024x1024 NEON STAGE sprite atlases and exact atlas geometry; no extra theme directories.")
+    print("PASS: exactly 16 runtime-ready themes; all theme artwork/SVGs; five 1024x1024 NEON STAGE sprite atlases and exact atlas geometry; no extra theme directories.")
     return 0
 
 if __name__ == "__main__":
