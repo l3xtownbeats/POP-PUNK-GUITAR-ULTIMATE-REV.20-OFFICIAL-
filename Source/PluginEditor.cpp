@@ -2041,32 +2041,36 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         g.drawImage(palette.rotarySpriteSheet, destinationX, destinationY,
                     diameter, diameter, sourceX, sourceY, cellSize, cellSize);
 
-        // A live luminous value arc surrounds the physical rotary control.
-        // It follows the Slider/APVTS normalized value rather than an animation.
-        if (slider.isEnabled())
+        // Premium value ring: its position is the real APVTS value, while
+        // hover/focus only change the optical response (never the parameter).
+        const bool rotaryEnabled = slider.isEnabled();
+        const bool rotaryHovered = rotaryEnabled && slider.isMouseOverOrDragging();
+        const bool rotaryFocused = rotaryEnabled && slider.hasKeyboardFocus(true);
+        const float centreX = static_cast<float>(destinationX) + diameter * 0.5f;
+        const float centreY = static_cast<float>(destinationY) + diameter * 0.5f;
+        const float arcRadius = static_cast<float>(diameter) * 0.455f;
+        const float valueAngle = start + pos * (end - start);
+        juce::Path arcTrack;
+        arcTrack.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                               0.0f, start, end, true);
+        g.setColour(rotaryEnabled ? palette.token("control_border").withAlpha(0.88f)
+                                  : palette.token("text_disabled").withAlpha(0.45f));
+        g.strokePath(arcTrack, juce::PathStrokeType(3.2f,
+            juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+        if (rotaryEnabled && pos > 0.0001f)
         {
-            const float centreX = static_cast<float>(destinationX) + diameter * 0.5f;
-            const float centreY = static_cast<float>(destinationY) + diameter * 0.5f;
-            const float arcRadius = static_cast<float>(diameter) * 0.455f;
-            const float valueAngle = start + pos * (end - start);
-            juce::Path arcTrack;
-            arcTrack.addCentredArc(centreX, centreY, arcRadius, arcRadius,
-                                   0.0f, start, end, true);
-            g.setColour(palette.token("control_border").withAlpha(0.82f));
-            g.strokePath(arcTrack, juce::PathStrokeType(3.2f,
+            juce::Path valueArc;
+            valueArc.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                                   0.0f, start, valueAngle, true);
+            const auto liveAccent = rotaryFocused ? palette.token("highlight")
+                : (rotaryHovered ? palette.token("accent") : palette.token("accent_glow"));
+            g.setColour(liveAccent.withAlpha(rotaryHovered ? 0.58f : 0.38f));
+            g.strokePath(valueArc, juce::PathStrokeType(rotaryHovered ? 9.0f : 7.0f,
                 juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-            if (pos > 0.0001f)
-            {
-                juce::Path valueArc;
-                valueArc.addCentredArc(centreX, centreY, arcRadius, arcRadius,
-                                       0.0f, start, valueAngle, true);
-                g.setColour(palette.token("accent_glow").withAlpha(0.34f));
-                g.strokePath(valueArc, juce::PathStrokeType(7.0f,
-                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-                g.setColour(palette.token("accent").withAlpha(0.98f));
-                g.strokePath(valueArc, juce::PathStrokeType(2.8f,
-                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-            }
+            g.setColour(rotaryFocused ? palette.token("highlight")
+                                      : palette.token("accent").withAlpha(0.99f));
+            g.strokePath(valueArc, juce::PathStrokeType(rotaryHovered ? 3.4f : 2.8f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
         }
 
         // Every knob keeps its continuous 61-frame rotary animation, while its
