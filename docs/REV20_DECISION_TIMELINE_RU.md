@@ -880,3 +880,13 @@ PATTERN
 Изменение не добавляет и не меняет DSP, аудиопоток, параметры или обработку звука. Оно устраняет ложное визуальное обещание до появления настоящей телеметрии.
 
 **Проверка:** изменение исходника зафиксировано коммитом `7e3995e2e4719a2d7ca862eeb602e28f6a355a8a`. Проверено текстовое содержимое патча и удаление статической кривой; Windows CI для нового SHA ещё не получен. Runtime, pixel-parity, DPI/resize и FL Studio 20 визуальная приёмка остаются открытыми.
+
+## 2026-11-22 — NEON STAGE atlas generator palette consistency fix
+
+- Exact REV.20 Windows workflow run `45023496206` completed with a failure in `tools/validate_skin_registry_16.py`: `NEON STAGE sprite atlas manifest identity/palette mismatch`.
+- Windows x64 configure and VST3/C++ contract build completed successfully; all 22 CTest tests passed.
+- Root cause was confirmed by comparing the validator, generated manifest and source generator: the approved validator expects `glow_blue = #6B8CFF`, while `tools/generate_neon_stage_spritesheets.py` still declared the obsolete `#0048FF`. The workflow regenerated the manifest from that stale source value, so the registry/artwork gate correctly rejected it.
+- Corrected only the generator palette constant to the already-approved electric blue `#6B8CFF`. No DSP, audio engine, sampler, MIDI, parameter bindings or sample assets changed.
+- Fix committed directly to `main`: `c492f4de6293bfeb9f2342a7a0d714b8b6293ac2`.
+- Required next evidence: rerun exact current-main Windows workflow, confirm regenerated manifest and all five atlas files pass, then complete skin staging, VST3 discovery and pluginval. The failed run did not produce a release artifact.
+- Separate native integration and SKIN-1 control-state runtime workflows on source SHA `6c2712461455a582f18a659bdbac13cecb96a17d` completed successfully; these do not replace the failed full Windows package workflow.
