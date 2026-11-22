@@ -1372,19 +1372,7 @@ public:
         patternLabel.setText("RHYTHM CATALOG", juce::dontSendNotification);
         sourceLabel.setText("GUITAR / INSTRUMENT SOURCE", juce::dontSendNotification);
         toneLabel.setText("TONE PRESET", juce::dontSendNotification);
-        performanceLabel.setText("ACTIVE PLAYING ARTICULATION", juce::dontSendNotification);
-        articulationTab.setButtonText("ARTICULATION");
-        articulationTab.setComponentID("patternPlayingArticulationTab");
-        articulationTab.setTooltip("PLAYING-PATTERN / ARTICULATION — shows the active source-mapped SFZ keyswitch articulation. Only verified source metadata is displayed.");
-        articulationTab.setClickingTogglesState(false);
-        articulationTab.setToggleState(true, juce::dontSendNotification);
-        articulationTab.onClick = [this]
-        {
-            articulationTab.setToggleState(true, juce::dontSendNotification);
-            updateStatus("PLAYING-PATTERN  /  ARTICULATION — live source-mapped articulation status.");
-            refreshActiveArticulation();
-            articulationTab.repaint();
-        };
+        performanceLabel.setText("PLAYING STYLE / ARTICULATION", juce::dontSendNotification);
         sourceValue.setJustificationType(juce::Justification::centredLeft);
         sourceValue.setText("NO SFZ INSTRUMENT LOADED", juce::dontSendNotification);
         toneValue.setJustificationType(juce::Justification::centredLeft);
@@ -1403,7 +1391,7 @@ public:
         openAutoChords.setButtonText("OPEN AUTOCHORDS");
         openAutoChords.onClick = [this] { if (autoChordsAction) autoChordsAction(); };
         addAndMakeVisible(openAutoChords);
-        addAndMakeVisible(articulationTab);
+
         for (int i = 0; i < static_cast<int>(patternCards.size()); ++i)
         {
             auto& card = patternCards[static_cast<size_t>(i)];
@@ -1503,10 +1491,7 @@ public:
         }
         openAutoChords.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
         openAutoChords.setColour(juce::TextButton::textColourOffId, palette.token("accent"));
-        articulationTab.setColour(juce::TextButton::buttonColourId, palette.token("accent").withAlpha(0.18f));
-        articulationTab.setColour(juce::TextButton::buttonOnColourId, palette.token("accent").withAlpha(0.28f));
-        articulationTab.setColour(juce::TextButton::textColourOffId, palette.token("accent"));
-        articulationTab.setColour(juce::TextButton::textColourOnId, palette.token("text_primary"));
+
         for (auto& card : patternCards)
         {
             card.setColour(juce::TextButton::buttonColourId, palette.token("control_bg"));
@@ -1553,8 +1538,7 @@ public:
         auto patternHeader = area.removeFromTop(24);
         patternLabel.setBounds(patternHeader.removeFromLeft(150));
         openAutoChords.setBounds(patternHeader.removeFromRight(150).reduced(0, 1));
-        patternHeader.removeFromRight(6);
-        articulationTab.setBounds(patternHeader.removeFromRight(132).reduced(0, 1));
+
 
         area.removeFromTop(3);
         const int cardGap = 7;
@@ -1651,7 +1635,7 @@ private:
                 performanceLabel, performanceValue, sectionLabel, patternLabel, status;
     juce::ComboBox sectionBox, patternBox;
     std::array<juce::TextButton, 8> patternCards;
-    juce::TextButton importSource, openAutoChords, articulationTab, preview, apply, cancel;
+
 };
 
 class PPGUChordDiagram final : public juce::Component, public PPGUThemeAwarePanel
