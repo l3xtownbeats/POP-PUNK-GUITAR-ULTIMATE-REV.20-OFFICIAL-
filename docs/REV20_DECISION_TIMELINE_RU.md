@@ -424,3 +424,15 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 
 Главный экран остаётся строго привязан к утверждённому `01 INTERFACE  NEON STAGE DEFAULT .png`; геометрию и композицию не менять. Session Guitarist – Electric Sunburst Deluxe/Vintage допустим только как ориентир UX/поведения, без копирования брендинга, графики, пресетов и аудиоматериала.
 
+## 2026-11-22 — PATTERN cards, AutoChords state LED и FX EDIT audit (review branch)
+
+В review-ветке `visual/neon-stage-polish` внесены следующие визуальные изменения:
+
+- `Source/PluginEditor.cpp`: восемь PATTERN slots представлены интерактивной сеткой из двух колонок и четырёх строк. Выбранная карточка синхронизируется с существующим выбором slot; PREVIEW/APPLY/CANCEL продолжают использовать прежние processor routing методы. Карточки названы именно слотами, а не готовыми ритмическими библиотеками: интерфейс не заявляет о наличии записанного материала там, где его наличие не подтверждено.
+- В PATTERN panel добавлена кнопка `OPEN AUTOCHORDS`, открывающая существующую AutoChords workspace через безопасный callback редактора. Минимальный размер окна повышен до 500×420, чтобы сохранить читаемость карточной сетки.
+- AutoChords получил реальный LED и текстовый статус, читающие APVTS `singleMidiNoteAsChordRoot`. Обновление выполняется таймером только при изменении состояния; декоративная анимация не используется.
+- FX EDIT: проверена существующая привязка POWER через APVTS ButtonAttachment; индикатор уже отражает фактическое состояние выбранного bypass-параметра, а статус показывает ACTIVE/BYPASSED. Смена выбранного FX в открытом окне обновляет текущую группу.
+- Исправлена палитра About: доступная кнопка больше не окрашивается токенами disabled/lowlight.
+- Основной макет и его геометрия не менялись; DSP, audio callbacks, MIDI routing и идентификаторы параметров не менялись.
+
+**Проверка:** эти новые коммиты пока не имеют подтверждённого CI-результата. Предыдущий CI на SHA `dd3c4694cfccb152de97c0589468c6d1f5948f00` проходил Windows x64 build, CTest, 16-skin validation и staging/upload; он не подтверждает компиляцию последних изменений. Для текущей ревизии требуется повторить Windows x64 VST3 build, contract tests, полный CTest, skin registry validation и package/artifact staging. Отдельно остаются pluginval strictness 5 на текущем SHA и ручная проверка UI в FL Studio 20 при нескольких размерах окна.
