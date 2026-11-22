@@ -708,15 +708,15 @@ private:
 
     void timerCallback() override
     {
-        const auto message = status.getText();
+        const auto message = status.getText().trim();
         LoadState next = LoadState::standby;
-        if (message.startsWithIgnoreCase("Loading SFZ"))
+        if (!loadButton.isEnabled() || message.startsWithIgnoreCase("Loading SFZ"))
             next = LoadState::loading;
         else if (message.startsWithIgnoreCase("READY"))
             next = LoadState::ready;
-        else if (message.containsIgnoreCase("FAILED")
-                 || message.containsIgnoreCase("ERROR")
-                 || message.containsIgnoreCase("NOT FOUND"))
+        else if (message.isNotEmpty()
+                 && message != "No SFZ library loaded in this session."
+                 && !message.startsWithIgnoreCase("SAVED LIBRARY"))
             next = LoadState::error;
         if (next != loadState)
         {
@@ -988,7 +988,7 @@ public:
                 area.getY() + static_cast<float>(i) * (segmentHeight + gap),
                 area.getWidth(), segmentHeight);
             const float fraction = static_cast<float>(levelIndex) / static_cast<float>(segments);
-            const auto colour = fraction >= 0.92f ? juce::Colour(0xffff557a)
+            const auto colour = fraction >= 0.92f ? juce::Colour(0xffff4545)
                 : fraction >= 0.80f ? juce::Colour(0xffff9b45)
                 : fraction >= 0.60f ? juce::Colour(0xffffd84a)
                                     : palette.token("success");
@@ -1077,7 +1077,9 @@ private:
     float leftLevel = 0.0f, rightLevel = 0.0f;
 };
 
-class PPGUFXEditPanel final : public juce::Component, public PPGUThemeAwarePanel
+class PPGUFXEditPanel final : public juce::Component,
+                                  public PPGUThemeAwarePanel,
+                                  private juce::Timer
 {
 public:
     explicit PPGUFXEditPanel(PopPunkGuitarUltimateAudioProcessor& source, int initialEffect)
@@ -1140,6 +1142,8 @@ public:
             }
         }
         selectGroup(effectSelector.getSelectedId() - 1);
+        refreshPowerState();
+        startTimerHz(10);
     }
 
     void setThemePalette(const PPGUThemeManager::Palette& value) override
@@ -1184,6 +1188,26 @@ public:
     {
         g.fillAll(palette.token("window_bg"));
         drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.32f, 0.035f);
+
+        // The FX LED mirrors the currently selected APVTS bypass parameter.
+        const auto powerBounds = powerButton.getBounds().toFloat();
+        if (!powerBounds.isEmpty())
+        {
+            const float ledX = powerBounds.getRight() - 10.0f;
+            const float ledY = powerBounds.getCentreY();
+            const auto led = lastEffectEnabled ? palette.token("accent")
+                                               : palette.token("led_off");
+            if (lastEffectEnabled)
+            {
+                g.setColour(led.withAlpha(0.30f));
+                g.fillEllipse(ledX - 7.0f, ledY - 7.0f, 14.0f, 14.0f);
+            }
+            g.setColour(led);
+            g.fillEllipse(ledX - 3.0f, ledY - 3.0f, 6.0f, 6.0f);
+            g.setColour(palette.token("control_border"));
+            g.drawEllipse(ledX - 3.0f, ledY - 3.0f, 6.0f, 6.0f, 0.8f);
+        }
+
         auto area = getLocalBounds().toFloat().reduced(12.0f);
         g.setColour(palette.token("control_border"));
         g.drawRoundedRectangle(area, 10.0f, 1.0f);
@@ -1278,9 +1302,30 @@ private:
         powerAttachment.reset();
         powerAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
             apvts, groups[static_cast<size_t>(selectedGroup)].enabledParameter, powerButton);
+        refreshPowerState();
         resized();
         repaint();
     }
+
+    void refreshPowerState()
+    {
+        const auto& parameterId = groups[static_cast<size_t>(selectedGroup)].enabledParameter;
+        if (const auto* value = apvts.getRawParameterValue(parameterId))
+        {
+            const bool enabled = value->load(std::memory_order_relaxed) > 0.5f;
+            if (enabled != lastEffectEnabled)
+            {
+                lastEffectEnabled = enabled;
+                status.setText(groups[static_cast<size_t>(selectedGroup)].name
+                    + (enabled ? "  /  ACTIVE" : "  /  BYPASSED"),
+                    juce::dontSendNotification);
+                repaint();
+            }
+        }
+    }
+
+    void timerCallback() override { refreshPowerState(); }
+
     PPGUThemeManager::Palette palette;
     juce::AudioProcessorValueTreeState& apvts;
     PPGUOutputMeter outputMeter;
@@ -1292,6 +1337,7 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> powerAttachment;
     juce::Rectangle<int> graphArea;
     int selectedGroup = 0;
+    bool lastEffectEnabled = false;
 };
 
 
