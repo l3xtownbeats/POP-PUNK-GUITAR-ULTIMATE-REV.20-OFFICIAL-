@@ -2088,7 +2088,7 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
                                                float sliderPos, float minSliderPos, float maxSliderPos,
                                                juce::Slider::SliderStyle style, juce::Slider& slider)
 {
-    juce::ignoreUnused(minSliderPos, maxSliderPos, slider);
+    juce::ignoreUnused(minSliderPos, maxSliderPos);
     if (style != juce::Slider::LinearHorizontal || !palette.metersSlidersSpriteSheet.isValid())
     {
         juce::LookAndFeel_V4::drawLinearSlider(g, x, y, width, height,
@@ -2096,6 +2096,10 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
         return;
     }
 
+    const bool enabled = slider.isEnabled();
+    const bool hovered = enabled && slider.isMouseOverOrDragging();
+    const bool focused = enabled && slider.hasKeyboardFocus(true);
+    const bool dragging = enabled && slider.isMouseButtonDown();
     const bool useLongTrack = width >= 420;
     const int sourceX = 60;
     const int sourceY = useLongTrack ? 445 : 570;
@@ -2110,10 +2114,12 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
         (sliderPos - static_cast<float>(x + 4)) / static_cast<float>(juce::jmax(1, width - 8)));
     const int fillWidth = juce::jlimit(0, track.getWidth(),
         juce::roundToInt(static_cast<float>(track.getWidth()) * proportion));
-    if (fillWidth > 0)
+    if (enabled && fillWidth > 0)
     {
-        g.setColour(palette.token("accent_glow").withAlpha(0.88f));
+        g.setColour(palette.token("accent_glow").withAlpha(0.72f));
         g.fillRoundedRectangle(track.withWidth(fillWidth).toFloat().reduced(1.0f), 4.0f);
+        g.setColour(palette.token("accent").withAlpha(0.92f));
+        g.fillRoundedRectangle(track.withWidth(fillWidth).toFloat().reduced(1.0f, 4.0f), 2.0f);
     }
 
     const int thumbSize = juce::jlimit(16, 30, height + 8);
@@ -2123,6 +2129,29 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
     const int thumbY = track.getCentreY() - thumbSize / 2;
     g.drawImage(palette.metersSlidersSpriteSheet, thumbX, thumbY, thumbSize, thumbSize,
                 910, 640, 32, 32);
+
+    // Match the rotary/button state language: the live slider value remains
+    // unchanged, while hover, drag, keyboard focus and disabled are visible.
+    if (!enabled)
+    {
+        g.setColour(palette.token("window_bg").withAlpha(0.48f));
+        g.fillRoundedRectangle(track.toFloat().expanded(1.0f), 6.0f);
+        g.fillEllipse(static_cast<float>(thumbX), static_cast<float>(thumbY),
+                      static_cast<float>(thumbSize), static_cast<float>(thumbSize));
+    }
+    else if (hovered || focused || dragging)
+    {
+        const auto stateColour = focused ? palette.token("highlight")
+            : (dragging ? palette.token("accent") : palette.token("accent_glow"));
+        g.setColour(stateColour.withAlpha(focused ? 0.82f : 0.62f));
+        g.drawRoundedRectangle(track.toFloat().expanded(2.0f), 6.0f,
+                               focused ? 1.8f : 1.25f);
+        g.drawEllipse(static_cast<float>(thumbX) - 1.5f,
+                      static_cast<float>(thumbY) - 1.5f,
+                      static_cast<float>(thumbSize) + 3.0f,
+                      static_cast<float>(thumbSize) + 3.0f,
+                      dragging ? 2.0f : 1.25f);
+    }
 }
 
 void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
