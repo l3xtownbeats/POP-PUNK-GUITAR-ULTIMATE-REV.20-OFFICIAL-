@@ -212,3 +212,17 @@ The user explicitly approved and locked the functional direction. The approved r
 - UI checkpoint commits: dbb05b8872746ad31fd0bce3103bb94e6f45358a, a9021d4a16fb3d4a7a1b3fa186acee3b49fd123c. This does not mean the audio performance engine is complete.
 - Current static audit confirms articulation and palmMuteThreshold are declared in APVTS but were not found consumed by the processor audio path. Next engineering workstream is recorded articulation metadata/routing into SamplerEngine and PatternScheduler with velocity selection and note lifecycle tests.
 - CI run 44997292780 for source SHA a9021d4a16fb3d4a7a1b3fa186acee3b49fd123c was in progress at the time of this entry; no exact-HEAD pass, pluginval pass or FL Studio 20 host acceptance is claimed.
+
+
+## 2026-11-22 — NEON STAGE main-window visual polish checkpoint
+
+Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parameter IDs/ranges and preset data are unchanged.
+
+- Main panel chrome now uses the approved REV.20 hierarchy: **PRESETS / PLAYING CORE / AMP & TONE / FX CHAIN**. The auxiliary AutoChords and FX Edit functions remain separate windows/pages, not main panel identities.
+- Header discovery action is named **AUTO DISCOVER**, matching the approved control vocabulary; it remains disabled until a real discovery backend exists.
+- **ABOUT** is disabled with an explicit tooltip until a verified information panel is implemented; no placeholder action is exposed as a finished feature.
+- MELODY/PATTERN tabs now mirror the actual APVTS play-mode selection with explicit selected/unselected visual states. The selected state is refreshed on mode changes and at editor initialization.
+- The authored Skin-1 five-state artwork is now resolved for the six header controls that have matching control-state assets: Import_Guitar, Auto_Discover, Curator, Settings, About and SKIN_button. Hover/pressed/disabled rendering remains in the JUCE LookAndFeel; no control art is substituted for live text or actions.
+- The canonical 1024×700 initial editor size and existing resize limits remain unchanged. No new visual layout, parameter, or control ID was invented.
+
+**Verification status:** source changes committed to main; Windows x64 VST3 build, CTest, pluginval and FL Studio 20 host acceptance remain pending. This is a visual-source checkpoint, not a release-ready claim.
