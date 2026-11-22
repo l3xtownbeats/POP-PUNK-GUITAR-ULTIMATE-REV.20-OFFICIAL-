@@ -395,14 +395,34 @@ int main()
     ppgu::sampler::SamplePool keyswitchMetadataPool;
     const auto keyswitchMetadataLoad = keyswitchMetadataPool.loadSfz(keyswitchMetadataSfz);
     const auto* keyswitchMetadataRegion = keyswitchMetadataPool.findRegion(67, 100, 1);
+    const auto* pickedRegion = keyswitchMetadataPool.findRegion(67, 100, 1, 36);
+    const auto* palmMuteRegion = keyswitchMetadataPool.findRegion(67, 100, 1, 38);
     if (!keyswitchMetadataLoad.success || keyswitchMetadataRegion == nullptr
         || keyswitchMetadataRegion->switchLowKey != 36
         || keyswitchMetadataRegion->switchHighKey != 40
         || keyswitchMetadataRegion->switchDefault != 36
         || keyswitchMetadataRegion->switchLast != 36
-        || keyswitchMetadataRegion->switchLabel != "Picked")
+        || keyswitchMetadataRegion->switchLabel != "Picked"
+        || pickedRegion == nullptr || pickedRegion->switchLabel != "Picked"
+        || palmMuteRegion == nullptr || palmMuteRegion->switchLabel != "PalmMute"
+        || keyswitchMetadataPool.getDefaultKeySwitch() != 36
+        || !keyswitchMetadataPool.isKeySwitchNote(36)
+        || keyswitchMetadataPool.isKeySwitchNote(41))
     {
-        std::cerr << "SFZ keyswitch metadata was lost before runtime region publication.\n";
+        std::cerr << "SFZ keyswitch metadata or selector filtering failed.\n";
+        return 1;
+    }
+
+    ppgu::sampler::SamplerEngine keyswitchEngine;
+    keyswitchEngine.prepare(44100.0);
+    if (!keyswitchEngine.loadSfz(keyswitchMetadataSfz).success
+        || keyswitchEngine.getActiveKeySwitch(1) != 36
+        || !keyswitchEngine.setKeySwitch(38, 1)
+        || keyswitchEngine.getActiveKeySwitch(1) != 38
+        || keyswitchEngine.setKeySwitch(41, 1)
+        || keyswitchEngine.getActiveKeySwitch(1) != 38)
+    {
+        std::cerr << "SamplerEngine did not initialize or safely update per-channel keyswitch state.\n";
         return 1;
     }
 

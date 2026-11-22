@@ -91,7 +91,10 @@ public:
         mutable std::vector<std::uint32_t> roundRobinCounters;
     };
 
-    [[nodiscard]] const RegionView* findRegion(int midiNote, int velocity, int midiChannel = 1) noexcept;
+    [[nodiscard]] const RegionView* findRegion(int midiNote, int velocity, int midiChannel = 1,
+                                               int activeSwitch = -1) noexcept;
+    [[nodiscard]] bool isKeySwitchNote(int midiNote) const noexcept;
+    [[nodiscard]] int getDefaultKeySwitch() const noexcept;
     [[nodiscard]] std::size_t getRegionCount() const noexcept;
     [[nodiscard]] std::size_t getSampleCount() const noexcept;
 
@@ -129,6 +132,9 @@ public:
         const std::atomic<std::uint64_t>* requestGeneration = nullptr,
         std::uint64_t expectedGeneration = 0);
     [[nodiscard]] bool noteOn(int midiNote, int velocity, int maximumActiveVoices = maximumVoices, int midiChannel = 1, double globalTuningSemitones = 0.0) noexcept;
+    [[nodiscard]] bool setKeySwitch(int midiNote, int midiChannel = 1) noexcept;
+    [[nodiscard]] bool isKeySwitchNote(int midiNote) const noexcept;
+    [[nodiscard]] int getActiveKeySwitch(int midiChannel = 1) const noexcept;
     void noteOff(int midiNote, int midiChannel = 1) noexcept;
     void allNotesOff() noexcept;
     void panic(int fadeSamples) noexcept;
@@ -163,6 +169,7 @@ private:
     // SampleStreamingService owners during SamplerEngine teardown.
     std::array<StreamingVoiceReader, maximumVoices> streamingReaders {};
     std::array<Voice, maximumVoices> voices {};
+    std::array<std::atomic<int>, 16> activeKeySwitches {};
     double outputSampleRate = 44100.0;
     std::uint64_t nextAge = 1;
 };

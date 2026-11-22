@@ -239,3 +239,10 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - Added parser and SamplePool regression fixtures for global inheritance, multiple labels, metadata publication and invalid switch selectors.
 - Scope is metadata-only: this commit does NOT yet consume keyswitch MIDI events, select an articulation in SamplerEngine, alter velocity behavior, or claim palm-mute/legato playback. Next step is lock-free per-channel keyswitch state and MIDI routing through MELODY/PATTERN without accidentally adding keyswitches to held chords.
 - SFZ opcode behavior follows the SFZ Format reference for sw_default/sw_label and sw_lokey/sw_hikey. No broad SFZ compatibility claim is made.
+
+
+## 2026-11-22 — SamplerEngine keyswitch selection foundation
+- Extended SamplePool region lookup to filter SFZ regions by sw_last against an active keyswitch; non-switch regions remain eligible. Added keyswitch-range detection and sw_default retrieval from the immutable active snapshot.
+- SamplerEngine now initializes a lock-free per-MIDI-channel keyswitch state from sw_default, exposes bounded set/query methods, and supplies the active switch to noteOn region selection. This makes SFZ-authored articulation-zone selection testable inside the sampler without guessing from filenames.
+- Added SamplePool/Engine checks for selected label resolution, default selection, per-channel switch update and rejection outside the declared switch range.
+- MIDI event interception in PluginProcessor, chord exclusion, UI articulation labels and host-sync PATTERN switching are still separate unfinished steps. This commit does not claim the UI can yet change articulation, nor that a real guitar bank contains palm-mute zones.

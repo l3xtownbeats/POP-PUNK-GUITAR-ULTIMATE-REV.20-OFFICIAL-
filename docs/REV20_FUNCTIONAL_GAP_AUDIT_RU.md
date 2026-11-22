@@ -210,3 +210,10 @@ The following audio-path wiring has now been selectively ported into REV.20 (tar
 - Added parser support for SFZ sw_lokey, sw_hikey, sw_last, sw_default and sw_label with bounded note parsing and validation of selector ranges/defaults.
 - Carried authored keyswitch range/default/label metadata into immutable SamplePool::RegionView and added SfzParserTests/SamplePoolTests coverage.
 - This is metadata ingestion only. MIDI keyswitch state, per-channel active articulation, audio-thread region filtering, and UI availability/selection are still NOT IMPLEMENTED. No articulation is to be marked playable until those steps and recorded-map verification pass.
+
+
+## 2026-11-22 — SamplerEngine keyswitch selector (implementation checkpoint)
+
+- SamplePool region lookup now accepts an active keyswitch and filters SFZ sw_last regions. It exposes switch-range detection and the source-authored sw_default.
+- SamplerEngine initializes per-channel active switch state from the loaded bank default, updates it through lock-free atomics, and uses it during noteOn region selection. Regression tests cover selected labels/defaults and out-of-range rejection.
+- Still open: intercept keyswitch MIDI notes in PluginProcessor so they do not become melody notes or PATTERN chord notes; publish current articulation state to UI; connect pattern changes with sample-offset scheduler events; verify against real licensed SFZ maps. This is not yet an end-user-complete articulation workflow.

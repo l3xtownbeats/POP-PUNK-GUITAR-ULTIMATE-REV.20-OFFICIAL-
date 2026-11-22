@@ -371,7 +371,8 @@ LoadReport SamplePool::loadSfz(const juce::File& sfzFile,
     return report;
 }
 
-const SamplePool::RegionView* SamplePool::findRegion(int midiNote, int velocity, int midiChannel) noexcept
+const SamplePool::RegionView* SamplePool::findRegion(int midiNote, int velocity, int midiChannel,
+                                                     int activeSwitch) noexcept
 {
     const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
     if (snapshot == nullptr) return nullptr;
@@ -384,7 +385,8 @@ const SamplePool::RegionView* SamplePool::findRegion(int midiNote, int velocity,
     {
         if (midiNote < region.lowKey || midiNote > region.highKey
             || velocity < region.lowVelocity || velocity > region.highVelocity
-            || midiChannel < region.lowChannel || midiChannel > region.highChannel)
+            || midiChannel < region.lowChannel || midiChannel > region.highChannel
+            || (region.switchLast >= 0 && region.switchLast != activeSwitch))
             continue;
 
         if (firstMatch == nullptr)
@@ -430,6 +432,31 @@ const SamplePool::RegionView* SamplePool::findRegion(int midiNote, int velocity,
     return firstSequenceMatch != nullptr ? firstSequenceMatch : firstMatch;
 }
 
+bool SamplePool::isKeySwitchNote(int midiNote) const noexcept
+{
+    if (midiNote < 0 || midiNote > 127)
+        return false;
+    const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
+    if (snapshot == nullptr)
+        return false;
+    for (const auto& region : snapshot->regions)
+        if (region.switchLowKey >= 0 && midiNote >= region.switchLowKey
+            && midiNote <= region.switchHighKey)
+            return true;
+    return false;
+}
+
+int SamplePool::getDefaultKeySwitch() const noexcept
+{
+    const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
+    if (snapshot == nullptr)
+        return -1;
+    for (const auto& region : snapshot->regions)
+        if (region.switchDefault >= 0)
+            return region.switchDefault;
+    return -1;
+}
+
 std::size_t SamplePool::getRegionCount() const noexcept
 {
     const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
@@ -470,12 +497,41 @@ LoadReport SamplerEngine::loadSfz(const juce::File& sfzFile,
                                   const std::atomic<std::uint64_t>* requestGeneration,
                                   std::uint64_t expectedGeneration)
 {
-    return pool.loadSfz(sfzFile, requestGeneration, expectedGeneration);
+    auto report = pool.loadSfz(sfzFile, requestGeneration, expectedGeneration);
+    if (report.success)
+    {
+        const int defaultSwitch = pool.getDefaultKeySwitch();
+        for (auto& activeSwitch : activeKeySwitches)
+            activeSwitch.store(defaultSwitch, std::memory_order_release);
+    }
+    return report;
+}
+
+bool SamplerEngine::setKeySwitch(int midiNote, int midiChannel) noexcept
+{
+    const int channel = juce::jlimit(1, 16, midiChannel);
+    if (!pool.isKeySwitchNote(midiNote))
+        return false;
+    activeKeySwitches[static_cast<std::size_t>(channel - 1)].store(midiNote, std::memory_order_release);
+    return true;
+}
+
+bool SamplerEngine::isKeySwitchNote(int midiNote) const noexcept
+{
+    return pool.isKeySwitchNote(midiNote);
+}
+
+int SamplerEngine::getActiveKeySwitch(int midiChannel) const noexcept
+{
+    const int channel = juce::jlimit(1, 16, midiChannel);
+    return activeKeySwitches[static_cast<std::size_t>(channel - 1)].load(std::memory_order_acquire);
 }
 
 bool SamplerEngine::noteOn(int midiNote, int velocity, int maximumActiveVoices, int midiChannel, double globalTuningSemitones) noexcept
 {
-    const auto* region = pool.findRegion(midiNote, velocity, midiChannel);
+    const int channel = juce::jlimit(1, 16, midiChannel);
+    const int activeSwitch = getActiveKeySwitch(channel);
+    const auto* region = pool.findRegion(midiNote, velocity, channel, activeSwitch);
     if (region == nullptr || (region->audio == nullptr && region->streaming == nullptr) || velocity <= 0)
         return false;
 
