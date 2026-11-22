@@ -1673,9 +1673,13 @@ public:
         sourceLabel.setText("INSTRUMENT SOURCE  /  " + (processor.getCurrentSfzFilePath().isNotEmpty()
             ? juce::File(processor.getCurrentSfzFilePath()).getFileName()
             : juce::String("NO SFZ INSTRUMENT LOADED")), juce::dontSendNotification);
-        for (auto* c : { static_cast<juce::Component*>(&title), &subtitle, &styleLabel,
-                         &articulationLabel, &availability, &activeLabel, &sourceLabel })
-            addAndMakeVisible(*c);
+        addAndMakeVisible(title);
+        addAndMakeVisible(subtitle);
+        addAndMakeVisible(styleLabel);
+        addAndMakeVisible(articulationLabel);
+        addAndMakeVisible(availability);
+        addAndMakeVisible(activeLabel);
+        addAndMakeVisible(sourceLabel);
         // Keep the candidate list empty until a source-map registry can prove availability.
         setThemePalette(palette);
         startTimerHz(2);
