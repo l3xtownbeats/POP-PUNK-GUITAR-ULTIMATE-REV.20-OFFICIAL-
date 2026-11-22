@@ -1309,18 +1309,21 @@ private:
 
     void refreshPowerState()
     {
-        const auto& parameterId = groups[static_cast<size_t>(selectedGroup)].enabledParameter;
-        if (const auto* value = apvts.getRawParameterValue(parameterId))
+        const auto& group = groups[static_cast<size_t>(selectedGroup)];
+        if (const auto* value = apvts.getRawParameterValue(group.enabledParameter))
         {
             const bool enabled = value->load(std::memory_order_relaxed) > 0.5f;
-            if (enabled != lastEffectEnabled)
-            {
-                lastEffectEnabled = enabled;
-                status.setText(groups[static_cast<size_t>(selectedGroup)].name
-                    + (enabled ? "  /  ACTIVE" : "  /  BYPASSED"),
-                    juce::dontSendNotification);
+            const bool stateChanged = enabled != lastEffectEnabled;
+            lastEffectEnabled = enabled;
+
+            // Keep the textual state correct on first open and after changing groups,
+            // even when the newly selected effect happens to be bypassed (false).
+            const auto expectedStatus = group.name
+                + (enabled ? "  /  ACTIVE" : "  /  BYPASSED");
+            if (status.getText() != expectedStatus)
+                status.setText(expectedStatus, juce::dontSendNotification);
+            if (stateChanged)
                 repaint();
-            }
         }
     }
 
