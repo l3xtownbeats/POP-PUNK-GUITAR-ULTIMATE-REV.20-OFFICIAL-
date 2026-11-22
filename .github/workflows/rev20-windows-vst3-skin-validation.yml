@@ -23,7 +23,7 @@ on:
 
 concurrency:
   group: rev20-windows-x64-vst3-skin-validation
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -49,22 +49,8 @@ jobs:
         shell: pwsh
         run: python tools/generate_neon_stage_spritesheets.py
 
-      - name: Commit generated NEON STAGE sprite atlases to the source tree
-        shell: pwsh
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add SKIN/Skin_053/assets/spritesheets/*.png SKIN/Skin_053/assets/spritesheets/neon_stage_spritesheet_manifest.json
-          git diff --cached --quiet
-          if ($LASTEXITCODE -ne 0) {
-            git commit -m "Refresh generated NEON STAGE sprite atlases"
-            git fetch origin main
-            git rebase origin/main
-            git push origin HEAD:main
-          } else {
-            Write-Host "Generated NEON STAGE sprite atlases match the committed source files."
-          }
-
+      # Generated atlases stay inside this build workspace. The build must never
+      # push back to main: that creates a second run and can cancel the release build.
       - name: Checkout JUCE 7.0.12
         shell: pwsh
         run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
