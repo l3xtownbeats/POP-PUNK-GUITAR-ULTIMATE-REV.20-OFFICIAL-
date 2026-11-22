@@ -578,3 +578,10 @@ The two windows are coordinated parts of PATTERN, not extra top-level modes. **A
 Both windows must follow the approved NEON STAGE visual system and the complete per-element acceptance contract: graphite materials and frames, approved cyan/electric-blue palette, real active/hover/pressed/focus/disabled states, keyboard/mouse parity, persistence and return transitions, accessible hit areas/tooltips, responsive layout/DPI, and performance-conscious animation. Session Guitarist remains a workflow/UX quality reference only; do not copy its UI, assets, branding or content.
 
 Implementation note: an earlier source experiment added a standalone ARTICULATION button to the pattern panel. The user corrected that interpretation. That standalone button is explicitly rejected and must not be retained as the architecture. The source branch cleanup removes that button; the two coordinated windows described above are the canonical target. This decision records the approved architecture, not a claim that both windows are already implemented or host-verified.
+
+
+## 2026-11-22 — PATTERN playing-style entry requested: PALM MUTE - 8TH
+
+The user supplied the exact entry/path label: **PLAYING / PATTERN — PALM MUTE - 8TH**. Treat PALM MUTE - 8TH as a requested PATTERN playing-style/articulation entry in the second **PLAYING STYLE / ARTICULATION** window, not as a separate top-level mode or a control in the PATTERN PRESETS window.
+
+The label is a user-approved catalog requirement, not proof that a playable recording or mapping currently exists. Show it as selectable/available only after a real, legally usable palm-muted eighth-note performance recording and its note/range/velocity/keyswitch mappings have been inspected and verified. Until then, preserve the requested entry in the catalog specification but show an honest unavailable / source mapping required state in the UI. Do not synthesize a false READY state or imply that the audio engine already plays it.
