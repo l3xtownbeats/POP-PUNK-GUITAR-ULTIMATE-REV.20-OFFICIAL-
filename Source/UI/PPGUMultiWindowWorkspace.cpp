@@ -5,6 +5,37 @@
 #include <cstdint>
 #include <limits>
 
+namespace
+{
+    void drawFrameArtwork(juce::Graphics& g, const juce::Image& atlas,
+                          juce::Rectangle<int> bounds)
+    {
+        if (!atlas.isValid() || bounds.getWidth() < 40 || bounds.getHeight() < 40)
+            return;
+        constexpr int corner = 22, edge = 8;
+        const int x = bounds.getX(), y = bounds.getY();
+        const int r = bounds.getRight(), b = bounds.getBottom();
+        const int mw = juce::jmax(1, bounds.getWidth() - corner * 2);
+        const int mh = juce::jmax(1, bounds.getHeight() - corner * 2);
+        g.saveState();
+        g.setOpacity(0.62f);
+        const auto draw = [&g, &atlas](juce::Rectangle<int> dst, juce::Rectangle<int> src)
+        {
+            g.drawImage(atlas, dst.getX(), dst.getY(), dst.getWidth(), dst.getHeight(),
+                        src.getX(), src.getY(), src.getWidth(), src.getHeight());
+        };
+        draw({x,y,corner,corner},{30,60,92,92});
+        draw({r-corner,y,corner,corner},{160,60,92,92});
+        draw({x,b-corner,corner,corner},{290,60,92,92});
+        draw({r-corner,b-corner,corner,corner},{420,60,92,92});
+        draw({x+corner,y+2,mw,edge},{30,230,440,22});
+        draw({x+corner,b-edge-2,mw,edge},{30,270,440,22});
+        draw({x+2,y+corner,edge,mh},{510,220,22,180});
+        draw({r-edge-2,y+corner,edge,mh},{570,220,22,180});
+        g.restoreState();
+    }
+}
+
 class PPGUMultiWindowWorkspace::Window final : public juce::Component
 {
 public:
@@ -22,18 +53,30 @@ public:
         title.setInterceptsMouseClicks(false, false);
         addAndMakeVisible(title);
 
+        // Give every workspace window the same explicit, keyboard-accessible
+        // hardware-control states as the main NEON STAGE surface.
         closeButton.setButtonText(juce::String::charToString(0x00d7));
+        closeButton.setName("Close " + spec.title);
+        closeButton.setComponentID("workspace_close");
         closeButton.setTooltip("Close panel");
+        closeButton.setWantsKeyboardFocus(true);
         closeButton.setColour(juce::TextButton::buttonColourId, panel.darker(0.2f));
-        closeButton.setColour(juce::TextButton::textColourOffId, text);
         closeButton.setColour(juce::TextButton::buttonOnColourId, border);
+        closeButton.setColour(juce::TextButton::textColourOffId, text);
+        closeButton.setColour(juce::TextButton::textColourOnId, text);
+        closeButton.setColour(juce::TextButton::buttonOnColourId, border);
+        closeButton.setColour(juce::TextButton::buttonColourId, panel.darker(0.2f));
         closeButton.onClick = [this] { owner.handleClose(panelId); };
         addAndMakeVisible(closeButton);
 
         maximizeButton.setButtonText("□");
+        maximizeButton.setName("Maximize or restore " + spec.title);
+        maximizeButton.setComponentID("workspace_maximize");
         maximizeButton.setTooltip("MAXIMIZE / RESTORE");
+        maximizeButton.setWantsKeyboardFocus(true);
         maximizeButton.setColour(juce::TextButton::buttonColourId, panel.darker(0.2f));
         maximizeButton.setColour(juce::TextButton::textColourOffId, text);
+        maximizeButton.setColour(juce::TextButton::textColourOnId, text);
         maximizeButton.onClick = [this] { toggleMaximize(); };
         addAndMakeVisible(maximizeButton);
         boundsConstrainer.setMinimumSize(static_cast<int>(minimum.width), static_cast<int>(minimum.height));
@@ -51,6 +94,7 @@ public:
     }
 
     int getPanelId() const noexcept { return panelId; }
+    juce::Component* getContentComponent() const noexcept { return content.get(); }
     ppgu::ui::PanelSize getDesiredSize() const noexcept { return desired; }
     ppgu::ui::PanelSize getMinimumSize() const noexcept { return minimum; }
     bool isMaximized() const noexcept { return maximized; }
@@ -60,6 +104,19 @@ public:
     {
         themePalette = palette;
         hasThemePalette = true;
+        const auto uiTypeface = palette.uiTypeface.isNotEmpty() ? palette.uiTypeface : juce::String("Arial");
+        const auto weight = palette.typographyWeight.equalsIgnoreCase("normal")
+            ? juce::Font::plain : juce::Font::bold;
+        title.setFont(juce::Font(uiTypeface, 14.0f * palette.fontScale, weight)
+                          .withExtraKerningFactor(palette.letterSpacing));
+        title.setColour(juce::Label::textColourId, palette.token("text_primary"));
+        for (auto* button : { &closeButton, &maximizeButton })
+        {
+            button->setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
+            button->setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
+            button->setColour(juce::TextButton::textColourOffId, palette.token("text_primary"));
+            button->setColour(juce::TextButton::textColourOnId, palette.token("window_bg"));
+        }
         if (content != nullptr)
             if (auto* themed = dynamic_cast<PPGUThemeAwarePanel*>(content.get()))
                 themed->setThemePalette(palette);
@@ -77,6 +134,7 @@ public:
         closeButton.setColour(juce::TextButton::buttonOnColourId, border);
         maximizeButton.setColour(juce::TextButton::buttonColourId, panel.darker(0.2f));
         maximizeButton.setColour(juce::TextButton::textColourOffId, text);
+        maximizeButton.setColour(juce::TextButton::buttonOnColourId, border);
         repaint();
     }
 
@@ -170,6 +228,8 @@ public:
 
         g.setColour(borderColour);
         g.drawRoundedRectangle(area.reduced(0.5f), 8.0f, 1.0f);
+        if (hasThemePalette)
+            drawFrameArtwork(g, themePalette.framesPanelsSpriteSheet, getLocalBounds());
         g.setColour(borderColour.withAlpha(0.55f));
         g.drawLine(8.0f, 42.0f, static_cast<float>(getWidth() - 8), 42.0f, 1.0f);
     }
@@ -191,6 +251,22 @@ public:
 
     void paintOverChildren(juce::Graphics& g) override
     {
+        // Keyboard focus must remain visible above the button's own LookAndFeel
+        // painting, without changing the window layout or hit targets.
+        const auto drawFocusRing = [&g](const juce::Button& button)
+        {
+            if (!button.hasKeyboardFocus(true))
+                return;
+
+            auto bounds = button.getBounds().toFloat().expanded(1.5f);
+            g.setColour(juce::Colour(0xff00d9ff).withAlpha(0.18f));
+            g.fillRoundedRectangle(bounds.expanded(2.0f), 5.0f);
+            g.setColour(juce::Colour(0xff00d9ff));
+            g.drawRoundedRectangle(bounds, 4.0f, 1.5f);
+        };
+        drawFocusRing(closeButton);
+        drawFocusRing(maximizeButton);
+
         if (!maximized)
         {
             juce::Path grip;
@@ -314,6 +390,13 @@ bool PPGUMultiWindowWorkspace::isPanelOpen(int id) const noexcept
 {
     return std::any_of(windows.begin(), windows.end(),
         [id](const auto& item) { return item->getPanelId() == id; });
+}
+
+juce::Component* PPGUMultiWindowWorkspace::getPanelContent(int id) const noexcept
+{
+    const auto it = std::find_if(windows.begin(), windows.end(),
+        [id](const auto& item) { return item->getPanelId() == id; });
+    return it != windows.end() ? (*it)->getContentComponent() : nullptr;
 }
 
 int PPGUMultiWindowWorkspace::getOpenPanelCount() const noexcept

@@ -46,6 +46,37 @@ juce::Font makeThemeFont(const PPGUThemeManager::Palette& palette, float baseSiz
         .withExtraKerningFactor(palette.letterSpacing);
 }
 
+void drawNineSliceFrame(juce::Graphics& g, const juce::Image& atlas,
+                        juce::Rectangle<int> bounds, float opacity = 0.72f)
+{
+    if (!atlas.isValid() || bounds.getWidth() < 40 || bounds.getHeight() < 40)
+        return;
+
+    constexpr int corner = 24;
+    constexpr int edge = 10;
+    const int x = bounds.getX(), y = bounds.getY();
+    const int right = bounds.getRight(), bottom = bounds.getBottom();
+    const int middleWidth = juce::jmax(1, bounds.getWidth() - corner * 2);
+    const int middleHeight = juce::jmax(1, bounds.getHeight() - corner * 2);
+
+    g.saveState();
+    g.setOpacity(opacity);
+    const auto draw = [&g, &atlas](juce::Rectangle<int> dst, juce::Rectangle<int> src)
+    {
+        g.drawImage(atlas, dst.getX(), dst.getY(), dst.getWidth(), dst.getHeight(),
+                    src.getX(), src.getY(), src.getWidth(), src.getHeight());
+    };
+    draw({x,y,corner,corner}, {30,60,92,92});
+    draw({right-corner,y,corner,corner}, {160,60,92,92});
+    draw({x,bottom-corner,corner,corner}, {290,60,92,92});
+    draw({right-corner,bottom-corner,corner,corner}, {420,60,92,92});
+    draw({x+corner,y+2,middleWidth,edge}, {30,230,440,22});
+    draw({x+corner,bottom-edge-2,middleWidth,edge}, {30,270,440,22});
+    draw({x+2,y+corner,edge,middleHeight}, {510,220,22,180});
+    draw({right-edge-2,y+corner,edge,middleHeight}, {570,220,22,180});
+    g.restoreState();
+}
+
 void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
                             const PPGUThemeManager::Palette& palette,
                             float textureOpacity = 0.10f,
@@ -303,7 +334,7 @@ private:
                            + "  /  " + item.layout, textArea.removeFromTop(14.0f),
                        juce::Justification::centredLeft, true);
             const auto tag = item.active ? juce::String("ACTIVE")
-                : (selected ? juce::String("SELECTED") : juce::String("PREVIEW"));
+                : (selected ? juce::String("SELECTED") : juce::String("AVAILABLE"));
             g.setColour(item.active ? item.accent : palette.token("accent"));
             g.fillRoundedRectangle(getWidth() - 68.0f, 10.0f, 58.0f, 17.0f, 5.0f);
             g.setColour(palette.token("window_bg")); g.setFont(makeThemeFont(palette, 7.5f, false, true));
@@ -575,10 +606,13 @@ private:
 };
 
 // Import panel delegates to the existing asynchronous SFZ loader and reports its real result.
-class PPGUImportGuitarPanel final : public juce::Component, public PPGUThemeAwarePanel
+class PPGUImportGuitarPanel final : public juce::Component,
+                                         public PPGUThemeAwarePanel,
+                                         private juce::Timer
 {
 public:
-    explicit PPGUImportGuitarPanel(std::function<void(juce::Label*, juce::Button*)> loadActionIn)
+    explicit PPGUImportGuitarPanel(std::function<void(juce::Label*, juce::Button*)> loadActionIn,
+                                  juce::String initialStatus)
         : loadAction(std::move(loadActionIn))
     {
         heading.setText("LICENSED GUITAR LIBRARY", juce::dontSendNotification);
@@ -591,13 +625,15 @@ public:
         description.setJustificationType(juce::Justification::topLeft);
         description.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(description);
-        status.setText("No SFZ library loaded in this session.", juce::dontSendNotification);
+        status.setText(initialStatus.isNotEmpty() ? initialStatus
+            : juce::String("No SFZ library loaded in this session."), juce::dontSendNotification);
         status.setJustificationType(juce::Justification::topLeft);
         status.setColour(juce::Label::textColourId, palette.token("lcd_text"));
         addAndMakeVisible(status);
         loadButton.setButtonText("LOAD SFZ");
         loadButton.onClick = [this] { if (loadAction) loadAction(&status, &loadButton); };
         addAndMakeVisible(loadButton);
+        startTimerHz(8);
     }
     void setThemePalette(const PPGUThemeManager::Palette& value) override
     {
@@ -617,6 +653,45 @@ public:
     {
         g.fillAll(palette.token("window_bg"));
         drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.12f, 0.34f, 0.04f);
+
+        // This indicator mirrors the real asynchronous SFZ loader status text.
+        // It is steady-state only: no decorative blinking or simulated progress.
+        const auto loadButtonBounds = loadButton.getBounds();
+        const auto ledBounds = juce::Rectangle<float>(
+            static_cast<float>(loadButtonBounds.getRight() + 18),
+            static_cast<float>(loadButtonBounds.getY() + loadButtonBounds.getHeight() * 0.5f - 5),
+            10.0f, 10.0f);
+        juce::Colour led = palette.token("led_off");
+        juce::String stateText = "STANDBY";
+        if (loadState == LoadState::loading)
+        {
+            led = palette.token("accent");
+            stateText = "LOADING";
+        }
+        else if (loadState == LoadState::ready)
+        {
+            led = palette.token("success");
+            stateText = "READY";
+        }
+        else if (loadState == LoadState::error)
+        {
+            led = palette.token("danger");
+            stateText = "ERROR";
+        }
+        if (loadState != LoadState::standby)
+        {
+            g.setColour(led.withAlpha(0.25f));
+            g.fillEllipse(ledBounds.expanded(4.0f));
+        }
+        g.setColour(led);
+        g.fillEllipse(ledBounds);
+        g.setColour(palette.token("control_border"));
+        g.drawEllipse(ledBounds, 1.0f);
+        g.setColour(palette.token("text_secondary"));
+        g.setFont(makeThemeFont(palette, 9.0f, false, true));
+        g.drawText(stateText, loadButton.getRight() + 34, loadButton.getY(),
+                   juce::jmax(72, getWidth() - loadButton.getRight() - 52),
+                   loadButton.getHeight(), juce::Justification::centredLeft);
     }
 
     void resized() override
@@ -631,10 +706,38 @@ public:
         status.setBounds(area.removeFromTop(90));
     }
 private:
+    enum class LoadState { standby, loading, ready, error };
+
+    void timerCallback() override
+    {
+        const auto message = status.getText().trim();
+        LoadState next = LoadState::standby;
+        if (!loadButton.isEnabled() || message.startsWithIgnoreCase("Loading SFZ")
+            || message.startsWithIgnoreCase("LOADING SFZ"))
+            next = LoadState::loading;
+        else if (message.startsWithIgnoreCase("READY")
+                 || message.startsWithIgnoreCase("SAVED LIBRARY"))
+            next = LoadState::ready;
+        else if (message.startsWithIgnoreCase("LIBRARY FILE NOT FOUND")
+                 || message.containsIgnoreCase("FAILED")
+                 || message.containsIgnoreCase("ERROR")
+                 || message.containsIgnoreCase("NOT FOUND"))
+            next = LoadState::error;
+        else if (message.isNotEmpty()
+                 && message != "No SFZ library loaded in this session.")
+            next = LoadState::error;
+        if (next != loadState)
+        {
+            loadState = next;
+            repaint();
+        }
+    }
+
     PPGUThemeManager::Palette palette;
     std::function<void(juce::Label*, juce::Button*)> loadAction;
     juce::Label heading, description, status;
     juce::TextButton loadButton;
+    LoadState loadState = LoadState::standby;
 };
 
 // Compact live harmony monitor. It observes the existing MIDI keyboard state and
@@ -692,7 +795,18 @@ public:
         area.removeFromRight(8);
         g.setColour(palette.tokens.textSecondary);
         g.setFont(makeThemeFont(palette, 8.5f, false, true));
-        g.drawText("NOTES HELD", area.removeFromTop(13), juce::Justification::left);
+        auto notesHeading = area.removeFromTop(13);
+        g.drawText("NOTES HELD", notesHeading, juce::Justification::left);
+        const float midiLedX = static_cast<float>(notesHeading.getRight() - 9);
+        const float midiLedY = static_cast<float>(notesHeading.getCentreY());
+        const auto midiLedColour = midiActive ? palette.token("accent") : palette.token("led_off");
+        if (midiActive)
+        {
+            g.setColour(midiLedColour.withAlpha(0.28f));
+            g.fillEllipse(midiLedX - 6.0f, midiLedY - 6.0f, 12.0f, 12.0f);
+        }
+        g.setColour(midiLedColour);
+        g.fillEllipse(midiLedX - 2.5f, midiLedY - 2.5f, 5.0f, 5.0f);
         g.setColour(palette.tokens.textPrimary);
         g.setFont(makeThemeFont(palette, 12.0f, false, false));
         g.drawFittedText(notesText, area, juce::Justification::centredLeft, 1);
@@ -814,6 +928,7 @@ private:
         const auto newChord = detectChord(held);
         const auto newNotes = held.empty() ? juce::String("Waiting for MIDI input")
                                            : noteNames.joinIntoString("   /   ");
+        const bool newMidiActive = !held.empty();
 
         auto* rootParameter = parameters.getRawParameterValue("scaleRoot");
         auto* modeParameter = parameters.getRawParameterValue("scaleMode");
@@ -825,11 +940,13 @@ private:
                          : mode == 2 ? pitchName(root) + " MINOR"
                                      : juce::String("CHROMATIC");
 
-        if (newChord != chordText || newNotes != notesText || newKey != keyText)
+        if (newChord != chordText || newNotes != notesText
+            || newKey != keyText || newMidiActive != midiActive)
         {
             chordText = newChord;
             notesText = newNotes;
             keyText = newKey;
+            midiActive = newMidiActive;
             repaint();
         }
     }
@@ -842,6 +959,7 @@ private:
     juce::String chordText { "—" };
     juce::String notesText { "Waiting for MIDI input" };
     juce::String keyText { "CHROMATIC" };
+    bool midiActive = false;
 };
 
 
@@ -878,7 +996,7 @@ public:
                 area.getY() + static_cast<float>(i) * (segmentHeight + gap),
                 area.getWidth(), segmentHeight);
             const float fraction = static_cast<float>(levelIndex) / static_cast<float>(segments);
-            const auto colour = fraction >= 0.92f ? juce::Colour(0xffff557a)
+            const auto colour = fraction >= 0.92f ? juce::Colour(0xffff4545)
                 : fraction >= 0.80f ? juce::Colour(0xffff9b45)
                 : fraction >= 0.60f ? juce::Colour(0xffffd84a)
                                     : palette.token("success");
@@ -967,7 +1085,9 @@ private:
     float leftLevel = 0.0f, rightLevel = 0.0f;
 };
 
-class PPGUFXEditPanel final : public juce::Component, public PPGUThemeAwarePanel
+class PPGUFXEditPanel final : public juce::Component,
+                                  public PPGUThemeAwarePanel,
+                                  private juce::Timer
 {
 public:
     explicit PPGUFXEditPanel(PopPunkGuitarUltimateAudioProcessor& source, int initialEffect)
@@ -1030,6 +1150,8 @@ public:
             }
         }
         selectGroup(effectSelector.getSelectedId() - 1);
+        refreshPowerState();
+        startTimerHz(10);
     }
 
     void setThemePalette(const PPGUThemeManager::Palette& value) override
@@ -1074,6 +1196,26 @@ public:
     {
         g.fillAll(palette.token("window_bg"));
         drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.32f, 0.035f);
+
+        // The FX LED mirrors the currently selected APVTS bypass parameter.
+        const auto powerBounds = powerButton.getBounds().toFloat();
+        if (!powerBounds.isEmpty())
+        {
+            const float ledX = powerBounds.getRight() - 10.0f;
+            const float ledY = powerBounds.getCentreY();
+            const auto led = lastEffectEnabled ? palette.token("accent")
+                                               : palette.token("led_off");
+            if (lastEffectEnabled)
+            {
+                g.setColour(led.withAlpha(0.30f));
+                g.fillEllipse(ledX - 7.0f, ledY - 7.0f, 14.0f, 14.0f);
+            }
+            g.setColour(led);
+            g.fillEllipse(ledX - 3.0f, ledY - 3.0f, 6.0f, 6.0f);
+            g.setColour(palette.token("control_border"));
+            g.drawEllipse(ledX - 3.0f, ledY - 3.0f, 6.0f, 6.0f, 0.8f);
+        }
+
         auto area = getLocalBounds().toFloat().reduced(12.0f);
         g.setColour(palette.token("control_border"));
         g.drawRoundedRectangle(area, 10.0f, 1.0f);
@@ -1168,9 +1310,33 @@ private:
         powerAttachment.reset();
         powerAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
             apvts, groups[static_cast<size_t>(selectedGroup)].enabledParameter, powerButton);
+        refreshPowerState();
         resized();
         repaint();
     }
+
+    void refreshPowerState()
+    {
+        const auto& group = groups[static_cast<size_t>(selectedGroup)];
+        if (const auto* value = apvts.getRawParameterValue(group.enabledParameter))
+        {
+            const bool enabled = value->load(std::memory_order_relaxed) > 0.5f;
+            const bool stateChanged = enabled != lastEffectEnabled;
+            lastEffectEnabled = enabled;
+
+            // Keep the textual state correct on first open and after changing groups,
+            // even when the newly selected effect happens to be bypassed (false).
+            const auto expectedStatus = group.name
+                + (enabled ? "  /  ACTIVE" : "  /  BYPASSED");
+            if (status.getText() != expectedStatus)
+                status.setText(expectedStatus, juce::dontSendNotification);
+            if (stateChanged)
+                repaint();
+        }
+    }
+
+    void timerCallback() override { refreshPowerState(); }
+
     PPGUThemeManager::Palette palette;
     juce::AudioProcessorValueTreeState& apvts;
     PPGUOutputMeter outputMeter;
@@ -1182,6 +1348,7 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> powerAttachment;
     juce::Rectangle<int> graphArea;
     int selectedGroup = 0;
+    bool lastEffectEnabled = false;
 };
 
 
@@ -1192,9 +1359,11 @@ class PPGUPatternSectionPanel final : public juce::Component,
 public:
     PPGUPatternSectionPanel(PopPunkGuitarUltimateAudioProcessor& processorIn,
                             juce::String selectedTonePreset,
-                            std::function<void()> importGuitarAction)
+                            std::function<void()> importGuitarAction,
+                            std::function<void()> openAutoChordsAction)
         : processor(processorIn), originalSection(processorIn.getSelectedSongSection()),
-          tonePresetName(std::move(selectedTonePreset)), importAction(std::move(importGuitarAction))
+          tonePresetName(std::move(selectedTonePreset)), importAction(std::move(importGuitarAction)),
+          autoChordsAction(std::move(openAutoChordsAction))
     {
         title.setText("PATTERN  /  SONG SECTION ROUTING", juce::dontSendNotification);
         title.setFont(makeThemeFont(palette, 19.0f, false, true));
@@ -1219,6 +1388,24 @@ public:
                              &performanceLabel, &sourceValue, &toneValue, &performanceValue, &status })
             addAndMakeVisible(*label);
         addAndMakeVisible(importSource);
+        openAutoChords.setButtonText("OPEN AUTOCHORDS");
+        openAutoChords.onClick = [this] { if (autoChordsAction) autoChordsAction(); };
+        addAndMakeVisible(openAutoChords);
+        for (int i = 0; i < static_cast<int>(patternCards.size()); ++i)
+        {
+            auto& card = patternCards[static_cast<size_t>(i)];
+            card.setButtonText("PATTERN SLOT  " + juce::String(i + 1).paddedLeft('0', 2));
+            card.setTooltip("Pattern slot " + juce::String(i + 1)
+                + ". Selecting a slot does not claim that a recorded rhythm library is installed.");
+            card.onClick = [this, i]
+            {
+                patternBox.setSelectedId(i + 1, juce::dontSendNotification);
+                refreshPatternCards();
+                updateStatus("PATTERN SLOT " + juce::String(i + 1)
+                    + " selected. Press PREVIEW to audition or APPLY to assign.");
+            };
+            addAndMakeVisible(card);
+        }
         refreshInstrumentSource();
         startTimerHz(2);
         sectionBox.addItemList({ "INTRO", "VERSE", "CHORUS", "BRIDGE", "OUTRO" }, 1);
@@ -1229,14 +1416,19 @@ public:
         const int legacy = static_cast<int>(processor.parameters.getRawParameterValue("patternSlot")->load());
         patternBox.setSelectedId((assigned >= 0 ? assigned : legacy) + 1, juce::dontSendNotification);
         addAndMakeVisible(sectionBox);
-        addAndMakeVisible(patternBox);
+        patternBox.setVisible(false); // Retained as the existing slot-selection model for APVTS/routing.
+        refreshPatternCards();
         preview.setButtonText("PREVIEW");
         apply.setButtonText("APPLY");
         cancel.setButtonText("CANCEL");
         for (auto* button : { &preview, &apply, &cancel })
             addAndMakeVisible(*button);
         sectionBox.onChange = [this] { selectSection(); };
-        patternBox.onChange = [this] { updateStatus("Catalog selection only — press PREVIEW to audition."); };
+        patternBox.onChange = [this]
+        {
+            refreshPatternCards();
+            updateStatus("Pattern slot selected — press PREVIEW to audition.");
+        };
         preview.onClick = [this]
         {
             const int slot = patternBox.getSelectedId() - 1;
@@ -1296,6 +1488,16 @@ public:
             button->setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
             button->setColour(juce::TextButton::textColourOffId, palette.token("text_primary"));
         }
+        openAutoChords.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
+        openAutoChords.setColour(juce::TextButton::textColourOffId, palette.token("accent"));
+        for (auto& card : patternCards)
+        {
+            card.setColour(juce::TextButton::buttonColourId, palette.token("control_bg"));
+            card.setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
+            card.setColour(juce::TextButton::textColourOffId, palette.token("text_secondary"));
+            card.setColour(juce::TextButton::textColourOnId, palette.token("window_bg"));
+        }
+        refreshPatternCards();
         apply.setColour(juce::TextButton::buttonColourId, palette.token("accent"));
         apply.setColour(juce::TextButton::textColourOffId, palette.token("window_bg"));
     }
@@ -1308,35 +1510,56 @@ public:
 
     void resized() override
     {
-        auto area = getLocalBounds().reduced(22);
-        title.setBounds(area.removeFromTop(30));
-        area.removeFromTop(7);
-        sourceLabel.setBounds(area.removeFromTop(14));
-        auto sourceRow = area.removeFromTop(27);
-        importSource.setBounds(sourceRow.removeFromRight(116));
+        auto area = getLocalBounds().reduced(18);
+        title.setBounds(area.removeFromTop(28));
+        area.removeFromTop(4);
+
+        sourceLabel.setBounds(area.removeFromTop(12));
+        auto sourceRow = area.removeFromTop(25);
+        importSource.setBounds(sourceRow.removeFromRight(112));
         sourceRow.removeFromRight(8);
         sourceValue.setBounds(sourceRow);
+
+        area.removeFromTop(3);
+        toneLabel.setBounds(area.removeFromTop(12));
+        toneValue.setBounds(area.removeFromTop(21));
+        area.removeFromTop(3);
+        performanceLabel.setBounds(area.removeFromTop(12));
+        performanceValue.setBounds(area.removeFromTop(21));
+
         area.removeFromTop(5);
-        toneLabel.setBounds(area.removeFromTop(14));
-        toneValue.setBounds(area.removeFromTop(24));
+        auto sectionRow = area.removeFromTop(29);
+        sectionLabel.setBounds(sectionRow.removeFromLeft(112));
+        sectionBox.setBounds(sectionRow.removeFromLeft(190).reduced(0, 1));
+
         area.removeFromTop(5);
-        performanceLabel.setBounds(area.removeFromTop(14));
-        performanceValue.setBounds(area.removeFromTop(24));
-        area.removeFromTop(8);
-        sectionLabel.setBounds(area.removeFromTop(14));
-        sectionBox.setBounds(area.removeFromTop(32));
-        area.removeFromTop(6);
-        patternLabel.setBounds(area.removeFromTop(14));
-        patternBox.setBounds(area.removeFromTop(32));
-        area.removeFromTop(9);
-        auto actions = area.removeFromTop(34);
-        preview.setBounds(actions.removeFromLeft(120));
-        actions.removeFromLeft(10);
-        apply.setBounds(actions.removeFromLeft(120));
-        actions.removeFromLeft(10);
-        cancel.setBounds(actions.removeFromLeft(120));
-        area.removeFromTop(14);
-        status.setBounds(area.removeFromTop(42));
+        auto patternHeader = area.removeFromTop(24);
+        patternLabel.setBounds(patternHeader.removeFromLeft(180));
+        openAutoChords.setBounds(patternHeader.removeFromRight(174).reduced(0, 1));
+
+        area.removeFromTop(3);
+        const int cardGap = 7;
+        const int cardHeight = juce::jmax(22, juce::jmin(31,
+            (area.getHeight() - 68 - cardGap * 3) / 4));
+        for (int row = 0; row < 4; ++row)
+        {
+            auto rowArea = area.removeFromTop(cardHeight);
+            auto left = rowArea.removeFromLeft((rowArea.getWidth() - cardGap) / 2);
+            rowArea.removeFromLeft(cardGap);
+            auto right = rowArea;
+            patternCards[static_cast<size_t>(row * 2)].setBounds(left);
+            patternCards[static_cast<size_t>(row * 2 + 1)].setBounds(right);
+            if (row < 3) area.removeFromTop(cardGap);
+        }
+
+        area.removeFromTop(5);
+        auto footer = area.removeFromTop(30);
+        preview.setBounds(footer.removeFromLeft(104));
+        footer.removeFromLeft(8);
+        apply.setBounds(footer.removeFromLeft(104));
+        footer.removeFromLeft(8);
+        cancel.setBounds(footer.removeFromLeft(104));
+        status.setBounds(area.removeFromTop(28));
     }
 
 private:
@@ -1389,6 +1612,14 @@ private:
         const int assigned = processor.getSectionPatternSlot(section);
         const int legacy = static_cast<int>(processor.parameters.getRawParameterValue("patternSlot")->load());
         patternBox.setSelectedId((assigned >= 0 ? assigned : legacy) + 1, juce::dontSendNotification);
+        refreshPatternCards();
+    }
+    void refreshPatternCards()
+    {
+        const int selected = patternBox.getSelectedId();
+        for (int i = 0; i < static_cast<int>(patternCards.size()); ++i)
+            patternCards[static_cast<size_t>(i)].setToggleState(i + 1 == selected,
+                                                               juce::dontSendNotification);
     }
     void updateStatus(const juce::String& message) { status.setText(message, juce::dontSendNotification); }
 
@@ -1396,11 +1627,12 @@ private:
     int originalSection = 0;
     PPGUThemeManager::Palette palette;
     juce::String tonePresetName;
-    std::function<void()> importAction;
+    std::function<void()> importAction, autoChordsAction;
     juce::Label title, sourceLabel, sourceValue, toneLabel, toneValue,
                 performanceLabel, performanceValue, sectionLabel, patternLabel, status;
     juce::ComboBox sectionBox, patternBox;
-    juce::TextButton importSource, preview, apply, cancel;
+    std::array<juce::TextButton, 8> patternCards;
+    juce::TextButton importSource, openAutoChords, preview, apply, cancel;
 };
 
 class PPGUChordDiagram final : public juce::Component, public PPGUThemeAwarePanel
@@ -1505,18 +1737,20 @@ private:
     std::array<int, 6> frets {{ 0, 0, 2, 2, 2, 0 }};
 };
 
-class PPGUAutoChordsPanel final : public juce::Component, public PPGUThemeAwarePanel
+class PPGUAutoChordsPanel final : public juce::Component, public PPGUThemeAwarePanel,
+                                  private juce::Timer
 {
 public:
     explicit PPGUAutoChordsPanel(juce::AudioProcessorValueTreeState& state) : apvts(state)
     {
+        startTimerHz(12);
         title.setText("AUTOCHORDS  /  HARMONY SETUP", juce::dontSendNotification);
         title.setFont(makeThemeFont(palette, 20.0f, false, true));
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
         addAndMakeVisible(title);
         stateLabel.setText("PATTERN MODE ONLY: ONE HELD NOTE EXPANDS TO A SCALE-BASED TRIAD. MELODY MODE REMAINS SINGLE-NOTE.",
                             juce::dontSendNotification);
-        stateLabel.setColour(juce::Label::textColourId, palette.token("success"));
+        stateLabel.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(stateLabel);
         offButton.setButtonText("AUTOCHORDS  /  ON-OFF");
         offButton.setClickingTogglesState(true);
@@ -1527,6 +1761,7 @@ public:
         if (auto* parameter = apvts.getRawParameterValue("singleMidiNoteAsChordRoot"))
             offButton.setToggleState(parameter->load(std::memory_order_relaxed) > 0.5f,
                                      juce::dontSendNotification);
+        offButton.setButtonText(isAutoChordsEnabled() ? "AUTOCHORDS  /  ON" : "AUTOCHORDS  /  OFF");
         addAndMakeVisible(offButton);
         autoChordAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
             apvts, "singleMidiNoteAsChordRoot", offButton);
@@ -1559,7 +1794,8 @@ public:
         for (auto* label : { &keyLabel, &modeLabel, &patternLabel })
             label->setFont(makeThemeFont(palette, 9.5f, false, true));
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
-        stateLabel.setColour(juce::Label::textColourId, palette.token("warning"));
+        stateLabel.setColour(juce::Label::textColourId,
+            isAutoChordsEnabled() ? palette.token("success") : palette.token("text_secondary"));
         for (auto* label : { &keyLabel, &modeLabel, &patternLabel })
             label->setColour(juce::Label::textColourId, palette.token("text_secondary"));
         offButton.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
@@ -1583,6 +1819,22 @@ public:
         drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.30f, 0.035f);
         g.setColour(palette.token("control_border"));
         g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(12), 10, 1);
+
+        // Status LED is driven by the same APVTS parameter as the real button.
+        const auto button = offButton.getBounds().toFloat();
+        const float cx = button.getRight() - 15.0f;
+        const float cy = button.getCentreY();
+        const bool enabled = isAutoChordsEnabled();
+        const auto led = enabled ? palette.token("accent") : palette.token("text_disabled");
+        if (enabled)
+        {
+            g.setColour(palette.token("accent_glow").withAlpha(0.42f));
+            g.fillEllipse(cx - 10.0f, cy - 10.0f, 20.0f, 20.0f);
+        }
+        g.setColour(led.withAlpha(enabled ? 0.95f : 0.65f));
+        g.fillEllipse(cx - 4.0f, cy - 4.0f, 8.0f, 8.0f);
+        g.setColour(palette.token("control_border"));
+        g.drawEllipse(cx - 4.0f, cy - 4.0f, 8.0f, 8.0f, 1.0f);
     }
     void resized() override
     {
@@ -1605,6 +1857,35 @@ public:
         patternBox.setBounds(controls.removeFromTop(44).removeFromLeft(280));
     }
 private:
+    bool isAutoChordsEnabled() const noexcept
+    {
+        if (const auto* value = apvts.getRawParameterValue("singleMidiNoteAsChordRoot"))
+            return value->load(std::memory_order_relaxed) > 0.5f;
+        return false;
+    }
+    void timerCallback() override
+    {
+        const bool enabled = isAutoChordsEnabled();
+        const auto text = enabled
+            ? "AUTOCHORDS ENABLED  /  PATTERN MODE ONLY"
+            : "AUTOCHORDS STANDBY  /  MELODY MODE UNAFFECTED";
+        const auto buttonText = enabled ? "AUTOCHORDS  /  ON" : "AUTOCHORDS  /  OFF";
+        bool changed = false;
+        if (stateLabel.getText() != text)
+        {
+            stateLabel.setText(text, juce::dontSendNotification);
+            stateLabel.setColour(juce::Label::textColourId,
+                enabled ? palette.token("success") : palette.token("text_secondary"));
+            changed = true;
+        }
+        if (offButton.getButtonText() != buttonText)
+        {
+            offButton.setButtonText(buttonText);
+            changed = true;
+        }
+        if (changed)
+            repaint();
+    }
     PPGUThemeManager::Palette palette;
     juce::AudioProcessorValueTreeState& apvts;
     juce::Label title, stateLabel, keyLabel, modeLabel, patternLabel;
@@ -1638,6 +1919,34 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         const int destinationY = y + (h - diameter) / 2;
         g.drawImage(palette.rotarySpriteSheet, destinationX, destinationY,
                     diameter, diameter, sourceX, sourceY, cellSize, cellSize);
+
+        // A live luminous value arc surrounds the physical rotary control.
+        // It follows the Slider/APVTS normalized value rather than an animation.
+        if (slider.isEnabled())
+        {
+            const float centreX = static_cast<float>(destinationX) + diameter * 0.5f;
+            const float centreY = static_cast<float>(destinationY) + diameter * 0.5f;
+            const float arcRadius = static_cast<float>(diameter) * 0.455f;
+            const float valueAngle = start + pos * (end - start);
+            juce::Path arcTrack;
+            arcTrack.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                                   0.0f, start, end, true);
+            g.setColour(palette.token("control_border").withAlpha(0.82f));
+            g.strokePath(arcTrack, juce::PathStrokeType(3.2f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            if (pos > 0.0001f)
+            {
+                juce::Path valueArc;
+                valueArc.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                                       0.0f, start, valueAngle, true);
+                g.setColour(palette.token("accent_glow").withAlpha(0.34f));
+                g.strokePath(valueArc, juce::PathStrokeType(7.0f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                g.setColour(palette.token("accent").withAlpha(0.98f));
+                g.strokePath(valueArc, juce::PathStrokeType(2.8f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            }
+        }
 
         // Every knob keeps its continuous 61-frame rotary animation, while its
         // dedicated five-state PNG remains part of the live visual state stack.
@@ -1779,7 +2088,7 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
                                                float sliderPos, float minSliderPos, float maxSliderPos,
                                                juce::Slider::SliderStyle style, juce::Slider& slider)
 {
-    juce::ignoreUnused(minSliderPos, maxSliderPos, slider);
+    juce::ignoreUnused(minSliderPos, maxSliderPos);
     if (style != juce::Slider::LinearHorizontal || !palette.metersSlidersSpriteSheet.isValid())
     {
         juce::LookAndFeel_V4::drawLinearSlider(g, x, y, width, height,
@@ -1787,6 +2096,10 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
         return;
     }
 
+    const bool enabled = slider.isEnabled();
+    const bool hovered = enabled && slider.isMouseOverOrDragging();
+    const bool focused = enabled && slider.hasKeyboardFocus(true);
+    const bool dragging = enabled && slider.isMouseButtonDown();
     const bool useLongTrack = width >= 420;
     const int sourceX = 60;
     const int sourceY = useLongTrack ? 445 : 570;
@@ -1801,10 +2114,12 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
         (sliderPos - static_cast<float>(x + 4)) / static_cast<float>(juce::jmax(1, width - 8)));
     const int fillWidth = juce::jlimit(0, track.getWidth(),
         juce::roundToInt(static_cast<float>(track.getWidth()) * proportion));
-    if (fillWidth > 0)
+    if (enabled && fillWidth > 0)
     {
-        g.setColour(palette.token("accent_glow").withAlpha(0.88f));
+        g.setColour(palette.token("accent_glow").withAlpha(0.72f));
         g.fillRoundedRectangle(track.withWidth(fillWidth).toFloat().reduced(1.0f), 4.0f);
+        g.setColour(palette.token("accent").withAlpha(0.92f));
+        g.fillRoundedRectangle(track.withWidth(fillWidth).toFloat().reduced(1.0f, 4.0f), 2.0f);
     }
 
     const int thumbSize = juce::jlimit(16, 30, height + 8);
@@ -1814,6 +2129,29 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
     const int thumbY = track.getCentreY() - thumbSize / 2;
     g.drawImage(palette.metersSlidersSpriteSheet, thumbX, thumbY, thumbSize, thumbSize,
                 910, 640, 32, 32);
+
+    // Match the rotary/button state language: the live slider value remains
+    // unchanged, while hover, drag, keyboard focus and disabled are visible.
+    if (!enabled)
+    {
+        g.setColour(palette.token("window_bg").withAlpha(0.48f));
+        g.fillRoundedRectangle(track.toFloat().expanded(1.0f), 6.0f);
+        g.fillEllipse(static_cast<float>(thumbX), static_cast<float>(thumbY),
+                      static_cast<float>(thumbSize), static_cast<float>(thumbSize));
+    }
+    else if (hovered || focused || dragging)
+    {
+        const auto stateColour = focused ? palette.token("highlight")
+            : (dragging ? palette.token("accent") : palette.token("accent_glow"));
+        g.setColour(stateColour.withAlpha(focused ? 0.82f : 0.62f));
+        g.drawRoundedRectangle(track.toFloat().expanded(2.0f), 6.0f,
+                               focused ? 1.8f : 1.25f);
+        g.drawEllipse(static_cast<float>(thumbX) - 1.5f,
+                      static_cast<float>(thumbY) - 1.5f,
+                      static_cast<float>(thumbSize) + 3.0f,
+                      static_cast<float>(thumbSize) + 3.0f,
+                      dragging ? 2.0f : 1.25f);
+    }
 }
 
 void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
@@ -1827,6 +2165,23 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         const auto focusBounds = button.getLocalBounds().toFloat().reduced(1.5f);
         g.setColour(palette.token("highlight").withAlpha(0.88f));
         g.drawRoundedRectangle(focusBounds, 5.0f, 1.6f);
+    };
+
+    const auto drawFxActiveIndicator = [&g, &button, this, controlId]
+    {
+        // FX LED follows the attached APVTS toggle; bypassed modules stay dark.
+        if (!controlId.startsWith("fx_switch") || !button.isEnabled()
+            || !button.getToggleState())
+            return;
+        const auto bounds = button.getLocalBounds().toFloat();
+        const float cx = bounds.getRight() - 10.0f;
+        const float cy = bounds.getCentreY();
+        g.setColour(palette.token("accent_glow").withAlpha(0.36f));
+        g.fillEllipse(cx - 7.0f, cy - 7.0f, 14.0f, 14.0f);
+        g.setColour(palette.token("accent").withAlpha(0.98f));
+        g.fillEllipse(cx - 3.0f, cy - 3.0f, 6.0f, 6.0f);
+        g.setColour(palette.token("text_primary").withAlpha(0.92f));
+        g.drawEllipse(cx - 3.0f, cy - 3.0f, 6.0f, 6.0f, 0.7f);
     };
 
     const auto drawAtlasIcon = [&g, &button, this, controlId]
@@ -1884,6 +2239,7 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                 // State artwork supplies the physical switch; the atlas icon
                 // is layered independently so labels and hit targets remain live.
                 drawAtlasIcon();
+                drawFxActiveIndicator();
                 drawKeyboardFocus();
                 return;
             }
@@ -1914,6 +2270,7 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                     bounds.getWidth(), bounds.getHeight(), sourceX, sourceY,
                     sourceWidth, sourceHeight);
         drawAtlasIcon();
+        drawFxActiveIndicator();
         drawKeyboardFocus();
         return;
     }
@@ -2121,8 +2478,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     curatorButton.setTooltip("CURATOR is not implemented yet. No asset is marked approved.");
 
     aboutButton.setComponentID("About");
-    aboutButton.setEnabled(false);
-    aboutButton.setTooltip("ABOUT is intentionally disabled in REV.20 until its verified information panel is implemented.");
+    aboutButton.setEnabled(true);
+    aboutButton.setTooltip("ABOUT — verified product and build information.");
     aboutButton.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
     aboutButton.setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
     aboutButton.onClick = [this]
@@ -2330,6 +2687,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
     }
     g.setColour(p.token("control_border").withAlpha(0.78f));
     g.drawRoundedRectangle(bounds.reduced(0.5f), 12.0f, 1.0f);
+    drawNineSliceFrame(g, p.framesPanelsSpriteSheet, area, 0.58f);
 
     // Section chrome belongs to the visual shell; it does not create or
     // reassign controls and follows the active theme's semantic palette.
@@ -2762,7 +3120,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette()
  presetSearch.setColour(juce::TextEditor::backgroundColourId,p.token("control_bg"));presetSearch.setColour(juce::TextEditor::textColourId,p.token("text_primary"));presetSearch.setColour(juce::TextEditor::outlineColourId,p.token("control_border"));presetSearch.setColour(juce::TextEditor::focusedOutlineColourId,p.token("highlight"));presetSearch.setColour(juce::TextEditor::highlightColourId,p.token("accent").withAlpha(.3f));
  loadButton.setColour(juce::TextButton::buttonColourId,p.token("accent"));loadButton.setColour(juce::TextButton::textColourOffId,p.token("window_bg"));settingsButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));settingsButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated"));skinButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));skinButton.setTooltip("Active skin: "+p.name+"  /  Ctrl+K");
  for (auto* unavailable : { &autoSoundHunterButton, &curatorButton }) { unavailable->setColour(juce::TextButton::buttonColourId,p.token("lowlight")); unavailable->setColour(juce::TextButton::textColourOffId,p.token("text_disabled")); unavailable->setEnabled(false); }
- aboutButton.setEnabled(false); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("lowlight")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_disabled"));
+ aboutButton.setEnabled(true); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));
  for(auto* b:{&melodyTab,&patternTab}){b->setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b->setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b->setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b->setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
  for(auto& s:knobs){s.setColour(juce::Slider::rotarySliderFillColourId,p.token("accent"));s.setColour(juce::Slider::rotarySliderOutlineColourId,p.token("control_border"));s.setColour(juce::Slider::thumbColourId,p.token("text_primary"));s.setColour(juce::Slider::textBoxTextColourId,p.token("text_primary"));}
  for(auto& l:knobLabels){l.setFont(makeThemeFont(p,9.5f,false,true));l.setColour(juce::Label::textColourId,p.token("text_secondary"));}
@@ -2832,7 +3190,13 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openFxEditPanel(int selectedEffe
     if (auxiliaryWorkspace == nullptr)
         return;
     constexpr int fxEditPanelId = 2101;
-    if (!auxiliaryWorkspace->isPanelOpen(fxEditPanelId))
+    if (auxiliaryWorkspace->isPanelOpen(fxEditPanelId))
+    {
+        if (auto* content = auxiliaryWorkspace->getPanelContent(fxEditPanelId))
+            if (auto* panel = dynamic_cast<PPGUFXEditPanel*>(content))
+                panel->setSelectedGroup(selectedEffect);
+    }
+    else
     {
         PPGUMultiWindowWorkspace::PanelSpec spec;
         spec.id = fxEditPanelId;
@@ -2859,11 +3223,12 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openPatternSectionPanel()
         spec.id = patternSectionPanelId;
         spec.title = "PATTERN  /  RHYTHM";
         spec.desired = { 620, 430 };
-        spec.minimum = { 420, 320 };
+        spec.minimum = { 500, 420 };
         juce::Component::SafePointer<PopPunkGuitarUltimateAudioProcessorEditor> safeThis(this);
         spec.content = std::make_unique<PPGUPatternSectionPanel>(
             processor, presetBox.getText(),
-            [safeThis] { if (safeThis != nullptr) safeThis->openImportGuitarPanel(); });
+            [safeThis] { if (safeThis != nullptr) safeThis->openImportGuitarPanel(); },
+            [safeThis] { if (safeThis != nullptr) safeThis->openAutoChordsPanel(); });
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
@@ -2904,12 +3269,21 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openImportGuitarPanel()
         spec.title = "IMPORT GUITAR";
         spec.desired = { 560, 360 };
         spec.minimum = { 300, 220 };
+        const auto currentSfzPath = processor.getCurrentSfzFilePath();
+        juce::String initialImportStatus;
+        if (currentSfzPath.isNotEmpty())
+        {
+            const juce::File currentSfz(currentSfzPath);
+            initialImportStatus = currentSfz.existsAsFile()
+                ? "SAVED LIBRARY  /  " + currentSfz.getFileName()
+                : "LIBRARY FILE NOT FOUND  /  " + currentSfz.getFileName();
+        }
         spec.content = std::make_unique<PPGUImportGuitarPanel>(
             [safeThis](juce::Label* targetStatus, juce::Button* targetButton)
             {
                 if (safeThis != nullptr)
                     safeThis->chooseSfzFile(targetStatus, targetButton);
-            });
+            }, initialImportStatus);
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
