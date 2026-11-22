@@ -1118,7 +1118,7 @@ public:
         powerButton.setButtonText("POWER");
         powerButton.setClickingTogglesState(true);
         addAndMakeVisible(powerButton);
-        graphCaption.setText("PROCESS RESPONSE  /  VISUAL GUIDE", juce::dontSendNotification);
+        graphCaption.setText("RESPONSE DISPLAY  /  LIVE DATA NOT CONNECTED", juce::dontSendNotification);
         graphCaption.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(graphCaption);
         status.setText("Controls are attached to the existing APVTS parameters.", juce::dontSendNotification);
@@ -1229,13 +1229,13 @@ public:
                 g.drawHorizontalLine(graphArea.getY() + graphArea.getHeight() * i / 5, graphArea.getX(), graphArea.getRight());
             for (int i = 1; i < 9; ++i)
                 g.drawVerticalLine(graphArea.getX() + graphArea.getWidth() * i / 9, graphArea.getY(), graphArea.getBottom());
-            juce::Path curve;
-            curve.startNewSubPath(static_cast<float>(graphArea.getX()), static_cast<float>(graphArea.getCentreY()));
-            curve.cubicTo(graphArea.getX() + graphArea.getWidth() * 0.28f, graphArea.getY() + graphArea.getHeight() * 0.78f,
-                          graphArea.getX() + graphArea.getWidth() * 0.62f, graphArea.getY() + graphArea.getHeight() * 0.22f,
-                          static_cast<float>(graphArea.getRight()), static_cast<float>(graphArea.getCentreY()));
-            g.setColour(palette.token("accent"));
-            g.strokePath(curve, juce::PathStrokeType(2.0f));
+            // Do not draw a fabricated response curve: no live DSP response
+            // telemetry is currently exposed to this visual workspace.
+            g.setColour(palette.token("text_secondary").withAlpha(0.82f));
+            g.setFont(makeThemeFont(palette, 9.0f, false, true));
+            g.drawFittedText("LIVE RESPONSE DATA NOT AVAILABLE",
+                             graphArea.reduced(10, 4),
+                             juce::Justification::centred, 1);
         }
     }
 
