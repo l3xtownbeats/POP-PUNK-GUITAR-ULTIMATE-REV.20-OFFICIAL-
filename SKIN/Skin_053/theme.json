@@ -5,7 +5,7 @@
   "name": "NEON STAGE DEFAULT",
   "family": "special",
   "layout": "STUDIO_CONSOLE",
-  "description": "Canonical SKIN-1 visual shell: dark graphite studio console with restrained cyan, electric-blue, violet and magenta stage accents. Default minimal mode; effects are opt-in.",
+  "description": "Canonical SKIN-1 visual shell: premium graphite studio console, precision anodized metal, restrained cyan and electric-blue stage accents. Default minimal mode; effects are opt-in.",
   "palette": {
     "window_bg": "#080B14",
     "panel": "#101827",
@@ -18,8 +18,8 @@
     "text_disabled": "#71829D",
     "accent": "#00D9FF",
     "accent_glow": "#6B8CFF",
-    "danger": "#FF557A",
-    "warning": "#FFBE55",
+    "danger": "#FF665E",
+    "warning": "#FFB454",
     "success": "#42E6B0",
     "lcd_bg": "#050D1B",
     "lcd_text": "#8DEBFF",
@@ -339,7 +339,8 @@
       "controls": "assets/spritesheets/neon_stage_controls_spritesheet.png",
       "meters_sliders": "assets/spritesheets/neon_stage_meters_sliders_sheet.png",
       "frames_panels": "assets/spritesheets/neon_stage_frames_panels_sheet.png",
-      "icons": "assets/spritesheets/neon_stage_icons_sheet.png"
+      "icons": "assets/spritesheets/neon_stage_icons_sheet.png",
+      "rotary": "assets/spritesheets/neon_stage_rotary_61frame_atlas.png"
     },
     "spriteSheetManifest": "assets/spritesheets/neon_stage_spritesheet_manifest.json"
   },
