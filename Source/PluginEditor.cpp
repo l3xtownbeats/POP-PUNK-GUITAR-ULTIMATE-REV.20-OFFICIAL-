@@ -1537,8 +1537,6 @@ public:
         addAndMakeVisible(keyBox);
         addAndMakeVisible(modeBox);
         addAndMakeVisible(patternBox);
-        chordDiagram.setPalette(palette);
-        addAndMakeVisible(chordDiagram);
         keyAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(apvts, "scaleRoot", keyBox);
         modeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(apvts, "scaleMode", modeBox);
         patternAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(apvts, "patternSlot", patternBox);
@@ -1572,7 +1570,6 @@ public:
             box->setColour(juce::ComboBox::outlineColourId, palette.token("control_border"));
             box->setColour(juce::ComboBox::arrowColourId, palette.token("accent"));
         }
-        chordDiagram.setPalette(palette);
         repaint();
     }
 
@@ -1590,24 +1587,25 @@ public:
         stateLabel.setBounds(area.removeFromTop(32));
         offButton.setBounds(area.removeFromTop(44).removeFromLeft(210).reduced(2));
         area.removeFromTop(24);
-        auto controls = area.removeFromLeft(300);
-        auto diagramArea = area.removeFromRight(196);
-        chordDiagram.setBounds(diagramArea.removeFromTop(176).reduced(3));
+        const int gap = 18;
+        const int columnWidth = (area.getWidth() - 2 * gap) / 3;
+        auto keyColumn = area.removeFromLeft(columnWidth);
+        area.removeFromLeft(gap);
+        auto scaleColumn = area.removeFromLeft(columnWidth);
+        area.removeFromLeft(gap);
+        auto patternColumn = area;
 
-        keyLabel.setBounds(controls.removeFromTop(22));
-        keyBox.setBounds(controls.removeFromTop(44).removeFromLeft(260));
-        controls.removeFromTop(20);
-        modeLabel.setBounds(controls.removeFromTop(22));
-        modeBox.setBounds(controls.removeFromTop(44).removeFromLeft(260));
-        controls.removeFromTop(20);
-        patternLabel.setBounds(controls.removeFromTop(22));
-        patternBox.setBounds(controls.removeFromTop(44).removeFromLeft(280));
+        keyLabel.setBounds(keyColumn.removeFromTop(24));
+        keyBox.setBounds(keyColumn.removeFromTop(46));
+        modeLabel.setBounds(scaleColumn.removeFromTop(24));
+        modeBox.setBounds(scaleColumn.removeFromTop(46));
+        patternLabel.setBounds(patternColumn.removeFromTop(24));
+        patternBox.setBounds(patternColumn.removeFromTop(46));
     }
 private:
     PPGUThemeManager::Palette palette;
     juce::AudioProcessorValueTreeState& apvts;
     juce::Label title, stateLabel, keyLabel, modeLabel, patternLabel;
-    PPGUChordDiagram chordDiagram;
     juce::TextButton offButton;
     juce::ComboBox keyBox, modeBox, patternBox;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> keyAttachment, modeAttachment, patternAttachment;
