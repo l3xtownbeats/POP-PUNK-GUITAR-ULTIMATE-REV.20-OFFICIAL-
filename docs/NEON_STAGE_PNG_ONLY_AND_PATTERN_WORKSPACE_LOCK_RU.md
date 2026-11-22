@@ -112,3 +112,9 @@ Do not copy its proprietary UI artwork, brand marks, product text, samples, pres
 - [ ] FL Studio 20 manual visual and interaction acceptance is completed before release claims.
 
 **Current status:** the PNG migration batch is a technical rasterization milestone, not final art approval. The existing SVG artwork must be replaced by bespoke, high-resolution PNG production masters before NEON STAGE can be called visually complete.
+
+
+2026-11-22 — USER APPROVAL / BASELINE CONFIRMATION
+Пользователь явно подтвердил: «Всё что выше обсудили - это база УТВЕРЖДАЮ ПОДТВЕРЖДАЮ».
+Считать утверждённой базой проекта совокупность зафиксированных требований NEON STAGE DEFAULT / SKIN-1, точное соответствие макетам 01–07 и дополнительным материалам, PNG-only production artwork, неизменность главной композиции и существующего PRESETS browser, двух главных режимов MELODY/PATTERN, отдельного трёхколоночного MELODY workspace и двухколоночного PATTERN workspace, правил AutoChords SETUP ONLY до подтверждённой backend-интеграции, запрета имитации несуществующих функций, а также всех ранее перечисленных ограничений по DSP, sampler, MIDI, APVTS, SoundBank и audio callback.
+Это пользовательское утверждение фиксирует требования и дизайн-базу. Оно не является доказательством реализации, сборки, тестирования или приёмки. Работать только в work/neon-stage-cover-parity; main не менять и не сливать без отдельного разрешения.
