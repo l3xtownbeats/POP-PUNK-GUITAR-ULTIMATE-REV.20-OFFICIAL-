@@ -1675,7 +1675,13 @@ public:
             : juce::String("NO SFZ INSTRUMENT LOADED")), juce::dontSendNotification);
         addAndMakeVisible(title);
         addAndMakeVisible(subtitle);
+        styleLabel.setText("01  /  PLAYING", juce::dontSendNotification);
+        articulationLabel.setText("03  /  ARTICULATIONS", juce::dontSendNotification);
+        patternLabel.setText("02  /  PATTERN", juce::dontSendNotification);
+        patternStatus.setText("NO VERIFIED PATTERN DATA", juce::dontSendNotification);
         addAndMakeVisible(styleLabel);
+        addAndMakeVisible(patternLabel);
+        addAndMakeVisible(patternStatus);
         addAndMakeVisible(articulationLabel);
         addAndMakeVisible(availability);
         addAndMakeVisible(activeLabel);
@@ -1690,14 +1696,15 @@ public:
         palette = value;
         title.setFont(makeThemeFont(palette, 19.0f, false, true));
         subtitle.setFont(makeThemeFont(palette, 10.0f, false, true));
-        for (auto* label : { &title, &subtitle, &styleLabel, &articulationLabel,
-                             &availability, &activeLabel, &sourceLabel })
+        for (auto* label : { &title, &subtitle, &styleLabel, &patternLabel,
+                             &patternStatus, &articulationLabel, &availability, &activeLabel, &sourceLabel })
             label->setColour(juce::Label::textColourId,
                 label == &title ? palette.token("text_primary")
-                : (label == &availability ? palette.token("warning") : palette.token("text_secondary")));
-        styleLabel.setFont(makeThemeFont(palette, 9.5f, false, true));
-        articulationLabel.setFont(makeThemeFont(palette, 9.5f, false, true));
-        for (auto* label : { &availability, &activeLabel, &sourceLabel })
+                : ((label == &availability || label == &patternStatus)
+                    ? palette.token("warning") : palette.token("text_secondary")));
+        for (auto* label : { &styleLabel, &patternLabel, &articulationLabel })
+            label->setFont(makeThemeFont(palette, 10.0f, false, true));
+        for (auto* label : { &patternStatus, &availability, &activeLabel, &sourceLabel })
             label->setFont(makeThemeFont(palette, 11.0f));
         styleEntry.setColour(juce::TextButton::buttonColourId, palette.token("lowlight"));
         styleEntry.setColour(juce::TextButton::textColourOffId, palette.token("text_disabled"));
@@ -1709,27 +1716,59 @@ public:
     {
         g.fillAll(palette.token("window_bg"));
         drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.30f, 0.035f);
-        auto card = getLocalBounds().reduced(18, 112).toFloat();
-        g.setColour(palette.token("panel"));
-        g.fillRoundedRectangle(card, 9.0f);
-        g.setColour(palette.token("control_border"));
-        g.drawRoundedRectangle(card, 9.0f, 1.0f);
+        auto area = getLocalBounds().reduced(22, 104);
+        const int gap = 12;
+        const int cardWidth = (area.getWidth() - gap * 2) / 3;
+        const std::array<juce::Rectangle<int>, 3> cards {
+            area.removeFromLeft(cardWidth), juce::Rectangle<int>(), juce::Rectangle<int>()
+        };
+        auto remaining = area;
+        auto second = remaining.removeFromLeft(gap);
+        juce::ignoreUnused(second);
+        auto card2 = remaining.removeFromLeft(cardWidth);
+        remaining.removeFromLeft(gap);
+        auto card3 = remaining;
+        const std::array<juce::Rectangle<int>, 3> panels { cards[0], card2, card3 };
+        for (int i = 0; i < static_cast<int>(panels.size()); ++i)
+        {
+            auto card = panels[static_cast<size_t>(i)].toFloat();
+            g.setColour(palette.token("shadow").withAlpha(0.55f));
+            g.fillRoundedRectangle(card.translated(0.0f, 3.0f), 8.0f);
+            g.setColour(palette.token("panel"));
+            g.fillRoundedRectangle(card, 8.0f);
+            g.setColour(palette.token("control_border").withAlpha(0.92f));
+            g.drawRoundedRectangle(card, 8.0f, 1.0f);
+            auto top = card.removeFromTop(3.0f);
+            g.setColour(i == 1 ? palette.token("accent_glow") : palette.token("accent").withAlpha(0.72f));
+            g.fillRoundedRectangle(top, 1.5f);
+        }
     }
 
     void resized() override
     {
-        auto area = getLocalBounds().reduced(30, 20);
+        auto area = getLocalBounds().reduced(22, 18);
         title.setBounds(area.removeFromTop(30));
-        subtitle.setBounds(area.removeFromTop(20));
-        area.removeFromTop(28);
-        // No articulation names or disabled placeholder buttons are shown without
-        // verified playable material plus matching mappings.
-        area.removeFromTop(8);
-        articulationLabel.setBounds(area.removeFromTop(15));
-        availability.setBounds(area.removeFromTop(30));
-        area.removeFromTop(18);
-        activeLabel.setBounds(area.removeFromTop(24));
-        sourceLabel.setBounds(area.removeFromTop(24));
+        subtitle.setBounds(area.removeFromTop(18));
+        area.removeFromTop(22);
+        const int gap = 12;
+        const int cardWidth = (area.getWidth() - gap * 2) / 3;
+        auto first = area.removeFromLeft(cardWidth).reduced(14, 12);
+        area.removeFromLeft(gap);
+        auto second = area.removeFromLeft(cardWidth).reduced(14, 12);
+        area.removeFromLeft(gap);
+        auto third = area.reduced(14, 12);
+        styleLabel.setBounds(first.removeFromTop(22));
+        first.removeFromTop(12);
+        first.removeFromTop(16);
+        patternLabel.setBounds(second.removeFromTop(22));
+        second.removeFromTop(12);
+        patternStatus.setBounds(second.removeFromTop(30));
+        articulationLabel.setBounds(third.removeFromTop(22));
+        third.removeFromTop(12);
+        availability.setBounds(third.removeFromTop(30));
+        third.removeFromTop(16);
+        activeLabel.setBounds(third.removeFromTop(24));
+        sourceLabel.setBounds(third.removeFromTop(24));
     }
 
 private:
@@ -1752,7 +1791,8 @@ private:
 
     PopPunkGuitarUltimateAudioProcessor& processor;
     PPGUThemeManager::Palette palette;
-    juce::Label title, subtitle, styleLabel, articulationLabel, availability, activeLabel, sourceLabel;
+    juce::Label title, subtitle, styleLabel, patternLabel, patternStatus,
+                articulationLabel, availability, activeLabel, sourceLabel;
     juce::TextButton styleEntry;
 };
 
