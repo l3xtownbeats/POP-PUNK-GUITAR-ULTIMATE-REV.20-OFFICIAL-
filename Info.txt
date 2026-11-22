@@ -167,3 +167,13 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Pluginval strictness level 5: PASS. Logs show scan, cold/warm open, editor, audio processing, state, automation, parameter, VST3 validator and bus checks all completed successfully.
 - Artifact: `PPGU-REV20-Windows-x64-VST3`, ID `14625308194`, 5,857,765 bytes, SHA-256 `72e31eb39e36301c2f3dfa070e9ef277c6d5a360d2907db12f4e4a25e219e864`, expires 2026-12-04.
 - Remaining manual/release gates: FL Studio 20 host acceptance on Windows 10; full GUI/reference parity including Playing Core hero display; DPI 100/125/150%; 150 ms hot-swap/ECO/memory/performance observation; 15 GB BASIC payload completion; all 500 playable presets.
+
+
+## 2026-11-22 — NEON STAGE PREMIUM UI / COMMERCIAL QUALITY REFERENCE
+- User confirmed Native Instruments SESSION GUITARIST — ELECTRIC SUNBURST DELUXE as the baseline reference for perceived commercial finish and product presentation. This is a quality benchmark only; do not copy its proprietary layout, artwork, UI assets, branding, or implementation.
+- The binding functional and visual requirements remain this REV.20 journal and the approved NEON STAGE reference images. Preserve the NEON STAGE identity, window composition, control map, real JUCE/APVTS bindings and truthful feature availability.
+- NEON STAGE palette remains graphite/anodized metal with cyan #00D9FF and electric blue #6B8CFF; purple, violet and magenta are prohibited. Warning/error accents must use restrained amber/red rather than pink/magenta.
+- Generator change: production sprite sheets must not bake labels, channel names, state captions, parameter values or live status text; render those as JUCE text layers.
+- Added a dedicated 61-position rotary atlas specification: 128x128 cells, 8x8 grid, 61 frames, -135°..+135° sweep in 4.5° increments. The theme manifest registers it and the active-skin packager stages it as the fifth NEON STAGE runtime atlas.
+- The existing Windows workflow generates the atlases and packages the active skins. The source commits alone do not prove that generated PNGs, VST3 build, CTest, pluginval or FL Studio 20 acceptance passed. Exact-SHA CI must be observed after these changes.
+- Remaining visual production gates: replace placeholder/legacy artwork only with approved, inspectable, license-cleared independent assets; produce 4x masters and 1x/2x/3x runtime variants; six-state control coverage; isolated per-component assets; SHA-256 production manifest; JUCE runtime integration and screenshot/reference parity review.
