@@ -51,6 +51,7 @@ public:
         juce::Image crestArtwork;
         // High-resolution Skin-1 stage stack. These images are decoded only while
         // the visual theme is loaded on the message thread; audio code never sees them.
+        juce::Image heroArtwork;
         juce::Image backgroundArtwork;
         juce::Image materialArtwork;
         juce::Image stageGlowArtwork;
