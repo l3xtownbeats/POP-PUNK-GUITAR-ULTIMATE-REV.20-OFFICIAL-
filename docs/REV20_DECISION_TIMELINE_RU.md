@@ -264,3 +264,20 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - `/docs/NEON_STAGE_NATIVE_INTEGRATION_RU.md` — интеграция NEON STAGE.
 
 **Рабочее правило для всех следующих сессий:** прежде чем просить пользователя повторно приложить файл или сообщать, что файл отсутствует, проверить этот индекс, GitHub tree и Library. Canonical 01 PNG уже подтверждён в корне репозитория; не запрашивать его повторно. Если инструмент не умеет отобразить бинарный PNG, это ограничение чтения/рендеринга инструмента, а не отсутствие файла. Для анализа сначала получить/открыть уже существующий GitHub/Library asset доступным способом. Новые точные пути, созданные файлы, commit SHA, CI run IDs и статусы дописывать сюда же.
+
+## 2026-11-22 — визуальный аудит по мастер-промпту и исправление блокирующей сборку ошибки
+
+Проверены непосредственно /Assets/3D/References/PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt, /Source/PluginEditor.cpp, /Source/PluginProcessor.cpp и GitHub Actions run 44998253820 на SHA 7863c648da180e63c7a2fd60d24d67d826ad50aa.
+
+**Подтверждённое расхождение главного layout:**
+- Мастер-промпт, раздел 4, определяет трёхзонную структуру: слева FACTORY PRESET BROWSER; в центре PLAYING CORE с девятью регуляторами в сетке 3×3 и режимами MELODY/PATTERN; справа AMP & TONE / FX CHAIN с семью переключателями.
+- Текущий PluginEditor.cpp пока размещает девять регуляторов в правой зоне, FX Edit в центральной зоне, а семь FX switches — отдельной горизонтальной полосой снизу. Поэтому заголовки панелей уже обновлены, но фактическая геометрия ещё не соответствует обязательному мастер-промпту.
+- Это не следует маскировать косметической сменой заголовков. Следующий layout-pass должен перенести 3×3 controls в центр, собрать семь FX switches в правую rack-зону и оставить FX EDIT вспомогательным окном/панелью. При этом сохранить 1024×700 исходный размер, resize limits, APVTS IDs, attachments и рабочие действия переключателей.
+- Не использовать новый/альтернативный дизайн. Порядок и визуальные пропорции проверять только по canonical /01 INTERFACE  NEON STAGE DEFAULT .png и его утверждённому asset master prompt.
+
+**CI диагностика и исправление:**
+- Run 44998253820 завершился FAILURE на Windows x64 при компиляции Source/PluginProcessor.cpp:326: вызов JUCE MidiKeyboardState::noteOff передавал два аргумента вместо требуемых трёх.
+- Исправлено вызовом keyboardState.noteOff(channel, noteNumber, 0.0f) для очистки transient keyswitch visualization. Commit: cab4f58e8a2fc0109ed85f1c1f8c14e0b7b2e686.
+- Повторная Windows x64 сборка и CTest после исправления обязательны; до завершения нового CI run успех не заявляется.
+
+**Статус:** визуальное соответствие layout — OPEN / NOT VERIFIED; исправление compile blocker — COMMITTED / CI PENDING.
