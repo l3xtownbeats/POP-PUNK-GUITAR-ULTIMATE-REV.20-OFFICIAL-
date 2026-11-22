@@ -1726,18 +1726,20 @@ private:
     std::array<int, 6> frets {{ 0, 0, 2, 2, 2, 0 }};
 };
 
-class PPGUAutoChordsPanel final : public juce::Component, public PPGUThemeAwarePanel
+class PPGUAutoChordsPanel final : public juce::Component, public PPGUThemeAwarePanel,
+                                  private juce::Timer
 {
 public:
     explicit PPGUAutoChordsPanel(juce::AudioProcessorValueTreeState& state) : apvts(state)
     {
+        startTimerHz(12);
         title.setText("AUTOCHORDS  /  HARMONY SETUP", juce::dontSendNotification);
         title.setFont(makeThemeFont(palette, 20.0f, false, true));
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
         addAndMakeVisible(title);
         stateLabel.setText("PATTERN MODE ONLY: ONE HELD NOTE EXPANDS TO A SCALE-BASED TRIAD. MELODY MODE REMAINS SINGLE-NOTE.",
                             juce::dontSendNotification);
-        stateLabel.setColour(juce::Label::textColourId, palette.token("success"));
+        stateLabel.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(stateLabel);
         offButton.setButtonText("AUTOCHORDS  /  ON-OFF");
         offButton.setClickingTogglesState(true);
@@ -1780,7 +1782,8 @@ public:
         for (auto* label : { &keyLabel, &modeLabel, &patternLabel })
             label->setFont(makeThemeFont(palette, 9.5f, false, true));
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
-        stateLabel.setColour(juce::Label::textColourId, palette.token("warning"));
+        stateLabel.setColour(juce::Label::textColourId,
+            isAutoChordsEnabled() ? palette.token("success") : palette.token("text_secondary"));
         for (auto* label : { &keyLabel, &modeLabel, &patternLabel })
             label->setColour(juce::Label::textColourId, palette.token("text_secondary"));
         offButton.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
@@ -1804,6 +1807,22 @@ public:
         drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.10f, 0.30f, 0.035f);
         g.setColour(palette.token("control_border"));
         g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(12), 10, 1);
+
+        // Status LED is driven by the same APVTS parameter as the real button.
+        const auto button = offButton.getBounds().toFloat();
+        const float cx = button.getRight() - 15.0f;
+        const float cy = button.getCentreY();
+        const bool enabled = isAutoChordsEnabled();
+        const auto led = enabled ? palette.token("accent") : palette.token("text_disabled");
+        if (enabled)
+        {
+            g.setColour(palette.token("accent_glow").withAlpha(0.42f));
+            g.fillEllipse(cx - 10.0f, cy - 10.0f, 20.0f, 20.0f);
+        }
+        g.setColour(led.withAlpha(enabled ? 0.95f : 0.65f));
+        g.fillEllipse(cx - 4.0f, cy - 4.0f, 8.0f, 8.0f);
+        g.setColour(palette.token("control_border"));
+        g.drawEllipse(cx - 4.0f, cy - 4.0f, 8.0f, 8.0f, 1.0f);
     }
     void resized() override
     {
@@ -1826,6 +1845,24 @@ public:
         patternBox.setBounds(controls.removeFromTop(44).removeFromLeft(280));
     }
 private:
+    bool isAutoChordsEnabled() const noexcept
+    {
+        if (const auto* value = apvts.getRawParameterValue("singleMidiNoteAsChordRoot"))
+            return value->load(std::memory_order_relaxed) > 0.5f;
+        return false;
+    }
+    void timerCallback() override
+    {
+        const bool enabled = isAutoChordsEnabled();
+        const auto text = enabled
+            ? "AUTOCHORDS ENABLED  /  PATTERN MODE ONLY"
+            : "AUTOCHORDS STANDBY  /  MELODY MODE UNAFFECTED";
+        if (stateLabel.getText() != text)
+            stateLabel.setText(text, juce::dontSendNotification);
+        stateLabel.setColour(juce::Label::textColourId,
+            enabled ? palette.token("success") : palette.token("text_secondary"));
+        repaint();
+    }
     PPGUThemeManager::Palette palette;
     juce::AudioProcessorValueTreeState& apvts;
     juce::Label title, stateLabel, keyLabel, modeLabel, patternLabel;
