@@ -451,3 +451,44 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 Пользователь явно утвердил в качестве базовой реализации review-ветки текущие решения по PATTERN (8 карточек, 2 колонки, существующие PREVIEW/APPLY/CANCEL и OPEN AUTOCHORDS), AutoChords (реальное APVTS ON/OFF и LED), FX EDIT (POWER/LED/ACTIVE/BYPASSED и переключение выбранного эффекта в уже открытом окне), оболочке (состояния доступных элементов и корректные статусы), а также ведение этого журнала.
 
 Это утверждение фиксирует продуктовую/визуальную базу для следующих изменений. Оно не заменяет техническую приёмку: текущая ветка должна пройти Windows x64 configure/build VST3, C++ contract tests, полный CTest, 16-skin validation, runtime staging и pluginval strictness 5; после этого нужна ручная проверка в FL Studio 20 при разных размерах окна. До получения этих результатов merge в `main` не выполнять.
+
+## 2026-11-22 — NEON STAGE: полный контракт визуальных состояний и интерактивности (review branch)
+
+### Новая реализация в этом checkpoint
+
+- `Source/PluginEditor.cpp`: linear-slider renderer для Skin-1 теперь явно отображает четыре состояния: normal, hover, drag и keyboard focus; disabled получает отдельное приглушение дорожки и thumb. Световой fill продолжает вычисляться из фактической позиции JUCE Slider/APVTS; декоративное движение и таймерная анимация не добавлены.
+- Включённый slider показывает cyan/electric-blue акцент; hover/drag/focus рамка отделена от значения параметра. При disabled значение остаётся видимым в форме положения thumb, но трек/ручка визуально приглушаются и не выглядят активными.
+- Изменение не затрагивает APVTS IDs, ranges, attachments, processor/DSP, MIDI, preset state или геометрию главного макета.
+
+### Полный контракт визуальной приёмки по зонам
+
+| Зона/элемент | Источник состояния | Обязательное отображение | Текущий source-level статус |
+|---|---|---|---|
+| Главная рамка и фон | Skin-1 theme.json + frame/background/material artwork | графитовая металлическая поверхность, чёткая рамка, аккуратные кромки, согласованные световые слои | подключено; pixel parity с макетом 01 требует визуальной host-проверки |
+| PRESETS | реальные catalog/search/category controls | поиск, фильтр/категория, выбранный preset, доступные/недоступные состояния | существующие controls; нужна поэлементная проверка кликов/resize |
+| PLAYING CORE | APVTS mode + 9 SliderAttachments | две вкладки MELODY/PATTERN; девять ручек; вращение 61-frame atlas; value arc и numeric readout по реальным значениям | привязки и renderer существуют; linear-slider state enhancement добавлен этим checkpoint |
+| Ручки | Slider state + APVTS value | normal/hover/drag/focus/disabled; кадр ручки и дуга соответствуют фактическому значению | Skin-1 rotary path подключён; проверить девять назначений и hit areas в host |
+| FX CHAIN | семь APVTS ButtonAttachments | семь утверждённых основных bypass switches; cyan LED только при ON; disabled не светится; клик открывает соответствующий FX EDIT | source binding существует; семь основных switch IDs намеренно не включают FLANGER |
+| FX EDIT | выбранная группа + восемь APVTS enabled-параметров | реальный selector, POWER, ACTIVE/BYPASSED, LED, параметрические контролы и реальный output meter | реализовано в исходнике; проверить все восемь групп и смену группы при открытом окне |
+| MIDI keyboard | processor.keyboardState | note-on подсвечивает конкретную клавишу, note-off снимает подсветку; mouse hover отдельно различим | JUCE MidiKeyboardComponent связан с processor.keyboardState; host-проверка обязательна |
+| Performance display | реальные held notes, scale root/mode и chord detection | LIVE HARMONY, NOTES HELD, SCALE/KEY и MIDI LED без фиктивных данных | source polling подключён; проверить MIDI note-on/off и chord transitions |
+| Output meters | реальные processor output peaks | L/R сегменты показывают сигнал и release/decay; amber/red только на верхних уровнях/предупреждении | source polling подключён; проверить реальный звук и отсутствие ложного движения в тишине |
+| PATTERN / Song Section | существующие pattern/section routing methods | 8 слотов в сетке 2×4, выбранный слот подсвечен, PREVIEW/APPLY/CANCEL; пустой слот не изображается как записанный riff | реализовано; проверить каждую кнопку и сохранение/отмену |
+| AUTOCHORDS | APVTS `singleMidiNoteAsChordRoot` + scale parameters | ON/OFF text+LED, выбранные key/mode/pattern, chord diagram; изменение обновляется без ложного blinking | source bindings/LED существуют; проверить только PATTERN behavior и host automation |
+| Import Guitar | processor SFZ loader/path/status | STANDBY/LOADING/READY/ERROR; сохранённый путь проверяется на существование; кнопка запускает существующий async loader | source integration существует; проверить success/failure/cancel и missing sample paths |
+| Skin Gallery | 16-entry registry + selection transaction | search, favorites, preview, apply, cancel, ACTIVE/AVAILABLE labels; ровно 16 тем | existing UI; нужна проверка каждой транзакции и runtime assets |
+| Workspace Settings | panel scale/gap callbacks + persisted settings | sliders показывают реальные значения; reset/gallery actions работают; изменение влияет только на workspace | existing callbacks; проверить persistence после перезапуска |
+| About | реализованный info dialog | доступная кнопка открывает существующее окно; нет ложного disabled state | включено; проверить открытие/закрытие |
+| Auto Discover / Curator | backend availability | до готового backend элементы явно disabled и не имитируют активность | намеренно disabled; это корректное состояние, а не недоделанный визуальный ON |
+| Все окна/рамки | shared frame atlas + workspace sizing | общий язык рамок/заголовков, корректные clipping/hit areas на минимальном/максимальном размере | 9-slice подключён; нужны screenshot review на разных размерах/DPI |
+
+### Эталон и границы
+
+- Главный экран: только `01 INTERFACE  NEON STAGE DEFAULT .png`; вспомогательные 02–07 используются только для соответствующих вспомогательных экранов/деталей.
+- Session Guitarist – Electric Sunburst Deluxe/Vintage допустим как UX-reference для читаемости, навигации, ощущения аппаратных контролов, preview и performance workflow. Запрещено копировать UI-композицию, бренд, графику, тексты, presets, riffs, samples или записи.
+- Внешний стиль: premium studio hardware, matte graphite/anodized metal, точные фаски/рамки, cyan `#00D9FF`, electric blue `#6B8CFF`; amber/red только для warning/error. Без purple/pink. Дизайн остаётся дорогим и реалистичным, не игровым HUD.
+- Любая подсветка должна отражать фактическое состояние; не использовать fake progress, decorative blinking или фиктивную performance telemetry.
+
+### Техническая приёмка
+
+Изменение linear-slider renderer опубликовано в commit `f1a5fdce15683e522c593cb8ce148b71b35d2732`. Документация этого контракта добавляется отдельным commit. Для нового HEAD необходимы Windows x64 configure/build VST3, C++ contract tests, полный CTest, 16-skin validator, runtime package staging и pluginval strictness 5. Затем обязательны ручные проверки в FL Studio 20: все 9 ручек, 7 FX switches, 8 FX EDIT groups, MIDI key-down/up, все auxiliary panels, min/max window sizes и DPI. До exact-SHA CI и host acceptance визуальный этап не объявлять завершённым.
