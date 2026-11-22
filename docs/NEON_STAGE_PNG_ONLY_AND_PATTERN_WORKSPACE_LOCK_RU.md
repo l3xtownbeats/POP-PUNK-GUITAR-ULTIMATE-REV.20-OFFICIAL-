@@ -32,6 +32,18 @@ NEON STAGE DEFAULT must read as a finished premium studio guitar instrument, not
 
 ## 3. PATTERN mode interaction
 
+### Immutable main-editor layout and preset contract — USER CONFIRMED
+
+The approved NEON STAGE main editor composition is immutable during this work:
+- Preserve the existing main-screen zones and columns, including PRESETS / preset browser, PLAYING / playing core, AMP & TONE, FX CHAIN, performance strip and footer/keyboard exactly as defined by the approved reference and current implementation.
+- Do not rename, reorder, replace, resize, relocate or repurpose those main-screen columns or their controls.
+- Preserve the existing factory preset catalog, category structure, names, ordering, filtering/search, selection callbacks, preset loading and sound-selection behavior byte-for-byte in intent. PATTERN work must not add Pattern 1–8 as entries to the main preset list or change any preset selection path.
+- PATTERN is an existing main mode/tab, not a new main-editor column and not a third mode. Selecting it may open its dedicated auxiliary workspace while leaving the main editor composition intact.
+- The two selection areas described below belong only inside the auxiliary PATTERN workspace. They must never be used to replace or restructure the main PRESETS / PLAYING / AMP & TONE / FX CHAIN columns.
+- Session Guitarist – Electric Sunburst Deluxe is strictly a usability benchmark for pattern/section/harmony workflow, never a source for visual design, labels, branding, samples or copied assets.
+
+## 3A. PATTERN mode interaction details
+
 PATTERN is one of exactly two main modes: MELODY and PATTERN. It is not a third mode.
 
 ### Entry flow
