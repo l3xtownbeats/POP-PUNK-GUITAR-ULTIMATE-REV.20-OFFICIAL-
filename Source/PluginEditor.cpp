@@ -1828,6 +1828,46 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         g.setColour(palette.token("highlight").withAlpha(0.88f));
         g.drawRoundedRectangle(focusBounds, 5.0f, 1.6f);
     };
+
+    const auto drawAtlasIcon = [&g, &button, this, controlId]
+    {
+        if (! palette.iconsSpriteSheet.isValid())
+            return;
+        juce::String icon;
+        if (controlId.startsWith("fx_switch01")) icon = "wave";
+        else if (controlId.startsWith("fx_switch02")) icon = "eq";
+        else if (controlId.startsWith("fx_switch03")) icon = "distortion";
+        else if (controlId.startsWith("fx_switch04")) icon = "chorus";
+        else if (controlId.startsWith("fx_switch05")) icon = "delay";
+        else if (controlId.startsWith("fx_switch06")) icon = "reverb";
+        else if (controlId.startsWith("fx_switch07")) icon = "cabinet";
+        else if (controlId == "Settings") icon = "settings";
+        else if (controlId == "About") icon = "info";
+        else if (controlId == "SKIN_button") icon = "palette";
+        else if (controlId == "Import_Guitar") icon = "guitar";
+        else if (controlId == "Auto_Discover") icon = "antenna";
+        else if (controlId == "Curator") icon = "crown";
+        if (icon.isEmpty()) return;
+
+        static const std::map<std::string, juce::Rectangle<int>> iconBounds {
+            { "wave", {32,75,144,144} }, { "eq", {196,75,144,144} },
+            { "distortion", {360,75,144,144} }, { "chorus", {524,75,144,144} },
+            { "delay", {688,75,144,144} }, { "reverb", {852,75,144,144} },
+            { "cabinet", {32,360,144,144} }, { "crown", {196,360,144,144} },
+            { "settings", {524,360,144,144} }, { "info", {688,360,144,144} },
+            { "guitar", {196,645,144,144} }, { "antenna", {360,645,144,144} },
+            { "palette", {524,645,144,144} }
+        };
+        const auto found = iconBounds.find(icon.toStdString());
+        if (found == iconBounds.end()) return;
+        const auto bounds = button.getLocalBounds();
+        const int size = juce::jlimit(14, 24, bounds.getHeight() - 8);
+        const int x = bounds.getX() + 7;
+        const int y = bounds.getCentreY() - size / 2;
+        const auto source = found->second;
+        g.drawImage(palette.iconsSpriteSheet, x, y, size, size,
+                    source.getX(), source.getY(), source.getWidth(), source.getHeight());
+    };
     if (controlId.startsWith("fx_switch") || controlId == "Import_Guitar"
         || controlId == "Auto_Discover" || controlId == "Curator"
         || controlId == "Settings" || controlId == "About"
@@ -1841,8 +1881,9 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                 const auto bounds = button.getLocalBounds();
                 g.drawImageWithin(*artwork, bounds.getX(), bounds.getY(),
                     bounds.getWidth(), bounds.getHeight(), juce::RectanglePlacement::centred);
-                // State artwork supplies the physical switch; focus remains a
-                // separate JUCE overlay and is never baked into the PNG.
+                // State artwork supplies the physical switch; the atlas icon
+                // is layered independently so labels and hit targets remain live.
+                drawAtlasIcon();
                 drawKeyboardFocus();
                 return;
             }
@@ -1872,6 +1913,7 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         g.drawImage(palette.controlsSpriteSheet, bounds.getX(), bounds.getY(),
                     bounds.getWidth(), bounds.getHeight(), sourceX, sourceY,
                     sourceWidth, sourceHeight);
+        drawAtlasIcon();
         drawKeyboardFocus();
         return;
     }
