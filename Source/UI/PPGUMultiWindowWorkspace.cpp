@@ -251,6 +251,22 @@ public:
 
     void paintOverChildren(juce::Graphics& g) override
     {
+        // Keyboard focus must remain visible above the button's own LookAndFeel
+        // painting, without changing the window layout or hit targets.
+        const auto drawFocusRing = [&g](const juce::Button& button)
+        {
+            if (!button.hasKeyboardFocus(true))
+                return;
+
+            auto bounds = button.getBounds().toFloat().expanded(1.5f);
+            g.setColour(juce::Colour(0xff00d9ff).withAlpha(0.18f));
+            g.fillRoundedRectangle(bounds.expanded(2.0f), 5.0f);
+            g.setColour(juce::Colour(0xff00d9ff));
+            g.drawRoundedRectangle(bounds, 4.0f, 1.5f);
+        };
+        drawFocusRing(closeButton);
+        drawFocusRing(maximizeButton);
+
         if (!maximized)
         {
             juce::Path grip;
