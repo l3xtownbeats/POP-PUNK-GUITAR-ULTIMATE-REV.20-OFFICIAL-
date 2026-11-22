@@ -3033,6 +3033,18 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
 
     drawPanel(g, left, "PRESETS");
     drawPanel(g, area, "PLAYING CORE");
+    if (p.heroArtwork.isValid())
+    {
+        // Keep the approved 3x3 control geometry fully visible; the hero is a
+        // restrained backdrop beneath child controls, not a replacement layout.
+        g.saveState();
+        g.setOpacity(0.10f);
+        g.drawImageWithin(p.heroArtwork, area.getX() + 8, area.getY() + 36,
+                          juce::jmax(1, area.getWidth() - 16),
+                          juce::jmax(1, area.getHeight() - 44),
+                          juce::RectanglePlacement::centred);
+        g.restoreState();
+    }
     drawPanel(g, right, "AMP & TONE");
 }
 
