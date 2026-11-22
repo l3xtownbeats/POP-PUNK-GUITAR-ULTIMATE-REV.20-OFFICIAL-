@@ -8,6 +8,8 @@ on:
       - "CMakeLists.txt"
       - "Source/**"
       - "tests/**"
+      - "presets/**"
+      - "tools/validate_factory_bank.py"
       - "SKIN/**"
       - "tools/package_active_skins.py"
       - "tools/validate_skin_registry_16.py"
@@ -47,6 +49,10 @@ jobs:
       - name: Install asset validation dependency
         shell: pwsh
         run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Validate unified 500-target factory database
+        shell: pwsh
+        run: python tools/validate_factory_bank.py presets/factory_bank_500.json
 
       - name: Checkout JUCE 7.0.12
         shell: pwsh

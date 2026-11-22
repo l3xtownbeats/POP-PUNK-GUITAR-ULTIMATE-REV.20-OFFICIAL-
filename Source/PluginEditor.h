@@ -66,6 +66,7 @@ private:
     // These REV.18 entry points are intentionally disabled until their real backends exist.
     juce::TextButton autoSoundHunterButton { "AUTO DISCOVER" }, curatorButton { "CURATOR" }, aboutButton { "ABOUT" };
     juce::ComboBox presetBox, categoryBox;
+    juce::TextButton previousPresetButton { "PREVIOUS" }, nextPresetButton { "NEXT" };
     juce::TextEditor presetSearch;
     struct FactoryPreset { juce::String name, category, mode, soundCharacter, groove, articulation; float drive=0.0f, tone=5.0f, reverb=0.0f, outputDb=0.0f; };
     std::vector<FactoryPreset> factoryPresets;

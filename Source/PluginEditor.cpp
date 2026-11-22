@@ -1966,6 +1966,12 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     presetBox.setColour(juce::ComboBox::textColourId, themeManager.getPalette().token("text_primary"));
     presetBox.setColour(juce::ComboBox::outlineColourId, themeManager.getPalette().token("accent").withAlpha(0.5f));
     addAndMakeVisible(presetBox);
+    for (auto* button : { &previousPresetButton, &nextPresetButton })
+    {
+        button->setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("panel_elevated"));
+        button->setColour(juce::TextButton::textColourOffId, themeManager.getPalette().token("text_primary"));
+        addAndMakeVisible(*button);
+    }
     categoryBox.addItem("ALL PRESETS", 1);
     categoryBox.addItem("MELODY", 2);
     categoryBox.addItem("PATTERN", 3);
@@ -1980,6 +1986,22 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     addAndMakeVisible(presetSearch);
     loadFactoryPresetCatalog();
     presetBox.onChange = [this] { if (presetBox.getSelectedId() > 0 && presetBox.getSelectedId() <= static_cast<int>(visiblePresetIndices.size())) applyFactoryPreset(visiblePresetIndices[static_cast<size_t>(presetBox.getSelectedId()-1)]); };
+    previousPresetButton.onClick = [this]
+    {
+        const int count = static_cast<int>(visiblePresetIndices.size());
+        if (count <= 0) return;
+        const int current = presetBox.getSelectedId();
+        const int previous = current <= 1 ? count : current - 1;
+        presetBox.setSelectedId(previous, juce::sendNotification);
+    };
+    nextPresetButton.onClick = [this]
+    {
+        const int count = static_cast<int>(visiblePresetIndices.size());
+        if (count <= 0) return;
+        const int current = presetBox.getSelectedId();
+        const int next = current <= 0 || current >= count ? 1 : current + 1;
+        presetBox.setSelectedId(next, juce::sendNotification);
+    };
     auto refreshPresetList = [this] {
         // Keep the current sound selected when it remains in the filtered list.
         // Filtering must never silently load a different preset.
@@ -2362,6 +2384,10 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     presetSearch.setBounds(left.removeFromTop(34).reduced(4, 2));
     left.removeFromTop(4);
     presetBox.setBounds(left.removeFromTop(40).reduced(4, 2));
+    left.removeFromTop(4);
+    auto presetNavigationRow = left.removeFromTop(30);
+    previousPresetButton.setBounds(presetNavigationRow.removeFromLeft(presetNavigationRow.getWidth() / 2).reduced(4, 2));
+    nextPresetButton.setBounds(presetNavigationRow.reduced(4, 2));
     left.removeFromTop(6);
     if (chordDiagram != nullptr)
     {
@@ -2717,10 +2743,10 @@ bool PopPunkGuitarUltimateAudioProcessorEditor::keyPressed(const juce::KeyPress&
 void PopPunkGuitarUltimateAudioProcessorEditor::loadFactoryPresetCatalog()
 {
     factoryPresets.clear();
-    const auto jsonText = juce::String::fromUTF8(BinaryData::factory_bank_300_json, BinaryData::factory_bank_300_jsonSize);
+    const auto jsonText = juce::String::fromUTF8(BinaryData::factory_bank_500_json, BinaryData::factory_bank_500_jsonSize);
     const auto root = juce::JSON::parse(jsonText);
     if (!root.isObject()) { statusLabel.setText("FACTORY PRESET CATALOG ERROR", juce::dontSendNotification); return; }
-    const auto append = [this](const juce::var& array, const juce::String& mode) {
+    const auto append = [this](const juce::var& array) {
         if (auto* values = array.getArray()) for (const auto& value : *values) {
             if (!value.isObject()) continue;
             FactoryPreset preset;
@@ -2730,7 +2756,9 @@ void PopPunkGuitarUltimateAudioProcessorEditor::loadFactoryPresetCatalog()
                 displayName = displayName.substring(reference.length()).trim();
             preset.name = displayName;
             preset.category = "Original";
-            preset.mode = mode;
+            preset.mode = value.getProperty("mode", "MELODY").toString().toUpperCase();
+            if (preset.mode != "MELODY" && preset.mode != "PATTERN")
+                continue;
             preset.soundCharacter = value.getProperty("soundCharacter", "Electric").toString();
             preset.groove = value.getProperty("groove", "").toString();
             preset.articulation = value.getProperty("articulation", "").toString();
@@ -2742,9 +2770,10 @@ void PopPunkGuitarUltimateAudioProcessorEditor::loadFactoryPresetCatalog()
             factoryPresets.push_back(std::move(preset));
         }
     };
-    append(root.getProperty("melodyPresets", juce::var()), "MELODY");
-    append(root.getProperty("patternPresets", juce::var()), "PATTERN");
-    statusLabel.setText("FACTORY CATALOG: "+juce::String(static_cast<int>(factoryPresets.size()))+" PRESETS", juce::dontSendNotification);
+    append(root.getProperty("presets", juce::var()));
+    const int targetCount = static_cast<int>(root.getProperty("targetPresetCount", 500));
+    statusLabel.setText("FACTORY DATABASE: "+juce::String(static_cast<int>(factoryPresets.size()))
+                        +" / "+juce::String(targetCount)+" PRESETS", juce::dontSendNotification);
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::applyFactoryPreset(int index)
