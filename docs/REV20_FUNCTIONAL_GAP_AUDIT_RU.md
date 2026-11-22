@@ -268,3 +268,19 @@ Still open: visually inspect the actual canonical 01 INTERFACE image against a r
 ## 2026-11-22 — Source-location index cross-reference
 
 Permanent source and approved-asset path index is recorded in `docs/REV20_DECISION_TIMELINE_RU.md`. Repository: `l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-`, branch `main`. Canonical NEON STAGE DEFAULT image is already present at repository root: `/01 INTERFACE  NEON STAGE DEFAULT .png` (blob SHA `747207e183c77e8b913a543b2dc40b29829e77da`). Main implementation paths: `/Source/PluginEditor.cpp`, `/Source/PluginEditor.h`, `/Source/PluginProcessor.cpp`, `/Source/PluginProcessor.h`, `/Source/UI/`, `/Source/Performance/`, `/Source/Sampler/`; supporting trees: `/Assets/3D/References/`, `/SKINS/`, `/assets/`, `/presets/`, `/tests/`, `/tools/`, `/docs/`, `/.github/workflows/`. Check the permanent index and live GitHub tree before requesting any existing asset from the user. Tool inability to render a binary image must not be reported as file absence.
+
+## 2026-11-22 — NEON STAGE main layout discrepancy (confirmed against asset master prompt)
+
+**Priority: P0 visual composition / implementation gap.**
+
+The approved master prompt at Assets/3D/References/PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt, section 4, specifies:
+1. LEFT: factory preset browser.
+2. CENTER: PLAYING CORE with the nine APVTS-backed rotary controls in a 3×3 grid and the MELODY/PATTERN mode controls.
+3. RIGHT: AMP & TONE / FX CHAIN with exactly seven APVTS-backed FX switches.
+4. LOWER: performance display, MIDI keyboard and live status/footer.
+
+Current Source/PluginEditor.cpp instead puts the nine rotary controls in the right zone, the FX Edit component in the center, and the seven FX switches in a separate horizontal strip. The panel captions alone therefore do not establish layout compliance.
+
+**Required implementation sequence:** map canonical 01 mockup geometry to component bounds; move the 3×3 knob group to center; compose the seven FX switches in the right rack; preserve the auxiliary FX EDIT workflow; retain all existing APVTS parameter IDs, slider/button attachments, component IDs, accessibility/hover/pressed/disabled states and resize constraints; verify at 1024×700 and minimum 900×640. Do not invent a replacement composition or add controls.
+
+**Build gate:** Windows run 44998253820 failed at PluginProcessor.cpp:326 because JUCE MidiKeyboardState::noteOff requires the velocity argument. Corrected on main by commit cab4f58e8a2fc0109ed85f1c1f8c14e0b7b2e686; new exact-HEAD CI/CTest result pending. No build pass is claimed.
