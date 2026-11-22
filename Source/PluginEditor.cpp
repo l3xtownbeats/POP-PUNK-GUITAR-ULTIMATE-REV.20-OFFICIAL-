@@ -2522,8 +2522,21 @@ void PPGUPremiumLookAndFeel::drawComboBox(juce::Graphics& g, int w, int h, bool 
     else if (down || box.isMouseOver())
         face = face.brighter(0.08f);
 
-    g.setColour(face);
+    const auto topFace = enabled ? face.brighter(down ? 0.015f : 0.075f)
+                                 : face.brighter(0.025f);
+    const auto bottomFace = enabled ? face.darker(down ? 0.22f : 0.15f)
+                                    : face.darker(0.08f);
+    g.setGradientFill(juce::ColourGradient(topFace, bounds.getX(), bounds.getY(),
+                                           bottomFace, bounds.getX(), bounds.getBottom(), false));
     g.fillRoundedRectangle(bounds, 7.0f);
+
+    // Fine upper bevel and inset edge make the selector read as a machined
+    // control, while hover/press/focus remain driven by JUCE's real state.
+    auto inner = bounds.reduced(1.0f);
+    g.setColour(palette.token("highlight").withAlpha(enabled ? (box.isMouseOver() ? 0.24f : 0.13f) : 0.05f));
+    g.drawRoundedRectangle(inner, 6.0f, 0.8f);
+    g.setColour(palette.token("lowlight").withAlpha(0.72f));
+    g.drawRoundedRectangle(bounds.reduced(2.0f), 5.0f, 0.65f);
     g.setColour(focused ? palette.focus : (enabled ? palette.border : palette.token("lowlight")));
     g.drawRoundedRectangle(bounds, 7.0f, focused ? 2.0f : 1.0f);
 
@@ -2533,6 +2546,12 @@ void PPGUPremiumLookAndFeel::drawComboBox(juce::Graphics& g, int w, int h, bool 
     arrow.startNewSubPath(cx - 4.0f, cy - 2.0f);
     arrow.lineTo(cx, cy + 2.0f);
     arrow.lineTo(cx + 4.0f, cy - 2.0f);
+    if (focused || down)
+    {
+        g.setColour(palette.token("accent_glow").withAlpha(0.28f));
+        g.strokePath(arrow, juce::PathStrokeType(4.0f, juce::PathStrokeType::curved,
+                                                  juce::PathStrokeType::rounded));
+    }
     g.setColour(enabled ? palette.accent : palette.token("text_disabled"));
     g.strokePath(arrow, juce::PathStrokeType(1.8f, juce::PathStrokeType::curved,
                                               juce::PathStrokeType::rounded));
