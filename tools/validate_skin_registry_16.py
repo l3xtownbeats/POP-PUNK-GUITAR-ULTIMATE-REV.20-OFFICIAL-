@@ -96,6 +96,11 @@ def validate_neon_stage_asset_manifest() -> int:
             raise SystemExit(f"FAIL: missing, linked, or out-of-theme asset: {asset}")
 
         data = asset.read_bytes()
+        # Windows Git checkouts may expand LF to CRLF for text assets. Integrity
+        # metadata describes the canonical Git blob, so normalize checkout-only
+        # line-ending conversion before checking byte count and digests.
+        if record.get("format") in ("JSON", "SVG"):
+            data = data.replace(b"\\r\\n", b"\\n")
         if len(data) != record.get("bytes"):
             raise SystemExit(f"FAIL: asset byte count mismatch: {asset}")
         if hashlib.sha256(data).hexdigest() != record.get("sha256"):
