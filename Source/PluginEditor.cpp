@@ -1734,12 +1734,28 @@ public:
             auto card = panels[static_cast<size_t>(i)].toFloat();
             g.setColour(palette.token("shadow").withAlpha(0.55f));
             g.fillRoundedRectangle(card.translated(0.0f, 3.0f), 8.0f);
-            g.setColour(palette.token("panel"));
+            const auto panelTop = palette.token("panel_elevated");
+            const auto panelBottom = palette.token("panel");
+            g.setGradientFill(juce::ColourGradient(panelTop.withAlpha(0.98f),
+                card.getX(), card.getY(), panelBottom, card.getX(), card.getBottom(), false));
             g.fillRoundedRectangle(card, 8.0f);
+
+            // Restrained metallic bevel: a soft upper edge and a darker inner
+            // boundary give the card depth without introducing fake activity.
+            auto inner = card.reduced(1.0f);
+            g.setColour(palette.token("highlight").withAlpha(0.13f));
+            g.drawRoundedRectangle(inner.removeFromTop(1.0f), 0.5f, 1.0f);
             g.setColour(palette.token("control_border").withAlpha(0.92f));
             g.drawRoundedRectangle(card, 8.0f, 1.0f);
+            g.setColour(palette.token("lowlight").withAlpha(0.62f));
+            g.drawRoundedRectangle(card.reduced(2.0f), 6.0f, 0.7f);
+
             auto top = card.removeFromTop(3.0f);
-            g.setColour(i == 1 ? palette.token("accent_glow") : palette.token("accent").withAlpha(0.72f));
+            const auto accent = i == 1 ? palette.token("accent_glow")
+                                       : palette.token("accent").withAlpha(0.78f);
+            g.setColour(accent.withAlpha(0.16f));
+            g.fillRoundedRectangle(top.expanded(2.0f, 1.0f), 2.0f);
+            g.setColour(accent);
             g.fillRoundedRectangle(top, 1.5f);
         }
     }
