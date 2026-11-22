@@ -1372,7 +1372,7 @@ public:
         patternLabel.setText("RHYTHM CATALOG", juce::dontSendNotification);
         sourceLabel.setText("GUITAR / INSTRUMENT SOURCE", juce::dontSendNotification);
         toneLabel.setText("TONE PRESET", juce::dontSendNotification);
-        performanceLabel.setText("PERFORMANCE ARTICULATION", juce::dontSendNotification);
+        performanceLabel.setText("PLAYING STYLE / ARTICULATION", juce::dontSendNotification);
         sourceValue.setJustificationType(juce::Justification::centredLeft);
         sourceValue.setText("NO SFZ INSTRUMENT LOADED", juce::dontSendNotification);
         toneValue.setJustificationType(juce::Justification::centredLeft);
@@ -1391,6 +1391,7 @@ public:
         openAutoChords.setButtonText("OPEN AUTOCHORDS");
         openAutoChords.onClick = [this] { if (autoChordsAction) autoChordsAction(); };
         addAndMakeVisible(openAutoChords);
+
         for (int i = 0; i < static_cast<int>(patternCards.size()); ++i)
         {
             auto& card = patternCards[static_cast<size_t>(i)];
@@ -1490,6 +1491,7 @@ public:
         }
         openAutoChords.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
         openAutoChords.setColour(juce::TextButton::textColourOffId, palette.token("accent"));
+
         for (auto& card : patternCards)
         {
             card.setColour(juce::TextButton::buttonColourId, palette.token("control_bg"));
@@ -1534,8 +1536,9 @@ public:
 
         area.removeFromTop(5);
         auto patternHeader = area.removeFromTop(24);
-        patternLabel.setBounds(patternHeader.removeFromLeft(180));
-        openAutoChords.setBounds(patternHeader.removeFromRight(174).reduced(0, 1));
+        patternLabel.setBounds(patternHeader.removeFromLeft(150));
+        openAutoChords.setBounds(patternHeader.removeFromRight(150).reduced(0, 1));
+
 
         area.removeFromTop(3);
         const int cardGap = 7;
