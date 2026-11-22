@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Generate the canonical NEON STAGE DEFAULT 1024x1024 sprite atlases.
+"""Generate label-free NEON STAGE DEFAULT 1024x1024 production sprite atlases.
 
+All labels and live values are rendered by JUCE, never baked into these atlases.
 The generated atlases are visual-only. They do not change APVTS IDs, DSP,
 sampler, MIDI, preset data, control geometry, or the audio callback.
 """
@@ -8,7 +9,7 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "SKIN" / "Skin_053" / "assets" / "spritesheets"
@@ -22,29 +23,10 @@ P = {
     "accent_warning": "#FFB454",
     "metal": "#101622",
     "metal_light": "#1B2A3B",
-    "text": "#FFFFFF",
-    "dim": "#7A8C9E",
 }
 def rgba(value, alpha=255):
     value = value.lstrip("#")
     return tuple(int(value[i:i+2], 16) for i in (0, 2, 4)) + (alpha,)
-def font(size=12, bold=False):
-    candidates = [
-        "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
-        "C:/Windows/Fonts/consolab.ttf" if bold else "C:/Windows/Fonts/consola.ttf",
-    ]
-    for candidate in candidates:
-        try:
-            return ImageFont.truetype(candidate, size)
-        except OSError:
-            pass
-    return ImageFont.load_default()
-def label(draw, box, text, color=None, size=11, bold=True):
-    x1,y1,x2,y2 = box
-    ft = font(size,bold)
-    bb = draw.textbbox((0,0), text, font=ft)
-    draw.text((x1+(x2-x1-(bb[2]-bb[0]))/2, y1+(y2-y1-(bb[3]-bb[1]))/2-1),
-              text, font=ft, fill=rgba(color or P["dim"]))
 def add_glow(im, draw_fn, color, radius=7):
     layer = Image.new("RGBA", im.size, (0,0,0,0))
     draw_fn(ImageDraw.Draw(layer), rgba(color,220))
@@ -55,7 +37,8 @@ def save(im, name):
     return path
 
 manifest = {
-  "schemaVersion":"1.0.0",
+  "schemaVersion":"1.1.0",
+  "textPolicy":"No baked labels, captions, parameter values, channel names, state names, or live status text. Render all text in JUCE.",
   "project":"NEON_STAGE_MANAGER_3_0",
   "theme":"NEON_STAGE_DEFAULT_SKIN_1",
   "canvas":[1024,1024],
@@ -124,7 +107,7 @@ for state,box in button_boxes.items():
     edge=P["glow_cyan"] if state in ("hover","active") else (P["metal_border"] if state=="pressed" else "#536A80")
     d.rounded_rectangle((x1+3,y1+3,x2-3,y2-3),radius=14,fill=rgba(face),outline=rgba(edge),width=3)
     d.rounded_rectangle((x1+10,y1+10,x2-10,y2-10),radius=10,outline=rgba("#8AA7BD",130),width=1)
-    label(d,box,state.upper(),P["text"],16)
+
 save(im,"neon_stage_controls_spritesheet.png")
 manifest["sheets"]["neon_stage_controls_spritesheet.png"]={
  "resolution":[1024,1024],
@@ -140,7 +123,7 @@ manifest["sheets"]["neon_stage_controls_spritesheet.png"]={
 # ---------------------------------------------------------------------------
 im=Image.new("RGBA",SIZE,(0,0,0,0))
 d=ImageDraw.Draw(im)
-label(d,(30,2,970,22),"VERTICAL LED METERS / 8 SEGMENTS",P["text"],12)
+
 meter_boxes=[]
 for i in range(8):
     x=43+i*117; y=34; w=82; h=286
@@ -154,14 +137,14 @@ for i in range(8):
         d.rounded_rectangle((x+17,sy,x+w-17,sy+18),radius=3,
                             fill=rgba(col,255 if seg<active else 30),
                             outline=rgba(col,100 if seg<active else 25),width=1)
-    label(d,(x,y+4,x+w,y+23),f"CH {i+1}",P["dim"],8)
+
     meter_boxes.append({"meter":i+1,"bbox":[x,y,x+w,y+h],"segments":8,"active_segments":active})
-label(d,(30,350,970,375),"HORIZONTAL SLIDERS / LONG + SHORT",P["text"],12)
+
 slider_boxes={}
 def slider(name,x,y,w):
     global im
     d=ImageDraw.Draw(im)
-    d.text((x,y-24),name.upper(),font=font(9,True),fill=rgba(P["dim"]))
+
     d.rounded_rectangle((x,y,x+w,y+22),radius=9,fill=rgba("#07101B"),outline=rgba("#405A70"),width=2)
     slider_boxes[name]={"track_bbox":[x,y,x+w,y+22]}
 slider("long_slider",60,445,820)
@@ -172,7 +155,7 @@ im=add_glow(im,lambda dd,c:dd.ellipse(thumb_box,outline=c,width=4),P["glow_cyan"
 d=ImageDraw.Draw(im)
 d.ellipse(thumb_box,fill=rgba("#19334A"),outline=rgba(P["glow_cyan"]),width=3)
 slider_boxes["thumb"]={"bbox":thumb_box}
-label(ImageDraw.Draw(im),(30,755,970,780),"STATUS LEDS / ROUND + SQUARE",P["text"],12)
+
 led_states=["off","cyan","blue","warning"]
 led_colors={"off":"#344354","cyan":P["glow_cyan"],"blue":P["glow_blue"],"warning":P["accent_warning"]}
 led_boxes={"round":{},"square":{}}
@@ -194,7 +177,7 @@ for shape,x_start in (("round",50),("square",570)):
             else:
                 d.rounded_rectangle((x,y,x+40,y+40),radius=5,fill=rgba(col),outline=rgba("#D7F7FF"),width=2)
             led_boxes[shape][row_key][state]={"bbox":[x,y,x+40,y+40]}
-            d.text((x-5,y+46),state.upper(),font=font(8,True),fill=rgba(P["dim"]))
+
 save(im,"neon_stage_meters_sliders_sheet.png")
 manifest["sheets"]["neon_stage_meters_sliders_sheet.png"]={
  "resolution":[1024,1024],
@@ -210,7 +193,7 @@ manifest["sheets"]["neon_stage_meters_sliders_sheet.png"]={
 # 3. Reusable panel frame components and display grid.
 # ---------------------------------------------------------------------------
 im=Image.new("RGBA",SIZE,(0,0,0,0)); d=ImageDraw.Draw(im)
-label(d,(25,18,500,42),"9-SLICE CORNERS",P["text"],13)
+
 corners={}
 for name,x,y in (("top_left",30,60),("top_right",160,60),("bottom_left",290,60),("bottom_right",420,60)):
     box=[x,y,x+92,y+92]
@@ -218,9 +201,9 @@ for name,x,y in (("top_left",30,60),("top_right",160,60),("bottom_left",290,60),
     if "left" in name: d.line((x+8,y+8,x+8,y+84),fill=rgba(P["glow_cyan"]),width=3)
     else: d.line((x+84,y+8,x+84,y+84),fill=rgba(P["glow_cyan"]),width=3)
     d.ellipse((x+15,y+15,x+25,y+25),fill=rgba(P["dim"]))
-    d.text((x,y+98),name,font=font(8),fill=rgba(P["dim"]))
+
     corners[name]={"bbox":box}
-label(d,(30,190,450,215),"BORDERS",P["text"],13)
+
 borders={}
 for name,box in {
  "top_border":[30,230,470,252],"bottom_border":[30,270,470,292],
@@ -232,7 +215,7 @@ for name,box in {
     else:
         d.line(((box[0]+box[2])//2,box[1]+8,(box[0]+box[2])//2,box[3]-8),fill=rgba(P["glow_cyan"]),width=2)
     borders[name]={"bbox":box}
-label(d,(30,425,450,450),"DIVIDERS",P["text"],13)
+
 dividers={}
 for name,box,width in [
  ("horizontal_thin",[30,470,450,474],2),("horizontal_thick",[30,510,450,518],5),
@@ -240,7 +223,7 @@ for name,box,width in [
 ]:
     d.rounded_rectangle(box,radius=2,fill=rgba(P["metal_border"]))
     dividers[name]={"bbox":box,"stroke_px":width}
-label(d,(30,610,970,635),"HEADER BARS",P["text"],13)
+
 headers={}
 for name,box in (("standard_header",[30,650,480,710]),("compact_header",[520,650,970,700])):
     im=add_glow(im,lambda dd,c,b=box:dd.rounded_rectangle(b,radius=7,outline=c,width=3),P["glow_blue"],5)
@@ -248,7 +231,7 @@ for name,box in (("standard_header",[30,650,480,710]),("compact_header",[520,650
     d.rounded_rectangle(box,radius=7,fill=rgba(P["metal"]),outline=rgba(P["metal_border"]),width=2)
     # Header text is drawn live by the JUCE component using its current section title.
     headers[name]={"bbox":box}
-label(ImageDraw.Draw(im),(30,745,970,775),"DISPLAY BACKGROUND / DARK TRANSLUCENT CYAN GRID",P["text"],12)
+
 display=[30,785,970,990]
 d=ImageDraw.Draw(im)
 d.rounded_rectangle(display,radius=8,fill=rgba("#071321",225),outline=rgba(P["metal_border"]),width=2)
@@ -352,7 +335,7 @@ for i,name in enumerate(all_names):
     box=[x,y,x+144,y+144]
     draw_icon(name,box)
     d=ImageDraw.Draw(im)
-    label(d,(x,y+150,x+144,y+178),name.upper(),P["text"],9)
+
     icon_records[name]={"category":"fx" if name in fx else "nav","bbox":box}
 save(im,"neon_stage_icons_sheet.png")
 manifest["sheets"]["neon_stage_icons_sheet.png"]={
