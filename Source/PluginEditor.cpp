@@ -606,7 +606,9 @@ private:
 };
 
 // Import panel delegates to the existing asynchronous SFZ loader and reports its real result.
-class PPGUImportGuitarPanel final : public juce::Component, public PPGUThemeAwarePanel
+class PPGUImportGuitarPanel final : public juce::Component,
+                                         public PPGUThemeAwarePanel,
+                                         private juce::Timer
 {
 public:
     explicit PPGUImportGuitarPanel(std::function<void(juce::Label*, juce::Button*)> loadActionIn)
@@ -629,6 +631,7 @@ public:
         loadButton.setButtonText("LOAD SFZ");
         loadButton.onClick = [this] { if (loadAction) loadAction(&status, &loadButton); };
         addAndMakeVisible(loadButton);
+        startTimerHz(8);
     }
     void setThemePalette(const PPGUThemeManager::Palette& value) override
     {
@@ -648,6 +651,43 @@ public:
     {
         g.fillAll(palette.token("window_bg"));
         drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.12f, 0.34f, 0.04f);
+
+        // This indicator mirrors the real asynchronous SFZ loader status text.
+        // It is steady-state only: no decorative blinking or simulated progress.
+        const auto ledBounds = juce::Rectangle<float>(
+            static_cast<float>(loadButton.getRight() + 18),
+            static_cast<float>(loadButton.getCentreY() - 5), 10.0f, 10.0f);
+        juce::Colour led = palette.token("led_off");
+        juce::String stateText = "STANDBY";
+        if (loadState == LoadState::loading)
+        {
+            led = palette.token("accent");
+            stateText = "LOADING";
+        }
+        else if (loadState == LoadState::ready)
+        {
+            led = palette.token("success");
+            stateText = "READY";
+        }
+        else if (loadState == LoadState::error)
+        {
+            led = palette.token("danger");
+            stateText = "ERROR";
+        }
+        if (loadState != LoadState::standby)
+        {
+            g.setColour(led.withAlpha(0.25f));
+            g.fillEllipse(ledBounds.expanded(4.0f));
+        }
+        g.setColour(led);
+        g.fillEllipse(ledBounds);
+        g.setColour(palette.token("control_border"));
+        g.drawEllipse(ledBounds, 1.0f);
+        g.setColour(palette.token("text_secondary"));
+        g.setFont(makeThemeFont(palette, 9.0f, false, true));
+        g.drawText(stateText, loadButton.getRight() + 34, loadButton.getY(),
+                   juce::jmax(72, getWidth() - loadButton.getRight() - 52),
+                   loadButton.getHeight(), juce::Justification::centredLeft);
     }
 
     void resized() override
@@ -662,10 +702,32 @@ public:
         status.setBounds(area.removeFromTop(90));
     }
 private:
+    enum class LoadState { standby, loading, ready, error };
+
+    void timerCallback() override
+    {
+        const auto message = status.getText();
+        LoadState next = LoadState::standby;
+        if (message.startsWithIgnoreCase("Loading SFZ"))
+            next = LoadState::loading;
+        else if (message.startsWithIgnoreCase("READY"))
+            next = LoadState::ready;
+        else if (message.containsIgnoreCase("FAILED")
+                 || message.containsIgnoreCase("ERROR")
+                 || message.containsIgnoreCase("NOT FOUND"))
+            next = LoadState::error;
+        if (next != loadState)
+        {
+            loadState = next;
+            repaint();
+        }
+    }
+
     PPGUThemeManager::Palette palette;
     std::function<void(juce::Label*, juce::Button*)> loadAction;
     juce::Label heading, description, status;
     juce::TextButton loadButton;
+    LoadState loadState = LoadState::standby;
 };
 
 // Compact live harmony monitor. It observes the existing MIDI keyboard state and
@@ -723,7 +785,18 @@ public:
         area.removeFromRight(8);
         g.setColour(palette.tokens.textSecondary);
         g.setFont(makeThemeFont(palette, 8.5f, false, true));
-        g.drawText("NOTES HELD", area.removeFromTop(13), juce::Justification::left);
+        auto notesHeading = area.removeFromTop(13);
+        g.drawText("NOTES HELD", notesHeading, juce::Justification::left);
+        const float midiLedX = static_cast<float>(notesHeading.getRight() - 9);
+        const float midiLedY = static_cast<float>(notesHeading.getCentreY());
+        const auto midiLedColour = midiActive ? palette.token("accent") : palette.token("led_off");
+        if (midiActive)
+        {
+            g.setColour(midiLedColour.withAlpha(0.28f));
+            g.fillEllipse(midiLedX - 6.0f, midiLedY - 6.0f, 12.0f, 12.0f);
+        }
+        g.setColour(midiLedColour);
+        g.fillEllipse(midiLedX - 2.5f, midiLedY - 2.5f, 5.0f, 5.0f);
         g.setColour(palette.tokens.textPrimary);
         g.setFont(makeThemeFont(palette, 12.0f, false, false));
         g.drawFittedText(notesText, area, juce::Justification::centredLeft, 1);
@@ -845,6 +918,7 @@ private:
         const auto newChord = detectChord(held);
         const auto newNotes = held.empty() ? juce::String("Waiting for MIDI input")
                                            : noteNames.joinIntoString("   /   ");
+        const bool newMidiActive = !held.empty();
 
         auto* rootParameter = parameters.getRawParameterValue("scaleRoot");
         auto* modeParameter = parameters.getRawParameterValue("scaleMode");
@@ -856,11 +930,13 @@ private:
                          : mode == 2 ? pitchName(root) + " MINOR"
                                      : juce::String("CHROMATIC");
 
-        if (newChord != chordText || newNotes != notesText || newKey != keyText)
+        if (newChord != chordText || newNotes != notesText
+            || newKey != keyText || newMidiActive != midiActive)
         {
             chordText = newChord;
             notesText = newNotes;
             keyText = newKey;
+            midiActive = newMidiActive;
             repaint();
         }
     }
@@ -873,6 +949,7 @@ private:
     juce::String chordText { "—" };
     juce::String notesText { "Waiting for MIDI input" };
     juce::String keyText { "CHROMATIC" };
+    bool midiActive = false;
 };
 
 
