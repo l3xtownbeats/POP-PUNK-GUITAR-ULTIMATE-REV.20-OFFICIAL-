@@ -1667,6 +1667,9 @@ public:
         // playable sample material and a complete, validated articulation mapping.
         styleEntry.setVisible(false);
         styleLabel.setVisible(false);
+        playingStatus.setText("NO VERIFIED PLAYING MAP\\nLOAD A SOURCE WITH VALIDATED PERFORMANCE DATA",
+                              juce::dontSendNotification);
+        playingStatus.setTooltip("Playing techniques remain unavailable until the loaded instrument provides validated sample zones and performance mappings.");
         availability.setText("NO VERIFIED ARTICULATIONS AVAILABLE", juce::dontSendNotification);
         availability.setTooltip("Articulation names are hidden until the loaded source has playable sample zones and complete, validated SFZ/MIDI mappings. A switch label alone is insufficient.");
         activeLabel.setText("ACTIVE PERFORMANCE  /  NONE VERIFIED", juce::dontSendNotification);
@@ -1680,6 +1683,7 @@ public:
         patternLabel.setText("02  /  PATTERN", juce::dontSendNotification);
         patternStatus.setText("NO VERIFIED PATTERN DATA", juce::dontSendNotification);
         addAndMakeVisible(styleLabel);
+        addAndMakeVisible(playingStatus);
         addAndMakeVisible(patternLabel);
         addAndMakeVisible(patternStatus);
         addAndMakeVisible(articulationLabel);
@@ -1696,7 +1700,7 @@ public:
         palette = value;
         title.setFont(makeThemeFont(palette, 19.0f, false, true));
         subtitle.setFont(makeThemeFont(palette, 10.0f, false, true));
-        for (auto* label : { &title, &subtitle, &styleLabel, &patternLabel,
+        for (auto* label : { &title, &subtitle, &styleLabel, &playingStatus, &patternLabel,
                              &patternStatus, &articulationLabel, &availability, &activeLabel, &sourceLabel })
             label->setColour(juce::Label::textColourId,
                 label == &title ? palette.token("text_primary")
@@ -1704,7 +1708,7 @@ public:
                     ? palette.token("warning") : palette.token("text_secondary")));
         for (auto* label : { &styleLabel, &patternLabel, &articulationLabel })
             label->setFont(makeThemeFont(palette, 10.0f, false, true));
-        for (auto* label : { &patternStatus, &availability, &activeLabel, &sourceLabel })
+        for (auto* label : { &playingStatus, &patternStatus, &availability, &activeLabel, &sourceLabel })
             label->setFont(makeThemeFont(palette, 11.0f));
         styleEntry.setColour(juce::TextButton::buttonColourId, palette.token("lowlight"));
         styleEntry.setColour(juce::TextButton::textColourOffId, palette.token("text_disabled"));
@@ -1775,7 +1779,7 @@ public:
         auto third = area.reduced(14, 12);
         styleLabel.setBounds(first.removeFromTop(22));
         first.removeFromTop(12);
-        first.removeFromTop(16);
+        playingStatus.setBounds(first.removeFromTop(54));
         patternLabel.setBounds(second.removeFromTop(22));
         second.removeFromTop(12);
         patternStatus.setBounds(second.removeFromTop(30));
@@ -1807,7 +1811,7 @@ private:
 
     PopPunkGuitarUltimateAudioProcessor& processor;
     PPGUThemeManager::Palette palette;
-    juce::Label title, subtitle, styleLabel, patternLabel, patternStatus,
+    juce::Label title, subtitle, styleLabel, playingStatus, patternLabel, patternStatus,
                 articulationLabel, availability, activeLabel, sourceLabel;
     juce::TextButton styleEntry;
 };
