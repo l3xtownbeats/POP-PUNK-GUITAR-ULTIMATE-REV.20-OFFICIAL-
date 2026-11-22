@@ -334,3 +334,14 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - GitHub Actions run `45001532775`, workflow `rev20-windows-vst3-skin-validation.yml`: шаги установки Python, Pillow, генерации NEON STAGE atlas и commit generated atlases завершились success. Автоматический commit генератора: `0b8aa7df2be3c302a07b257a386aee2b237ab8ca`; rotary atlas PNG присутствует в дереве: `SKIN/Skin_053/assets/spritesheets/neon_stage_rotary_61frame_atlas.png` (1024×1024, 61 кадр по manifest).
 - На момент записи Windows configure ещё выполнялся; build VST3, CTest, 16-skin validation, pluginval strictness 5 и upload artifact ещё не завершены. Этот этап не объявляется release-ready.
 - Главный visual reference остаётся неизменным: `/01 INTERFACE  NEON STAGE DEFAULT .png`. Все новые runtime assets должны быть разложены по отдельным master/runtime fragments и states, без baked labels/values, с сохранением реальных JUCE/APVTS state bindings.
+
+
+## 2026-11-22 — повторная сверка всех макетов 01–07 и Library
+
+- По текущему Git tree проверено, что все семь корневых PNG-макетов существуют и сохранены без изменения. Их точные blob SHA, размеры и назначение внесены в `docs/PPGU_REFERENCE_DESIGN_ASSET_REGISTER.md`.
+- Зафиксировано назначение: 01 — единственный источник композиции главного окна; 02 — AutoChords; 03 — FX EDIT / компрессор и MIDI presentation; 04–07 — дополнительные экранные/компонентные ориентиры, которые нельзя механически объединять с главным экраном.
+- Проверено хранилище `/PPGU/REFERENCE_ASSETS/`: доступен инвентаризированный набор из 38 оригинальных файлов. Оригиналы не дублируются вслепую в runtime; сначала сравниваются похожие экспорты, далее создаются отдельные производные PNG-фрагменты с provenance и SHA-256.
+- Дополнительные исходники `Assets/3D/References/` включают master prompt, Meshy renders, sheets кнопок, ручек, панелей, измерителей и иконок. Они учтены как source artwork для извлечения фрагментов и последующей сверки.
+- Текущий `Source/PluginEditor.cpp` уже имеет три зоны, 9 APVTS knobs, 7 FX switches, нижний performance strip и MIDI keyboard; однако в нём пока не найдено подключение отдельного `heroArtwork` в центральной зоне. Полное pixel parity с макетом 01 не подтверждено.
+- Открытые PR #11/#12 описывают дополнительные visual QA и main-editor gaps, но не слиты в main; не объявлять их функции внедрёнными. Текущий Windows run `45001532775` ещё выполняет build на SHA `7d02e657ad385a95d95296df87f4778651c5d3e8`; CTest, 16-skin package и pluginval ожидают.
+- Пути: `/01 INTERFACE  NEON STAGE DEFAULT .png` … `/07 INTERFACE  NEON STAGE DEFAULT .png`; `/02 INTERFACE  NEON STAGE DEFAULT AUTOCHORDS .png`; `/Assets/3D/References/`; `/SKIN/Skin_053/assets/`; `/Source/PluginEditor.cpp`; `/Source/UI/`; `/docs/PPGU_REFERENCE_DESIGN_ASSET_REGISTER.md`.
