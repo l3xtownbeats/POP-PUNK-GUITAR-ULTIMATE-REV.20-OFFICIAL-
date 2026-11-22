@@ -215,6 +215,7 @@ def main() -> int:
             or slider_instances.get("thumb", {}).get("bbox") != [910, 640, 942, 672]:
         raise SystemExit("FAIL: NEON STAGE slider track/thumb geometry mismatch")
     leds = meters.get("status_leds", {})
+    # Warning LEDs are amber (#FFB454); purple/magenta states are intentionally excluded.
     expected_led_states = ["off", "cyan", "blue", "warning"]
     if leds.get("round", {}).get("states") != expected_led_states \
             or leds.get("square", {}).get("states") != expected_led_states \
