@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "skinId": "skin-053",
   "theme": "NEON STAGE DEFAULT",
-  "assetCount": 308,
+  "assetCount": 307,
   "records": [
     {
       "path": "assets/hero.png",
@@ -3015,15 +3015,6 @@
       "bytes": 671,
       "sha256": "30e0dc0e610688989d83c574908be76edac7b1f8d2cfa846c915c07d098b4796",
       "crc32": "5198D8E5",
-      "origin": "[DECISION] original deterministic PPGU REV18 artwork generated from approved theme tokens"
-    },
-    {
-      "path": "fonts/font_manifest.json",
-      "format": "JSON",
-      "category": "font-license-manifest",
-      "bytes": 527,
-      "sha256": "739ac1bfbb1ced89d75865fc486557ae2d10c27f383d6d511f291047de3239ab",
-      "crc32": "E51EFA73",
       "origin": "[DECISION] original deterministic PPGU REV18 artwork generated from approved theme tokens"
     },
     {
