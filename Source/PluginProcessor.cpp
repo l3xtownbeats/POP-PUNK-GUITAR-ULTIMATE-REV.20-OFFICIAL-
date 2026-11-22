@@ -323,7 +323,7 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
     {
         const auto& message = metadata.getMessage();
         if ((message.isNoteOnOrOff()) && sampler.isKeySwitchNote(message.getNoteNumber()))
-            keyboardState.noteOff(message.getChannel(), message.getNoteNumber());
+            keyboardState.noteOff(message.getChannel(), message.getNoteNumber(), 0.0f);
     }
 
     // Publish a lock-free, UI-only snapshot after keyboard-generated events
