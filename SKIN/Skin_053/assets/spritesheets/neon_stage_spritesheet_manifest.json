@@ -1,5 +1,6 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
+  "textPolicy": "No baked labels, captions, parameter values, channel names, state names, or live status text. Render all text in JUCE.",
   "project": "NEON_STAGE_MANAGER_3_0",
   "theme": "NEON_STAGE_DEFAULT_SKIN_1",
   "canvas": [
