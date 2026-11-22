@@ -274,3 +274,5 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - Added regression checks for low-velocity Palm Mute selection, high-velocity return to default, active-label publication and MIDI-channel isolation. Runtime audition with a legally distributable bank containing real Palm Mute recordings remains required.
 
 - Follow-up hardening: Palm label detection is case-insensitive; the runtime test asserts the actual SamplerEngine active label API.
+
+- Corrected case-folding implementation to normalize the owned label string before searching; no iterators from temporary strings are used.

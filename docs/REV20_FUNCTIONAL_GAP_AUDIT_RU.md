@@ -247,3 +247,5 @@ The following audio-path wiring has now been selectively ported into REV.20 (tar
 - Still required: validate with a real, licensed guitar bank that has correctly mapped Palm Mute and open articulations; audition transitions in FL Studio 20; verify whether a source bank uses another label convention and document explicit aliases only after inspection.
 
 - Follow-up hardening: Palm label detection is case-insensitive and the sampler regression uses the public active-label query.
+
+- Case-insensitive label matching normalizes the copied SFZ label string during off-thread snapshot construction; no temporary-iterator lifetime issue remains.

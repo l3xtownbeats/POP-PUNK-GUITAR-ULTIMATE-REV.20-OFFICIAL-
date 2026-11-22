@@ -339,13 +339,11 @@ LoadReport SamplePool::loadSfz(const juce::File& sfzFile,
                 candidateSnapshot->keySwitchNoteMask[static_cast<std::size_t>(keySwitch)] = true;
         if (candidateSnapshot->defaultKeySwitch < 0 && region.switchDefault >= 0)
             candidateSnapshot->defaultKeySwitch = region.switchDefault;
-        const auto labelContainsPalm = std::search(
-            region.switchLabel.begin(), region.switchLabel.end(),
-            std::string("palm").begin(), std::string("palm").end(),
-            [](unsigned char lhs, unsigned char rhs)
-            {
-                return std::tolower(lhs) == std::tolower(rhs);
-            }) != region.switchLabel.end();
+        auto lowerArticulationLabel = region.switchLabel;
+        std::transform(lowerArticulationLabel.begin(), lowerArticulationLabel.end(),
+                       lowerArticulationLabel.begin(),
+                       [](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+        const bool labelContainsPalm = lowerArticulationLabel.find("palm") != std::string::npos;
         if (candidateSnapshot->palmMuteKeySwitch < 0 && region.switchLast >= 0
             && labelContainsPalm)
             candidateSnapshot->palmMuteKeySwitch = region.switchLast;
