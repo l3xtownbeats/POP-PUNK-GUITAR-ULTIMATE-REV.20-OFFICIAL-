@@ -1185,19 +1185,40 @@ private:
 };
 
 
-class PPGUPatternSectionPanel final : public juce::Component, public PPGUThemeAwarePanel
+class PPGUPatternSectionPanel final : public juce::Component,
+                                           public PPGUThemeAwarePanel,
+                                           private juce::Timer
 {
 public:
-    explicit PPGUPatternSectionPanel(PopPunkGuitarUltimateAudioProcessor& processorIn)
-        : processor(processorIn), originalSection(processorIn.getSelectedSongSection())
+    PPGUPatternSectionPanel(PopPunkGuitarUltimateAudioProcessor& processorIn,
+                            juce::String selectedTonePreset,
+                            std::function<void()> importGuitarAction)
+        : processor(processorIn), originalSection(processorIn.getSelectedSongSection()),
+          tonePresetName(std::move(selectedTonePreset)), importAction(std::move(importGuitarAction))
     {
         title.setText("PATTERN  /  SONG SECTION ROUTING", juce::dontSendNotification);
         title.setFont(makeThemeFont(palette, 19.0f, false, true));
         addAndMakeVisible(title);
         sectionLabel.setText("SONG SECTION", juce::dontSendNotification);
         patternLabel.setText("RHYTHM CATALOG", juce::dontSendNotification);
-        for (auto* label : { &sectionLabel, &patternLabel, &status })
+        sourceLabel.setText("GUITAR / INSTRUMENT SOURCE", juce::dontSendNotification);
+        toneLabel.setText("TONE PRESET", juce::dontSendNotification);
+        performanceLabel.setText("PERFORMANCE ARTICULATION", juce::dontSendNotification);
+        sourceValue.setJustificationType(juce::Justification::centredLeft);
+        sourceValue.setText("NO SFZ INSTRUMENT LOADED", juce::dontSendNotification);
+        toneValue.setJustificationType(juce::Justification::centredLeft);
+        toneValue.setText(tonePresetName.isNotEmpty() ? tonePresetName : "SELECT A FACTORY PRESET");
+        performanceValue.setJustificationType(juce::Justification::centredLeft);
+        performanceValue.setText("RECORDED MAP STATUS: VERIFY BEFORE EXPOSING VARIATIONS",
+                                 juce::dontSendNotification);
+        importSource.setButtonText("IMPORT GUITAR");
+        importSource.onClick = [this] { if (importAction) importAction(); };
+        for (auto* label : { &sectionLabel, &patternLabel, &sourceLabel, &toneLabel,
+                             &performanceLabel, &sourceValue, &toneValue, &performanceValue, &status })
             addAndMakeVisible(*label);
+        addAndMakeVisible(importSource);
+        refreshInstrumentSource();
+        startTimerHz(2);
         sectionBox.addItemList({ "INTRO", "VERSE", "CHORUS", "BRIDGE", "OUTRO" }, 1);
         for (int i = 0; i < 8; ++i)
             patternBox.addItem("PATTERN " + juce::String(i + 1), i + 1);
@@ -1248,11 +1269,18 @@ public:
         palette = value;
         title.setFont(makeThemeFont(palette, 19.0f, false, true));
         title.setColour(juce::Label::textColourId, palette.token("text_primary"));
-        for (auto* label : { &sectionLabel, &patternLabel })
+        for (auto* label : { &sectionLabel, &patternLabel, &sourceLabel, &toneLabel, &performanceLabel })
         {
-            label->setFont(makeThemeFont(palette, 10.0f, false, true));
+            label->setFont(makeThemeFont(palette, 9.5f, false, true));
             label->setColour(juce::Label::textColourId, palette.token("text_secondary"));
         }
+        for (auto* value : { &sourceValue, &toneValue, &performanceValue })
+        {
+            value->setFont(makeThemeFont(palette, 10.5f));
+            value->setColour(juce::Label::textColourId, palette.token("text_primary"));
+        }
+        importSource.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
+        importSource.setColour(juce::TextButton::textColourOffId, palette.token("accent"));
         status.setFont(makeThemeFont(palette, 11.0f));
         status.setColour(juce::Label::textColourId, palette.token("accent"));
         for (auto* box : { &sectionBox, &patternBox })
@@ -1279,15 +1307,27 @@ public:
     void resized() override
     {
         auto area = getLocalBounds().reduced(22);
-        title.setBounds(area.removeFromTop(34));
-        area.removeFromTop(18);
-        sectionLabel.setBounds(area.removeFromTop(18));
-        sectionBox.setBounds(area.removeFromTop(38));
-        area.removeFromTop(14);
-        patternLabel.setBounds(area.removeFromTop(18));
-        patternBox.setBounds(area.removeFromTop(38));
-        area.removeFromTop(18);
-        auto actions = area.removeFromTop(38);
+        title.setBounds(area.removeFromTop(30));
+        area.removeFromTop(7);
+        sourceLabel.setBounds(area.removeFromTop(14));
+        auto sourceRow = area.removeFromTop(27);
+        importSource.setBounds(sourceRow.removeFromRight(116));
+        sourceRow.removeFromRight(8);
+        sourceValue.setBounds(sourceRow);
+        area.removeFromTop(5);
+        toneLabel.setBounds(area.removeFromTop(14));
+        toneValue.setBounds(area.removeFromTop(24));
+        area.removeFromTop(5);
+        performanceLabel.setBounds(area.removeFromTop(14));
+        performanceValue.setBounds(area.removeFromTop(24));
+        area.removeFromTop(8);
+        sectionLabel.setBounds(area.removeFromTop(14));
+        sectionBox.setBounds(area.removeFromTop(32));
+        area.removeFromTop(6);
+        patternLabel.setBounds(area.removeFromTop(14));
+        patternBox.setBounds(area.removeFromTop(32));
+        area.removeFromTop(9);
+        auto actions = area.removeFromTop(34);
         preview.setBounds(actions.removeFromLeft(120));
         actions.removeFromLeft(10);
         apply.setBounds(actions.removeFromLeft(120));
@@ -1298,6 +1338,17 @@ public:
     }
 
 private:
+    void timerCallback() override { refreshInstrumentSource(); }
+    void refreshInstrumentSource()
+    {
+        const auto currentPath = processor.getCurrentSfzFilePath();
+        const auto display = currentPath.isNotEmpty()
+            ? juce::File(currentPath).getFileName()
+            : juce::String("NO SFZ INSTRUMENT LOADED");
+        if (sourceValue.getText() != display)
+            sourceValue.setText(display, juce::dontSendNotification);
+        sourceValue.setTooltip(currentPath);
+    }
     void selectSection()
     {
         const int section = sectionBox.getSelectedId() - 1;
@@ -1320,9 +1371,12 @@ private:
     PopPunkGuitarUltimateAudioProcessor& processor;
     int originalSection = 0;
     PPGUThemeManager::Palette palette;
-    juce::Label title, sectionLabel, patternLabel, status;
+    juce::String tonePresetName;
+    std::function<void()> importAction;
+    juce::Label title, sourceLabel, sourceValue, toneLabel, toneValue,
+                performanceLabel, performanceValue, sectionLabel, patternLabel, status;
     juce::ComboBox sectionBox, patternBox;
-    juce::TextButton preview, apply, cancel;
+    juce::TextButton importSource, preview, apply, cancel;
 };
 
 class PPGUChordDiagram final : public juce::Component, public PPGUThemeAwarePanel
@@ -2698,7 +2752,10 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openPatternSectionPanel()
         spec.title = "PATTERN  /  RHYTHM";
         spec.desired = { 620, 430 };
         spec.minimum = { 420, 320 };
-        spec.content = std::make_unique<PPGUPatternSectionPanel>(processor);
+        juce::Component::SafePointer<PopPunkGuitarUltimateAudioProcessorEditor> safeThis(this);
+        spec.content = std::make_unique<PPGUPatternSectionPanel>(
+            processor, presetBox.getText(),
+            [safeThis] { if (safeThis != nullptr) safeThis->openImportGuitarPanel(); });
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
