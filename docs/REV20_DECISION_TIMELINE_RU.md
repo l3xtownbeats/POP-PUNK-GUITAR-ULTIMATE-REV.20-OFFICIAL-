@@ -436,3 +436,12 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - Основной макет и его геометрия не менялись; DSP, audio callbacks, MIDI routing и идентификаторы параметров не менялись.
 
 **Проверка:** эти новые коммиты пока не имеют подтверждённого CI-результата. Предыдущий CI на SHA `dd3c4694cfccb152de97c0589468c6d1f5948f00` проходил Windows x64 build, CTest, 16-skin validation и staging/upload; он не подтверждает компиляцию последних изменений. Для текущей ревизии требуется повторить Windows x64 VST3 build, contract tests, полный CTest, skin registry validation и package/artifact staging. Отдельно остаются pluginval strictness 5 на текущем SHA и ручная проверка UI в FL Studio 20 при нескольких размерах окна.
+
+## 2026-11-22 — FX EDIT и SFZ import: аудит начального состояния (review branch)
+
+- В FX EDIT устранён случай, когда при первом открытии или выборе эффекта с выключенным bypass-параметром строка статуса могла оставаться общей/устаревшей. Теперь ACTIVE/BYPASSED синхронизируется с текущим APVTS значением независимо от того, изменился ли bool относительно предыдущей группы; LED по-прежнему перерисовывается при реальном изменении состояния.
+- Import Guitar теперь получает начальный статус из фактического пути SFZ, уже загруженного процессором. Существующий файл показывается как SAVED LIBRARY/READY, отсутствующий путь — как LIBRARY FILE NOT FOUND/ERROR.
+- Классификатор LED импорта различает LOADING, READY/SAVED LIBRARY, STANDBY и явные ошибки (FAILED/ERROR/NOT FOUND); произвольные непустые сообщения загрузчика не маскируются под READY. Светодиод остаётся steady-state, без искусственной анимации.
+- Аудио/DSP, формат SFZ и существующие callbacks не изменялись.
+
+**Проверка:** SHA `64e02d7498ddd6a1721c7f204fa3690fc6680299`. На момент записи GitHub connector не возвращает workflow runs или commit statuses для этого SHA. Изменения исходников проверены чтением актуального файла, но компиляция не подтверждена; необходим повтор Windows x64 CI и ручная проверка импортных состояний на стенде.
