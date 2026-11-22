@@ -6,8 +6,10 @@ artwork completion. A passing contract is not a claim of pixel parity.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
+from PIL import Image
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -130,6 +132,38 @@ def main() -> int:
     missing_panels = [name for name in required_panel_assets if not (ASSETS / "panels" / name).is_file()]
     if missing_panels:
         pending.append(f"Window-specific production panel artwork missing: {len(missing_panels)}/{len(required_panel_assets)} panels")
+
+    # Verify the dedicated panel pack produced by the deterministic Linux renderer.
+    png_manifest_path = ASSETS / "png_migration" / "png_manifest.json"
+    if not png_manifest_path.is_file():
+        pending.append("Audited PNG migration manifest is missing from the Windows validation workspace.")
+    else:
+        png_manifest = read_json(png_manifest_path)
+        production_panels = png_manifest.get("productionPanels", [])
+        require(len(production_panels) == len(required_panel_assets),
+                "PNG manifest must contain exactly 13 dedicated production panels.", errors)
+        expected_scales = {"1x", "2x", "3x"}
+        for panel in production_panels:
+            variants = panel.get("variants", [])
+            require({v.get("scale") for v in variants} == expected_scales,
+                    f"Panel {panel.get('name')} must provide 1x/2x/3x PNG variants.", errors)
+            for variant in variants:
+                relative = variant.get("png", "")
+                image_path = ROOT / relative
+                require(image_path.is_file(), f"Missing generated panel PNG: {relative}", errors)
+                if not image_path.is_file():
+                    continue
+                payload = image_path.read_bytes()
+                require(hashlib.sha256(payload).hexdigest() == variant.get("pngSha256"),
+                        f"Panel PNG SHA-256 mismatch: {relative}", errors)
+                try:
+                    with Image.open(image_path) as image:
+                        image.load()
+                        require(image.mode == "RGBA", f"Panel PNG must be RGBA: {relative}", errors)
+                        require(image.size == (variant.get("width"), variant.get("height")),
+                                f"Panel PNG dimensions mismatch: {relative}", errors)
+                except Exception as exc:
+                    errors.append(f"Panel PNG cannot be decoded ({relative}): {exc}")
     art_manifest = read_json(ASSETS / "asset_manifest.json")
     hero = next((r for r in art_manifest.get("records", []) if r.get("path") == "assets/hero.png"), None)
     if hero and hero.get("sha256") == "dcdb2acdcdc01c76c62883ecd542356e6ba6106b0edd0544d74456bae56120f8":
