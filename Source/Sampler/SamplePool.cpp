@@ -391,6 +391,11 @@ const SamplePool::RegionView* SamplePool::findRegion(int midiNote, int velocity,
     const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
     if (snapshot == nullptr) return nullptr;
 
+    // A direct SamplePool lookup without an explicit articulation should use
+    // the bank's declared default keyswitch, matching SamplerEngine startup.
+    if (activeSwitch < 0)
+        activeSwitch = snapshot->defaultKeySwitch;
+
     const RegionView* firstMatch = nullptr;
     const RegionView* firstSequenceMatch = nullptr;
     int sequenceLength = 1;
