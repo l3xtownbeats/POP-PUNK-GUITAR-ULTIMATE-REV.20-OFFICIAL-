@@ -1,1 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><defs><linearGradient id="surface" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#080E12"/><stop offset="1" stop-color="#1D2B33"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#surface)"/><g fill="none" stroke="#9CC7D3" stroke-opacity=".13"><path d="M-80 220L1100 0M-80 420L1100 200M-80 620L1100 400M-80 820L1100 600M-80 1020L1100 800" stroke-width="2"/></g><g fill="#D6F5F7" opacity=".08"><circle cx="820" cy="170" r="150"/><circle cx="170" cy="850" r="190"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="carbonBase" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#070C10"/><stop offset=".52" stop-color="#121C22"/><stop offset="1" stop-color="#1D2B33"/>
+    </linearGradient>
+    <pattern id="weave" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M0 0H12V12H24M0 24V12H12V0" fill="none" stroke="#9CC7D3" stroke-opacity=".12" stroke-width="5"/>
+      <path d="M0 3H9M15 21H24" stroke="#F1F8FA" stroke-opacity=".10" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="titanium" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#D6F5F7" stop-opacity=".20"/><stop offset=".5" stop-color="#9CC7D3" stop-opacity=".025"/><stop offset="1" stop-color="#020608" stop-opacity=".18"/>
+    </linearGradient>
+    <radialGradient id="forgeGlow" cx=".72" cy=".28" r=".72">
+      <stop stop-color="#9CC7D3" stop-opacity=".17"/><stop offset="1" stop-color="#9CC7D3" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#carbonBase)"/>
+  <rect width="1024" height="1024" fill="url(#weave)"/>
+  <rect width="1024" height="1024" fill="url(#titanium)"/>
+  <rect width="1024" height="1024" fill="url(#forgeGlow)"/>
+  <g fill="none" stroke="#BFE8EF" stroke-opacity=".15">
+    <path d="M-100 820L820 -100M40 1100L1100 40" stroke-width="2"/>
+    <path d="M-80 920L920 -80M140 1100L1100 140" stroke-width=".7"/>
+  </g>
+  <path d="M0 160H1024M0 864H1024" stroke="#9CC7D3" stroke-opacity=".18" stroke-width="1.5"/>
+  <path d="M512 0V1024" stroke="#D6F5F7" stroke-opacity=".035" stroke-width="1"/>
+</svg>
