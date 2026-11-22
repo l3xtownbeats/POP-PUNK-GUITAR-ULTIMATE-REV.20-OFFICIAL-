@@ -50,3 +50,29 @@ The 38 reference images listed below have been preserved in the user's ChatGPT L
 
 ## Coverage note
 This is the complete 38-item inventory visible in the PPGU Library reference folder at capture time. It does not claim to include files from other inaccessible/expired attachments or unindexed chat images. At each new session, compare current conversation uploads and Library contents; append newly discovered assets. Never claim that an attachment has been archived unless the file exists in the Library or repository and its identity is verified.
+
+
+## REV.20 integration pass — 2026-11-22
+
+### Seven canonical repository mockups (all present; originals preserved)
+The seven root PNG references were re-enumerated directly from the current Git tree. They are design inputs, not seven interchangeable main-screen layouts:
+
+| File | Git blob SHA | Size | Intended integration scope | Runtime rule |
+|---|---|---:|---|---|
+| `01 INTERFACE  NEON STAGE DEFAULT .png` | `747207e183c77e8b913a543b2dc40b29829e77da` | 2,359,486 B | Canonical main editor / only visual authority for Skin-1 composition | Match the approved hierarchy; do not replace or modify the source PNG |
+| `02 INTERFACE  NEON STAGE DEFAULT AUTOCHORDS .png` | `aa524fbbbcdcc69ed119361b5b74f87adf3cfab0` | 2,008,950 B | AutoChords auxiliary window | Implement only supported chord/progression/rhythm actions; no fabricated playback state |
+| `03 INTERFACE  NEON STAGE DEFAULT .png` | `e99424006d1fb1ac751241acdc03d5c1b4c1111d` | 2,148,103 B | FX EDIT / compressor detail and MIDI keyboard presentation reference | Detailed effect controls must bind to real processor parameters; meter values must be measured |
+| `04 INTERFACE  NEON STAGE DEFAULT .png` | `7fa9a5939e2458c4d44b7e72da50d6e7ef850f1e` | 2,383,481 B | Full studio layout / Browser, guitar stage and amp-tone visual reference | Secondary composition reference; 01 remains authoritative where layouts conflict |
+| `05 INTERFACE  NEON STAGE DEFAULT .png` | `eabdf6b150b81fdf819f31ad9a7d91de3f8c68e2` | 2,239,241 B | Main-stage, amp and FX visual detail reference | Reuse component-level visual language, not conflicting extra modes or unapproved geometry |
+| `06 INTERFACE  NEON STAGE DEFAULT .png` | `61428f7a02998e7ad6ab97a74250b9fbd839f82e` | 2,183,361 B | Supplementary screen/reference in the approved set | Inspect against the relevant auxiliary window before promoting individual details |
+| `07 INTERFACE  NEON STAGE DEFAULT .png` | `bfdc755ea9a3a3f8377f7dc55d9469f0c48ba759` | 2,198,527 B | Supplementary screen/reference in the approved set | Inspect against the relevant auxiliary window before promoting individual details |
+
+### Additional GitHub and Library references
+- The repository's `Assets/3D/References/` contains Meshy source renders, knob/meter/button/panel/icon sheets, duplicate exports and the Russian master prompt. These are inputs for asset extraction and quality comparison; preserve originals and do not blindly ship reference boards as runtime graphics.
+- The Library inventory `/PPGU/REFERENCE_ASSETS/` contains 38 reference files at the time of its last inventory. The originals remain in the Library; the Git register stores their file IDs and paths. Retrieve the matching originals by file ID, compare duplicates visually, then record a source-to-derived-asset relationship before producing runtime fragments.
+- The user instruction on 2026-11-22 explicitly requests the entire approved 01–07 set plus additional GitHub/Library references to inform the finished implementation. This is an instruction to review and apply the compatible visual/functional details, not to combine incompatible historical layouts, palettes, third main modes or fake controls.
+
+### Integration and acceptance boundary
+- 01 is the sole Skin-1 main-layout authority. 02 is the AutoChords auxiliary-screen reference. 03 is the FX detail/MIDI presentation reference. 04–07 inform supplementary composition and component detail only after their role is checked against the locked REV.20 product contract.
+- All derivatives must be separately named PNG/SVG assets with documented dimensions, alpha, atlas region/state, source reference and SHA-256. Runtime UI labels and numeric values remain live text, not baked into sprites.
+- Current main editor still needs a measured pixel/layout review against 01. The editor source has no `heroArtwork` field or central hero-image draw call; do not claim full mockup parity. See the open visual acceptance gates in the decision timeline.
