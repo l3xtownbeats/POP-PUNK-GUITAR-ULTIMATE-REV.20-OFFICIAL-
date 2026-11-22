@@ -1244,12 +1244,21 @@ private:
 class PPGUPatternSectionPanel final : public juce::Component, public PPGUThemeAwarePanel
 {
 public:
-    explicit PPGUPatternSectionPanel(PopPunkGuitarUltimateAudioProcessor& processorIn)
-        : processor(processorIn), originalSection(processorIn.getSelectedSongSection())
+    PPGUPatternSectionPanel(PopPunkGuitarUltimateAudioProcessor& processorIn,
+                            std::function<void()> openAutoChordsIn)
+        : processor(processorIn), openAutoChords(std::move(openAutoChordsIn)),
+          originalSection(processorIn.getSelectedSongSection())
     {
         title.setText("PATTERN  /  SONG SECTION ROUTING", juce::dontSendNotification);
         title.setFont(makeThemeFont(palette, 19.0f, false, true));
         addAndMakeVisible(title);
+        autoChordsButton.setButtonText("OPEN AUTOCHORDS  +");
+        autoChordsButton.setTooltip("Open the AutoChords / Harmony Setup workspace for PATTERN mode.");
+        autoChordsButton.onClick = [this]
+        {
+            if (openAutoChords) openAutoChords();
+        };
+        addAndMakeVisible(autoChordsButton);
         sectionLabel.setText("SONG SECTION", juce::dontSendNotification);
         patternLabel.setText("RHYTHM CATALOG", juce::dontSendNotification);
         for (auto* label : { &sectionLabel, &patternLabel, &status })
@@ -1317,6 +1326,8 @@ public:
             box->setColour(juce::ComboBox::textColourId, palette.token("text_primary"));
             box->setColour(juce::ComboBox::outlineColourId, palette.token("control_border"));
         }
+        autoChordsButton.setColour(juce::TextButton::buttonColourId, palette.token("accent"));
+        autoChordsButton.setColour(juce::TextButton::textColourOffId, palette.token("window_bg"));
         for (auto* button : { &preview, &apply, &cancel })
         {
             button->setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
@@ -1335,15 +1346,28 @@ public:
     void resized() override
     {
         auto area = getLocalBounds().reduced(22);
-        title.setBounds(area.removeFromTop(34));
+        auto header = area.removeFromTop(42);
+        title.setBounds(header.removeFromLeft(header.getWidth() - 194));
+        header.removeFromLeft(10);
+        autoChordsButton.setBounds(header.removeFromRight(184).reduced(0, 2));
+        area.removeFromTop(16);
+
+        // The routing workspace is intentionally split into two equal columns:
+        // song-section selection on the left, rhythm-pattern catalog on the right.
+        auto columns = area.removeFromTop(112);
+        const int columnGap = 22;
+        auto leftColumn = columns.removeFromLeft((columns.getWidth() - columnGap) / 2);
+        columns.removeFromLeft(columnGap);
+        auto rightColumn = columns;
+        sectionLabel.setBounds(leftColumn.removeFromTop(20));
+        leftColumn.removeFromTop(6);
+        sectionBox.setBounds(leftColumn.removeFromTop(42));
+        patternLabel.setBounds(rightColumn.removeFromTop(20));
+        rightColumn.removeFromTop(6);
+        patternBox.setBounds(rightColumn.removeFromTop(42));
+
         area.removeFromTop(18);
-        sectionLabel.setBounds(area.removeFromTop(18));
-        sectionBox.setBounds(area.removeFromTop(38));
-        area.removeFromTop(14);
-        patternLabel.setBounds(area.removeFromTop(18));
-        patternBox.setBounds(area.removeFromTop(38));
-        area.removeFromTop(18);
-        auto actions = area.removeFromTop(38);
+        auto actions = area.removeFromTop(40);
         preview.setBounds(actions.removeFromLeft(120));
         actions.removeFromLeft(10);
         apply.setBounds(actions.removeFromLeft(120));
@@ -1374,11 +1398,12 @@ private:
     void updateStatus(const juce::String& message) { status.setText(message, juce::dontSendNotification); }
 
     PopPunkGuitarUltimateAudioProcessor& processor;
+    std::function<void()> openAutoChords;
     int originalSection = 0;
     PPGUThemeManager::Palette palette;
     juce::Label title, sectionLabel, patternLabel, status;
     juce::ComboBox sectionBox, patternBox;
-    juce::TextButton preview, apply, cancel;
+    juce::TextButton autoChordsButton, preview, apply, cancel;
 };
 
 class PPGUChordDiagram final : public juce::Component, public PPGUThemeAwarePanel
@@ -2845,7 +2870,8 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openPatternSectionPanel()
         spec.title = "PATTERN  /  RHYTHM";
         spec.desired = { 620, 430 };
         spec.minimum = { 420, 320 };
-        spec.content = std::make_unique<PPGUPatternSectionPanel>(processor);
+        spec.content = std::make_unique<PPGUPatternSectionPanel>(
+            processor, [this] { openAutoChordsPanel(); });
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
