@@ -2241,11 +2241,63 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         const int destinationY = y + (h - diameter) / 2;
         g.drawImage(palette.controlsSpriteSheet, destinationX, destinationY,
                     diameter, diameter, sourceX, sourceY, 100, 100);
-        if (!slider.isEnabled())
+
+        // The legacy 8-frame atlas is only the physical knob face. Keep the
+        // continuous parameter value and interaction state visible above it.
+        const float cx = static_cast<float>(destinationX) + diameter * 0.5f;
+        const float cy = static_cast<float>(destinationY) + diameter * 0.5f;
+        const float radius = static_cast<float>(diameter) * 0.30f;
+        const float arcRadius = static_cast<float>(diameter) * 0.455f;
+        const float angle = start + pos * (end - start);
+        const bool enabled = slider.isEnabled();
+        const bool hovered = enabled && slider.isMouseOverOrDragging();
+        const bool focused = enabled && slider.hasKeyboardFocus(true);
+
+        juce::Path arcTrack;
+        arcTrack.addCentredArc(cx, cy, arcRadius, arcRadius, 0.0f,
+                               start, end, true);
+        g.setColour(enabled ? palette.token("control_border").withAlpha(0.92f)
+                            : palette.token("text_disabled").withAlpha(0.48f));
+        g.strokePath(arcTrack, juce::PathStrokeType(3.0f,
+            juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        if (enabled && pos > 0.0001f)
+        {
+            juce::Path valueArc;
+            valueArc.addCentredArc(cx, cy, arcRadius, arcRadius, 0.0f,
+                                   start, angle, true);
+            g.setColour(palette.token("accent_glow").withAlpha(hovered ? 0.62f : 0.36f));
+            g.strokePath(valueArc, juce::PathStrokeType(hovered ? 8.0f : 6.0f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            g.setColour(focused ? palette.token("highlight") : palette.token("accent"));
+            g.strokePath(valueArc, juce::PathStrokeType(hovered ? 3.5f : 2.8f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+        }
+
+        juce::Path pointer;
+        pointer.startNewSubPath(cx, cy);
+        pointer.lineTo(cx + std::sin(angle) * radius,
+                       cy - std::cos(angle) * radius);
+        g.setColour(enabled ? palette.token("text_primary")
+                            : palette.token("text_disabled"));
+        g.strokePath(pointer, juce::PathStrokeType(2.2f,
+            juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        if (!enabled)
         {
             g.setColour(palette.token("window_bg").withAlpha(0.48f));
             g.fillEllipse(static_cast<float>(destinationX), static_cast<float>(destinationY),
                           static_cast<float>(diameter), static_cast<float>(diameter));
+        }
+        else if (hovered || focused)
+        {
+            const auto stateColour = focused ? palette.token("highlight")
+                                             : palette.token("accent");
+            g.setColour(stateColour.withAlpha(hovered ? 0.78f : 0.58f));
+            g.drawEllipse(static_cast<float>(destinationX) + 1.5f,
+                          static_cast<float>(destinationY) + 1.5f,
+                          static_cast<float>(diameter) - 3.0f,
+                          static_cast<float>(diameter) - 3.0f, 1.5f);
         }
         return;
     }
