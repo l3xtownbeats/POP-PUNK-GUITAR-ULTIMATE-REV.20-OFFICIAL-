@@ -115,6 +115,14 @@ void drawThemeArtworkLayers(juce::Graphics& g, juce::Rectangle<int> bounds,
     if (palette.heroArtwork.isValid() && bounds.getWidth() >= 640 && bounds.getHeight() >= 360)
         drawLayer(palette.heroArtwork, includePremiumStageLayers ? 0.035f : 0.055f);
 
+    // Extended per-skin layers are optional so older approved themes retain their
+    // exact appearance until their complete artwork pack is installed.
+    if (palette.fxLayerArtwork.isValid())
+        drawLayer(palette.fxLayerArtwork, 0.16f);
+
+    if (palette.decorativeArtwork.isValid() && bounds.getWidth() >= 640 && bounds.getHeight() >= 360)
+        drawLayer(palette.decorativeArtwork, 0.12f);
+
     if (palette.textureArtwork.isValid() && textureOpacity > 0.0f)
     {
         g.saveState();
