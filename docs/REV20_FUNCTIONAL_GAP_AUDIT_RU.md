@@ -217,3 +217,11 @@ The following audio-path wiring has now been selectively ported into REV.20 (tar
 - SamplePool region lookup now accepts an active keyswitch and filters SFZ sw_last regions. It exposes switch-range detection and the source-authored sw_default.
 - SamplerEngine initializes per-channel active switch state from the loaded bank default, updates it through lock-free atomics, and uses it during noteOn region selection. Regression tests cover selected labels/defaults and out-of-range rejection.
 - Still open: intercept keyswitch MIDI notes in PluginProcessor so they do not become melody notes or PATTERN chord notes; publish current articulation state to UI; connect pattern changes with sample-offset scheduler events; verify against real licensed SFZ maps. This is not yet an end-user-complete articulation workflow.
+
+
+## 2026-11-22 — MIDI keyswitch event routing (implementation checkpoint)
+
+- PluginProcessor now recognizes note-on/off events inside the active SFZ switch range in both MELODY and PATTERN. Note-on updates the sampler's per-channel active switch at the event position; keyswitches are excluded from guitar triggering and PATTERN held-chord state. Keyswitch note-off does not release a guitar voice.
+- JUCE keyboard held-state and the editor's held-note snapshot clear/exclude these control notes.
+- Sampler tests now check independent per-channel switch state.
+- Still open: expose the current sw_label in the UI, validate complete real-bank articulation zones/velocity maps, and test switching while host-synced pattern events are already scheduled. FL Studio 20 host acceptance remains pending.

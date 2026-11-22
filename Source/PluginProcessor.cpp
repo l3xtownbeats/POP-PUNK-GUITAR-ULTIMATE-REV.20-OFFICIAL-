@@ -315,6 +315,17 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
     const int samples = buffer.getNumSamples();
     keyboardState.processNextMidiBuffer(midi, 0, samples, true);
 
+    // SFZ keyswitch notes are control events, not playable guitar notes.
+    // Clear their transient keyboard visualization after JUCE has consumed
+    // the host MIDI buffer; the sample-accurate mode handlers below update
+    // the active articulation at the exact event position.
+    for (const auto metadata : midi)
+    {
+        const auto& message = metadata.getMessage();
+        if ((message.isNoteOnOrOff()) && sampler.isKeySwitchNote(message.getNoteNumber()))
+            keyboardState.noteOff(message.getChannel(), message.getNoteNumber());
+    }
+
     // Publish a lock-free, UI-only snapshot after keyboard-generated events
     // have been merged. The editor polls atomics; it never takes the MIDI
     // keyboard state's lock or calls into the audio engine.
@@ -326,6 +337,12 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
         {
             for (auto& held : displayHeldNotes[static_cast<size_t>(channel)])
                 held.store(false, std::memory_order_relaxed);
+        }
+        else if ((message.isNoteOn() || message.isNoteOff())
+                 && sampler.isKeySwitchNote(message.getNoteNumber()))
+        {
+            // Articulation selectors are not displayed as held performance notes.
+            continue;
         }
         else if (message.isNoteOn())
         {
@@ -428,6 +445,10 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
                 panicRequested.store(true, std::memory_order_release);
                 sampler.panic(fadeLength);
             }
+            else if (message.isNoteOn() && sampler.isKeySwitchNote(message.getNoteNumber()))
+            {
+                sampler.setKeySwitch(message.getNoteNumber(), message.getChannel());
+            }
             else if (message.isNoteOn() && velocityScale > 0.0f)
             {
                 const float normalizedVelocity = juce::jlimit<float>(
@@ -440,6 +461,10 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
                 const bool triggered = sampler.noteOn(message.getNoteNumber(), scaledVelocity, maximumVoices,
                                                       message.getChannel(), globalTuningSemitones);
                 juce::ignoreUnused(triggered);
+            }
+            else if (message.isNoteOff() && sampler.isKeySwitchNote(message.getNoteNumber()))
+            {
+                // Keyswitch note-offs do not release guitar voices.
             }
             else if (message.isNoteOff())
                 sampler.noteOff(message.getNoteNumber(), message.getChannel());
@@ -633,6 +658,14 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
                     previousPatternChordCount = 0;
                     previousPatternChordNotes.fill(-1);
                     previousPatternChordChannel = 1;
+                }
+                else if (message.isNoteOn() && sampler.isKeySwitchNote(message.getNoteNumber()))
+                {
+                    sampler.setKeySwitch(message.getNoteNumber(), message.getChannel());
+                }
+                else if (message.isNoteOff() && sampler.isKeySwitchNote(message.getNoteNumber()))
+                {
+                    // Keyswitch releases never enter the held-chord model.
                 }
                 else if (message.isNoteOn() || message.isNoteOff())
                 {

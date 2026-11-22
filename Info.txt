@@ -246,3 +246,11 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - SamplerEngine now initializes a lock-free per-MIDI-channel keyswitch state from sw_default, exposes bounded set/query methods, and supplies the active switch to noteOn region selection. This makes SFZ-authored articulation-zone selection testable inside the sampler without guessing from filenames.
 - Added SamplePool/Engine checks for selected label resolution, default selection, per-channel switch update and rejection outside the declared switch range.
 - MIDI event interception in PluginProcessor, chord exclusion, UI articulation labels and host-sync PATTERN switching are still separate unfinished steps. This commit does not claim the UI can yet change articulation, nor that a real guitar bank contains palm-mute zones.
+
+
+## 2026-11-22 — PluginProcessor MIDI keyswitch interception
+- Added sample-accurate keyswitch handling to both MELODY and PATTERN MIDI event paths. A note inside the loaded SFZ sw_lokey/sw_hikey range updates the sampler's per-channel active switch; it is not triggered as a guitar note and is not added to PATTERN held chords.
+- Keyswitch note-offs do not release guitar voices. Transient keyswitches are cleared from the JUCE on-screen held-key state and excluded from the lock-free held-note display snapshot.
+- Extended sampler regression coverage to verify independent keyswitch states across MIDI channels.
+- The feature is data-driven: if the loaded SFZ has no declared switch range, no keyswitch note is intercepted. If a bank declares a switch range but lacks a matching recorded zone for the selected sw_last, noteOn safely returns no region rather than substituting an unrelated articulation.
+- UI label publication and host-side FL Studio 20 verification remain open. No claim that any bundled guitar library currently supplies palm-mute/legato/slide maps.

@@ -419,6 +419,9 @@ int main()
         || keyswitchEngine.getActiveKeySwitch(1) != 36
         || !keyswitchEngine.setKeySwitch(38, 1)
         || keyswitchEngine.getActiveKeySwitch(1) != 38
+        || !keyswitchEngine.setKeySwitch(40, 2)
+        || keyswitchEngine.getActiveKeySwitch(2) != 40
+        || keyswitchEngine.getActiveKeySwitch(1) != 38
         || keyswitchEngine.setKeySwitch(41, 1)
         || keyswitchEngine.getActiveKeySwitch(1) != 38)
     {
