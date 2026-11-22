@@ -284,3 +284,15 @@ Current Source/PluginEditor.cpp instead puts the nine rotary controls in the rig
 **Required implementation sequence:** map canonical 01 mockup geometry to component bounds; move the 3×3 knob group to center; compose the seven FX switches in the right rack; preserve the auxiliary FX EDIT workflow; retain all existing APVTS parameter IDs, slider/button attachments, component IDs, accessibility/hover/pressed/disabled states and resize constraints; verify at 1024×700 and minimum 900×640. Do not invent a replacement composition or add controls.
 
 **Build gate:** Windows run 44998253820 failed at PluginProcessor.cpp:326 because JUCE MidiKeyboardState::noteOff requires the velocity argument. Corrected on main by commit cab4f58e8a2fc0109ed85f1c1f8c14e0b7b2e686; new exact-HEAD CI/CTest result pending. No build pass is claimed.
+## 2026-11-22 — three-zone NEON STAGE layout implementation
+
+Implemented in Source/PluginEditor.cpp, commit 3dcea2a245b8b287ddf80958c6ea1f6fd55dcd5e; right rack heading finalized as AMP & TONE in commit 039e9faf178eaf73cfbfd1a46139d5cf67c33a13.
+
+- LEFT: factory preset browser.
+- CENTER: PLAYING CORE, MELODY/PATTERN row, nine APVTS-attached knobs in 3×3 grid.
+- RIGHT: AMP & TONE and exactly seven APVTS-attached FX switches in vertical rack.
+- LOWER: performance display, MIDI keyboard 36–84, status footer.
+- Main embedded FX Edit surface is hidden; the existing auxiliary FX EDIT window is opened by each primary FX switch. FLANGER remains a detail group only.
+- Preserved editor size, resize bounds, parameter IDs and attachments.
+
+CI run 45000503467: VST3 and C++ test targets compiled successfully; CTest 21/22. Failure isolated to SamplePool direct lookup ignoring declared default keyswitch when activeSwitch is omitted. Corrected in Source/Sampler/SamplePool.cpp commit 6c495692fba2cdeb99e4c8fb841027ffe16930e6. New CI for final HEAD pending.
