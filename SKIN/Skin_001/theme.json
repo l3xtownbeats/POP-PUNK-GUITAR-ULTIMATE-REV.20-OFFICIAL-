@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "name": "SIGNALS",
+  "skin_number": "001",
+  "stable_id_reference": "skin-053",
+  "status": "experimental_artwork_package",
+  "canvas": {"width": 1920, "height": 1080, "aspect_ratio": "16:9"},
+  "palette": {
+    "background": "#080D14", "surface": "#101A26", "surface_alt": "#152536",
+    "cyan": "#37E6F2", "electric_blue": "#438CFF",
+    "text_primary": "#EAF7FF", "text_secondary": "#8CA8BC",
+    "warning": "#FFB84D", "danger": "#FF5578"
+  },
+  "materials": {
+    "base": "graphite anodized metal", "trim": "brushed dark titanium",
+    "glass": "smoked glass", "accent": "cyan/electric-blue emissive edge"
+  },
+  "assets_manifest": "assets/artwork_manifest.json",
+  "compatibility": {
+    "preserve_existing_layout": true, "preserve_control_geometry": true,
+    "preserve_apvts_ids": true, "preserve_dsp_midi_sampler": true,
+    "top_level_modes": ["MELODY", "PATTERN"]
+  },
+  "validation": {
+    "schema": false, "runtime": false, "windows_vst3": false,
+    "pluginval": false, "fl_studio_20": false
+  }
+}

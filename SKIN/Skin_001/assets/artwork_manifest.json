@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "skin": "SIGNALS",
+  "skin_number": "001",
+  "base_reference": "NEON STAGE DEFAULT / SKIN-1",
+  "asset_policy": "Original artwork; no third-party brand or artist imagery.",
+  "spritesheets": [
+    {"path":"assets/spritesheets/knob_states_4x1.png","frame_width":256,"frame_height":256,"columns":4,"rows":1,"states":["default","hover","active","disabled"]},
+    {"path":"assets/spritesheets/button_states_4x1.png","frame_width":256,"frame_height":128,"columns":4,"rows":1,"states":["default","hover","active","disabled"]}
+  ],
+  "raster_delivery": "See local downloadable archive SIGNALS_SKIN_001_experimental.zip for generated PNG assets.",
+  "generator": "tools/generate_signals_skin.py",
+  "asset_files": [
+    "assets/background/main.png",
+    "assets/controls/knob_default.png",
+    "assets/controls/knob_hover.png",
+    "assets/controls/knob_active.png",
+    "assets/controls/knob_disabled.png",
+    "assets/fx_layers/blue_bloom.png",
+    "assets/fx_layers/cyan_bloom.png",
+    "assets/fx_layers/edge_reflection.png",
+    "assets/hero/signals_stage_hero.png",
+    "assets/preview.png",
+    "assets/spritesheets/button_states_4x1.png",
+    "assets/spritesheets/knob_states_4x1.png",
+    "assets/textures/graphite_brushed_4k.png",
+    "assets/textures/smoked_glass_2k.png"
+  ]
+}
