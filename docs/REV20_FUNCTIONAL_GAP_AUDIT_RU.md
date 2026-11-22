@@ -193,3 +193,13 @@
 ## DSP audit update — 2026-11-20
 
 The following audio-path wiring has now been selectively ported into REV.20 (target test pending): live `eqLowFreq` / `eqHighFreq` crossover cutoffs, independent AMP TONE high-band tilt that remains active when EQ is bypassed, and Compressor Amount blend snapshotted once per block outside the sample loop. A new CTest guard checks declarations/consumption and ensures no APVTS atomic load inside the per-sample compressor loop. This does not change the separate finding that factory preset application currently writes only four preset values plus mode.
+
+
+## 2026-11-22 — Session Guitarist-inspired workflow checkpoint (user approved)
+
+- User approved the functional direction: use Session Guitarist – Electric Sunburst Deluxe/Vintage as a usability benchmark while retaining NEON STAGE DEFAULT as the only visual source of truth. No NI assets, branding, presets, recordings, riffs or protected composition are copied.
+- PATTERN panel now displays three separate dimensions: loaded SFZ source (live filename + existing Import Guitar action), current factory tone label, and recorded-articulation map verification status. Existing section routing, rhythm slot selection and Preview/Apply/Cancel are retained. Commits: dbb05b8872746ad31fd0bce3103bb94e6f45358a, a9021d4a16fb3d4a7a1b3fa186acee3b49fd123c.
+- This is a UI workflow checkpoint only. The articulation choice and palmMuteThreshold APVTS parameters are declared, but static inspection did not find them consumed in PluginProcessor.cpp audio path. Do not count articulation switching or velocity-triggered palm mute as implemented.
+- Sampler already has SFZ key/velocity zones, seq_length/seq_position round-robin selection, group/off_by choking, sample streaming and bounded voice count. Existing SamplePoolTests.cpp covers round-robin cycles, independent sets, incomplete-set fallback, invalid sequence positions, streamed playback and voice limits. Remaining gap is recorded articulation identity/zone routing and its integration with PatternScheduler, not basic SFZ round-robin support.
+- Next workstream: define a provenance-safe articulation metadata contract; map only verified source zones to Open/Palm Mute/Muted/Legato/Slide/etc.; route velocity threshold only when matching zones exist; test note-on/off, choke/release, RR, pattern transitions and host-sync without audio-thread I/O/locks. Unavailable techniques must remain unavailable.
+- Verification: run 44997292780 targeted source SHA a9021d4a16fb3d4a7a1b3fa186acee3b49fd123c was observed in progress; current main has a later journal update. Exact-HEAD Windows VST3/CTest, pluginval strictness 5 and FL Studio 20 acceptance remain open.
