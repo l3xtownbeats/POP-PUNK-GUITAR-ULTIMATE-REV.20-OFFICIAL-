@@ -263,3 +263,8 @@ The main-window visual pass has addressed the following source-level gaps withou
 - Preserved the 1024×700 launch size, current responsive layout, 9 APVTS rotary bindings, 7 FX bindings, 16-theme registry and Skin-1 asset set.
 
 Still open: visually inspect the actual canonical 01 INTERFACE image against a runtime screenshot at 1024×700; verify the 27-control state map end-to-end (including preset browser, mode selector, keyboard, LCD and LED); test 100/125/150% scaling and resizing; then pass exact-HEAD Windows x64 build, CTest, pluginval strictness 5 and FL Studio 20 host acceptance. No visual or build gate is marked complete solely from these source edits.
+
+
+## 2026-11-22 — Source-location index cross-reference
+
+Permanent source and approved-asset path index is recorded in `docs/REV20_DECISION_TIMELINE_RU.md`. Repository: `l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-`, branch `main`. Canonical NEON STAGE DEFAULT image is already present at repository root: `/01 INTERFACE  NEON STAGE DEFAULT .png` (blob SHA `747207e183c77e8b913a543b2dc40b29829e77da`). Main implementation paths: `/Source/PluginEditor.cpp`, `/Source/PluginEditor.h`, `/Source/PluginProcessor.cpp`, `/Source/PluginProcessor.h`, `/Source/UI/`, `/Source/Performance/`, `/Source/Sampler/`; supporting trees: `/Assets/3D/References/`, `/SKINS/`, `/assets/`, `/presets/`, `/tests/`, `/tools/`, `/docs/`, `/.github/workflows/`. Check the permanent index and live GitHub tree before requesting any existing asset from the user. Tool inability to render a binary image must not be reported as file absence.
