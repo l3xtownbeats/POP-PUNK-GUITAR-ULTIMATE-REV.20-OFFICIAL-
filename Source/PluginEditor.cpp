@@ -1750,6 +1750,7 @@ public:
         if (auto* parameter = apvts.getRawParameterValue("singleMidiNoteAsChordRoot"))
             offButton.setToggleState(parameter->load(std::memory_order_relaxed) > 0.5f,
                                      juce::dontSendNotification);
+        offButton.setButtonText(isAutoChordsEnabled() ? "AUTOCHORDS  /  ON" : "AUTOCHORDS  /  OFF");
         addAndMakeVisible(offButton);
         autoChordAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
             apvts, "singleMidiNoteAsChordRoot", offButton);
@@ -1857,13 +1858,22 @@ private:
         const auto text = enabled
             ? "AUTOCHORDS ENABLED  /  PATTERN MODE ONLY"
             : "AUTOCHORDS STANDBY  /  MELODY MODE UNAFFECTED";
+        const auto buttonText = enabled ? "AUTOCHORDS  /  ON" : "AUTOCHORDS  /  OFF";
+        bool changed = false;
         if (stateLabel.getText() != text)
         {
             stateLabel.setText(text, juce::dontSendNotification);
             stateLabel.setColour(juce::Label::textColourId,
                 enabled ? palette.token("success") : palette.token("text_secondary"));
-            repaint();
+            changed = true;
         }
+        if (offButton.getButtonText() != buttonText)
+        {
+            offButton.setButtonText(buttonText);
+            changed = true;
+        }
+        if (changed)
+            repaint();
     }
     PPGUThemeManager::Palette palette;
     juce::AudioProcessorValueTreeState& apvts;
