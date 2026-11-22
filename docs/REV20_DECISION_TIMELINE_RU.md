@@ -680,3 +680,40 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 ### Подтверждённый CI checkpoint 2026-11-22
 
 GitHub Actions run **45015637797 / run #407**, commit `30aa6cda6a205fb3338112a5eda959e5b2d94bfa`, завершился **success**. Успешны: Windows x64 configure, VST3 + C++ contract build, full CTest, validation ровно 16 тем и artwork assets, staging 16 skin folders, pluginval strictness 5, upload VST3 + skin pack. Артефакт workflow: `PPGU-REV20-Windows-x64-VST3` (artifact ID `14751807040`, размер 11,250,391 bytes). Это подтверждает автоматический build/package checkpoint именно для указанного SHA. Это **не** доказывает 100% pixel parity с макетами и не заменяет ручную проверку в FL Studio 20, DPI и реальном визуальном поведении. Host acceptance остаётся открытой до предоставления/получения скриншотов и результатов тестирования.
+
+## 2026-11-22 — Проверка эталонных файлов и безопасная оценка PR #12
+
+### Подтверждённый состав эталонов на main
+
+Проверено дерево репозитория main (805 записей, Git tree не усечён). В корне присутствуют все семь утверждённых макетов:
+
+- 01 INTERFACE  NEON STAGE DEFAULT .png
+- 02 INTERFACE  NEON STAGE DEFAULT AUTOCHORDS .png
+- 03 INTERFACE  NEON STAGE DEFAULT .png
+- 04 INTERFACE  NEON STAGE DEFAULT .png
+- 05 INTERFACE  NEON STAGE DEFAULT .png
+- 06 INTERFACE  NEON STAGE DEFAULT .png
+- 07 INTERFACE  NEON STAGE DEFAULT .png
+
+Также подтверждены рабочие ресурсы Skin_053: asset_manifest.json, controls/control_states_manifest.json, neon_stage_spritesheet_manifest.json, controls atlas, frames/panels sheet, icons sheet, meters/sliders sheet и rotary 61-frame atlas. Эталонные файлы не перемещать, не переименовывать и не перегенерировать в рамках косметических исправлений.
+
+### Результат проверки PR #12
+
+PR #12 NEON STAGE DEFAULT — visual asset and performance QA baseline не переносить и не сливать целиком: сравнение его ветки с текущим main показывает divergence, 14 commits ahead и 73 commits behind. Его старый набор файлов нельзя принимать поверх актуальной реализации без выборочного переноса и повторной адаптации.
+
+Обнаружены конкретные причины повторного аудита перед любым переносом:
+- старые контрактные тесты фиксируют восемь кадров rotary atlas, тогда как текущий main уже содержит отдельный 61-frame rotary atlas;
+- в старой ветке изменена палитра accent blue на #0048FF, тогда как утверждённый Skin-1 контракт использует electric blue #6B8CFF;
+- asset audit в PR #12 изначально описан как report-only и не является строгим release gate;
+- PR #12 не подтверждает ручную работу в FL Studio 20, визуальное совпадение с макетами или реальные performance measurements.
+
+Решение: сохранить PR #12 как источник QA-идей, но не сливать его ветку. QA следует адаптировать непосредственно к текущему main и актуальным manifest/atlas, не откатывая визуальные изменения и не меняя палитру.
+
+### Текущие границы подтверждения
+
+- ASSET INVENTORY VERIFIED: семь файлов 01–07 и перечисленные manifest/sprite assets присутствуют в main.
+- SOURCE IMPLEMENTED: в PluginEditor присутствуют APVTS-linked rotary controls, live value indicator, linear slider hover/drag/focus/disabled rendering, FX toggle LED, MIDI-held-note indication, output meter, performance display и state-driven auxiliary panels.
+- CI VERIFIED: относится только к точному SHA и workflow run, указанным в checkpoint выше.
+- HOST / PIXEL ACCEPTANCE: остаётся открытой до получения скриншотов/записей проверок в Windows VST3 host, FL Studio 20, DPI 1x/2x/3x и интерактивной матрицы всех 14 областей.
+
+Следующий source-level этап: проверить и закрыть несоответствия каждого компонента относительно его макета и текущего manifest; сначала главная оболочка и rotary/button states, затем FX EDIT и остальные панели. Любое исправление должно сохранять геометрию макета 01–07 и проходить Windows CI.
