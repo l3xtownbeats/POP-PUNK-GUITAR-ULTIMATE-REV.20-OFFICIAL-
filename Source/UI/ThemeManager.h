@@ -57,6 +57,8 @@ public:
         juce::Image edgeHighlightArtwork;
         juce::Image specularArtwork;
         juce::Image shadowArtwork;
+        // Per-skin hero artwork, decoded on the UI thread and used as a subtle Playing Core backdrop.
+        juce::Image heroArtwork;
         // Optional NEON STAGE sprite atlases. Only SKIN-1 supplies these;
         // other approved themes continue using the shared vector fallback.
         juce::Image controlsSpriteSheet;
