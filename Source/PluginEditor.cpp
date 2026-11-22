@@ -654,9 +654,11 @@ public:
 
         // This indicator mirrors the real asynchronous SFZ loader status text.
         // It is steady-state only: no decorative blinking or simulated progress.
+        const auto loadButtonBounds = loadButton.getBounds();
         const auto ledBounds = juce::Rectangle<float>(
-            static_cast<float>(loadButton.getRight() + 18),
-            static_cast<float>(loadButton.getCentreY() - 5), 10.0f, 10.0f);
+            static_cast<float>(loadButtonBounds.getRight() + 18),
+            static_cast<float>(loadButtonBounds.getY() + loadButtonBounds.getHeight() * 0.5f - 5),
+            10.0f, 10.0f);
         juce::Colour led = palette.token("led_off");
         juce::String stateText = "STANDBY";
         if (loadState == LoadState::loading)
