@@ -1348,9 +1348,11 @@ class PPGUPatternSectionPanel final : public juce::Component,
 public:
     PPGUPatternSectionPanel(PopPunkGuitarUltimateAudioProcessor& processorIn,
                             juce::String selectedTonePreset,
-                            std::function<void()> importGuitarAction)
+                            std::function<void()> importGuitarAction,
+                            std::function<void()> openAutoChordsAction)
         : processor(processorIn), originalSection(processorIn.getSelectedSongSection()),
-          tonePresetName(std::move(selectedTonePreset)), importAction(std::move(importGuitarAction))
+          tonePresetName(std::move(selectedTonePreset)), importAction(std::move(importGuitarAction)),
+          autoChordsAction(std::move(openAutoChordsAction))
     {
         title.setText("PATTERN  /  SONG SECTION ROUTING", juce::dontSendNotification);
         title.setFont(makeThemeFont(palette, 19.0f, false, true));
@@ -1375,6 +1377,24 @@ public:
                              &performanceLabel, &sourceValue, &toneValue, &performanceValue, &status })
             addAndMakeVisible(*label);
         addAndMakeVisible(importSource);
+        openAutoChords.setButtonText("OPEN AUTOCHORDS");
+        openAutoChords.onClick = [this] { if (autoChordsAction) autoChordsAction(); };
+        addAndMakeVisible(openAutoChords);
+        for (int i = 0; i < static_cast<int>(patternCards.size()); ++i)
+        {
+            auto& card = patternCards[static_cast<size_t>(i)];
+            card.setButtonText("PATTERN SLOT  " + juce::String(i + 1).paddedLeft('0', 2));
+            card.setTooltip("Pattern slot " + juce::String(i + 1)
+                + ". Selecting a slot does not claim that a recorded rhythm library is installed.");
+            card.onClick = [this, i]
+            {
+                patternBox.setSelectedId(i + 1, juce::dontSendNotification);
+                refreshPatternCards();
+                updateStatus("PATTERN SLOT " + juce::String(i + 1)
+                    + " selected. Press PREVIEW to audition or APPLY to assign.");
+            };
+            addAndMakeVisible(card);
+        }
         refreshInstrumentSource();
         startTimerHz(2);
         sectionBox.addItemList({ "INTRO", "VERSE", "CHORUS", "BRIDGE", "OUTRO" }, 1);
@@ -1385,14 +1405,19 @@ public:
         const int legacy = static_cast<int>(processor.parameters.getRawParameterValue("patternSlot")->load());
         patternBox.setSelectedId((assigned >= 0 ? assigned : legacy) + 1, juce::dontSendNotification);
         addAndMakeVisible(sectionBox);
-        addAndMakeVisible(patternBox);
+        patternBox.setVisible(false); // Retained as the existing slot-selection model for APVTS/routing.
+        refreshPatternCards();
         preview.setButtonText("PREVIEW");
         apply.setButtonText("APPLY");
         cancel.setButtonText("CANCEL");
         for (auto* button : { &preview, &apply, &cancel })
             addAndMakeVisible(*button);
         sectionBox.onChange = [this] { selectSection(); };
-        patternBox.onChange = [this] { updateStatus("Catalog selection only — press PREVIEW to audition."); };
+        patternBox.onChange = [this]
+        {
+            refreshPatternCards();
+            updateStatus("Pattern slot selected — press PREVIEW to audition.");
+        };
         preview.onClick = [this]
         {
             const int slot = patternBox.getSelectedId() - 1;
@@ -1452,6 +1477,16 @@ public:
             button->setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
             button->setColour(juce::TextButton::textColourOffId, palette.token("text_primary"));
         }
+        openAutoChords.setColour(juce::TextButton::buttonColourId, palette.token("panel_elevated"));
+        openAutoChords.setColour(juce::TextButton::textColourOffId, palette.token("accent"));
+        for (auto& card : patternCards)
+        {
+            card.setColour(juce::TextButton::buttonColourId, palette.token("control_bg"));
+            card.setColour(juce::TextButton::buttonOnColourId, palette.token("accent"));
+            card.setColour(juce::TextButton::textColourOffId, palette.token("text_secondary"));
+            card.setColour(juce::TextButton::textColourOnId, palette.token("window_bg"));
+        }
+        refreshPatternCards();
         apply.setColour(juce::TextButton::buttonColourId, palette.token("accent"));
         apply.setColour(juce::TextButton::textColourOffId, palette.token("window_bg"));
     }
@@ -1464,35 +1499,56 @@ public:
 
     void resized() override
     {
-        auto area = getLocalBounds().reduced(22);
-        title.setBounds(area.removeFromTop(30));
-        area.removeFromTop(7);
-        sourceLabel.setBounds(area.removeFromTop(14));
-        auto sourceRow = area.removeFromTop(27);
-        importSource.setBounds(sourceRow.removeFromRight(116));
+        auto area = getLocalBounds().reduced(18);
+        title.setBounds(area.removeFromTop(28));
+        area.removeFromTop(4);
+
+        sourceLabel.setBounds(area.removeFromTop(12));
+        auto sourceRow = area.removeFromTop(25);
+        importSource.setBounds(sourceRow.removeFromRight(112));
         sourceRow.removeFromRight(8);
         sourceValue.setBounds(sourceRow);
+
+        area.removeFromTop(3);
+        toneLabel.setBounds(area.removeFromTop(12));
+        toneValue.setBounds(area.removeFromTop(21));
+        area.removeFromTop(3);
+        performanceLabel.setBounds(area.removeFromTop(12));
+        performanceValue.setBounds(area.removeFromTop(21));
+
         area.removeFromTop(5);
-        toneLabel.setBounds(area.removeFromTop(14));
-        toneValue.setBounds(area.removeFromTop(24));
+        auto sectionRow = area.removeFromTop(29);
+        sectionLabel.setBounds(sectionRow.removeFromLeft(112));
+        sectionBox.setBounds(sectionRow.removeFromLeft(190).reduced(0, 1));
+
         area.removeFromTop(5);
-        performanceLabel.setBounds(area.removeFromTop(14));
-        performanceValue.setBounds(area.removeFromTop(24));
-        area.removeFromTop(8);
-        sectionLabel.setBounds(area.removeFromTop(14));
-        sectionBox.setBounds(area.removeFromTop(32));
-        area.removeFromTop(6);
-        patternLabel.setBounds(area.removeFromTop(14));
-        patternBox.setBounds(area.removeFromTop(32));
-        area.removeFromTop(9);
-        auto actions = area.removeFromTop(34);
-        preview.setBounds(actions.removeFromLeft(120));
-        actions.removeFromLeft(10);
-        apply.setBounds(actions.removeFromLeft(120));
-        actions.removeFromLeft(10);
-        cancel.setBounds(actions.removeFromLeft(120));
-        area.removeFromTop(14);
-        status.setBounds(area.removeFromTop(42));
+        auto patternHeader = area.removeFromTop(24);
+        patternLabel.setBounds(patternHeader.removeFromLeft(180));
+        openAutoChords.setBounds(patternHeader.removeFromRight(174).reduced(0, 1));
+
+        area.removeFromTop(3);
+        const int cardGap = 7;
+        const int cardHeight = juce::jmax(24, juce::jmin(31,
+            (area.getHeight() - 43 - cardGap * 3) / 4));
+        for (int row = 0; row < 4; ++row)
+        {
+            auto rowArea = area.removeFromTop(cardHeight);
+            auto left = rowArea.removeFromLeft((rowArea.getWidth() - cardGap) / 2);
+            rowArea.removeFromLeft(cardGap);
+            auto right = rowArea;
+            patternCards[static_cast<size_t>(row * 2)].setBounds(left);
+            patternCards[static_cast<size_t>(row * 2 + 1)].setBounds(right);
+            if (row < 3) area.removeFromTop(cardGap);
+        }
+
+        area.removeFromTop(5);
+        auto footer = area.removeFromTop(30);
+        preview.setBounds(footer.removeFromLeft(104));
+        footer.removeFromLeft(8);
+        apply.setBounds(footer.removeFromLeft(104));
+        footer.removeFromLeft(8);
+        cancel.setBounds(footer.removeFromLeft(104));
+        status.setBounds(area.removeFromTop(28));
     }
 
 private:
@@ -1545,6 +1601,14 @@ private:
         const int assigned = processor.getSectionPatternSlot(section);
         const int legacy = static_cast<int>(processor.parameters.getRawParameterValue("patternSlot")->load());
         patternBox.setSelectedId((assigned >= 0 ? assigned : legacy) + 1, juce::dontSendNotification);
+        refreshPatternCards();
+    }
+    void refreshPatternCards()
+    {
+        const int selected = patternBox.getSelectedId();
+        for (int i = 0; i < static_cast<int>(patternCards.size()); ++i)
+            patternCards[static_cast<size_t>(i)].setToggleState(i + 1 == selected,
+                                                               juce::dontSendNotification);
     }
     void updateStatus(const juce::String& message) { status.setText(message, juce::dontSendNotification); }
 
@@ -1552,11 +1616,12 @@ private:
     int originalSection = 0;
     PPGUThemeManager::Palette palette;
     juce::String tonePresetName;
-    std::function<void()> importAction;
+    std::function<void()> importAction, autoChordsAction;
     juce::Label title, sourceLabel, sourceValue, toneLabel, toneValue,
                 performanceLabel, performanceValue, sectionLabel, patternLabel, status;
     juce::ComboBox sectionBox, patternBox;
-    juce::TextButton importSource, preview, apply, cancel;
+    std::array<juce::TextButton, 8> patternCards;
+    juce::TextButton importSource, openAutoChords, preview, apply, cancel;
 };
 
 class PPGUChordDiagram final : public juce::Component, public PPGUThemeAwarePanel
@@ -3073,7 +3138,8 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openPatternSectionPanel()
         juce::Component::SafePointer<PopPunkGuitarUltimateAudioProcessorEditor> safeThis(this);
         spec.content = std::make_unique<PPGUPatternSectionPanel>(
             processor, presetBox.getText(),
-            [safeThis] { if (safeThis != nullptr) safeThis->openImportGuitarPanel(); });
+            [safeThis] { if (safeThis != nullptr) safeThis->openImportGuitarPanel(); },
+            [safeThis] { if (safeThis != nullptr) safeThis->openAutoChordsPanel(); });
         if (!auxiliaryWorkspace->openPanel(std::move(spec)))
             return;
     }
