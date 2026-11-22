@@ -492,3 +492,49 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 ### Техническая приёмка
 
 Изменение linear-slider renderer опубликовано в commit `f1a5fdce15683e522c593cb8ce148b71b35d2732`. Документация этого контракта добавляется отдельным commit. Для нового HEAD необходимы Windows x64 configure/build VST3, C++ contract tests, полный CTest, 16-skin validator, runtime package staging и pluginval strictness 5. Затем обязательны ручные проверки в FL Studio 20: все 9 ручек, 7 FX switches, 8 FX EDIT groups, MIDI key-down/up, все auxiliary panels, min/max window sizes и DPI. До exact-SHA CI и host acceptance визуальный этап не объявлять завершённым.
+
+### 17. AUTO SOUND HUNTER / CURATOR
+- **Текущее состояние:** обе функции остаются disabled, пока не существует рабочего backend и достоверного источника результатов.
+- **Визуально:** disabled state должен быть явно читаемым (приглушённый контраст, нет cyan glow, курсор/tooltip объясняет недоступность); никаких фальшивых сканирований, процентов, найденных звуков или карточек.
+- **Когда backend появится:** состояния IDLE → SCANNING → RESULTS/EMPTY → ERROR должны быть привязаны к реальному процессу; отмена должна останавливать задачу; список результатов должен отражать реально найденные/проиндексированные данные.
+- **Приёмка:** до backend проверяется только корректное disabled поведение; после backend — все переходы и cancel/error paths.
+
+### 18. Общий контракт всех кнопок, переключателей и rotary controls
+- Каждая интерактивная область должна иметь соответствующий cursor, tooltip при необходимости, keyboard focus и доступное имя/подпись.
+- Hover, pressed, toggled/active, selected, focused и disabled — независимые состояния. Hover не должен стирать active, а active не должен выглядеть как зажатая мышью кнопка.
+- Toggle state меняется только после успешного изменения реальной функции/параметра. LED и текстовый статус читают один источник состояния.
+- Rotary: значение, дуга, кадр atlas, tooltip и host automation должны быть синхронны. Нельзя анимировать значение независимо от APVTS.
+- Для недоступного backend — disabled с ясным объяснением; не подменять заглушку фальшивой работой.
+
+### 19. Общий контракт окон и навигации
+- Каждое auxiliary окно получает единый title bar, frame atlas, close, maximize/restore и resize affordance; рамка не перекрывает интерактивные дочерние компоненты.
+- Перемещение окна за заголовок, resize за угол, maximize/restore, закрытие, повторное открытие и сохранение геометрии должны быть доступны и визуально понятны.
+- Окна не должны дублироваться при повторном выборе уже открытого модуля; активная группа обновляется в существующем окне.
+- При изменении DPI/масштаба заголовок, hit areas, labels и controls остаются читаемыми и не перекрываются.
+
+### 20. Единый контракт палитры, материалов и подсветки
+- Корпус/панели: graphite, matte black, anodized metal; материал и текстура не должны ухудшать контраст текста.
+- Основные активные акценты: cyan `#00D9FF`; вторичный electric blue `#6B8CFF`. Amber/red зарезервированы для warning/error. Purple/pink запрещены.
+- Свечение должно быть локальным и умеренным: вокруг активного LED/кнопки/выбранного режима, а не заливать весь модуль.
+- Любой визуальный индикатор имеет документированный источник состояния; если источника нет, индикатор выключен/disabled.
+- Микроанимация допустима только для реального перехода/занятости (например, реальный async SFZ load). Не добавлять бесконечное мигание, fake waveform, fake meter или fake progress.
+
+### 21. Матрица реализации и проверки по каждому модулю
+Каждый модуль считается **визуально завершённым** только после четырёх независимых проверок:
+1. **Artwork/layout:** материалы, рамки, отступы, типографика, контраст и pixel comparison с утверждённым макетом/вспомогательным reference.
+2. **Interaction:** каждый control реально нажимается/перетаскивается/выбирается, имеет правильный hit area, focus, hover, pressed и disabled state.
+3. **State binding:** LED, подпись, дисплей, значение и визуальная подсветка синхронизированы с фактическим APVTS/processor/backend state.
+4. **Runtime:** модуль проверен в Windows VST3 host на минимальном/максимальном размере, нескольких DPI и при повторном открытии; результат зафиксирован скриншотом/тестом.
+  
+### 22. Порядок выполнения визуального этапа
+1. **Foundation:** main chassis, frame atlas, typography, palette, shared button/slider/LED states; сверка главного экрана с макетом 01.
+2. **Main screen:** PRESETS, PLAYING CORE, nine rotary controls, AMP & TONE, seven FX switches, MIDI/performance/output displays.
+3. **Auxiliary screens:** FX EDIT (8 групп), PATTERN, AutoChords, Import Guitar, Skin Gallery, Workspace Settings, About.
+4. **Workspace/runtime:** окна, resize/maximize/restore, сохранение геометрии, clipping, keyboard navigation, DPI.
+5. **Acceptance:** exact-SHA Windows build + contract tests + full CTest + 16-skin validator + runtime skin staging + pluginval strictness 5; затем ручная проверка в FL Studio 20 и запись фактических результатов.
+  
+### 23. Текущий статус на момент записи
+- GitHub Actions для checkpoint `6ae2bab1b4ce775567fc33ad0d99c986cbbf2bdd`: Windows x64 configure, VST3 build, C++ contract tests, full CTest, 16-skin validation и runtime skin staging завершились успешно в доступных workflow runs.
+- Эти workflow не выполняют pluginval strictness 5; отдельный pluginval запуск ещё требуется.
+- Успешный CI не заменяет визуальную host-приёмку. Проверка в FL Studio 20, скриншотная сверка с макетом 01 и DPI/resize матрица остаются открытыми.
+- Следующий рабочий проход — поэлементная проверка реальных контролов/состояний в исходниках и закрытие обнаруженных несоответствий, а не изменение утверждённой композиции. До фактической проверки соответствующие строки матрицы остаются «требует host-проверки».
