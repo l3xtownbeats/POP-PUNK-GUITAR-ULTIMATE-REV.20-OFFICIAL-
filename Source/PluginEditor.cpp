@@ -1528,8 +1528,8 @@ public:
 
         area.removeFromTop(3);
         const int cardGap = 7;
-        const int cardHeight = juce::jmax(24, juce::jmin(31,
-            (area.getHeight() - 43 - cardGap * 3) / 4));
+        const int cardHeight = juce::jmax(22, juce::jmin(31,
+            (area.getHeight() - 68 - cardGap * 3) / 4));
         for (int row = 0; row < 4; ++row)
         {
             auto rowArea = area.removeFromTop(cardHeight);
@@ -3171,7 +3171,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openPatternSectionPanel()
         spec.id = patternSectionPanelId;
         spec.title = "PATTERN  /  RHYTHM";
         spec.desired = { 620, 430 };
-        spec.minimum = { 420, 320 };
+        spec.minimum = { 500, 420 };
         juce::Component::SafePointer<PopPunkGuitarUltimateAudioProcessorEditor> safeThis(this);
         spec.content = std::make_unique<PPGUPatternSectionPanel>(
             processor, presetBox.getText(),
