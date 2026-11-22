@@ -281,3 +281,16 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - Повторная Windows x64 сборка и CTest после исправления обязательны; до завершения нового CI run успех не заявляется.
 
 **Статус:** визуальное соответствие layout — OPEN / NOT VERIFIED; исправление compile blocker — COMMITTED / CI PENDING.
+## 2026-11-22 — главный layout переведён на утверждённую трёхзонную композицию
+
+В Source/PluginEditor.cpp опубликован layout commit 3dcea2a245b8b287ddf80958c6ea1f6fd55dcd5e:
+- LEFT: FACTORY PRESET BROWSER с категориями, поиском и каталогом.
+- CENTER: PLAYING CORE; MELODY/PATTERN и все девять APVTS-linked rotary controls теперь размещаются сеткой 3×3.
+- RIGHT: AMP & TONE / FX CHAIN; ровно семь существующих FX switches размещаются вертикально в rack.
+- LOWER: performance display, горизонтальная MIDI keyboard (36–84) и library status.
+- FX EDIT больше не занимает центральную поверхность; каждый из семи FX switches открывает вспомогательное FX EDIT окно через openFxEditPanel(). FLANGER остаётся отдельной страницей FX EDIT, а не восьмым главным переключателем.
+- Сохранены размеры 1024×700, limits 900×640–1600×1100, существующие APVTS IDs/attachments и component IDs. Заголовок правой стойки приведён к AMP & TONE отдельным commit 039e9faf178eaf73cfbfd1a46139d5cf67c33a13.
+
+**Дополнительная CI находка:** run 45000503467 собрал VST3 и тестовые targets успешно, но CTest завершился 21/22: ppgu_sample_pool_contracts обнаружил, что прямой SamplePool::findRegion без explicit keyswitch не выбирал SFZ default articulation. Исправлено: при activeSwitch < 0 используется snapshot->defaultKeySwitch. Commit 6c495692fba2cdeb99e4c8fb841027ffe16930e6.
+
+**Проверка:** layout и SamplePool fixes committed; CI для финального HEAD ещё ожидается. Не заявлять visual acceptance, VST3 package или pluginval pass до завершения нового run.
