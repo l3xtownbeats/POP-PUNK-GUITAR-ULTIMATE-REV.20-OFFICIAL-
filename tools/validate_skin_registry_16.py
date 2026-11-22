@@ -5,6 +5,7 @@ import json
 import hashlib
 import struct
 import zlib
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -63,6 +64,35 @@ def validate_png(path: Path, expected_size: tuple[int, int]) -> None:
         raise SystemExit(f"FAIL: incomplete PNG or trailing data: {path}")
     if dimensions != expected_size:
         raise SystemExit(f"FAIL: PNG dimensions {dimensions!r}, expected {expected_size!r}: {path}")
+
+
+
+
+def validate_svg(path: Path) -> None:
+    """Reject malformed, oversized, or externally-referencing theme SVGs."""
+    if not path.is_file() or path.is_symlink() or path.stat().st_size <= 0 \
+            or path.stat().st_size > 256 * 1024:
+        raise SystemExit(f"FAIL: missing, linked, empty, or oversized SVG: {path}")
+    try:
+        root = ET.fromstring(path.read_bytes())
+    except (ET.ParseError, OSError) as exc:
+        raise SystemExit(f"FAIL: malformed SVG {path}: {exc}")
+    if root.tag.split("}")[-1] != "svg":
+        raise SystemExit(f"FAIL: SVG root element is not <svg>: {path}")
+    forbidden = {"script", "foreignObject", "image", "iframe", "object", "embed"}
+    for element in root.iter():
+        if element.tag.split("}")[-1] in forbidden:
+            raise SystemExit(f"FAIL: unsupported active/embedded SVG element in {path}")
+        for key, value in element.attrib.items():
+            local_key = key.split("}")[-1].lower()
+            text_value = value.strip().lower()
+            if local_key in {"href", "src"} and not (
+                    text_value.startswith("#") or text_value.startswith("data:")):
+                raise SystemExit(f"FAIL: external SVG reference in {path}")
+            if "url(" in text_value and not (
+                    "url(#" in text_value or "url('#" in text_value
+                    or 'url("#' in text_value):
+                raise SystemExit(f"FAIL: external SVG URL reference in {path}")
 
 
 
@@ -167,10 +197,19 @@ def main() -> int:
             if not asset_path.is_file():
                 raise SystemExit(f"FAIL: {label} lacks artwork {key}: {asset_path}")
             validate_png(asset_path, size)
-        for key in ("texture", "bezel", "crest"):
+        required_svg_layers = ["texture", "bezel", "crest"]
+        if stable_id != "skin-053":
+            required_svg_layers.extend(["controls", "fxLayers", "decorative"])
+        for key in required_svg_layers:
             relative_svg = assets.get(key)
-            if not relative_svg or not (manifest_path.parent / relative_svg).is_file():
-                raise SystemExit(f"FAIL: {label} lacks SVG layer {key}")
+            if (not isinstance(relative_svg, str) or not relative_svg
+                    or relative_svg.startswith("/") or chr(92) in relative_svg
+                    or any(part in ("", ".", "..") for part in relative_svg.split("/"))):
+                raise SystemExit(f"FAIL: {label} has an unsafe or missing SVG path for {key}")
+            svg_path = manifest_path.parent / relative_svg
+            if not svg_path.resolve().is_relative_to(manifest_path.parent.resolve()):
+                raise SystemExit(f"FAIL: {label} SVG escapes its theme directory: {key}")
+            validate_svg(svg_path)
         if entry.get("runtimeReady") is True:
             ready.append(stable_id)
         elif entry.get("runtimeReady") is not False:
