@@ -22,7 +22,7 @@
 - UI font: Segoe UI semibold; технические значения: Consolas.
 - Default lighting: MINIMAL. Glow — только для реального hover/focus/active/status.
 - Динамические подписи, значения, preset names, status и meter readings рисуются живым JUCE text/value layer, а не запекаются в PNG.
-- PNG RGBA — основной production artwork; master/runtime варианты и 9-slice панели. SVG допускается только там, где это уже предусмотрено утверждённой темой и runtime contract.
+- PNG RGBA — единственный формат production artwork: отдельные прозрачные PNG для каждой панели, аппаратной детали, иконки, ручки, переключателя и состояния; master не менее 4× относительно эталона 1024×700 для крупных панелей/деталей, runtime-варианты 1x/2x/3x, manifest с semantic ID, точными размерами, alpha, state, scale, master relationship и SHA-256. SVG запрещён как production master, промежуточный render source и runtime asset. Существующие SVG и SVG-derived PNG — только legacy placeholders; не засчитывать их как финальный визуал.
 - Не использовать generic prototype atlases, старые цветовые палитры, случайные sci-fi HUD, fake meters или placeholder artwork как финальный ресурс.
 
 ## 3. Главное окно — reference 01
@@ -87,3 +87,11 @@
 ## 8. Explicitly excluded from this UI pass
 
 No changes to DSP, sampler, MIDI scheduler, APVTS IDs/ranges, 500-preset content, SoundBank, audio callback or library source files. No invented controls, third main mode, eighth FX switch, fake CPU/RAM, false chord generation, fake preset totals, waveform/timeline, or unfinished Auto Sound Hunter/Curator panels.
+
+
+## 9. PNG-only precedence and reference set (user reaffirmed 2026-11-22)
+
+- The current user-approved lock `docs/NEON_STAGE_PNG_ONLY_AND_PATTERN_WORKSPACE_LOCK_RU.md` takes precedence over any older sentence in this document that allowed SVG under an earlier runtime contract.
+- Visual authority is the exact seven-image set in the REV.20 repository: `01 INTERFACE  NEON STAGE DEFAULT .png`, `02 INTERFACE  NEON STAGE DEFAULT AUTOCHORDS.png`, and `03` through `07 INTERFACE  NEON STAGE DEFAULT .png`. Reference 01 governs the main editor composition; 02–07 govern their respective auxiliary/workspace views and states. Do not replace or reinterpret them as separate themes.
+- Supporting materials in `Assets/3D/References/`, the canonical theme `SKIN/Skin_053/theme.json`, the accepted baseline, current `PluginEditor.cpp/.h`, processor bindings and the master asset prompt remain mandatory cross-checks. Where references and real functionality conflict, record the issue in `ASSET_OPEN_ISSUES.md`; never depict unavailable functions as working.
+- This clarification is a documentation/authority correction only. It does not claim that the production PNG library has been authored, visually matched, integrated, or accepted in FL Studio 20.
