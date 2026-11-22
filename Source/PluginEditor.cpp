@@ -1546,6 +1546,43 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
                                                     float pos, float start, float end, juce::Slider& slider)
 {
     const auto controlId = slider.getComponentID();
+    if (palette.rotarySpriteSheet.isValid())
+    {
+        // Canonical NEON STAGE rotary atlas: 61 authored positions in an 8x8
+        // grid of 128px cells. Frame selection follows the live normalized
+        // Slider value; the underlying APVTS value remains continuous.
+        const int frame = juce::jlimit(0, 60, juce::roundToInt(pos * 60.0f));
+        constexpr int cellSize = 128;
+        const int sourceX = (frame % 8) * cellSize;
+        const int sourceY = (frame / 8) * cellSize;
+        const int diameter = juce::jmax(1, juce::jmin(w, h) - 2);
+        const int destinationX = x + (w - diameter) / 2;
+        const int destinationY = y + (h - diameter) / 2;
+        g.drawImage(palette.rotarySpriteSheet, destinationX, destinationY,
+                    diameter, diameter, sourceX, sourceY, cellSize, cellSize);
+
+        if (! slider.isEnabled())
+        {
+            g.setColour(palette.token("window_bg").withAlpha(0.46f));
+            g.fillEllipse(static_cast<float>(destinationX), static_cast<float>(destinationY),
+                          static_cast<float>(diameter), static_cast<float>(diameter));
+        }
+        else if (slider.isMouseOverOrDragging() || slider.hasKeyboardFocus(true))
+        {
+            // Keep the authored rotary frame intact; express interaction state
+            // as a restrained live JUCE ring rather than swapping in a static
+            // state PNG that would hide the 61-position animation.
+            const auto ringColour = slider.isMouseOverOrDragging()
+                ? palette.token("accent") : palette.token("highlight");
+            g.setColour(ringColour.withAlpha(slider.isMouseOverOrDragging() ? 0.82f : 0.58f));
+            g.drawEllipse(static_cast<float>(destinationX) + 1.5f,
+                          static_cast<float>(destinationY) + 1.5f,
+                          static_cast<float>(diameter) - 3.0f,
+                          static_cast<float>(diameter) - 3.0f, 1.5f);
+        }
+        return;
+    }
+
     if (controlId.startsWith("knob"))
     {
         const auto stateName = ppguSliderArtworkState(slider);
@@ -1573,30 +1610,6 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
                 return;
             }
         }
-    }
-
-    if (palette.rotarySpriteSheet.isValid())
-    {
-        // Canonical NEON STAGE rotary atlas: 61 authored positions in an 8x8
-        // grid of 128px cells. Frame selection follows the live normalized
-        // Slider value; the underlying APVTS value remains continuous.
-        const int frame = juce::jlimit(0, 60, juce::roundToInt(pos * 60.0f));
-        constexpr int cellSize = 128;
-        const int sourceX = (frame % 8) * cellSize;
-        const int sourceY = (frame / 8) * cellSize;
-        const int diameter = juce::jmax(1, juce::jmin(w, h) - 2);
-        const int destinationX = x + (w - diameter) / 2;
-        const int destinationY = y + (h - diameter) / 2;
-        g.drawImage(palette.rotarySpriteSheet, destinationX, destinationY,
-                    diameter, diameter, sourceX, sourceY, cellSize, cellSize);
-
-        if (! slider.isEnabled())
-        {
-            g.setColour(palette.token("window_bg").withAlpha(0.46f));
-            g.fillEllipse(static_cast<float>(destinationX), static_cast<float>(destinationY),
-                          static_cast<float>(diameter), static_cast<float>(diameter));
-        }
-        return;
     }
 
     if (palette.controlsSpriteSheet.isValid())
