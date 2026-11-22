@@ -391,3 +391,16 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 **CI checkpoint:** run `45006282828` на SHA `38ba76fbe1e10c4860bf01d0fe49340c013ab977`: Windows x64 configure — success; VST3 и C++ build — success; CTest — 22/22 success. Skin validation остановилась на ошибочном условии валидатора: он ожидал ровно четыре sprite sheets, хотя canonical manifest и ThemeManager содержат пять, включая `neon_stage_rotary_61frame_atlas.png`. Исправление валидатора должно учитывать пятый 61-frame atlas и проверять его геометрию. Из-за остановки на этом шаге staging, pluginval strictness 5 и upload artifact не запускались; VST3 build success не равен pluginval/release acceptance.
 
 **Следующий этап:** устранить только validator mismatch, повторить полный Windows workflow, затем продолжить visual implementation: FX EDIT selection update при уже открытом окне; проверка/подключение LCD, LED и MIDI-keyboard artwork с реальными состояниями; поочерёдный аудит всех auxiliary windows; pixel/geometry review по canonical mockup и журналу. Не заявлять визуальное завершение до реальной проверки.
+
+
+## 2026-11-22 — визуальная полировка главного и вспомогательных окон (ветка review)
+
+В отдельной review-ветке `visual/neon-stage-polish`, commit `71aad83ef647d417ea23aa934deba95acdd2d5f7`, подготовлены следующие source changes:
+
+- `Source/PluginEditor.cpp`: добавлен 9-slice renderer для утверждённого `neon_stage_frames_panels_sheet.png`; рамки/углы/верхняя и нижняя кромки/боковые грани подключены к трём основным панелям без изменения их layout bounds, размеров или APVTS bindings.
+- `Source/UI/PPGUMultiWindowWorkspace.h/.cpp`: добавлен безопасный UI-thread accessor `getPanelContent(id)`; оконная оболочка использует те же 9-slice frame assets, чтобы вспомогательные панели соответствовали общей NEON STAGE chrome.
+- `Source/PluginEditor.cpp`: устранено игнорирование выбранного FX при повторном клике на FX switch, когда FX EDIT уже открыт: существующий `PPGUFXEditPanel::setSelectedGroup()` теперь вызывается для уже открытого content-компонента, без создания дублирующего окна.
+- About button включён, поскольку в текущем editor уже существует рабочий информационный диалог; прежний disabled state делал обработчик onClick недостижимым. Auto Sound Hunter и Curator остаются disabled из-за отсутствующего backend.
+- Не изменялись canonical mockup 01, параметры APVTS, аудио/DSP, основная геометрия или список семи FX switches.
+
+**Статус:** изменения находятся в review-ветке и не считаются прошедшими компиляцию/визуальную приёмку. Перед переносом в main необходимы Windows x64 build, CTest, skin validation, pluginval strictness 5 и проверка отсутствия артефактов отрисовки (особенно 9-slice на разных размерах окна). Это не завершение всего visual stage: LCD/LED/MIDI keyboard state artwork и полный визуальный аудит всех вспомогательных окон остаются открытыми задачами.
