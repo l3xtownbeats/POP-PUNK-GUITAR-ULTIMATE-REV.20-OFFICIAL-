@@ -72,3 +72,11 @@ SKIN-1 / `skin-053` now declares four 1024x1024 transparent PNG atlases under `S
 - `neon_stage_icons_sheet.png`: seven FX and ten navigation icons.
 
 The source-of-truth layout and bounding boxes are recorded in `neon_stage_spritesheet_manifest.json`. Regenerate with `python tools/generate_neon_stage_spritesheets.py` (requires Pillow), then run `python tools/validate_skin_registry_16.py`. The generator is also run by the Windows x64 VST3 workflow before compilation and package staging. The sprite atlases are visual-only and do not change the APVTS, DSP, sampler, MIDI, preset catalogue, control geometry or audio callback.
+
+
+## Extended per-skin artwork layers (REV.20 runtime)
+
+- The shared theme runtime accepts optional `assets.controls`, `assets.fxLayers`, and `assets.decorative` SVG paths. Each declared SVG is sandbox-validated and decoded on the UI thread; missing optional paths preserve compatibility with earlier theme packages.
+- `fxLayers` and `decorative` are now authored and registered for SKIN-5 through SKIN-16 (stable IDs `skin-106`…`skin-117`). Their palette-specific accents are rendered by the shared shell without changing component geometry, control IDs, APVTS, DSP, MIDI, or sampler behavior.
+- The optional `controls` SVG slot is reserved for per-skin vector control atlases. Existing NEON STAGE sprite atlases remain the fully authored control-state package; other themes still use the shared vector control renderer until their control atlas art is added.
+- These additions are source-level artwork integration only. No build, CI, host acceptance, or installer validation was run as part of this work.
