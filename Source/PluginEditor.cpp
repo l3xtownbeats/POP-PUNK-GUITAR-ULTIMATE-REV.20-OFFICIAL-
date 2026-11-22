@@ -1725,6 +1725,14 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                                                    const juce::Colour& base, bool hovered, bool down)
 {
     const auto controlId = button.getComponentID();
+    const auto drawKeyboardFocus = [&g, &button, this]
+    {
+        if (! button.isEnabled() || ! button.hasKeyboardFocus(true))
+            return;
+        const auto focusBounds = button.getLocalBounds().toFloat().reduced(1.5f);
+        g.setColour(palette.token("highlight").withAlpha(0.88f));
+        g.drawRoundedRectangle(focusBounds, 5.0f, 1.6f);
+    };
     if (controlId.startsWith("fx_switch"))
     {
         const auto stateName = ppguButtonArtworkState(button, hovered, down);
@@ -1735,6 +1743,9 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                 const auto bounds = button.getLocalBounds();
                 g.drawImageWithin(*artwork, bounds.getX(), bounds.getY(),
                     bounds.getWidth(), bounds.getHeight(), juce::RectanglePlacement::centred);
+                // State artwork supplies the physical switch; focus remains a
+                // separate JUCE overlay and is never baked into the PNG.
+                drawKeyboardFocus();
                 return;
             }
         }
@@ -1763,6 +1774,7 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         g.drawImage(palette.controlsSpriteSheet, bounds.getX(), bounds.getY(),
                     bounds.getWidth(), bounds.getHeight(), sourceX, sourceY,
                     sourceWidth, sourceHeight);
+        drawKeyboardFocus();
         return;
     }
 
