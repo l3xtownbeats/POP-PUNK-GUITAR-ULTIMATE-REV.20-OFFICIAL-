@@ -253,15 +253,20 @@ public:
     {
         // Keyboard focus must remain visible above the button's own LookAndFeel
         // painting, without changing the window layout or hit targets.
-        const auto drawFocusRing = [&g](const juce::Button& button)
+        const auto drawFocusRing = [this, &g](const juce::Button& button)
         {
             if (!button.hasKeyboardFocus(true))
                 return;
 
+            // Focus feedback follows the active skin instead of hard-coding
+            // NEON STAGE cyan, so all 16 approved themes remain coherent.
+            const auto focusColour = hasThemePalette
+                ? themePalette.token("accent")
+                : borderColour.brighter(0.55f);
             auto bounds = button.getBounds().toFloat().expanded(1.5f);
-            g.setColour(juce::Colour(0xff00d9ff).withAlpha(0.18f));
+            g.setColour(focusColour.withAlpha(0.18f));
             g.fillRoundedRectangle(bounds.expanded(2.0f), 5.0f);
-            g.setColour(juce::Colour(0xff00d9ff));
+            g.setColour(focusColour);
             g.drawRoundedRectangle(bounds, 4.0f, 1.5f);
         };
         drawFocusRing(closeButton);
