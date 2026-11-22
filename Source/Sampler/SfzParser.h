@@ -21,6 +21,11 @@ struct Region
     int offBy = 0;
     int seqLength = 1;
     int seqPosition = 1;
+    int switchLowKey = -1;
+    int switchHighKey = -1;
+    int switchLast = -1;
+    int switchDefault = -1;
+    std::string switchLabel;
     int xfinLowVelocity = -1;
     int xfinHighVelocity = -1;
     int xfoutLowVelocity = -1;

@@ -203,3 +203,10 @@ The following audio-path wiring has now been selectively ported into REV.20 (tar
 - Sampler already has SFZ key/velocity zones, seq_length/seq_position round-robin selection, group/off_by choking, sample streaming and bounded voice count. Existing SamplePoolTests.cpp covers round-robin cycles, independent sets, incomplete-set fallback, invalid sequence positions, streamed playback and voice limits. Remaining gap is recorded articulation identity/zone routing and its integration with PatternScheduler, not basic SFZ round-robin support.
 - Next workstream: define a provenance-safe articulation metadata contract; map only verified source zones to Open/Palm Mute/Muted/Legato/Slide/etc.; route velocity threshold only when matching zones exist; test note-on/off, choke/release, RR, pattern transitions and host-sync without audio-thread I/O/locks. Unavailable techniques must remain unavailable.
 - Verification: run 44997292780 targeted source SHA a9021d4a16fb3d4a7a1b3fa186acee3b49fd123c was observed in progress; current main has a later journal update. Exact-HEAD Windows VST3/CTest, pluginval strictness 5 and FL Studio 20 acceptance remain open.
+
+
+## 2026-11-22 — SFZ keyswitch metadata foundation (implementation checkpoint)
+
+- Added parser support for SFZ sw_lokey, sw_hikey, sw_last, sw_default and sw_label with bounded note parsing and validation of selector ranges/defaults.
+- Carried authored keyswitch range/default/label metadata into immutable SamplePool::RegionView and added SfzParserTests/SamplePoolTests coverage.
+- This is metadata ingestion only. MIDI keyswitch state, per-channel active articulation, audio-thread region filtering, and UI availability/selection are still NOT IMPLEMENTED. No articulation is to be marked playable until those steps and recorded-map verification pass.

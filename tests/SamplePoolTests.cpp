@@ -381,6 +381,31 @@ int main()
         return 1;
     }
 
+    // SFZ keyswitch metadata must survive immutable runtime publication.
+    // MIDI keyswitch state selection is a separate runtime implementation step.
+    const auto keyswitchMetadataSfz = directory.getChildFile("keyswitch-metadata.sfz");
+    if (!keyswitchMetadataSfz.replaceWithText(
+        "<global> sw_lokey=36 sw_hikey=40 sw_default=36\\n"
+        "<region> sample=test.wav key=67 sw_last=36 sw_label=Picked\\n"
+        "<region> sample=test.wav key=67 sw_last=38 sw_label=PalmMute\\n"))
+    {
+        std::cerr << "Could not write SFZ keyswitch metadata fixture.\\n";
+        return 1;
+    }
+    ppgu::sampler::SamplePool keyswitchMetadataPool;
+    const auto keyswitchMetadataLoad = keyswitchMetadataPool.loadSfz(keyswitchMetadataSfz);
+    const auto* keyswitchMetadataRegion = keyswitchMetadataPool.findRegion(67, 100, 1);
+    if (!keyswitchMetadataLoad.success || keyswitchMetadataRegion == nullptr
+        || keyswitchMetadataRegion->switchLowKey != 36
+        || keyswitchMetadataRegion->switchHighKey != 40
+        || keyswitchMetadataRegion->switchDefault != 36
+        || keyswitchMetadataRegion->switchLast != 36
+        || keyswitchMetadataRegion->switchLabel != "Picked")
+    {
+        std::cerr << "SFZ keyswitch metadata was lost before runtime region publication.\\n";
+        return 1;
+    }
+
     // Velocity crossfade opcodes must survive SFZ parsing and reach the
     // immutable runtime region metadata (playback blending is a later step).
     const auto crossfadeMetadataSfz = directory.getChildFile("crossfade-metadata.sfz");

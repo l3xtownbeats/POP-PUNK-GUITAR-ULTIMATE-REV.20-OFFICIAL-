@@ -303,6 +303,11 @@ LoadReport SamplePool::loadSfz(const juce::File& sfzFile,
         view.offBy = region.offBy;
         view.seqLength = region.seqLength;
         view.seqPosition = region.seqPosition;
+        view.switchLowKey = region.switchLowKey;
+        view.switchHighKey = region.switchHighKey;
+        view.switchLast = region.switchLast;
+        view.switchDefault = region.switchDefault;
+        view.switchLabel = region.switchLabel;
         view.xfinLowVelocity = region.xfinLowVelocity;
         view.xfinHighVelocity = region.xfinHighVelocity;
         view.xfoutLowVelocity = region.xfoutLowVelocity;

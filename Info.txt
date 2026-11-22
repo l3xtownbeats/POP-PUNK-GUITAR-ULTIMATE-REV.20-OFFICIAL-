@@ -231,3 +231,11 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - This is a UI/workflow checkpoint, not completion of the Guitar Performance Engine. Current APVTS articulation and palmMuteThreshold declarations were not found consumed in the current PluginProcessor.cpp audio path during static audit. Do not expose them as functional controls until runtime sample routing is implemented and tested.
 - The next implementation workstream is the sampler/performance bridge: verified articulation metadata and recorded zones -> velocity/technique selection -> note lifecycle/choke/release -> pattern scheduler sample-offset events -> streamed sample playback. Preserve non-blocking audio callback, bounded voices, round-robin, and host-sync transition semantics.
 - Current CI run for source SHA a9021d4a16fb3d4a7a1b3fa186acee3b49fd123c was observed as in progress (run 44997292780); no pass is claimed. Re-run exact-HEAD Windows VST3/CTest/skin validation after the next code commit; pluginval strictness 5 and FL Studio 20 host acceptance remain separate gates.
+
+
+## 2026-11-22 — SFZ keyswitch metadata foundation for recorded guitar articulations
+- Added SFZ sw_lokey, sw_hikey, sw_last, sw_default and sw_label metadata parsing. MIDI note names/numbers use the existing bounded parseKey path; switch range and selector consistency are validated at region flush.
+- The immutable SamplePool RegionView now retains authored switch range, selected switch note, default switch note and label. This creates a provenance-safe foundation for later runtime selection of source-authored articulation zones rather than guessing from filenames.
+- Added parser and SamplePool regression fixtures for global inheritance, multiple labels, metadata publication and invalid switch selectors.
+- Scope is metadata-only: this commit does NOT yet consume keyswitch MIDI events, select an articulation in SamplerEngine, alter velocity behavior, or claim palm-mute/legato playback. Next step is lock-free per-channel keyswitch state and MIDI routing through MELODY/PATTERN without accidentally adding keyswitches to held chords.
+- SFZ opcode behavior follows the SFZ Format reference for sw_default/sw_label and sw_lokey/sw_hikey. No broad SFZ compatibility claim is made.

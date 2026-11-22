@@ -151,6 +151,20 @@ void applyOpcode(Opcodes& target, const std::string& opcode, const std::string& 
         else if (opcode == "xfout_lovel") target.values.xfoutLowVelocity = integer;
         else target.values.xfoutHighVelocity = integer;
     }
+    else if (opcode == "sw_lokey" || opcode == "sw_hikey"
+        || opcode == "sw_last" || opcode == "sw_default")
+    {
+        if (!parseKey(value, integer)) { bad(); return; }
+        if (opcode == "sw_lokey") target.values.switchLowKey = integer;
+        else if (opcode == "sw_hikey") target.values.switchHighKey = integer;
+        else if (opcode == "sw_last") target.values.switchLast = integer;
+        else target.values.switchDefault = integer;
+    }
+    else if (opcode == "sw_label")
+    {
+        if (value.empty()) { bad(); return; }
+        target.values.switchLabel = value;
+    }
     else if (opcode == "lochan" || opcode == "hichan" || opcode == "group" || opcode == "off_by"
         || opcode == "seq_length" || opcode == "seq_position")
     {
@@ -235,6 +249,12 @@ ParseResult parseText(const std::string& text, const std::filesystem::path& sfzD
                 || (item.xfoutLowVelocity >= 0 && item.xfoutLowVelocity > item.xfoutHighVelocity)
                 || item.lowChannel > item.highChannel
                 || item.rootKey < item.lowKey || item.rootKey > item.highKey
+                || ((item.switchLowKey >= 0) != (item.switchHighKey >= 0))
+                || (item.switchLowKey >= 0 && item.switchLowKey > item.switchHighKey)
+                || (item.switchLast >= 0 && (item.switchLowKey < 0
+                    || item.switchLast < item.switchLowKey || item.switchLast > item.switchHighKey))
+                || (item.switchDefault >= 0 && (item.switchLowKey < 0
+                    || item.switchDefault < item.switchLowKey || item.switchDefault > item.switchHighKey))
                 || (item.loopEnd != 0 && item.loopStart >= item.loopEnd))
                 result.errors.push_back({ item.sourceLine, "Region has invalid key/velocity ranges or root key." });
             else
