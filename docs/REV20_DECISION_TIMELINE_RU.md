@@ -638,3 +638,48 @@ This entry clarifies and takes precedence over any wording that could imply PATT
 The main shell must visibly communicate the two top-level modes, with each mode exposing the correct PRESETS and PLAYING workflow. Labels, active cyan/electric-blue illumination, selected-state borders, display text, focus/hover/pressed/disabled states and window navigation must make the current mode and current sub-workspace unambiguous. Mode-specific preset and playing selections must not leak across modes.
 
 This is the canonical user-approved information architecture for further NEON STAGE visual implementation. It does not claim that the full hierarchy, persistent state model, visual parity, performance QA or host acceptance is already implemented.
+
+
+## 2026-11-22 — пользователь утвердил расширенный MASTER STANDARD MELODY / PATTERN
+
+Пользователь явно подтвердил и зафиксировал расширенную редакцию требований NEON STAGE. Эта запись является обязательным уточнением канонической архитектуры MELODY / PATTERN и дополняет предыдущую запись о двух верхнеуровневых режимах.
+
+### Утверждённая структура
+
+**Ровно два верхнеуровневых режима:**
+- **MELODY** — собственный PRESETS workflow (музыкальное направление → стиль/исполнитель → композиция/часть) и независимый PLAYING workflow (например, LEAD, OPEN CHORDS и другие подтверждённые варианты).
+- **PATTERN** — собственный PRESETS workflow (направление → стиль/исполнитель → композиция/часть/ритмический пресет) и независимый performance workflow PLAYING / PATTERN / ARTICULATIONS.
+
+В PATTERN сохраняется координация двух рабочих окон: PATTERN PRESETS отвечает за группу/фрагмент/паттерн; PLAYING STYLE / ARTICULATION отвечает за стиль исполнения и артикуляции. Это внутренние рабочие окна PATTERN, а не дополнительные верхнеуровневые режимы.
+
+### Обязательные правила независимого состояния
+
+- Контексты PRESETS у MELODY и PATTERN независимы и не перезаписывают друг друга.
+- PLAYING не изменяет выбранный PRESETS.
+- PATTERN pattern/articulation не изменяют выбранную группу/фрагмент PRESETS.
+- Переключение MELODY ↔ PATTERN сохраняет последний контекст каждого режима и восстанавливает его при возвращении.
+- Изменение одного параметра не должно молча сбрасывать или изменять другой параметр.
+- Состояния выбора и геометрия рабочих окон должны сохраняться в рамках поддерживаемой модели состояния проекта.
+
+### Достоверность доступности
+
+Playing styles, patterns и articulations разрешено показывать как доступные только при подтверждённых playable recordings, корректных диапазонах нот, velocity layers (если применимо), полных MIDI/SFZ mappings и правах на использование/распространение. Непроверенные позиции остаются явно недоступными с объяснением причины. Запрещены фиктивные READY/ACTIVE состояния, вымышленные mappings и незаявленная синтетическая подмена.
+
+### Визуальный и интерактивный контракт
+
+- Активный верхнеуровневый режим должен быть мгновенно различим по реальному selected/active state и утверждённой cyan/electric-blue подсветке.
+- Для каждого интерактивного элемента независимы NORMAL, HOVER, PRESSED, ACTIVE, SELECTED, FOCUSED, DISABLED, LOADING и ERROR там, где состояние применимо.
+- Подсветка, LED, подписи и дисплеи обязаны отражать фактическое состояние функции; декоративная имитация состояния запрещена.
+- Сохраняются утверждённые макеты 01–07, палитра, оригинальная идентичность NEON STAGE и правила использования Session Guitarist только как UX/workflow ориентира.
+- Навигация должна быть понятна мышью и клавиатурой; окна должны поддерживать корректное открытие/закрытие, повторное открытие, resize, maximize/restore, DPI и восстановление контекста.
+- Анимации допустимы только как производительная визуализация реального состояния/перехода; не создавать fake progress, meters или waveform.
+
+### Критерии завершения и доказательства
+
+Архитектура не считается реализованной только по факту документации или статического макета. Для каждого модуля отдельно подтверждаются: (1) artwork/layout относительно утверждённых макетов; (2) реальные interaction states и hit areas; (3) binding визуального состояния к реальным параметрам/processor/backend; (4) runtime-проверка Windows VST3, размеров окна, DPI и повторного открытия с фиксируемыми результатами.
+
+Приёмка включает независимость и восстановление контекстов MELODY/PATTERN, независимость PRESETS/PLAYING, корректность навигации, подсветки и disabled/unavailable состояний, а затем точный Windows x64 build, contract tests, CTest, skin validation/staging, pluginval strictness 5 и отдельную ручную host-проверку в FL Studio 20.
+
+**Порядок работ остаётся неизменным: сначала полная визуальная оболочка NEON STAGE и её проверка; аудиодвижок, DSP и интеграция сэмплов не входят в этот этап и не должны начинаться до завершения визуального этапа.**
+
+**Статус записи:** пользовательское утверждение требований зафиксировано. Это фиксация спецификации, а не заявление о завершённой реализации или успешной приёмке.
