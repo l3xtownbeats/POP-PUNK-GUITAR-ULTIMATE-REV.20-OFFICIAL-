@@ -38,6 +38,7 @@ private:
     void openFxEditPanel(int selectedEffect);
     void openAutoChordsPanel();
     void openPatternSectionPanel();
+    void openPlayingStylePanel();
     juce::File getRuntimeSkinRoot() const;
     int getSkinCount() const;
     juce::File getSkinManifest(int ordinal) const;
