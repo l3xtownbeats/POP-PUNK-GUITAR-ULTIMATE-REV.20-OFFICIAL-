@@ -2425,6 +2425,8 @@ void PPGUPremiumLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, i
 void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
                                                    const juce::Colour& base, bool hovered, bool down)
 {
+    // Keep PNG button-state art and atlas icons crisp at non-native UI scales.
+    g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
     const auto controlId = button.getComponentID();
     const auto drawKeyboardFocus = [&g, &button, this]
     {
