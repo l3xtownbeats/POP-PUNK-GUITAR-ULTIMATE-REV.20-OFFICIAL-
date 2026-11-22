@@ -177,3 +177,10 @@ Exact-SHA REV.20 Windows build, full CTest, pluginval, package checks and FL Stu
 - Added a dedicated 61-position rotary atlas specification: 128x128 cells, 8x8 grid, 61 frames, -135°..+135° sweep in 4.5° increments. The theme manifest registers it and the active-skin packager stages it as the fifth NEON STAGE runtime atlas.
 - The existing Windows workflow generates the atlases and packages the active skins. The source commits alone do not prove that generated PNGs, VST3 build, CTest, pluginval or FL Studio 20 acceptance passed. Exact-SHA CI must be observed after these changes.
 - Remaining visual production gates: replace placeholder/legacy artwork only with approved, inspectable, license-cleared independent assets; produce 4x masters and 1x/2x/3x runtime variants; six-state control coverage; isolated per-component assets; SHA-256 production manifest; JUCE runtime integration and screenshot/reference parity review.
+
+
+## 2026-11-22 — USER-SUPPLIED SUPPLEMENTAL GUITAR VISUAL REFERENCE
+- User supplied an additional image in `l3xtownbeats/SKINS-THEME-`: `Футуристическая электрогитара с синими акцентами.png` (Git blob SHA `b308998bbd0b88a30f2b66cf4cfeefa6f909936d`).
+- Source file: https://github.com/l3xtownbeats/SKINS-THEME-/blob/main/%D0%A4%D1%83%D1%82%D1%83%D1%80%D0%B8%D1%81%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F%20%D1%8D%D0%BB%D0%B5%D0%BA%D1%82%D1%80%D0%BE%D0%B3%D0%B8%D1%82%D0%B0%D1%80%D0%B0%20%D1%81%20%D1%81%D0%B8%D0%BD%D0%B8%D0%BC%D0%B8%20%D0%B0%D0%BA%D1%86%D0%B5%D0%BD%D1%82%D0%B0%D0%BC%D0%B8.png
+- Treat it as a supplemental guitar/visual-direction reference, not as an approved production asset and not as permission to copy or redistribute it. Preserve the established NEON STAGE graphite + cyan/electric-blue identity and approved layout.
+- Binary inspection is pending: the GitHub file connector returned the file metadata/blob SHA but an empty binary payload, so dimensions, actual pixels, alpha, embedded marks and licensing/ownership cannot yet be verified. Do not derive or commit runtime artwork from it until the actual image is inspectable and rights are confirmed.
