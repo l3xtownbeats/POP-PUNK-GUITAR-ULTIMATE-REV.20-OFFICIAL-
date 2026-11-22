@@ -2,6 +2,7 @@
 """Validate REV.20's exact 16-theme registry without accepting legacy skins."""
 from __future__ import annotations
 import json
+import hashlib
 import struct
 import zlib
 from pathlib import Path
@@ -64,6 +65,61 @@ def validate_png(path: Path, expected_size: tuple[int, int]) -> None:
         raise SystemExit(f"FAIL: PNG dimensions {dimensions!r}, expected {expected_size!r}: {path}")
 
 
+
+def validate_neon_stage_asset_manifest() -> int:
+    """Verify every inventoried NEON STAGE source/runtime asset against its manifest."""
+    theme_root = SKIN / "Skin_053"
+    manifest_path = theme_root / "assets" / "asset_manifest.json"
+    if not manifest_path.is_file():
+        raise SystemExit("FAIL: missing NEON STAGE asset integrity manifest")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    records = manifest.get("records", [])
+    if manifest.get("assetCount") != len(records) or not records:
+        raise SystemExit("FAIL: NEON STAGE asset manifest count mismatch")
+
+    seen = set()
+    for record in records:
+        relative = record.get("path")
+        if (not isinstance(relative, str) or not relative
+                or relative.startswith("/") or chr(92) in relative
+                or any(part in ("", ".", "..") for part in relative.split("/"))):
+            raise SystemExit(f"FAIL: unsafe asset manifest path: {relative!r}")
+        if relative in seen:
+            raise SystemExit(f"FAIL: duplicate asset manifest path: {relative}")
+        seen.add(relative)
+
+        asset = theme_root / relative
+        resolved_root = theme_root.resolve()
+        resolved_asset = asset.resolve()
+        if (not asset.is_file() or asset.is_symlink()
+                or not resolved_asset.is_relative_to(resolved_root)):
+            raise SystemExit(f"FAIL: missing, linked, or out-of-theme asset: {asset}")
+
+        data = asset.read_bytes()
+        if len(data) != record.get("bytes"):
+            raise SystemExit(f"FAIL: asset byte count mismatch: {asset}")
+        if hashlib.sha256(data).hexdigest() != record.get("sha256"):
+            raise SystemExit(f"FAIL: asset SHA-256 mismatch: {asset}")
+        actual_crc = f"{zlib.crc32(data) & 0xFFFFFFFF:08X}"
+        if actual_crc != str(record.get("crc32", "")).upper():
+            raise SystemExit(f"FAIL: asset CRC32 mismatch: {asset}")
+
+        asset_format = record.get("format")
+        suffix = asset.suffix.lower()
+        expected_suffix = {"PNG": ".png", "SVG": ".svg", "JSON": ".json"}.get(asset_format)
+        if expected_suffix is None or suffix != expected_suffix:
+            raise SystemExit(f"FAIL: asset format/extension mismatch: {asset}")
+        if asset_format == "PNG":
+            dimensions = record.get("dimensions", "")
+            try:
+                width, height = (int(value) for value in dimensions.split("x", 1))
+            except (TypeError, ValueError):
+                raise SystemExit(f"FAIL: invalid PNG dimensions metadata: {asset}")
+            validate_png(asset, (width, height))
+
+    return len(records)
+
+
 def main() -> int:
     registry = json.loads((SKIN / "theme_manifest.json").read_text(encoding="utf-8"))
     entries = registry.get("themes", [])
@@ -119,6 +175,7 @@ def main() -> int:
                    if p.is_dir() and p.name.startswith("Skin_")}
     if actual_dirs != expected_dirs:
         raise SystemExit(f"FAIL: only approved 16 theme directories may exist; found {sorted(actual_dirs)}")
+    verified_asset_count = validate_neon_stage_asset_manifest()
     # NEON STAGE DEFAULT's dedicated sprite atlas package is validated
     # independently from the other 15 skins; the registry remains exactly 16.
     atlas_dir = SKIN / "Skin_053" / "assets" / "spritesheets"
@@ -248,7 +305,7 @@ def main() -> int:
     expected_ready = [item[2] for item in EXPECTED]
     if ready != expected_ready:
         raise SystemExit(f"FAIL: all 16 approved themes must be runtime-ready after exact-SHA SVG decode/package validation; got {ready}")
-    print("PASS: exactly 16 runtime-ready themes; all theme artwork/SVGs; five 1024x1024 NEON STAGE sprite atlases and exact atlas geometry; no extra theme directories.")
+    print(f"PASS: exactly 16 runtime-ready themes; all theme artwork/SVGs; {verified_asset_count} NEON STAGE assets match byte counts, SHA-256, CRC32 and PNG dimensions; five 1024x1024 sprite atlases and exact atlas geometry; no extra theme directories.")
     return 0
 
 if __name__ == "__main__":
