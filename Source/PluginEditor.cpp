@@ -334,7 +334,7 @@ private:
                            + "  /  " + item.layout, textArea.removeFromTop(14.0f),
                        juce::Justification::centredLeft, true);
             const auto tag = item.active ? juce::String("ACTIVE")
-                : (selected ? juce::String("SELECTED") : juce::String("PREVIEW"));
+                : (selected ? juce::String("SELECTED") : juce::String("AVAILABLE"));
             g.setColour(item.active ? item.accent : palette.token("accent"));
             g.fillRoundedRectangle(getWidth() - 68.0f, 10.0f, 58.0f, 17.0f, 5.0f);
             g.setColour(palette.token("window_bg")); g.setFont(makeThemeFont(palette, 7.5f, false, true));
