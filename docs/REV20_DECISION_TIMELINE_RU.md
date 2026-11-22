@@ -294,3 +294,12 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 **Дополнительная CI находка:** run 45000503467 собрал VST3 и тестовые targets успешно, но CTest завершился 21/22: ppgu_sample_pool_contracts обнаружил, что прямой SamplePool::findRegion без explicit keyswitch не выбирал SFZ default articulation. Исправлено: при activeSwitch < 0 используется snapshot->defaultKeySwitch. Commit 6c495692fba2cdeb99e4c8fb841027ffe16930e6.
 
 **Проверка:** layout и SamplePool fixes committed; CI для финального HEAD ещё ожидается. Не заявлять visual acceptance, VST3 package или pluginval pass до завершения нового run.
+## 2026-11-22 — интерактивная детализация NEON STAGE controls
+
+В Source/PluginEditor.cpp опубликован commit d5a750d6896797cdd4cf8cdda4721b7992c41312:
+- Девять rotary controls получили осмысленные component names и подсказки с текущим назначением и пояснением числового readout; APVTS attachments и параметрические ID не менялись.
+- Семь FX rack switches получили индивидуальные подсказки: назначение каждого эффекта, состояние enable/bypass и возможность открыть детальное окно. Имена компонентов синхронизированы с отображаемыми подписями.
+- Заголовки AMP & TONE и FX CHAIN получили поясняющие подсказки.
+- Существующая state artwork pipeline (default/hover/pressed/dragged/disabled), sprite atlas и APVTS toggle bindings сохранены.
+
+Проверка run 45001201289 на HEAD 6c495692fba2cdeb99e4c8fb841027ffe16930e6: sprite atlas generation прошла; Windows configure выполнялся. Этот run не включает последующие layout/documentation/tooltip commits. Требуется CI на актуальном HEAD d5a750d6896797cdd4cf8cdda4721b7992c41312. Не заявлять сборку успешной до точного HEAD check.
