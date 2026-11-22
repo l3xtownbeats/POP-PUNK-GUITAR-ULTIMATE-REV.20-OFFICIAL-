@@ -2152,8 +2152,19 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
         knobs[i].setComponentID("knob" + juce::String(static_cast<int>(i + 1)).paddedLeft('0', 2));
         knobAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.parameters, parameterIDs[i], knobs[i]);
     }
+    static constexpr std::array<const char*, 7> fxTooltips {{
+        "COMPRESSOR — enable or bypass dynamics compression. Click to open detailed controls.",
+        "EQ — enable or bypass the tone equalizer. Click to open detailed controls.",
+        "DISTORTION — enable or bypass the distortion stage. Click to open detailed controls.",
+        "CHORUS — enable or bypass stereo modulation. Click to open detailed controls.",
+        "DELAY — enable or bypass tempo-aware delay. Click to open detailed controls.",
+        "REVERB — enable or bypass the room/space processor. Click to open detailed controls.",
+        "CABINET IR — enable or bypass cabinet impulse response. Click to open detailed controls."
+    }};
     for (size_t i = 0; i < fxButtons.size(); ++i) {
         auto& b = fxButtons[i];
+        b.setTooltip(fxTooltips[i]);
+        b.setName(b.getButtonText());
         b.setClickingTogglesState(true);
         b.setColour(juce::TextButton::buttonColourId, themeManager.getPalette().token("control_bg"));
         b.setColour(juce::TextButton::buttonOnColourId, themeManager.getPalette().token("accent"));
@@ -2171,7 +2182,9 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
         addAndMakeVisible(b);
     }
     ampTitle.setText("AMP & TONE", juce::dontSendNotification);
+    ampTitle.setTooltip("Amplifier and tone controls. Use the PLAYING CORE knobs for gain and EQ.");
     fxTitle.setText("FX CHAIN", juce::dontSendNotification);
+    fxTitle.setTooltip("Seven real-time effect bypass switches. Click a switch to open its detailed editor.");
     playbackTitle.setText("PLAYBACK", juce::dontSendNotification);
     for (auto* l : { &ampTitle, &fxTitle, &playbackTitle }) {
         l->setFont(makeThemeFont(themeManager.getPalette(), 15.0f, false, true));
@@ -2222,6 +2235,8 @@ void PopPunkGuitarUltimateAudioProcessorEditor::timerCallback()
 void PopPunkGuitarUltimateAudioProcessorEditor::configureKnob(juce::Slider& s, juce::Label& l, const juce::String& name)
 {
     s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    s.setName(name);
+    s.setTooltip(name + " — adjust the live instrument parameter. The numeric readout shows the current value.");
     s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 46, 16);
     s.setColour(juce::Slider::rotarySliderFillColourId, themeManager.getPalette().token("accent"));
     s.setColour(juce::Slider::rotarySliderOutlineColourId, themeManager.getPalette().token("control_border"));
