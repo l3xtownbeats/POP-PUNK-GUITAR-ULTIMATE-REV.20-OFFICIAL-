@@ -890,3 +890,12 @@ PATTERN
 - Fix committed directly to `main`: `c492f4de6293bfeb9f2342a7a0d714b8b6293ac2`.
 - Required next evidence: rerun exact current-main Windows workflow, confirm regenerated manifest and all five atlas files pass, then complete skin staging, VST3 discovery and pluginval. The failed run did not produce a release artifact.
 - Separate native integration and SKIN-1 control-state runtime workflows on source SHA `6c2712461455a582f18a659bdbac13cecb96a17d` completed successfully; these do not replace the failed full Windows package workflow.
+
+
+## 2026-11-22 — NEON STAGE: graphite chassis bevel and panel depth pass
+
+В главной оболочке усилена материальность трёх основных панелей PRESETS / PLAYING CORE / AMP & TONE без изменения утверждённой композиции и геометрии макета. Добавлены мягкая тень корпуса, верхняя светлая фаска, нижняя затемнённая кромка и тонкий внутренний контур. Цвета берутся из токенов активной темы (shadow, highlight, lowlight, control_border), поэтому правка не вводит отдельную несогласованную палитру.
+
+Изменение ограничено отрисовкой оболочки в `drawPanel()`: не затрагивает DSP, аудиодвижок, MIDI, APVTS, параметры, размеры и расположение интерактивных контролов. Нет таймеров или дополнительной анимации — стоимость ограничена обычной перерисовкой панели.
+
+**Проверка:** изменение исходника зафиксировано в `main` коммитом `b190ed50a50c68a4c3d73c74dce6626d65a1b064`. Требуется завершить Windows CI для этого SHA и выполнить runtime screenshot/DPI/resize приёмку в FL Studio 20; визуальное завершение всего NEON STAGE пока не заявляется.
