@@ -41,6 +41,8 @@
     "texture": "svg/texture.svg",
     "bezel": "svg/bezel.svg",
     "crest": "svg/crest.svg",
+    "fxLayers": "svg/fx_layers.svg",
+    "decorative": "svg/decorative.svg",
     "shadowDepth": 0.3,
     "edgeHighlight": 0.22,
     "glow": "restrained optional accent lighting; off in default minimal mode"
