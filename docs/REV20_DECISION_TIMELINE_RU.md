@@ -312,3 +312,13 @@ Scope: visual shell only. Audio engine, DSP, sampler, MIDI routing, APVTS parame
 - Добавлена спецификация `SKIN/Skin_053/assets/vector/ROTARY_ARTWORK_PRODUCTION_SPEC.md`: состояния default/hover/pressed/dragged/disabled, размеры master/runtime, правила экспорта, список существующих PNG/atlas и обязательные проверки перед заменой.
 - Канонический внешний ориентир не меняется: `/01 INTERFACE  NEON STAGE DEFAULT .png`. Новый SVG — исходный производственный компонент, а не новый макет/скин. Перед интеграцией необходимо визуальное сравнение PNG-экспорта с canonical mockup и обновление SHA-256/CRC/asset manifests.
 - Изменения не затрагивают JUCE bindings, APVTS, DSP и аудио-путь. Это source artwork/spec addition; не считать production runtime asset integration или visual acceptance завершёнными.
+
+
+## 2026-11-22 — обновление генератора premium rotary atlas
+
+- Обновлён `tools/generate_neon_stage_spritesheets.py`: генератор 61-кадрового атласа теперь рисует единый machined graphite/steel control с inset enamel face, металлической шкалой, сдержанной cyan sweep, металлическим указателем и центральной подсветкой.
+- Рендер выполняется в 2× разрешении с последующим Lanczos downsample до 120×120 внутри 128×128 ячейки; сохраняются 61 кадр, диапазон −135°…+135°, шаг 4,5°, прозрачный RGBA и непрерывное APVTS значение.
+- Обновлён `SKIN/Skin_053/assets/spritesheets/neon_stage_spritesheet_manifest.json`: добавлен artworkProfile с указанием SVG master, генератора и характеристик атласа.
+- Canonical layout `/01 INTERFACE  NEON STAGE DEFAULT .png` остаётся неизменным. Не добавлялись baked labels и не менялись control geometry, APVTS, DSP или аудио-путь.
+- Изменения генератора: commit `a89904886c7d54c46c74c63fb6d8f4ebf78792e9`. Manifest: commit `7d02e657ad385a95d95296df87f4778651c5d3e8`.
+- Генератор ещё должен быть исполнен CI; обновлённый PNG atlas и визуальная сверка результата не объявляются готовыми до успешной генерации и проверки артефакта.
