@@ -780,6 +780,16 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         return false;
     }
 
+    // Every approved Skin Studio theme supplies an 800x450 hero image.
+    // Decode it once on the UI thread; the audio processor never accesses artwork.
+    if (!loadSafePngArtwork(themeRoot, assets.getProperty("hero", "").toString(),
+                           800, 450, candidate.heroArtwork, error))
+    {
+        lastError = error.isNotEmpty() ? error : "Theme hero artwork loading failed";
+        resetToDefault();
+        return false;
+    }
+
     // The default NEON STAGE shell has a four-atlas visual package.
     // Atlases are decoded only on the UI/control thread and never touched by audio code.
     if (id == "skin-053")
