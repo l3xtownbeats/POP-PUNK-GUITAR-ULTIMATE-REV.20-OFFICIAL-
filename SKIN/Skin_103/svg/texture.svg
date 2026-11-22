@@ -1,1 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><defs><linearGradient id="surface" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#09090D"/><stop offset="1" stop-color="#24212A"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#surface)"/><g fill="none" stroke="#D6A84F" stroke-opacity=".13"><path d="M-80 220L1100 0M-80 420L1100 200M-80 620L1100 400M-80 820L1100 600M-80 1020L1100 800" stroke-width="2"/></g><g fill="#FFE2A0" opacity=".08"><circle cx="820" cy="170" r="150"/><circle cx="170" cy="850" r="190"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="obsidian" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#07070B"/>
+      <stop offset=".48" stop-color="#17151A"/>
+      <stop offset="1" stop-color="#24212A"/>
+    </linearGradient>
+    <radialGradient id="polish" cx=".78" cy=".18" r=".78">
+      <stop stop-color="#6D5A3C" stop-opacity=".30"/>
+      <stop offset=".48" stop-color="#24212A" stop-opacity=".10"/>
+      <stop offset="1" stop-color="#09090D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="champagne" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#FFE2A0" stop-opacity="0"/>
+      <stop offset=".48" stop-color="#D6A84F" stop-opacity=".30"/>
+      <stop offset="1" stop-color="#FFE2A0" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="brushed" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path d="M0 1H8M0 5H8" stroke="#FFF8E8" stroke-opacity=".025" stroke-width=".6"/>
+    </pattern>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#obsidian)"/>
+  <rect width="1024" height="1024" fill="url(#polish)"/>
+  <rect width="1024" height="1024" fill="url(#brushed)"/>
+  <g fill="none" stroke="#D6A84F" stroke-opacity=".12">
+    <path d="M-80 760L760 -80M40 1100L1100 40" stroke-width="1.2"/>
+    <path d="M-80 900L900 -80M180 1100L1100 180" stroke-width=".7"/>
+  </g>
+  <path d="M0 178H1024M0 846H1024" stroke="url(#champagne)" stroke-width="2"/>
+  <path d="M650 0L1024 374V650L374 0Z" fill="#FFE2A0" opacity=".018"/>
+  <path d="M0 1024L1024 0" stroke="#FFE2A0" stroke-opacity=".035" stroke-width="22"/>
+  <g fill="#FFE2A0" opacity=".10">
+    <circle cx="846" cy="178" r="2.5"/>
+    <circle cx="178" cy="846" r="2"/>
+  </g>
+</svg>
