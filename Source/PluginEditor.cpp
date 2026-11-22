@@ -1662,11 +1662,13 @@ public:
         subtitle.setText("PATTERN  /  ARTICULATION CATALOG", juce::dontSendNotification);
         styleLabel.setText("PLAYING STYLE", juce::dontSendNotification);
         articulationLabel.setText("ARTICULATION", juce::dontSendNotification);
-        styleEntry.setButtonText("PALM MUTE - 8TH");
-        styleEntry.setTooltip("Requested catalog entry. It remains unavailable until a real, licensed recording and its SFZ/MIDI mappings are verified.");
-        styleEntry.setEnabled(false);
-        availability.setText("UNAVAILABLE  /  VERIFIED SOURCE MAPPING REQUIRED", juce::dontSendNotification);
-        availability.setTooltip("No playable recording and complete mapping have been verified for PALM MUTE - 8TH. No synthetic substitute is used.");
+        // Candidate articulation names are deliberately not rendered here.
+        // A name may enter the UI only after the loaded instrument provides both
+        // playable sample material and a complete, validated articulation mapping.
+        styleEntry.setVisible(false);
+        styleLabel.setVisible(false);
+        availability.setText("NO VERIFIED ARTICULATIONS AVAILABLE", juce::dontSendNotification);
+        availability.setTooltip("Articulation names are hidden until the loaded source has playable sample zones and complete, validated SFZ/MIDI mappings. A switch label alone is insufficient.");
         activeLabel.setText("ACTIVE PERFORMANCE  /  NONE VERIFIED", juce::dontSendNotification);
         sourceLabel.setText("INSTRUMENT SOURCE  /  " + (processor.getCurrentSfzFilePath().isNotEmpty()
             ? juce::File(processor.getCurrentSfzFilePath()).getFileName()
@@ -1674,7 +1676,7 @@ public:
         for (auto* c : { static_cast<juce::Component*>(&title), &subtitle, &styleLabel,
                          &articulationLabel, &availability, &activeLabel, &sourceLabel })
             addAndMakeVisible(*c);
-        addAndMakeVisible(styleEntry);
+        // Keep the candidate list empty until a source-map registry can prove availability.
         setThemePalette(palette);
         startTimerHz(2);
     }
@@ -1716,9 +1718,9 @@ public:
         title.setBounds(area.removeFromTop(30));
         subtitle.setBounds(area.removeFromTop(20));
         area.removeFromTop(28);
-        styleLabel.setBounds(area.removeFromTop(15));
-        styleEntry.setBounds(area.removeFromTop(42).removeFromLeft(300));
-        area.removeFromTop(24);
+        // No articulation names or disabled placeholder buttons are shown without
+        // verified playable material plus matching mappings.
+        area.removeFromTop(8);
         articulationLabel.setBounds(area.removeFromTop(15));
         availability.setBounds(area.removeFromTop(30));
         area.removeFromTop(18);
@@ -1736,13 +1738,10 @@ private:
         if (sourceLabel.getText() != sourceText)
             sourceLabel.setText(sourceText, juce::dontSendNotification);
 
-        // A keyswitch label alone is not proof of a playable zone/mapping.
-        // Keep the catalog item unavailable until a verified source-map registry exists.
-        const int switchNote = processor.getActiveArticulationSwitch(1);
-        const auto switchLabel = processor.getActiveArticulationLabel(1);
-        const auto activeText = switchNote >= 0 && switchLabel.isNotEmpty()
-            ? "SOURCE SWITCH  /  " + switchLabel + "  [KEY " + juce::String(switchNote) + "]"
-            : "ACTIVE PERFORMANCE  /  NONE VERIFIED";
+        // Do not expose raw keyswitch metadata as a playable articulation.
+        // Until sample-zone and mapping validation is available, no articulation
+        // can be declared active or selectable.
+        const juce::String activeText("ACTIVE PERFORMANCE  /  NONE VERIFIED");
         if (activeLabel.getText() != activeText)
             activeLabel.setText(activeText, juce::dontSendNotification);
     }
