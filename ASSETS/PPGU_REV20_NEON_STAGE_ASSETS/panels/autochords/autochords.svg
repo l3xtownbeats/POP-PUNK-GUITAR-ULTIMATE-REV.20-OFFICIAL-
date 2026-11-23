@@ -20,4 +20,22 @@
     <path d="M 32 32 h 18 M 32 32 v 12"/>
     <path d="M 588 408 h -18 M 588 408 v -12"/>
   </g>
+
+<g font-family="Segoe UI,Arial,sans-serif" fill="#DCEBFA">
+ <text x="42" y="68" font-size="20" font-weight="700" letter-spacing="1.2">AUTOCHORDS / HARMONY SETUP</text>
+ <rect x="42" y="92" width="536" height="74" rx="8" fill="#251D16" stroke="#B9823E"/>
+ <text x="58" y="119" font-size="10" font-weight="700" fill="#FFBE55">SETUP ONLY</text>
+ <text x="58" y="139" font-size="10" fill="#E5CBA7">MIDI CHORD GENERATION / CUSTOM MODE / PREVIEW ENGINE NOT CONNECTED</text>
+ <rect x="42" y="188" width="536" height="44" rx="7" fill="#101827" stroke="#53677C" opacity=".9"/>
+ <text x="62" y="216" font-size="13" fill="#8293A5">AUTOCHORDS OFF  ·  DISABLED</text>
+ <g font-size="11" fill="#8DCBFF">
+  <text x="42" y="274">KEY</text><text x="228" y="274">SCALE / QUALITY</text><text x="414" y="274">RHYTHM PATTERN SLOT</text>
+ </g>
+ <g fill="#080E19" stroke="#47617D">
+  <rect x="42" y="288" width="160" height="44" rx="6"/><rect x="228" y="288" width="160" height="44" rx="6"/><rect x="414" y="288" width="164" height="44" rx="6"/>
+ </g>
+ <g font-size="13" fill="#DCEBFA"><text x="60" y="316">C  ▾</text><text x="246" y="316">MAJOR  ▾</text><text x="432" y="316">PATTERN 1  ▾</text></g>
+ <text x="42" y="376" font-size="10" fill="#8DA9C4">Available keys: C · C# · D · D# · E · F · F# · G · G# · A · A# · B</text>
+ <text x="42" y="397" font-size="10" fill="#8DA9C4">Scale: Chromatic · Major · Minor   /   Pattern slots: 1–8</text>
+</g>
 </svg>
