@@ -276,3 +276,10 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - Follow-up hardening: Palm label detection is case-insensitive; the runtime test asserts the actual SamplerEngine active label API.
 
 - Corrected case-folding implementation to normalize the owned label string before searching; no iterators from temporary strings are used.
+
+
+## 2026-11-23 — USER-DIRECTED STILLWATER SKIN FOUNDATION
+- User clarified STILLWATER is the visual foundation/direction for the skin. Implemented the visual identity on existing SKIN-10 / stable ID skin-111; the 16-theme count, ordinal, stable ID and control/layout contracts remain unchanged.
+- Updated SKIN-10 runtime palette and description to deep blue graphite, satin cold metal, smoked glass and restrained mineral teal; replaced its SVG texture, bezel and crest foundations with the STILLWATER artwork direction.
+- Updated theme_manifest.json, approved_theme_sequence.json and ASSETS/theme_catalog.json display names to STILLWATER.
+- This is a visual-foundation checkpoint only. Existing PNG preview/hero files have not yet been replaced; SVG/PNG validation, exact-SHA build/CTest, package staging, pluginval and FL Studio 20 host acceptance remain pending. No build was run in this step.
