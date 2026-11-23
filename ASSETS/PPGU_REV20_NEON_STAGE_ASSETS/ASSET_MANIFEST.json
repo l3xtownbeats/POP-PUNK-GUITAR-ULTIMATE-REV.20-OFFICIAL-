@@ -8,7 +8,7 @@
   "source_root": "SKIN/Skin_053/",
   "source_manifest": "SKIN/Skin_053/assets/asset_manifest.json",
   "asset_record_count": 323,
-  "package_status": "PARTIAL_EXPORT_WITH_16_PANEL_SVG_FRAMES",
+  "package_status": "PARTIAL_EXPORT_WITH_16_PANEL_FRAMES_AND_6_AUXILIARY_LAYOUTS_CHECKSUM_PENDING",
   "records": [
     {
       "asset_id": "skin053_001_assets_hero_png",
@@ -11041,7 +11041,11 @@
       },
       "scaling_policy": "9-slice; preserve 26-unit corners, stretch edges and center",
       "source_reference": "Generated for PPGU REV.20 from SKIN/Skin_053/theme.json palette tokens; visual comparison to reference pending",
-      "validation_status": "FILE_CREATED_SVG_STRUCTURE_NOT_VISUALLY_APPROVED"
+      "validation_status": "PRESENT_CHECKSUM_RECALCULATION_PENDING",
+      "sha256": null,
+      "crc32": null,
+      "bytes": null,
+      "git_blob_sha": "9a5244ee0341b71387f44b01d96b744cfad63dd9"
     },
     {
       "asset_id": "skin053_export_panel_09_fx_edit",
@@ -11077,7 +11081,11 @@
       },
       "scaling_policy": "9-slice; preserve 26-unit corners, stretch edges and center",
       "source_reference": "Generated for PPGU REV.20 from SKIN/Skin_053/theme.json palette tokens; visual comparison to reference pending",
-      "validation_status": "FILE_CREATED_SVG_STRUCTURE_NOT_VISUALLY_APPROVED"
+      "validation_status": "PRESENT_CHECKSUM_RECALCULATION_PENDING",
+      "sha256": null,
+      "crc32": null,
+      "bytes": null,
+      "git_blob_sha": "977d526ceb7ce2f3b6fd63be6bd8342f4f31d689"
     },
     {
       "asset_id": "skin053_export_panel_10_pattern_routing",
@@ -11113,7 +11121,11 @@
       },
       "scaling_policy": "9-slice; preserve 26-unit corners, stretch edges and center",
       "source_reference": "Generated for PPGU REV.20 from SKIN/Skin_053/theme.json palette tokens; visual comparison to reference pending",
-      "validation_status": "FILE_CREATED_SVG_STRUCTURE_NOT_VISUALLY_APPROVED"
+      "validation_status": "PRESENT_CHECKSUM_RECALCULATION_PENDING",
+      "sha256": null,
+      "crc32": null,
+      "bytes": null,
+      "git_blob_sha": "419f85f85411b9038edc4a8874af138d3f9d7c88"
     },
     {
       "asset_id": "skin053_export_panel_11_autochords",
@@ -11149,7 +11161,11 @@
       },
       "scaling_policy": "9-slice; preserve 26-unit corners, stretch edges and center",
       "source_reference": "Generated for PPGU REV.20 from SKIN/Skin_053/theme.json palette tokens; visual comparison to reference pending",
-      "validation_status": "FILE_CREATED_SVG_STRUCTURE_NOT_VISUALLY_APPROVED"
+      "validation_status": "PRESENT_CHECKSUM_RECALCULATION_PENDING",
+      "sha256": null,
+      "crc32": null,
+      "bytes": null,
+      "git_blob_sha": "2d1a3ebb06a38cdfe60cf7ff14f734bad7112df2"
     },
     {
       "asset_id": "skin053_export_panel_12_workspace_settings",
@@ -11185,7 +11201,11 @@
       },
       "scaling_policy": "9-slice; preserve 26-unit corners, stretch edges and center",
       "source_reference": "Generated for PPGU REV.20 from SKIN/Skin_053/theme.json palette tokens; visual comparison to reference pending",
-      "validation_status": "FILE_CREATED_SVG_STRUCTURE_NOT_VISUALLY_APPROVED"
+      "validation_status": "PRESENT_CHECKSUM_RECALCULATION_PENDING",
+      "sha256": null,
+      "crc32": null,
+      "bytes": null,
+      "git_blob_sha": "ca44a9603f80d2960640d41f8a55a23b3ee5acc2"
     },
     {
       "asset_id": "skin053_export_panel_13_skin_gallery",
@@ -11221,7 +11241,11 @@
       },
       "scaling_policy": "9-slice; preserve 26-unit corners, stretch edges and center",
       "source_reference": "Generated for PPGU REV.20 from SKIN/Skin_053/theme.json palette tokens; visual comparison to reference pending",
-      "validation_status": "FILE_CREATED_SVG_STRUCTURE_NOT_VISUALLY_APPROVED"
+      "validation_status": "PRESENT_CHECKSUM_RECALCULATION_PENDING",
+      "sha256": null,
+      "crc32": null,
+      "bytes": null,
+      "git_blob_sha": "5856941a6856ecea4095d18c89f14b78f967ecf2"
     },
     {
       "asset_id": "skin053_export_panel_14_dialog_base",
