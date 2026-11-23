@@ -161,6 +161,21 @@ int main()
         expect(foundStillwater, "STILLWATER skin-111 remains registered");
     }
 
+    PPGUThemeManager embeddedStillwater;
+    const bool embeddedLoaded = embeddedStillwater.loadEmbeddedStillwater();
+    expect(embeddedLoaded, "STILLWATER loads from resources embedded in the plugin binary"
+           + (embeddedLoaded ? juce::String{} : ": " + embeddedStillwater.getLastError()));
+    if (embeddedLoaded)
+    {
+        const auto& stillwater = embeddedStillwater.getPalette();
+        expect(stillwater.id == "skin-111" && stillwater.name == "STILLWATER",
+               "embedded theme preserves stable ID and display name");
+        expect(stillwater.textureArtwork.isValid() && stillwater.bezelArtwork.isValid()
+                   && stillwater.crestArtwork.isValid() && stillwater.controlsArtwork.isValid()
+                   && stillwater.fxLayerArtwork.isValid() && stillwater.decorativeArtwork.isValid(),
+               "all six STILLWATER runtime SVG layers decode from BinaryData");
+    }
+
     const auto neon = skinRoot.getChildFile("Skin_053").getChildFile("theme.json");
     const bool loaded = neon.existsAsFile() && manager.loadFromFile(neon);
     expect(loaded, "NEON STAGE DEFAULT manifest loads"
