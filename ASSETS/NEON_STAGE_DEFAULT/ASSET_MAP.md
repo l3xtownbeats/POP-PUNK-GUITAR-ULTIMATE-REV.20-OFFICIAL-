@@ -54,3 +54,14 @@ The actual directory currently contains additional files beyond manifest records
 ## Package integrity
 
 Do not rename/move the canonical files to imitate the illustrative folder tree from the request. The map above provides the requested logical grouping while retaining the exact paths expected by REV.20 runtime and packaging.
+
+
+## REV.20 production workspace
+
+A dedicated production-pack workspace is maintained at `PPGU_REV20_NEON_STAGE_ASSETS/` with:
+- `README_ASSET_PACK_RU.md` — pack rules, folder taxonomy and runtime-source mapping;
+- `ASSET_MANIFEST.json` — package-level index and canonical manifest pointers;
+- `ASSET_OPEN_ISSUES.md` — unresolved source/palette/provenance and missing-export issues;
+- the complete requested output directory scaffold.
+
+This workspace does not duplicate or relocate canonical runtime binaries. The actual source remains `SKIN/Skin_053/assets/`; package completion is still in progress and must not be described as a finished full asset library.
