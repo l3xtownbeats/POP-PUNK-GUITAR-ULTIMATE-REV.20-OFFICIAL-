@@ -137,7 +137,11 @@
       "svg": "SKIN/Skin_111/svg/",
       "preview": "SKIN/Skin_111/assets/preview.png",
       "hero": "SKIN/Skin_111/assets/hero.png",
-      "description": "Quiet-water studio console: deep blue graphite, satin cold metal, smoked glass and restrained mineral teal."
+      "description": "Quiet-water studio console: deep blue graphite, satin cold metal, smoked glass and restrained mineral teal.",
+      "artworkManifest": "SKIN/Skin_111/STILLWATER_ASSET_MANIFEST.json",
+      "stateAtlas": "SKIN/Skin_111/svg/state_atlas.svg",
+      "patternWorkspaceReference": "SKIN/Skin_111/svg/pattern_workspace.svg",
+      "status": "STILLWATER_VECTOR_ARTWORK_FOUNDATION_EXPANDED; REV20_EXACT_SHA_REVALIDATION_PENDING; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING"
     },
     {
       "ordinal": 11,
