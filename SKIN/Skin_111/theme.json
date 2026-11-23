@@ -337,7 +337,11 @@
     "crest": "svg/crest.svg",
     "controls": "svg/controls.svg",
     "fxLayers": "svg/fx_layers.svg",
-    "decorative": "svg/decorative.svg"
+    "decorative": "svg/decorative.svg",
+    "rotarySpecimen": "svg/rotary_components.svg",
+    "fxSwitchSpecimen": "svg/fx_switches.svg",
+    "displayFrames": "svg/display_frames.svg",
+    "keyboardSpecimen": "svg/keyboard.svg"
   },
   "compatibility": {
     "minimumPluginVersion": "4.0.0",
@@ -356,7 +360,8 @@
     "Visual-only shell: do not modify APVTS, DSP, MIDI, the 27-control contract, seven FX bypass IDs, sampler, preset semantics or functional layout.",
     "REV.20 exact SHA 8cfd11ecce3c8039360c1c194be5251e716c9015 passed Windows x64 VST3 build, full CTest, this theme's texture/bezel/crest SVG decoding, PNG CRC/dimension validation and 16-only package staging (workflow 44717722638). This theme is runtime-ready/selectable in the REV.20 gallery. FL Studio 20 host acceptance and pluginval remain pending.",
     "User-directed visual identity: STILLWATER. Reuses logical SKIN-10 / stable ID skin-111; product remains exactly 16 themes.",
-    "STILLWATER palette and SVG texture/bezel/crest foundations updated in REV.20. PNG preview/hero replacement and exact-SHA runtime/host acceptance remain pending."
+    "STILLWATER palette and SVG texture/bezel/crest foundations updated in REV.20. PNG preview/hero replacement and exact-SHA runtime/host acceptance remain pending.",
+    "Additional STILLWATER static artwork specimens added for rotary controls, FX switch housings, display frames and 49-key keybed. They are artwork references only; live values, LEDs, switch states and pressed MIDI keys remain native runtime UI."
   ],
   "ordinal": 10
 }
