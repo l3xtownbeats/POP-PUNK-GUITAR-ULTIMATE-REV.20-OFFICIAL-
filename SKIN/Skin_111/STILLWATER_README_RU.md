@@ -1,18 +1,53 @@
-# STILLWATER — графические ресурсы SKIN-10
+# STILLWATER — SKIN-10 / skin-111
 
-Эта папка содержит векторную основу темы STILLWATER для REV.20.
+## Итог графического этапа
 
-## Создано
-- `svg/background.svg` — фон главного окна.
-- `svg/hero.svg` — фирменная hero-графика.
-- `svg/preview.svg` — концептуальный preview-композит.
-- `svg/controls.svg` — образцы визуального языка rotary/button/LCD/LED; это не runtime spritesheet.
-- `svg/texture.svg`, `svg/bezel.svg`, `svg/crest.svg` — поверхности и фирменные рамки.
+STILLWATER оформлена как отдельная визуальная тема существующей SKIN-10. Количество тем остаётся строго **16**. Стабильный ID `skin-111`, ordinal 10, сетка и действующие control IDs сохранены.
 
-## Состояние
-Это SVG foundation, а не завершённый PNG export pack и не подтверждение runtime-интеграции. Перед выпуском нужны raster exports, production state assets, decode/CRC/dimension validation и точная REV.20 проверка.
+### Визуальный язык
+- Глубокий сине-графитовый фон: `#07111B`.
+- Панели: `#101F2B`, `#172D3A`.
+- Холодный сатинированный металл: `#426171`.
+- Минеральный бирюзовый акцент: `#62C8C2`.
+- Световой акцент: `#A0E6DF`.
+- Дымчатые LCD-поверхности и спокойные водные линии.
+- Шрифты: Segoe UI / Consolas.
 
-## Ограничения
-- STILLWATER — SKIN-10, stable ID `skin-111`, index 111; всего тем остаётся ровно 16.
-- Не менять APVTS, DSP, MIDI, аудиодвижок, control IDs и геометрию layout.
-- Главные режимы только MELODY и PATTERN; AUTOCHORDS — дополнительное окно внутри PATTERN.
+### Графические файлы
+| Файл | Назначение |
+|---|---|
+| `svg/background.svg` | Фон интерфейса |
+| `svg/hero.svg` | Фирменная графика |
+| `svg/preview.svg` | Концептуальный preview |
+| `svg/texture.svg` | Текстура поверхности |
+| `svg/bezel.svg` | Металлическая рамка |
+| `svg/crest.svg` | Логотипная композиция |
+| `svg/controls.svg` | Образцы базовых контролов |
+| `svg/fx_layers.svg` | FX-слой |
+| `svg/decorative.svg` | Декоративные водные линии |
+| `svg/rotary_components.svg` | Девять визуальных образцов энкодеров |
+| `svg/fx_switches.svg` | Семь визуальных образцов FX-слотов |
+| `svg/display_frames.svg` | Шесть рамок дисплеев |
+| `svg/keyboard.svg` | Основа 49-клавишной клавиатуры |
+| `svg/state_atlas.svg` | Справочник состояний rotary/FX/LED/клавиш |
+| `svg/pattern_workspace.svg` | Концептуальный визуальный референс PATTERN |
+
+### Границы готовности
+Графическая основа и справочные SVG созданы. Но статические specimen-файлы не являются подключёнными runtime-контролами. Значения энкодеров, состояние FX, LED, meters и нажатия MIDI-клавиш должны отображаться реальными данными интерфейса.
+
+Тема **не помечается как runtime-ready** до проверки точного текущего REV.20 commit. Остаются:
+1. Проверка SVG декодирования и соответствия утверждённой геометрии.
+2. Экспорт производственных PNG, отдельных слоёв и атласов с извлечением кадров.
+3. Подключение ресурсов через существующий theme renderer без изменения control IDs/layout/DSP/MIDI/APVTS.
+4. Windows x64 VST3 build и полный CTest на точном commit.
+5. pluginval и проверка в FL Studio 20.
+
+Сборка в этом графическом этапе не запускалась. Это зафиксировано намеренно; нельзя выдавать визуальные эскизы за проверенный runtime.
+
+## Неприкосновенные ограничения
+- Ровно 16 тем; SKIN-17 не создавать.
+- SKIN-1 NEON STAGE DEFAULT / skin-053 остаётся темой по умолчанию.
+- STILLWATER — SKIN-10 / skin-111.
+- Только два главных режима: MELODY и PATTERN.
+- AUTOCHORDS остаётся дополнительным окном внутри PATTERN.
+- Не менять DSP, аудиодвижок, MIDI, APVTS, control IDs, layout geometry и семантику пресетов.
