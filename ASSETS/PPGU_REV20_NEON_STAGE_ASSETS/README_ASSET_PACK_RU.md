@@ -7,6 +7,7 @@
 ## What is prepared
 
 - `ASSET_MANIFEST.json` indexes all 307 records in the canonical Skin-053 asset manifest, preserving source paths, sizes, SHA-256 and CRC32 values.
+- 16 standalone SVG panel frames have now been created in `panels/`, each with a documented 9-slice inset and no baked-in dynamic UI.
 - 27-control state contract and five declared states are retained in the canonical `assets/controls/control_states_manifest.json`.
 - Nine main rotary and seven main FX switch APVTS bindings are recorded only after checking the IDs against `Source/PluginProcessor.cpp`.
 - Existing background, material, FX overlay, control-state, icon, atlas and vector assets remain in their canonical runtime locations. This pack does not move or duplicate them.
