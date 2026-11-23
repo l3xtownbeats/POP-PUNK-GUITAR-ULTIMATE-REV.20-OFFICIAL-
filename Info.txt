@@ -295,3 +295,10 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - Added static vector artwork specimens for nine rotary housings, seven FX slot housings, six LCD/display frame examples and a 49-key keyboard base, plus FX overlay and decorative ripple layers.
 - Registered the artwork references in `SKIN/Skin_111/theme.json` and expanded the dedicated asset manifest.
 - These SVGs are visual foundations only: live knob values, FX enabled states, LED indicators and pressed MIDI notes must remain native UI state. Production per-control state atlases, PNG exports, full runtime validation and host acceptance are still pending. No build was run.
+
+
+## 2026-11-23 — STILLWATER GRAPHIC DESIGN HANDOFF
+- Added `state_atlas.svg` covering rotary positions, FX switch appearance, semantic LED examples and MIDI key appearances; added `pattern_workspace.svg` as a conceptual PATTERN reference.
+- Registered both resources in `theme.json`, the dedicated STILLWATER asset manifest and the asset catalog. The STILLWATER manifest now indexes 15 SVG resources.
+- Updated the STILLWATER handoff documentation. Corrected release metadata so SKIN-10 is not advertised as runtime-ready until the current exact REV.20 commit is revalidated. The product still contains exactly 16 themes and skin-111 remains ordinal 10.
+- No build was run. Production PNG exports, runtime renderer wiring, approved-geometry review, exact-SHA Windows build/CTest, pluginval and FL Studio 20 acceptance remain release gates.
