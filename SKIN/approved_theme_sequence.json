@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "product": "POP PUNK GUITAR ULTIMATE",
   "contract": "REV.20 LOCKED APPROVED SEQUENCE — EXACTLY 16 GRAPHIC SHELLS",
-  "status": "EXACTLY_16_NAMED_SKINS; ALL_16_PREVIEW_HERO_AND_SVG_ASSETS_PRESENT; REV20_EXACT_SHA_WINDOWS_BUILD_CTEST_RUNTIME_DECODE_AND_16_ONLY_PACKAGE_PASS; FL20_HOST_AND_PLUGINVAL_PENDING",
+  "status": "EXACTLY_16_NAMED_SKINS; STILLWATER_VECTOR_ARTWORK_FOUNDATION_EXPANDED; REV20_EXACT_SHA_REVALIDATION_PENDING; FL20_HOST_AND_PLUGINVAL_PENDING",
   "defaultLogicalSkin": "SKIN-1",
   "defaultStableId": "skin-053",
   "rule": "The product contains exactly 16 graphical shells, logical SKIN-1 through SKIN-16. SKIN-1 is NEON STAGE DEFAULT. Stable IDs/indices are immutable and distinct from logical ordinals. No extra legacy or generated theme is an active product theme. SKIN-10 visual identity is STILLWATER; stable ID skin-111 and ordinal 10 are preserved.",
@@ -95,7 +95,7 @@
       "stableId": "skin-111",
       "index": 111,
       "path": "Skin_111/theme.json",
-      "status": "STILLWATER_VISUAL_FOUNDATIONS_UPDATED; PNG_ARTWORK_AND_EXACT_SHA_VALIDATION_PENDING"
+      "status": "STILLWATER_VECTOR_ARTWORK_FOUNDATION_EXPANDED; REV20_EXACT_SHA_REVALIDATION_PENDING; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING"
     },
     {
       "ordinal": 11,
@@ -165,6 +165,7 @@
     "FL Studio 20 on Windows 10: open plugin, render/inspect all 16 themes, preview/apply/cancel/default restore and persistence",
     "pluginval strictness 5 on exact REV.20 SHA",
     "DPI 100/125/150%, 150 ms hot-swap, ECO/memory/performance and audio/parameter-state invariance",
-    "final release/package approval after legal sample and 500-preset delivery gates"
+    "final release/package approval after legal sample and 500-preset delivery gates",
+    "Revalidate exact current REV.20 commit after STILLWATER artwork additions before marking SKIN-10 runtime-ready"
   ]
 }
