@@ -289,3 +289,9 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - Added dedicated vector artwork for SKIN-10 / skin-111: background, hero, preview concept and control specimen, in addition to texture, bezel and crest.
 - Added `SKIN/Skin_111/STILLWATER_ASSET_MANIFEST.json` and Russian resource notes.
 - This checkpoint is SVG-only. PNG raster exports, production rotary/FX/LED/display/keyboard states, full panel atlas, asset validation, exact-SHA runtime verification and FL Studio 20 host acceptance remain pending. No build was run.
+
+
+## 2026-11-23 — STILLWATER CONTROL ARTWORK SPECIMENS
+- Added static vector artwork specimens for nine rotary housings, seven FX slot housings, six LCD/display frame examples and a 49-key keyboard base, plus FX overlay and decorative ripple layers.
+- Registered the artwork references in `SKIN/Skin_111/theme.json` and expanded the dedicated asset manifest.
+- These SVGs are visual foundations only: live knob values, FX enabled states, LED indicators and pressed MIDI notes must remain native UI state. Production per-control state atlases, PNG exports, full runtime validation and host acceptance are still pending. No build was run.
