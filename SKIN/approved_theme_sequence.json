@@ -5,7 +5,7 @@
   "status": "EXACTLY_16_NAMED_SKINS; ALL_16_PREVIEW_HERO_AND_SVG_ASSETS_PRESENT; REV20_EXACT_SHA_WINDOWS_BUILD_CTEST_RUNTIME_DECODE_AND_16_ONLY_PACKAGE_PASS; FL20_HOST_AND_PLUGINVAL_PENDING",
   "defaultLogicalSkin": "SKIN-1",
   "defaultStableId": "skin-053",
-  "rule": "The product contains exactly 16 graphical shells, logical SKIN-1 through SKIN-16. SKIN-1 is NEON STAGE DEFAULT. Stable IDs/indices are immutable and distinct from logical ordinals. No extra legacy or generated theme is an active product theme.",
+  "rule": "The product contains exactly 16 graphical shells, logical SKIN-1 through SKIN-16. SKIN-1 is NEON STAGE DEFAULT. Stable IDs/indices are immutable and distinct from logical ordinals. No extra legacy or generated theme is an active product theme. SKIN-10 visual identity is STILLWATER; stable ID skin-111 and ordinal 10 are preserved.",
   "themes": [
     {
       "ordinal": 1,
@@ -91,11 +91,11 @@
     {
       "ordinal": 10,
       "label": "SKIN-10",
-      "name": "DEEP OCEAN",
+      "name": "STILLWATER",
       "stableId": "skin-111",
       "index": 111,
       "path": "Skin_111/theme.json",
-      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING"
+      "status": "STILLWATER_VISUAL_FOUNDATIONS_UPDATED; PNG_ARTWORK_AND_EXACT_SHA_VALIDATION_PENDING"
     },
     {
       "ordinal": 11,
