@@ -302,3 +302,12 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - Registered both resources in `theme.json`, the dedicated STILLWATER asset manifest and the asset catalog. The STILLWATER manifest now indexes 15 SVG resources.
 - Updated the STILLWATER handoff documentation. Corrected release metadata so SKIN-10 is not advertised as runtime-ready until the current exact REV.20 commit is revalidated. The product still contains exactly 16 themes and skin-111 remains ordinal 10.
 - No build was run. Production PNG exports, runtime renderer wiring, approved-geometry review, exact-SHA Windows build/CTest, pluginval and FL Studio 20 acceptance remain release gates.
+
+
+## 2026-11-23 — STILLWATER EMBEDDED VST3 RESOURCE INTEGRATION
+- Added STILLWATER manifest and six base SVG layers to the `PPGUData` JUCE BinaryData target in CMakeLists.txt.
+- Added `PPGUThemeManager::loadEmbeddedStillwater()` to validate the embedded skin-111 manifest and decode the embedded SVG layers on the UI thread.
+- Updated PluginEditor to route ordinal 10 and saved skin-111 preference through embedded resources; standalone VST3 can retain the 16-slot theme model and fall back to embedded STILLWATER when no external Skins package is present.
+- Added ThemeManager contract assertions for embedded theme identity and all six decoded SVG layers; linked PPGUData into the theme contract target.
+- External resource dependency is removed for STILLWATER itself. The other 15 skins remain external-package themes.
+- No APVTS, DSP, MIDI, control IDs or layout geometry changed. This source integration has NOT been compiled or executed. CTest, pluginval and FL Studio 20 acceptance remain pending; registry runtimeReady for STILLWATER remains false until those gates pass.
