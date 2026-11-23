@@ -105,6 +105,8 @@ public:
     // A failed load always restores the canonical NEON STAGE DEFAULT palette.
     bool loadFromJson(const juce::String& jsonText);
     bool loadFromFile(const juce::File& manifestFile);
+    // Loads STILLWATER from JUCE BinaryData; no external Skins folder is required.
+    bool loadEmbeddedStillwater();
     void resetToDefault() noexcept;
 
     const Palette& getPalette() const noexcept { return activePalette; }
