@@ -129,14 +129,15 @@
     {
       "ordinal": 10,
       "label": "SKIN-10",
-      "name": "DEEP OCEAN",
+      "name": "STILLWATER",
       "stableId": "skin-111",
       "index": 111,
       "themeJson": "SKIN/Skin_111/theme.json",
       "assets": "SKIN/Skin_111/assets/",
       "svg": "SKIN/Skin_111/svg/",
       "preview": "SKIN/Skin_111/assets/preview.png",
-      "hero": "SKIN/Skin_111/assets/hero.png"
+      "hero": "SKIN/Skin_111/assets/hero.png",
+      "description": "Quiet-water studio console: deep blue graphite, satin cold metal, smoked glass and restrained mineral teal."
     },
     {
       "ordinal": 11,
