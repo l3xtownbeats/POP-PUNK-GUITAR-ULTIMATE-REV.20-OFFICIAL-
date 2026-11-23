@@ -1016,16 +1016,25 @@ public:
                 area.getY() + static_cast<float>(i) * (segmentHeight + gap),
                 area.getWidth(), segmentHeight);
             const float fraction = static_cast<float>(levelIndex) / static_cast<float>(segments);
-            const auto colour = fraction >= 0.92f ? juce::Colour(0xffff4545)
-                : fraction >= 0.80f ? juce::Colour(0xffff9b45)
-                : fraction >= 0.60f ? juce::Colour(0xffffd84a)
+            // Meter thresholds use the active skin's semantic palette tokens,
+            // not fixed NEON-only RGB values. This keeps all 16 themes coherent.
+            const auto colour = fraction >= 0.92f ? palette.token("danger")
+                : fraction >= 0.80f ? palette.token("warning")
+                : fraction >= 0.60f ? palette.token("highlight")
                                     : palette.token("success");
-            g.setColour(i < activeCount ? colour : palette.token("control_bg").brighter(0.04f));
+            const bool lit = i < activeCount;
+            g.setColour(lit ? colour : palette.token("control_bg").brighter(0.04f));
             g.fillRoundedRectangle(segment, 1.2f);
-            if (i < activeCount)
+            if (lit)
             {
-                g.setColour(colour.withAlpha(0.24f));
-                g.drawRoundedRectangle(segment.expanded(0.7f), 1.5f, 1.0f);
+                const float intensity = fraction >= 0.92f ? 0.34f
+                    : (fraction >= 0.80f ? 0.27f : 0.20f);
+                g.setColour(colour.withAlpha(intensity));
+                g.drawRoundedRectangle(segment.expanded(0.9f), 1.5f, 1.0f);
+                // A fine inner highlight improves readability at compact sizes.
+                g.setColour(palette.token("text_primary").withAlpha(0.10f));
+                g.drawLine(segment.getX() + 2.0f, segment.getY() + 1.0f,
+                           segment.getRight() - 2.0f, segment.getY() + 1.0f, 0.6f);
             }
         }
     }
