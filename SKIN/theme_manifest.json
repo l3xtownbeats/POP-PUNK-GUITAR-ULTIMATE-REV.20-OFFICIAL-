@@ -5,7 +5,7 @@
   "totalSkins": 16,
   "defaultLogicalSkin": "SKIN-1",
   "defaultStableId": "skin-053",
-  "runtimePolicy": "All 16 themes are selectable after REV.20 exact-SHA Windows build, CTest, SVG decode, PNG CRC/dimension validation and 16-only package staging pass. FL Studio 20 host acceptance and pluginval remain separate release gates.",
+  "runtimePolicy": "All 16 themes remain selectable only after exact-SHA Windows build, CTest, SVG decode, PNG CRC/dimension validation and 16-only package staging. FL Studio 20 host acceptance and pluginval remain separate release gates.",
   "themes": [
     {
       "ordinal": 1,
@@ -118,12 +118,12 @@
     {
       "ordinal": 10,
       "label": "SKIN-10",
-      "name": "DEEP OCEAN",
+      "name": "STILLWATER",
       "id": "skin-111",
       "index": 111,
       "path": "Skin_111/theme.json",
       "runtimeReady": true,
-      "status": "REV20_RUNTIME_ARTWORK_BUILD_CTEST_AND_PACKAGE_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
+      "status": "STILLWATER_VISUAL_FOUNDATIONS_UPDATED; PNG_ARTWORK_AND_EXACT_SHA_VALIDATION_PENDING",
       "preview": "Skin_111/assets/preview.png",
       "hero": "Skin_111/assets/hero.png"
     },
