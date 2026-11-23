@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs><linearGradient id="heroBg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07111B"/><stop offset=".55" stop-color="#172D3A"/><stop offset="1" stop-color="#050D14"/></linearGradient><radialGradient id="mist" cx=".5" cy=".52" r=".55"><stop stop-color="#62C8C2" stop-opacity=".2"/><stop offset="1" stop-color="#07111B" stop-opacity="0"/></radialGradient><linearGradient id="line" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#426171" stop-opacity="0"/><stop offset=".5" stop-color="#A0E6DF" stop-opacity=".9"/><stop offset="1" stop-color="#426171" stop-opacity="0"/></linearGradient></defs>
+<rect width="1600" height="900" fill="url(#heroBg)"/><rect width="1600" height="900" fill="url(#mist)"/>
+<g fill="none" stroke="#62C8C2" stroke-opacity=".15"><path d="M-80 570 Q180 480 420 570 T900 570 T1380 570 T1860 570" stroke-width="3"/><path d="M-80 625 Q180 535 420 625 T900 625 T1380 625 T1860 625" stroke-width="2"/><path d="M-80 680 Q180 590 420 680 T900 680 T1380 680 T1860 680"/></g>
+<path d="M220 450H1380" stroke="url(#line)" stroke-width="2"/>
+<text x="800" y="360" text-anchor="middle" fill="#E8F2F3" font-family="Segoe UI,Arial,sans-serif" font-size="94" font-weight="600" letter-spacing="18">STILLWATER</text>
+<text x="800" y="430" text-anchor="middle" fill="#A9C0C5" font-family="Segoe UI,Arial,sans-serif" font-size="22" letter-spacing="8">POP PUNK GUITAR ULTIMATE</text>
+<text x="800" y="790" text-anchor="middle" fill="#62C8C2" font-family="Consolas,monospace" font-size="16" letter-spacing="5">DEEP GRAPHITE  /  SATIN METAL  /  MINERAL TEAL</text>
+</svg>
