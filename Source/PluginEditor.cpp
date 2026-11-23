@@ -3315,9 +3315,12 @@ juce::File PopPunkGuitarUltimateAudioProcessorEditor::getRuntimeSkinRoot() const
 int PopPunkGuitarUltimateAudioProcessorEditor::getSkinCount() const
 {
     const auto registryFile = runtimeSkinRoot.getChildFile("theme_manifest.json");
-    if (!registryFile.existsAsFile()) return 0;
+    // The plugin always contains STILLWATER as an embedded fallback theme.
+    // Without a neighbouring Skins package, keep the 16-slot ordinal model so
+    // slot 10 remains addressable; unavailable external themes are simply omitted.
+    if (!registryFile.existsAsFile()) return 16;
     const auto registry = juce::JSON::parse(registryFile.loadFileAsString());
-    if (!registry.isObject()) return 0;
+    if (!registry.isObject()) return 16;
     const auto totalValue = registry.getProperty("totalSkins", juce::var());
     const auto* themes = registry.getProperty("themes", juce::var()).getArray();
     if ((!totalValue.isInt() && !totalValue.isInt64()) || themes == nullptr) return 0;
@@ -3403,8 +3406,12 @@ void PopPunkGuitarUltimateAudioProcessorEditor::loadSavedSkin()
         const auto defaultOrdinal = getSkinOrdinalForId("skin-053");
         if (defaultOrdinal < 1 || !loadSkinByIndex(defaultOrdinal, false))
         {
-            themeManager.resetToDefault();
-            applyPalette();
+            // A standalone VST3 still has a complete embedded visual theme.
+            if (!loadSkinByIndex(10, false))
+            {
+                themeManager.resetToDefault();
+                applyPalette();
+            }
         }
     }
 }
