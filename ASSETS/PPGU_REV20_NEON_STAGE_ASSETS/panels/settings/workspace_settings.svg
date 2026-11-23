@@ -20,4 +20,23 @@
     <path d="M 38 38 h 18 M 38 38 v 12"/>
     <path d="M 682 502 h -18 M 682 502 v -12"/>
   </g>
+
+<g font-family="Segoe UI,Arial,sans-serif" fill="#DCEBFA">
+ <text x="48" y="78" font-size="23" font-weight="700" letter-spacing="2">WORKSPACE SETTINGS</text>
+ <text x="48" y="104" font-size="11" fill="#8DA9C4">NEON STAGE / PANEL LAYOUT</text>
+ <text x="52" y="166" font-size="12" fill="#8DCBFF">AUXILIARY PANEL SCALE</text>
+ <text x="650" y="166" font-size="12" text-anchor="end">1.0x</text>
+ <rect x="52" y="184" width="598" height="10" rx="5" fill="#24384F"/><rect x="52" y="184" width="299" height="10" rx="5" fill="#00D9FF"/>
+ <circle cx="351" cy="189" r="10" fill="#DCEBFA" stroke="#00D9FF" stroke-width="2"/>
+ <text x="52" y="214" font-size="10" fill="#8DA9C4">0.5x</text><text x="650" y="214" font-size="10" text-anchor="end" fill="#8DA9C4">1.5x</text>
+ <text x="52" y="276" font-size="12" fill="#8DCBFF">SPACE BETWEEN PANELS</text>
+ <text x="650" y="276" font-size="12" text-anchor="end">16 px</text>
+ <rect x="52" y="294" width="598" height="10" rx="5" fill="#24384F"/><rect x="52" y="294" width="299" height="10" rx="5" fill="#00D9FF"/>
+ <circle cx="351" cy="299" r="10" fill="#DCEBFA" stroke="#00D9FF" stroke-width="2"/>
+ <text x="52" y="324" font-size="10" fill="#8DA9C4">0 px</text><text x="650" y="324" font-size="10" text-anchor="end" fill="#8DA9C4">32 px</text>
+ <rect x="52" y="374" width="598" height="48" rx="7" fill="#111C2C" stroke="#47617D"/>
+ <text x="351" y="404" font-size="13" text-anchor="middle" font-weight="700">RESTORE NEON STAGE DEFAULT</text>
+ <rect x="52" y="444" width="598" height="48" rx="7" fill="#123044" stroke="#00D9FF"/>
+ <text x="351" y="474" font-size="13" text-anchor="middle" font-weight="700">OPEN SKIN GALLERY</text>
+</g>
 </svg>
