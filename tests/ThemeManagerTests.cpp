@@ -35,6 +35,7 @@ int main()
     std::set<int> ordinals, indices;
     std::set<std::string> ids;
     int runtimeReadyCount = 0;
+    int registryRuntimeReadyCount = 0;
     if (themes != nullptr)
     {
         expect(themes->size() == 16, "registry contains exactly 16 entries");
@@ -46,6 +47,7 @@ int main()
             const auto id = entry.getProperty("id", "").toString();
             const auto path = entry.getProperty("path", "").toString();
             const bool ready = static_cast<bool>(entry.getProperty("runtimeReady", false));
+            if (ready) ++registryRuntimeReadyCount;
             expect(ordinalValue.isInt() || ordinalValue.isInt64(), id + " has logical ordinal");
             expect(indexValue.isInt() || indexValue.isInt64(), id + " has immutable index");
             expect(path.startsWith("Skin_") && path.endsWith("/theme.json"), id + " has safe manifest path");
@@ -139,7 +141,23 @@ int main()
         }
     }
     expect(ordinals.size() == 16, "all 16 logical ordinals are present");
-    expect(runtimeReadyCount == 16, "all 16 approved skins are runtime-ready after exact-SHA REV.20 validation");
+    expect(runtimeReadyCount == registryRuntimeReadyCount,
+           "runtime-ready count matches the explicit registry gate (not an assumed 16)");
+
+    const auto stillwaterEntry = std::find_if(themes != nullptr ? themes->begin() : juce::Array<juce::var>().begin(),
+                                               themes != nullptr ? themes->end() : juce::Array<juce::var>().end(),
+        [](const juce::var& entry) { return entry.getProperty("id", "").toString() == "skin-111"; });
+    if (themes != nullptr)
+    {
+        expect(stillwaterEntry != themes->end(), "STILLWATER skin-111 remains registered");
+        if (stillwaterEntry != themes->end())
+        {
+            expect(stillwaterEntry->getProperty("name", "").toString() == "STILLWATER",
+                   "skin-111 display name is STILLWATER");
+            expect(!static_cast<bool>(stillwaterEntry->getProperty("runtimeReady", true)),
+                   "STILLWATER stays gated until exact-SHA runtime and FL Studio 20 acceptance");
+        }
+    }
 
     const auto neon = skinRoot.getChildFile("Skin_053").getChildFile("theme.json");
     const bool loaded = neon.existsAsFile() && manager.loadFromFile(neon);
