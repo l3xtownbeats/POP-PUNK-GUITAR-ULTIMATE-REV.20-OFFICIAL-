@@ -4,7 +4,7 @@
   "logicalSkin": "SKIN-10",
   "stableId": "skin-111",
   "index": 111,
-  "status": "VECTOR_FOUNDATION_EXPANDED_PARTIAL",
+  "status": "VECTOR_ARTWORK_FOUNDATION_COMPLETE_FOR_DESIGN_REVIEW; RUNTIME_INTEGRATION_PENDING",
   "visualContract": {
     "palette": "SKIN/Skin_111/theme.json",
     "typography": [
@@ -112,22 +112,38 @@
       "format": "SVG",
       "role": "static visual artwork specimen; live runtime state remains native UI",
       "status": "created"
+    },
+    {
+      "id": "stillwater-state-atlas",
+      "path": "svg/state_atlas.svg",
+      "format": "SVG",
+      "dimensions": "1800x1200",
+      "role": "static states reference: rotary positions, FX states, semantic LEDs, MIDI key states",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-pattern-workspace",
+      "path": "svg/pattern_workspace.svg",
+      "format": "SVG",
+      "dimensions": "1440x900",
+      "role": "PATTERN workspace visual reference; geometry is conceptual and not runtime layout",
+      "status": "created"
     }
   ],
   "pending": [
-    "PNG exports for preview/hero/background/materials",
-    "production rotary layers and parameter-specific scales for all nine bindings",
-    "seven approved FX switch states rendered by native runtime controls",
-    "LED/display/keyboard live state integration and atlas exports",
-    "all 16 panel raster exports",
-    "SVG decode and PNG CRC/dimension validation",
-    "exact-SHA REV.20 runtime build and CTest",
-    "FL Studio 20 host acceptance"
+    "Compare visual references against approved REV.20 UI mockup and exact runtime geometry",
+    "Wire SVG/PNG asset loading through existing theme renderer without changing control IDs or geometry",
+    "Raster-export production preview, hero, background, panels and per-control layers at approved dimensions",
+    "Generate production state atlases with individual extracted frames and verify live native states",
+    "Run SVG decode, PNG CRC/dimension, manifest path and SHA validation",
+    "Run exact-commit Windows x64 VST3 build and full CTest",
+    "Run pluginval and FL Studio 20 host acceptance at required DPI scales"
   ],
   "constraints": [
     "exactly 16 themes",
     "preserve stable ID skin-111",
     "visual-only; no DSP/MIDI/APVTS/control ID/layout changes",
-    "AUTOCHORDS remains auxiliary within PATTERN"
+    "AUTOCHORDS remains auxiliary within PATTERN",
+    "Pattern workspace SVG is a visual reference only; it does not replace or redefine runtime PATTERN layout."
   ]
 }
