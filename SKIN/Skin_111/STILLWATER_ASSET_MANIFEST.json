@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "1.0.0",
+  "theme": "STILLWATER",
+  "logicalSkin": "SKIN-10",
+  "stableId": "skin-111",
+  "index": 111,
+  "status": "VECTOR_FOUNDATION_PARTIAL",
+  "visualContract": {
+    "palette": "SKIN/Skin_111/theme.json",
+    "typography": [
+      "Segoe UI",
+      "Consolas"
+    ],
+    "accent": "#62C8C2",
+    "glow": "active/focus only"
+  },
+  "assets": [
+    {
+      "id": "stillwater-background",
+      "path": "svg/background.svg",
+      "format": "SVG",
+      "dimensions": "1600x1100",
+      "role": "main background",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-hero",
+      "path": "svg/hero.svg",
+      "format": "SVG",
+      "dimensions": "1600x900",
+      "role": "hero artwork",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-preview",
+      "path": "svg/preview.svg",
+      "format": "SVG",
+      "dimensions": "720x480",
+      "role": "theme preview concept",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-controls",
+      "path": "svg/controls.svg",
+      "format": "SVG",
+      "dimensions": "960x320",
+      "role": "visual component specimen; not runtime spritesheet",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-texture",
+      "path": "svg/texture.svg",
+      "format": "SVG",
+      "dimensions": "1024x1024",
+      "role": "surface texture",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-bezel",
+      "path": "svg/bezel.svg",
+      "format": "SVG",
+      "dimensions": "1600x900",
+      "role": "outer frame",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-crest",
+      "path": "svg/crest.svg",
+      "format": "SVG",
+      "dimensions": "1200x420",
+      "role": "brand crest",
+      "status": "created"
+    }
+  ],
+  "pending": [
+    "PNG exports for preview/hero/background/materials",
+    "nine rotary production layers and states",
+    "seven approved FX switch states",
+    "LED/display/keyboard atlases",
+    "all 16 panel raster exports",
+    "SVG decode and PNG CRC/dimension validation",
+    "exact-SHA REV.20 runtime build and CTest",
+    "FL Studio 20 host acceptance"
+  ],
+  "constraints": [
+    "exactly 16 themes",
+    "preserve stable ID skin-111",
+    "visual-only; no DSP/MIDI/APVTS/control ID/layout changes",
+    "AUTOCHORDS remains auxiliary within PATTERN"
+  ]
+}
