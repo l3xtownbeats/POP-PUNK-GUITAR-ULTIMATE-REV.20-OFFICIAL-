@@ -1,1 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420"><defs><linearGradient id="c"><stop stop-color="#3EABF5"/><stop offset="1" stop-color="#9AD9FF"/></linearGradient></defs><g fill="none" stroke="url(#c)" stroke-width="16" stroke-linecap="square" stroke-linejoin="round"><path d="M100 300V100L230 300V100M310 100H450L380 200H450M520 100V300H660M730 100L800 300L870 100M950 300V100L1080 300V100"/></g><text x="600" y="385" text-anchor="middle" fill="#B7CDE2" font-family="Segoe UI,Arial,sans-serif" font-size="18" letter-spacing="7">POP PUNK GUITAR ULTIMATE</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420">
+<defs><linearGradient id="waterMark" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#426171"/><stop offset=".48" stop-color="#62C8C2"/><stop offset="1" stop-color="#A0E6DF"/></linearGradient></defs>
+<g fill="none" stroke="url(#waterMark)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+<path d="M100 250 C180 190 260 190 340 250 S500 310 580 250 S740 190 820 250 S980 310 1100 230"/>
+<path d="M160 290 C240 250 300 250 360 290 S500 330 580 290 S720 250 800 290 S960 330 1040 280" stroke-opacity=".38" stroke-width="5"/>
+</g>
+<text x="600" y="145" text-anchor="middle" fill="#E8F2F3" font-family="Segoe UI,Arial,sans-serif" font-size="62" font-weight="600" letter-spacing="13">STILLWATER</text>
+<text x="600" y="375" text-anchor="middle" fill="#A9C0C5" font-family="Segoe UI,Arial,sans-serif" font-size="17" letter-spacing="6">POP PUNK GUITAR ULTIMATE</text>
+</svg>
