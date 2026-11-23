@@ -17,7 +17,14 @@ juce_add_binary_data(PPGUData
     HEADER_NAME PPGUData.h
     NAMESPACE BinaryData
     SOURCES
-        presets/factory_bank_300.json)
+        presets/factory_bank_300.json
+        SKIN/Skin_111/theme.json
+        SKIN/Skin_111/svg/texture.svg
+        SKIN/Skin_111/svg/bezel.svg
+        SKIN/Skin_111/svg/crest.svg
+        SKIN/Skin_111/svg/controls.svg
+        SKIN/Skin_111/svg/fx_layers.svg
+        SKIN/Skin_111/svg/decorative.svg)
 
 juce_add_binary_data(PPGUTestData
     HEADER_NAME PPGUTestData.h
