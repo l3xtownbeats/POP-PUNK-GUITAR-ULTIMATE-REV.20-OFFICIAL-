@@ -3373,6 +3373,11 @@ juce::File PopPunkGuitarUltimateAudioProcessorEditor::getSkinManifest(int ordina
 
 int PopPunkGuitarUltimateAudioProcessorEditor::getSkinOrdinalForId(const juce::String& stableId) const
 {
+    // STILLWATER is shipped in the plugin binary; it does not depend on the
+    // external skin package's runtimeReady flag or a neighbouring Skins folder.
+    if (stableId == "skin-111")
+        return 10;
+
     const auto registryFile = runtimeSkinRoot.getChildFile("theme_manifest.json");
     if (!registryFile.existsAsFile()) return 0;
     const auto registry = juce::JSON::parse(registryFile.loadFileAsString());
@@ -3407,8 +3412,10 @@ void PopPunkGuitarUltimateAudioProcessorEditor::loadSavedSkin()
 bool PopPunkGuitarUltimateAudioProcessorEditor::loadSkinByIndex(int ordinal, bool save)
 {
     if (ordinal < 1 || ordinal > getSkinCount()) return false;
-    const auto manifest = getSkinManifest(ordinal);
-    const bool loaded = manifest.existsAsFile() && themeManager.loadFromFile(manifest);
+    const bool loaded = ordinal == 10
+        ? themeManager.loadEmbeddedStillwater()
+        : (getSkinManifest(ordinal).existsAsFile()
+            && themeManager.loadFromFile(getSkinManifest(ordinal)));
     if (!loaded) themeManager.resetToDefault();
     applyPalette();
     if (save && loaded) persistSkinPreference();
@@ -3429,10 +3436,21 @@ void PopPunkGuitarUltimateAudioProcessorEditor::openSkinGalleryPanel()
         for (int index = 1; index <= count; ++index)
         {
             const auto manifest = getSkinManifest(index);
-            if (!manifest.existsAsFile()) continue;
             PPGUThemeManager candidate;
-            if (!candidate.loadFromFile(manifest)) continue;
-            const auto root = juce::JSON::parse(manifest.loadFileAsString());
+            juce::var root;
+            if (index == 10)
+            {
+                if (!candidate.loadEmbeddedStillwater()) continue;
+                int embeddedJsonSize = 0;
+                const auto* embeddedJson = BinaryData::getNamedResource("theme_json", embeddedJsonSize);
+                if (embeddedJson == nullptr || embeddedJsonSize <= 0) continue;
+                root = juce::JSON::parse(juce::String::fromUTF8(embeddedJson, embeddedJsonSize));
+            }
+            else
+            {
+                if (!manifest.existsAsFile() || !candidate.loadFromFile(manifest)) continue;
+                root = juce::JSON::parse(manifest.loadFileAsString());
+            }
             const auto familyKey = root.getProperty("family", juce::var()).toString();
             const auto legacyCluster = root.getProperty("cluster", juce::var()).toString();
             const auto family = familyKey.isNotEmpty()
