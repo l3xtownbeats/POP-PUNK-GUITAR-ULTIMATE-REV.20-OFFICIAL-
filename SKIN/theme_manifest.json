@@ -5,7 +5,7 @@
   "totalSkins": 16,
   "defaultLogicalSkin": "SKIN-1",
   "defaultStableId": "skin-053",
-  "runtimePolicy": "All 16 themes remain selectable only after exact-SHA Windows build, CTest, SVG decode, PNG CRC/dimension validation and 16-only package staging. FL Studio 20 host acceptance and pluginval remain separate release gates.",
+  "runtimePolicy": "Theme selection/release readiness requires exact-SHA Windows build, CTest, SVG decode, PNG CRC/dimension validation and 16-only package staging. Any visual asset or theme metadata commit invalidates prior exact-SHA evidence until revalidated. FL Studio 20 host acceptance and pluginval remain separate release gates.",
   "themes": [
     {
       "ordinal": 1,
@@ -122,8 +122,8 @@
       "id": "skin-111",
       "index": 111,
       "path": "Skin_111/theme.json",
-      "runtimeReady": true,
-      "status": "STILLWATER_VISUAL_FOUNDATIONS_UPDATED; PNG_ARTWORK_AND_EXACT_SHA_VALIDATION_PENDING",
+      "runtimeReady": false,
+      "status": "STILLWATER_VECTOR_ARTWORK_FOUNDATION_EXPANDED; REV20_EXACT_SHA_REVALIDATION_PENDING; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_111/assets/preview.png",
       "hero": "Skin_111/assets/hero.png"
     },
