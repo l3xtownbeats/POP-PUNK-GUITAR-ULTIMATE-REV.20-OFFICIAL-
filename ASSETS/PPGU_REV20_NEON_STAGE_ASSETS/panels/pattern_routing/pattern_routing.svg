@@ -20,4 +20,30 @@
     <path d="M 37 37 h 18 M 37 37 v 12"/>
     <path d="M 783 483 h -18 M 783 483 v -12"/>
   </g>
+
+<g font-family="Segoe UI,Arial,sans-serif" fill="#DCEBFA">
+ <text x="48" y="76" font-size="22" font-weight="700" letter-spacing="1.5">PATTERN / SONG SECTION ROUTING</text>
+ <text x="48" y="101" font-size="11" fill="#8DA9C4">PATTERN MODE / SECTION ASSIGNMENT</text>
+ <text x="52" y="157" font-size="11" fill="#8DCBFF">SONG SECTION</text>
+ <rect x="52" y="172" width="330" height="48" rx="7" fill="#080E19" stroke="#47617D"/>
+ <text x="72" y="202" font-size="14">VERSE  ▾</text>
+ <text x="430" y="157" font-size="11" fill="#8DCBFF">RHYTHM CATALOG</text>
+ <rect x="430" y="172" width="338" height="48" rx="7" fill="#080E19" stroke="#47617D"/>
+ <text x="450" y="202" font-size="14">PATTERN 1  ▾</text>
+ <g font-size="11" text-anchor="middle">
+  <rect x="52" y="250" width="716" height="106" rx="9" fill="#080E19" stroke="#31506F"/>
+  <text x="410" y="278" fill="#00D9FF" letter-spacing="1.5">AVAILABLE SONG SECTIONS</text>
+  <g fill="#14263A" stroke="#3C5C78">
+   <rect x="72" y="294" width="120" height="42" rx="5"/><rect x="210" y="294" width="120" height="42" rx="5"/><rect x="348" y="294" width="120" height="42" rx="5"/><rect x="486" y="294" width="120" height="42" rx="5"/><rect x="624" y="294" width="120" height="42" rx="5"/>
+  </g>
+  <g fill="#DCEBFA"><text x="132" y="320">INTRO</text><text x="270" y="320">VERSE</text><text x="408" y="320">CHORUS</text><text x="546" y="320">BRIDGE</text><text x="684" y="320">OUTRO</text></g>
+ </g>
+ <rect x="52" y="388" width="716" height="44" rx="7" fill="#080E19" stroke="#31506F"/>
+ <text x="72" y="415" font-size="11" fill="#8DA9C4">ROUTING STATUS / SELECT A SECTION AND PATTERN</text>
+ <g font-size="12" font-weight="700" text-anchor="middle">
+  <rect x="52" y="454" width="150" height="42" rx="6" fill="#123044" stroke="#00D9FF"/><text x="127" y="480">PREVIEW</text>
+  <rect x="216" y="454" width="150" height="42" rx="6" fill="#123044" stroke="#00D9FF"/><text x="291" y="480">APPLY</text>
+  <rect x="380" y="454" width="150" height="42" rx="6" fill="#111C2C" stroke="#47617D"/><text x="455" y="480">CANCEL</text>
+ </g>
+</g>
 </svg>
