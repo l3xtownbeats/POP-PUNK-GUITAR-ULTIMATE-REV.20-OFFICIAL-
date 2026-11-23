@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "1.0.0",
+  "project": "POP PUNK GUITAR ULTIMATE REV.20",
+  "package": "PPGU_REV20_NEON_STAGE_ASSETS",
+  "targetTheme": {
+    "logicalOrdinal": 1,
+    "name": "NEON STAGE DEFAULT",
+    "stableId": "skin-053",
+    "stableIndex": 53
+  },
+  "status": "PARTIAL_PRODUCTION_WORKSPACE_NOT_FINAL",
+  "canonicalRuntimeManifest": "../SKIN/Skin_053/assets/asset_manifest.json",
+  "canonicalThemeManifest": "../SKIN/Skin_053/theme.json",
+  "canonicalControlStateManifest": "../SKIN/Skin_053/assets/controls/control_states_manifest.json",
+  "canonicalSpriteSheetManifest": "../SKIN/Skin_053/assets/spritesheets/neon_stage_spritesheet_manifest.json",
+  "assetPolicy": {
+    "binaryAssetsAreNotDuplicated": true,
+    "canonicalBinaryRoot": "../SKIN/Skin_053/assets/",
+    "textRenderedBy": "JUCE runtime",
+    "formats": [
+      "PNG RGBA",
+      "self-contained SVG"
+    ],
+    "noExternalReferences": true
+  },
+  "existingGroups": [
+    {
+      "id": "background",
+      "source": "../SKIN/Skin_053/assets/background/",
+      "status": "PRESENT_RUNTIME_ASSET"
+    },
+    {
+      "id": "preview",
+      "source": "../SKIN/Skin_053/assets/preview/",
+      "status": "PRESENT_RUNTIME_ASSET"
+    },
+    {
+      "id": "hero",
+      "source": "../SKIN/Skin_053/assets/hero/",
+      "status": "PRESENT_RUNTIME_ASSET"
+    },
+    {
+      "id": "control_states",
+      "source": "../SKIN/Skin_053/assets/controls/",
+      "status": "PRESENT_CONTROL_STATE_EXPORTS_27_IDS_X_5_STATES"
+    },
+    {
+      "id": "master_controls",
+      "source": "../SKIN/Skin_053/assets/master/controls/",
+      "status": "PRESENT_MASTER_ARTWORK"
+    },
+    {
+      "id": "sprite_sheets",
+      "source": "../SKIN/Skin_053/assets/spritesheets/",
+      "status": "PRESENT_RUNTIME_ATLASES"
+    },
+    {
+      "id": "fx_layers",
+      "source": "../SKIN/Skin_053/assets/fx_layers/",
+      "status": "PRESENT_RUNTIME_LAYERS"
+    },
+    {
+      "id": "icons",
+      "source": "../SKIN/Skin_053/assets/icons/",
+      "status": "PRESENT_RUNTIME_ICONS"
+    },
+    {
+      "id": "textures",
+      "source": "../SKIN/Skin_053/assets/textures/",
+      "status": "PRESENT_RUNTIME_TEXTURE"
+    },
+    {
+      "id": "svg_materials",
+      "source": "../SKIN/Skin_053/svg/",
+      "status": "PRESENT_RUNTIME_SVG_LAYERS"
+    }
+  ],
+  "requiredProductionGroups": [
+    "previews/contact_sheets",
+    "backgrounds/separate_material_exports",
+    "panels/main_and_auxiliary_windows",
+    "buttons/individual_interaction_states",
+    "knobs/separate_base_rim_face_pointer_scale_glow_layers",
+    "switches/individual_states",
+    "leds/individual_states",
+    "displays/lcd_components_and_states",
+    "meters/vu_and_level_meter_parts",
+    "keyboard/49_key_midi_keyboard_and_key_states",
+    "icons/16_24_32_48",
+    "hardware/metal_bevels_screws_frames",
+    "sprites/extracted_individual_frames",
+    "source/layered_artwork_and_export_metadata"
+  ],
+  "references": {
+    "approvedMockup": "../01%20INTERFACE%20%20NEON%20STAGE%20DEFAULT%20.png",
+    "masterPrompt": "../PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt",
+    "developmentBaseline": "../docs/REV20_ACCEPTED_BASELINE_RU.md",
+    "skinApproval": "../docs/REV20_SKIN_APPROVAL_STANDARD_RU.md"
+  },
+  "notes": [
+    "The canonical asset_manifest.json remains the exhaustive file-level inventory of current Skin_053 runtime assets.",
+    "This package manifest indexes current groups and required production exports; it does not claim every requested production export is complete.",
+    "Do not modify the 16-theme registry or any functional IDs while producing artwork."
+  ]
+}
