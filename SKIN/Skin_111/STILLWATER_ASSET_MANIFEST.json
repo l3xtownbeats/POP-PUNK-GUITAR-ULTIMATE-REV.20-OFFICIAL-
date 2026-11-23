@@ -4,7 +4,7 @@
   "logicalSkin": "SKIN-10",
   "stableId": "skin-111",
   "index": 111,
-  "status": "VECTOR_FOUNDATION_PARTIAL",
+  "status": "VECTOR_FOUNDATION_EXPANDED_PARTIAL",
   "visualContract": {
     "palette": "SKIN/Skin_111/theme.json",
     "typography": [
@@ -70,13 +70,55 @@
       "dimensions": "1200x420",
       "role": "brand crest",
       "status": "created"
+    },
+    {
+      "id": "stillwater-fx-layers",
+      "path": "svg/fx_layers.svg",
+      "format": "SVG",
+      "role": "static visual artwork specimen; live runtime state remains native UI",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-decorative",
+      "path": "svg/decorative.svg",
+      "format": "SVG",
+      "role": "static visual artwork specimen; live runtime state remains native UI",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-rotary-components",
+      "path": "svg/rotary_components.svg",
+      "format": "SVG",
+      "role": "static visual artwork specimen; live runtime state remains native UI",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-fx-switches",
+      "path": "svg/fx_switches.svg",
+      "format": "SVG",
+      "role": "static visual artwork specimen; live runtime state remains native UI",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-display-frames",
+      "path": "svg/display_frames.svg",
+      "format": "SVG",
+      "role": "static visual artwork specimen; live runtime state remains native UI",
+      "status": "created"
+    },
+    {
+      "id": "stillwater-keyboard",
+      "path": "svg/keyboard.svg",
+      "format": "SVG",
+      "role": "static visual artwork specimen; live runtime state remains native UI",
+      "status": "created"
     }
   ],
   "pending": [
     "PNG exports for preview/hero/background/materials",
-    "nine rotary production layers and states",
-    "seven approved FX switch states",
-    "LED/display/keyboard atlases",
+    "production rotary layers and parameter-specific scales for all nine bindings",
+    "seven approved FX switch states rendered by native runtime controls",
+    "LED/display/keyboard live state integration and atlas exports",
     "all 16 panel raster exports",
     "SVG decode and PNG CRC/dimension validation",
     "exact-SHA REV.20 runtime build and CTest",
