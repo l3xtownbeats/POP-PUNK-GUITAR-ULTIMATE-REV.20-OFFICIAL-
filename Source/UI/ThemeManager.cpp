@@ -1,4 +1,5 @@
 #include "ThemeManager.h"
+#include "PPGUData.h"
 
 #include <limits>
 
@@ -243,6 +244,62 @@ namespace
         }
 
         destination = decoded;
+        return true;
+    }
+
+    bool loadEmbeddedSvgArtwork(const char* resourceName, int width, int height,
+                                 juce::Image& destination, juce::String& error)
+    {
+        int dataSize = 0;
+        const auto* data = BinaryData::getNamedResource(resourceName, dataSize);
+        if (data == nullptr || dataSize <= 0 || dataSize > 256 * 1024)
+        {
+            error = "Embedded STILLWATER SVG resource is missing or exceeds the size limit";
+            return false;
+        }
+
+        const auto svgText = juce::String::fromUTF8(data, dataSize);
+        if (svgText.isEmpty()
+            || svgText.containsIgnoreCase("<script")
+            || svgText.containsIgnoreCase("<foreignObject")
+            || svgText.containsIgnoreCase("<image")
+            || svgText.containsIgnoreCase("javascript:")
+            || svgText.containsIgnoreCase("href=\"http")
+            || svgText.containsIgnoreCase("href='http")
+            || svgText.containsIgnoreCase("url(http")
+            || svgText.containsIgnoreCase("xlink:href")
+            || svgText.containsIgnoreCase("<!DOCTYPE")
+            || svgText.containsIgnoreCase("<!ENTITY"))
+        {
+            error = "Embedded STILLWATER SVG contains unsupported or external content";
+            return false;
+        }
+
+        auto xml = juce::XmlDocument::parse(svgText);
+        if (xml == nullptr || xml->getTagName() != "svg")
+        {
+            error = "Embedded STILLWATER SVG could not be parsed";
+            return false;
+        }
+
+        auto drawable = juce::Drawable::createFromSVG(*xml);
+        if (drawable == nullptr)
+        {
+            error = "Embedded STILLWATER SVG could not be rendered";
+            return false;
+        }
+
+        juce::Image rendered(juce::Image::ARGB, width, height, true);
+        juce::Graphics graphics(rendered);
+        drawable->drawWithin(graphics, rendered.getBounds().toFloat(),
+                             juce::RectanglePlacement::stretchToFit, 1.0f);
+        if (!rendered.isValid())
+        {
+            error = "Embedded STILLWATER SVG produced an invalid image";
+            return false;
+        }
+
+        destination = std::move(rendered);
         return true;
     }
 
@@ -741,6 +798,47 @@ bool PPGUThemeManager::loadFromJson(const juce::String& jsonText)
     }
 
     activePalette = candidate;
+    lastError.clear();
+    return true;
+}
+
+bool PPGUThemeManager::loadEmbeddedStillwater()
+{
+    int jsonSize = 0;
+    const auto* jsonData = BinaryData::getNamedResource("theme_json", jsonSize);
+    if (jsonData == nullptr || jsonSize <= 0)
+    {
+        lastError = "Embedded STILLWATER manifest is missing";
+        resetToDefault();
+        return false;
+    }
+
+    const auto root = juce::JSON::parse(juce::String::fromUTF8(jsonData, jsonSize));
+    Palette candidate;
+    juce::String error;
+    if (!validateManifest(root, candidate, error) || candidate.id != "skin-111"
+        || candidate.name != "STILLWATER")
+    {
+        lastError = error.isNotEmpty() ? error : "Embedded theme is not the canonical STILLWATER skin-111";
+        resetToDefault();
+        return false;
+    }
+
+    // These resources are compiled into PPGUData and therefore travel inside the
+    // VST3 binary. They are decoded once on the UI thread, never on the audio thread.
+    if (!loadEmbeddedSvgArtwork("texture_svg", 512, 512, candidate.textureArtwork, error)
+        || !loadEmbeddedSvgArtwork("bezel_svg", 800, 450, candidate.bezelArtwork, error)
+        || !loadEmbeddedSvgArtwork("crest_svg", 480, 168, candidate.crestArtwork, error)
+        || !loadEmbeddedSvgArtwork("controls_svg", 1024, 1024, candidate.controlsArtwork, error)
+        || !loadEmbeddedSvgArtwork("fx_layers_svg", 800, 450, candidate.fxLayerArtwork, error)
+        || !loadEmbeddedSvgArtwork("decorative_svg", 800, 450, candidate.decorativeArtwork, error))
+    {
+        lastError = error.isNotEmpty() ? error : "Embedded STILLWATER artwork loading failed";
+        resetToDefault();
+        return false;
+    }
+
+    activePalette = std::move(candidate);
     lastError.clear();
     return true;
 }
