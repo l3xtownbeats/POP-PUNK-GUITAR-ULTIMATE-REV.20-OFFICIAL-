@@ -1,0 +1,33 @@
+# PPGU REV.20 — NEON STAGE DEFAULT Asset Pack
+
+**Theme:** SKIN-1 / NEON STAGE DEFAULT / `skin-053`  
+**Status:** SOURCE INDEX PREPARED — EXPORT NOT COMPLETE  
+**Canonical runtime source:** `SKIN/Skin_053/`
+
+## What is prepared
+
+- `ASSET_MANIFEST.json` indexes all 307 records in the canonical Skin-053 asset manifest, preserving source paths, sizes, SHA-256 and CRC32 values.
+- 27-control state contract and five declared states are retained in the canonical `assets/controls/control_states_manifest.json`.
+- Nine main rotary and seven main FX switch APVTS bindings are recorded only after checking the IDs against `Source/PluginProcessor.cpp`.
+- Existing background, material, FX overlay, control-state, icon, atlas and vector assets remain in their canonical runtime locations. This pack does not move or duplicate them.
+
+## Exact style contract
+
+Use the SKIN-1 theme tokens in `SKIN/Skin_053/theme.json`: dark graphite surfaces, anodized-metal edges, restrained cyan accent and controlled glow. Typography and dynamic readouts stay live in JUCE. Keep exactly two main modes (MELODY/PATTERN), nine main rotary controls, seven main FX switches, and AUTOCHORDS as a PATTERN auxiliary window. Preserve all 27 control IDs and stable ID `skin-053`.
+
+## Important source conflict
+
+The current sprite sheet manifest declares project `NEON_STAGE_MANAGER_3_0` and a palette that differs from PPGU REV.20. Do not treat it as an approved PPGU palette source. Its geometry may be used only after a dedicated reconciliation against `theme.json` and the approved reference. The SKIN-1 palette itself is authoritative.
+
+## Export limitations
+
+This commit does not fabricate missing images or pretend that existing atlases are equivalent to individually exported components. The exact outstanding deliverables are listed in `ASSET_OPEN_ISSUES.md`. The reference PNG at repository root has not yet been visually inspected in this session, so pixel-perfect layout approval is still open. No ZIP is produced until the source assets have been copied, audited and the missing component assets completed.
+
+## Source references
+
+- `Info.txt` — unified development journal and approved design decisions.
+- `PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt` — complete asset production contract.
+- `SKIN/Skin_053/theme.json` — exact palette, control map and runtime asset links.
+- `SKIN/Skin_053/assets/asset_manifest.json` — canonical asset hashes and source inventory.
+- `SKIN/Skin_053/assets/controls/control_states_manifest.json` — 27 controls × 5 states.
+- `Source/PluginProcessor.cpp` — actual APVTS parameter identifiers.
