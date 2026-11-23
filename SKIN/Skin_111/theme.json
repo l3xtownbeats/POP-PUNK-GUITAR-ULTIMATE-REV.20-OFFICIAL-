@@ -341,7 +341,9 @@
     "rotarySpecimen": "svg/rotary_components.svg",
     "fxSwitchSpecimen": "svg/fx_switches.svg",
     "displayFrames": "svg/display_frames.svg",
-    "keyboardSpecimen": "svg/keyboard.svg"
+    "keyboardSpecimen": "svg/keyboard.svg",
+    "stateAtlas": "svg/state_atlas.svg",
+    "patternWorkspaceReference": "svg/pattern_workspace.svg"
   },
   "compatibility": {
     "minimumPluginVersion": "4.0.0",
@@ -349,7 +351,7 @@
     "layoutChanges": false,
     "audioChanges": false
   },
-  "designStatus": "REV20_RUNTIME_READY_CI_VERIFIED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
+  "designStatus": "STILLWATER_VECTOR_FOUNDATION_EXPANDED; REV20_EXACT_SHA_REVALIDATION_PENDING; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
   "notes": [
     "Concept selected under user's delegated direction on 2026-11-15. Logical SKIN-10; stable identity skin-111 / index 111.",
     "Legacy IDs and indices 1–102 are preserved.",
@@ -358,10 +360,10 @@
     "Premium artwork is present in REV.20: assets/preview.png (360x240), assets/hero.png (800x450), plus this theme's SVG texture/bezel/crest foundations.",
     "Source artwork asset audit and Windows x64 build/full CTest passed on source SHA 10e590c8a3fdfed90cc7ae05e0ff74d8875ac88a; REV.20 exact-SHA runtime, package and FL Studio 20 acceptance remain pending.",
     "Visual-only shell: do not modify APVTS, DSP, MIDI, the 27-control contract, seven FX bypass IDs, sampler, preset semantics or functional layout.",
-    "REV.20 exact SHA 8cfd11ecce3c8039360c1c194be5251e716c9015 passed Windows x64 VST3 build, full CTest, this theme's texture/bezel/crest SVG decoding, PNG CRC/dimension validation and 16-only package staging (workflow 44717722638). This theme is runtime-ready/selectable in the REV.20 gallery. FL Studio 20 host acceptance and pluginval remain pending.",
     "User-directed visual identity: STILLWATER. Reuses logical SKIN-10 / stable ID skin-111; product remains exactly 16 themes.",
     "STILLWATER palette and SVG texture/bezel/crest foundations updated in REV.20. PNG preview/hero replacement and exact-SHA runtime/host acceptance remain pending.",
-    "Additional STILLWATER static artwork specimens added for rotary controls, FX switch housings, display frames and 49-key keybed. They are artwork references only; live values, LEDs, switch states and pressed MIDI keys remain native runtime UI."
+    "Additional STILLWATER static artwork specimens added for rotary controls, FX switch housings, display frames and 49-key keybed. They are artwork references only; live values, LEDs, switch states and pressed MIDI keys remain native runtime UI.",
+    "STILLWATER completion checkpoint: vector artwork foundations and static state/workspace references are present. This commit has not been rebuilt or runtime-validated; do not treat the additional specimen SVGs as runtime-integrated controls."
   ],
   "ordinal": 10
 }
