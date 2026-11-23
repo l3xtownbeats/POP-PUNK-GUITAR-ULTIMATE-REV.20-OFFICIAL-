@@ -144,19 +144,21 @@ int main()
     expect(runtimeReadyCount == registryRuntimeReadyCount,
            "runtime-ready count matches the explicit registry gate (not an assumed 16)");
 
-    const auto stillwaterEntry = std::find_if(themes != nullptr ? themes->begin() : juce::Array<juce::var>().begin(),
-                                               themes != nullptr ? themes->end() : juce::Array<juce::var>().end(),
-        [](const juce::var& entry) { return entry.getProperty("id", "").toString() == "skin-111"; });
     if (themes != nullptr)
     {
-        expect(stillwaterEntry != themes->end(), "STILLWATER skin-111 remains registered");
-        if (stillwaterEntry != themes->end())
+        bool foundStillwater = false;
+        for (const auto& entry : *themes)
         {
-            expect(stillwaterEntry->getProperty("name", "").toString() == "STILLWATER",
+            if (entry.getProperty("id", "").toString() != "skin-111")
+                continue;
+
+            foundStillwater = true;
+            expect(entry.getProperty("name", "").toString() == "STILLWATER",
                    "skin-111 display name is STILLWATER");
-            expect(!static_cast<bool>(stillwaterEntry->getProperty("runtimeReady", true)),
+            expect(!static_cast<bool>(entry.getProperty("runtimeReady", true)),
                    "STILLWATER stays gated until exact-SHA runtime and FL Studio 20 acceptance");
         }
+        expect(foundStillwater, "STILLWATER skin-111 remains registered");
     }
 
     const auto neon = skinRoot.getChildFile("Skin_053").getChildFile("theme.json");
