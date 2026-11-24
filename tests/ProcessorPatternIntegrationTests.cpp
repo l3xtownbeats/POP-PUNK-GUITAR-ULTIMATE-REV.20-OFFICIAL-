@@ -150,6 +150,109 @@ int main()
         }
     }
 
+    // Exercise the asynchronous registry path: decoding/publication happens
+    // off the message thread, completion is marshalled back to it, and a valid
+    // empty registry explicitly clears an already-published snapshot.
+    {
+        const auto asyncRoot = std::filesystem::temp_directory_path()
+            / "ppgu-pattern-async-empty-registry";
+        std::error_code asyncCleanupError;
+        std::filesystem::remove_all(asyncRoot, asyncCleanupError);
+        std::filesystem::create_directories(asyncRoot);
+        const juce::File asyncManifest(asyncRoot.string() + "/pattern_clips.json");
+        if (!asyncManifest.replaceWithText("{\\n  \\"schema_version\\": 1,\\n  \\"clips\\": []\\n}"))
+        {
+            std::cerr << "Could not create asynchronous PATTERN registry fixture.\\n";
+            result = 1;
+        }
+        else
+        {
+            PopPunkGuitarUltimateAudioProcessor asyncProcessor;
+            asyncProcessor.prepareToPlay(48000.0, 256);
+            auto asyncSnapshot = std::make_unique<ppgu::performance::PatternClipSnapshot>();
+            asyncSnapshot->clips.resize(1);
+            asyncSnapshot->clips[0].sampleRate = 48000.0;
+            asyncSnapshot->clips[0].samples.assign(1024, 0.25f);
+            asyncSnapshot->mappings.push_back({72, 1, 127, 0, 0, 0, 64, 1.0f, 0.0f});
+            if (!asyncProcessor.installPatternClipSnapshot(std::move(asyncSnapshot)))
+            {
+                std::cerr << "Could not publish seed snapshot for async registry test.\\n";
+                result = 1;
+            }
+
+            setParameter(asyncProcessor, "playMode", 1.0f);
+            setParameter(asyncProcessor, "articulation", 0.0f);
+            setParameter(asyncProcessor, "ampGain", 5.0f);
+            setParameter(asyncProcessor, "master", 1.0f);
+            setParameter(asyncProcessor, "eqOn", 0.0f);
+            setParameter(asyncProcessor, "compressorOn", 0.0f);
+            setParameter(asyncProcessor, "distortionOn", 0.0f);
+            setParameter(asyncProcessor, "chorusOn", 0.0f);
+            setParameter(asyncProcessor, "flangerOn", 0.0f);
+            setParameter(asyncProcessor, "delayOn", 0.0f);
+            setParameter(asyncProcessor, "reverbOn", 0.0f);
+            setParameter(asyncProcessor, "cabinetOn", 0.0f);
+
+            std::atomic<bool> completed { false };
+            std::atomic<bool> callbackOnMessageThread { false };
+            std::atomic<bool> reportedEmpty { false };
+            asyncProcessor.loadPatternClipRegistryAsync(asyncManifest,
+                [&](ppgu::performance::PatternClipLoadResult loadResult)
+                {
+                    callbackOnMessageThread.store(
+                        juce::MessageManager::getInstance()->isThisTheMessageThread(),
+                        std::memory_order_release);
+                    reportedEmpty.store(loadResult.empty && !loadResult.ready
+                                            && loadResult.errors.empty(),
+                                        std::memory_order_release);
+                    completed.store(true, std::memory_order_release);
+                });
+
+            const auto deadline = std::chrono::steady_clock::now()
+                + std::chrono::seconds(5);
+            while (!completed.load(std::memory_order_acquire)
+                   && std::chrono::steady_clock::now() < deadline)
+                juce::MessageManager::getInstance()->runDispatchLoopUntil(10);
+
+            if (!completed.load(std::memory_order_acquire))
+            {
+                std::cerr << "Asynchronous PATTERN registry completion timed out.\\n";
+                result = 1;
+            }
+            else if (!callbackOnMessageThread.load(std::memory_order_acquire)
+                     || !reportedEmpty.load(std::memory_order_acquire))
+            {
+                std::cerr << "Asynchronous PATTERN completion thread/status contract failed.\\n";
+                result = 1;
+            }
+            else
+            {
+                juce::AudioBuffer<float> clearedBlock(2, 256);
+                juce::MidiBuffer clearedMidi;
+                clearedMidi.addEvent(
+                    juce::MidiMessage::noteOn(1, 72, static_cast<juce::uint8>(110)), 0);
+                asyncProcessor.processBlock(clearedBlock, clearedMidi);
+                double peak = 0.0;
+                for (int channel = 0; channel < clearedBlock.getNumChannels(); ++channel)
+                    for (int sample = 0; sample < clearedBlock.getNumSamples(); ++sample)
+                        peak = juce::jmax(peak, std::abs(
+                            static_cast<double>(clearedBlock.getSample(channel, sample))));
+                if (peak > 1.0e-7)
+                {
+                    std::cerr << "A valid empty async registry did not clear the published PATTERN snapshot.\\n";
+                    result = 1;
+                }
+            }
+        }
+        std::filesystem::remove_all(asyncRoot, asyncCleanupError);
+        if (asyncCleanupError)
+        {
+            std::cerr << "Could not remove async PATTERN fixtures: "
+                      << asyncCleanupError.message() << "\\n";
+            result = 1;
+        }
+    }
+
     std::filesystem::remove_all(root, cleanupError);
     std::filesystem::create_directories(root);
 
