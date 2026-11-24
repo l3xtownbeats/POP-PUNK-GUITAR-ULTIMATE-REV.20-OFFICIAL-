@@ -238,6 +238,9 @@ PatternClipLoadResult PatternClipLoader::load(const juce::File& manifestFile)
             auto clipReader = openPcmWav(formats, clipPath, assetId, "derived clip");
             if (clipReader->sampleRate != sampleRate || clipReader->lengthInSamples != frameCount)
                 throw std::runtime_error(assetId + ": derived WAV rate/frame_count mismatch");
+            if (clipReader->numChannels != sourceReader->numChannels
+                || clipReader->bitsPerSample != sourceReader->bitsPerSample)
+                throw std::runtime_error(assetId + ": derived WAV PCM format differs from source");
 
             if (static_cast<std::size_t>(frameCount) >
                 PatternClipSnapshot::maximumDecodedFrames - totalFrames)
@@ -250,6 +253,8 @@ PatternClipLoadResult PatternClipLoader::load(const juce::File& manifestFile)
             const int decodeChannels = static_cast<int>(clipReader->numChannels);
             juce::AudioBuffer<float> decoded(decodeChannels,
                 juce::jmin(decodeChunkFrames, frameCount));
+            juce::AudioBuffer<float> sourceDecoded(decodeChannels,
+                juce::jmin(decodeChunkFrames, frameCount));
             PatternClipPcm pcm;
             pcm.sampleRate = clipReader->sampleRate;
             pcm.samples.resize(static_cast<std::size_t>(frameCount));
@@ -259,6 +264,14 @@ PatternClipLoadResult PatternClipLoader::load(const juce::File& manifestFile)
                 decoded.clear();
                 if (!clipReader->read(&decoded, 0, chunk, offset, true, true))
                     throw std::runtime_error(assetId + ": failed to decode complete derived WAV");
+                if (!sourceReader->read(&sourceDecoded, 0, chunk,
+                                        static_cast<int64_t>(start) + offset, true, true))
+                    throw std::runtime_error(assetId + ": failed to decode declared source range");
+                for (int channel = 0; channel < decodeChannels; ++channel)
+                    for (int frame = 0; frame < chunk; ++frame)
+                        if (decoded.getSample(channel, frame) != sourceDecoded.getSample(channel, frame))
+                            throw std::runtime_error(
+                                assetId + ": derived clip PCM does not match declared source sample range");
                 for (int frame = 0; frame < chunk; ++frame)
                 {
                     const float sample = monoFrame(decoded, frame);
