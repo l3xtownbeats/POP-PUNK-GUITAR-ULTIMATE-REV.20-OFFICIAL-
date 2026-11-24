@@ -30,6 +30,7 @@ struct PatternClipMapping
     std::uint32_t releaseSamples = 2400;
     float gain = 1.0f;
     float pan = 0.0f;
+    std::uint16_t roundRobinGroup = 0;
 };
 
 struct PatternClipSnapshot
@@ -81,6 +82,7 @@ public:
                 const auto& prior = snapshot.mappings[j];
                 if (prior.triggerNote == mapping.triggerNote
                     && prior.articulation == mapping.articulation
+                    && prior.roundRobinGroup == mapping.roundRobinGroup
                     && prior.velocityLow <= mapping.velocityHigh
                     && mapping.velocityLow <= prior.velocityHigh)
                     return false;
@@ -139,17 +141,22 @@ public:
             || velocity < 1 || velocity > 127 || channel < 1 || channel > 16)
             return false;
 
-        const PatternClipMapping* selected = nullptr;
+        std::array<const PatternClipMapping*, PatternClipSnapshot::maximumMappings> matches {};
+        std::size_t matchCount = 0;
         for (const auto& mapping : snapshot->mappings)
         {
             if (mapping.triggerNote == note && mapping.articulation == articulation
-                && velocity >= mapping.velocityLow && velocity <= mapping.velocityHigh)
-            {
-                selected = &mapping;
-                break;
-            }
+                && velocity >= mapping.velocityLow && velocity <= mapping.velocityHigh
+                && matchCount < matches.size())
+                matches[matchCount++] = &mapping;
         }
-        if (selected == nullptr || selected->clipIndex >= snapshot->clips.size())
+        if (matchCount == 0)
+            return false;
+        const auto rrIndex = static_cast<std::size_t>(note);
+        const auto selectedIndex = static_cast<std::size_t>(
+            roundRobinCounters[rrIndex]++ % static_cast<std::uint32_t>(matchCount));
+        const auto* selected = matches[selectedIndex];
+        if (selected->clipIndex >= snapshot->clips.size())
             return false;
 
         const auto& clip = snapshot->clips[selected->clipIndex];
@@ -206,6 +213,7 @@ public:
     {
         for (auto& voice : voices) voice = Voice {};
         nextAge = 1;
+        roundRobinCounters.fill(0);
     }
 
     void prepare(double sampleRate) noexcept
@@ -297,6 +305,7 @@ private:
 
     std::atomic<const PatternClipSnapshot*> activeSnapshot { nullptr };
     std::array<Voice, maximumVoices> voices {};
+    std::array<std::uint32_t, 128> roundRobinCounters {};
     double outputSampleRate = 48000.0;
     std::uint64_t nextAge = 1;
 };
