@@ -268,8 +268,8 @@ bool PopPunkGuitarUltimateAudioProcessor::installPatternClipSnapshot(
 
 void PopPunkGuitarUltimateAudioProcessor::clearPatternClipSnapshot() noexcept
 {
-    patternClipRuntime.clearPublishedSnapshot();
     const std::lock_guard<std::mutex> lock(patternClipSnapshotMutex);
+    patternClipRuntime.clearPublishedSnapshot();
     collectRetiredPatternClipSnapshotsLocked();
 }
 
