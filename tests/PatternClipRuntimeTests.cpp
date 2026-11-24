@@ -37,6 +37,46 @@ int main()
         return 1;
     }
 
+    // Hot publication must leave active voices attached to the old,
+    // still-owned immutable snapshot while new triggers use the replacement.
+    PatternClipSnapshot replacement;
+    replacement.clips.resize(1);
+    replacement.clips[0].sampleRate = 48000.0;
+    replacement.clips[0].samples.assign(512, 0.1f);
+    replacement.mappings.push_back({62, 1, 127, 0, 0, 0, 64, 1.0f, 0.0f});
+
+    PatternClipRuntime hotSwapRuntime;
+    hotSwapRuntime.prepare(48000.0);
+    hotSwapRuntime.attachSnapshot(&snapshot);
+    if (!hotSwapRuntime.noteOn(60, 100, 1)
+        || !hotSwapRuntime.publishSnapshot(&replacement)
+        || !hotSwapRuntime.noteOn(62, 100, 1)
+        || hotSwapRuntime.activeVoiceCount() != 2)
+    {
+        std::cerr << "Live snapshot publication did not preserve old voices and route new triggers.\\n";
+        return 1;
+    }
+    std::array<float, 8> hotSwapLeft {}, hotSwapRight {};
+    hotSwapRuntime.render(hotSwapLeft.data(), hotSwapRight.data(),
+                          static_cast<int>(hotSwapLeft.size()));
+    if (!(hotSwapLeft[0] > 0.59f && hotSwapLeft[0] < 0.61f))
+    {
+        std::cerr << "Voices did not retain their respective immutable snapshot PCM.\\n";
+        return 1;
+    }
+    if (hotSwapRuntime.publishSnapshot(&invalidSnapshot))
+    {
+        std::cerr << "Invalid snapshot replaced the active publication.\\n";
+        return 1;
+    }
+    hotSwapRuntime.clearPublishedSnapshot();
+    if (hotSwapRuntime.noteOn(62, 100, 1) || hotSwapRuntime.activeVoiceCount() != 2)
+    {
+        std::cerr << "Clearing publication affected active voices or accepted new triggers.\\n";
+        return 1;
+    }
+    hotSwapRuntime.detachSnapshot();
+
     PatternClipRuntime runtime;
     runtime.prepare(48000.0);
     runtime.attachSnapshot(&snapshot);
