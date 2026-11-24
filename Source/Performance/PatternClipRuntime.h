@@ -36,6 +36,7 @@ struct PatternClipSnapshot
 {
     static constexpr std::size_t maximumMappings = 512;
     static constexpr std::size_t maximumClips = 256;
+    static constexpr std::size_t maximumDecodedFrames = 8U * 1024U * 1024U;
     std::vector<PatternClipPcm> clips;
     std::vector<PatternClipMapping> mappings;
 };
@@ -47,6 +48,46 @@ class PatternClipRuntime final
 {
 public:
     static constexpr std::size_t maximumVoices = 32;
+
+    // Run on a loader/worker thread before publication. This bounds all work
+    // reachable from the real-time mapping lookup and prevents invalid PCM.
+    [[nodiscard]] static bool validateSnapshot(const PatternClipSnapshot& snapshot) noexcept
+    {
+        if (snapshot.clips.empty() || snapshot.clips.size() > PatternClipSnapshot::maximumClips
+            || snapshot.mappings.empty() || snapshot.mappings.size() > PatternClipSnapshot::maximumMappings)
+            return false;
+        std::size_t totalFrames = 0;
+        for (const auto& clip : snapshot.clips)
+        {
+            if (clip.samples.empty() || !std::isfinite(clip.sampleRate)
+                || clip.sampleRate < 8000.0 || clip.sampleRate > 192000.0
+                || clip.samples.size() > PatternClipSnapshot::maximumDecodedFrames - totalFrames)
+                return false;
+            totalFrames += clip.samples.size();
+            for (const float sample : clip.samples)
+                if (!std::isfinite(sample)) return false;
+        }
+        for (std::size_t i = 0; i < snapshot.mappings.size(); ++i)
+        {
+            const auto& mapping = snapshot.mappings[i];
+            if (mapping.triggerNote > 127 || mapping.velocityLow < 1
+                || mapping.velocityHigh > 127 || mapping.velocityLow > mapping.velocityHigh
+                || mapping.clipIndex >= snapshot.clips.size() || mapping.articulation > 65535
+                || !std::isfinite(mapping.gain) || mapping.gain < 0.0f || mapping.gain > 4.0f
+                || !std::isfinite(mapping.pan) || mapping.pan < -1.0f || mapping.pan > 1.0f)
+                return false;
+            for (std::size_t j = 0; j < i; ++j)
+            {
+                const auto& prior = snapshot.mappings[j];
+                if (prior.triggerNote == mapping.triggerNote
+                    && prior.articulation == mapping.articulation
+                    && prior.velocityLow <= mapping.velocityHigh
+                    && mapping.velocityLow <= prior.velocityHigh)
+                    return false;
+            }
+        }
+        return true;
+    }
 
     void attachSnapshot(const PatternClipSnapshot* snapshot) noexcept
     {
@@ -65,7 +106,7 @@ public:
                               int articulation = 0) noexcept
     {
         const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
-        if (snapshot == nullptr || note < 0 || note > 127
+        if (snapshot == nullptr || snapshot->mappings.empty()\n            || snapshot->mappings.size() > PatternClipSnapshot::maximumMappings\n            || note < 0 || note > 127
             || velocity < 1 || velocity > 127 || channel < 1 || channel > 16)
             return false;
 
