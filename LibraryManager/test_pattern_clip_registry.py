@@ -20,19 +20,27 @@ class PatternClipRegistryTests(unittest.TestCase):
         (self.root / "clips").mkdir()
         (self.root / "licenses").mkdir()
         (self.root / "licenses" / "CC0.txt").write_text("CC0 license evidence fixture", encoding="utf-8")
+        (self.root / "sources").mkdir()
+        self.source = self.root / "sources" / "guitar-source.wav"
+        with wave.open(str(self.source), "wb") as wav:
+            wav.setnchannels(1)
+            wav.setsampwidth(2)
+            wav.setframerate(48000)
+            wav.writeframes(b"\\x01\\x00" * 9600)
+        source_digest = hashlib.sha256(self.source.read_bytes()).hexdigest().upper()
         self.clip = self.root / "clips" / "fixture.wav"
         with wave.open(str(self.clip), "wb") as wav:
             wav.setnchannels(1)
             wav.setsampwidth(2)
             wav.setframerate(48000)
-            wav.writeframes(b"\x00\x00" * 4800)
+            wav.writeframes(b"\\x00\\x00" * 4800)
         digest = hashlib.sha256(self.clip.read_bytes()).hexdigest().upper()
         self.record = {
             "asset_id": "TEST-CLIP-001",
             "kind": "note_event",
             "engine_targets": ["PATTERN_MODE"],
-            "source_path": "external-source-library/guitar-source.wav",
-            "source_sha256": "A" * 64,
+            "source_path": "sources/guitar-source.wav",
+            "source_sha256": source_digest,
             "source_start_sample": 1200,
             "source_end_sample": 6000,
             "sample_rate": 48000,
@@ -99,6 +107,25 @@ class PatternClipRegistryTests(unittest.TestCase):
         self.record["musical_review"]["status"] = "NEEDS_MUSICAL_REVIEW"
         self.write_manifest()
         with self.assertRaisesRegex(ValueError, "musical_review APPROVED"):
+            load_pattern_clip_registry(self.manifest)
+
+    def test_source_hash_mismatch_is_rejected(self):
+        self.record["source_sha256"] = "B" * 64
+        self.write_manifest()
+        with self.assertRaisesRegex(ValueError, "source WAV SHA-256 mismatch"):
+            load_pattern_clip_registry(self.manifest)
+
+    def test_source_file_must_be_packaged(self):
+        self.record["source_path"] = "sources/missing.wav"
+        self.write_manifest()
+        with self.assertRaisesRegex(ValueError, "does not exist"):
+            load_pattern_clip_registry(self.manifest)
+
+    def test_source_sample_range_must_fit_source_wav(self):
+        self.record["source_end_sample"] = 12000
+        self.record["frame_count"] = 10800
+        self.write_manifest()
+        with self.assertRaisesRegex(ValueError, "exceeds source WAV frame count"):
             load_pattern_clip_registry(self.manifest)
 
     def test_clip_hash_mismatch_is_rejected(self):
