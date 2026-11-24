@@ -26,14 +26,14 @@ class PatternClipRegistryTests(unittest.TestCase):
             wav.setnchannels(1)
             wav.setsampwidth(2)
             wav.setframerate(48000)
-            wav.writeframes(b"\\x01\\x00" * 9600)
+            wav.writeframes(b"\x01\x00" * 9600)
         source_digest = hashlib.sha256(self.source.read_bytes()).hexdigest().upper()
         self.clip = self.root / "clips" / "fixture.wav"
         with wave.open(str(self.clip), "wb") as wav:
             wav.setnchannels(1)
             wav.setsampwidth(2)
             wav.setframerate(48000)
-            wav.writeframes(b"\\x00\\x00" * 4800)
+            wav.writeframes(b"\x00\x00" * 4800)
         digest = hashlib.sha256(self.clip.read_bytes()).hexdigest().upper()
         self.record = {
             "asset_id": "TEST-CLIP-001",
