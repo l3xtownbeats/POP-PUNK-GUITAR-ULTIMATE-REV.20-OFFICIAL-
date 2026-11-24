@@ -1,81 +1,93 @@
-# PATTERN MODE — C++ runtime integration design
+# PATTERN MODE — C++ runtime integration status
 
-Статус: implementation design / not yet wired into the audio processor.
+Статус: runtime, manifest loader, asynchronous publication и прямой MIDI-маршрут интегрированы в C++ процессор. Приёмка Windows x64/CTest и проверка в FL Studio 20 ещё не подтверждены.
 
 ## Scope boundary
 
-This runtime handles only the approved per-key note-event clips:
+Этот runtime обслуживает только approved per-key note-event clips:
 
-- MIDI Note On selects a mapping by trigger note, articulation, and velocity zone.
-- The selected clip plays as a recorded one-shot event.
-- MIDI Note Off releases the matching active clip voice; it must not be confused with a generated pattern step.
-- Choke/retrigger behavior is deterministic and channel-aware.
-- Chord-driven PATTERN INSTRUMENT phrases remain a separate future engine.
+- MIDI Note On выбирает mapping по trigger note, articulation и velocity zone.
+- Выбранный clip воспроизводится как записанный one-shot фрагмент.
+- MIDI Note Off адресуется по MIDI key и channel.
+- Velocity layers и Round Robin являются частью mapping lookup.
+- Choke/retrigger и ограничение голосов обрабатываются детерминированно.
+- Chord-driven PATTERN INSTRUMENT (аккорд → riff/phrase) остаётся отдельным будущим движком.
 
-The existing chord-driven rhythm-mask path in `PluginProcessor::processBlock` is legacy behavior. It must not be silently relabeled as recorded clip playback. Until the clip runtime is enabled and has approved content, the product must expose its unavailable state honestly.
+Нельзя подменять реальные записанные фрагменты hard-coded rhythm masks. Legacy chord-driven PATTERN и AutoChords остаются отдельной веткой. MELODY не должен перехватываться direct PATTERN маршрутом.
 
-## Existing architecture findings
+## Реализованные компоненты
 
-- `SamplerEngine` already owns fixed-capacity voices and renders into the output buffer.
-- `SamplePool` publishes immutable region snapshots from a non-audio loader and retains their owners so audio-thread region pointers remain valid.
-- Production SFZ samples use a bounded streaming page cache. That streaming path is not automatically suitable for short PATTERN clips: cache misses can produce missing audio and the PATTERN contract requires a bounded, fully preloaded clip cache.
-- `processBlock` currently owns MIDI sample-accurate segmentation, MELODY routing, PATTERN chord tracking, AutoChords, and transport scheduling. New clip routing must not intercept MELODY or alter AutoChords semantics.
+### 1. Registry и provenance
 
-## Required runtime shape
+- `LibraryManager/pattern_clip_registry.py` — fail-closed проверка per-key note-event registry.
+- Проверяются source/derived SHA-256, source range, PCM WAV, sample rate/frame count, MIDI key/source pitch, articulation, velocity, RR group, musical review и license evidence.
+- Пустой registry валиден как конфигурация, но возвращает `EMPTY_NO_APPROVED_CLIPS` и `ready=False`.
+- Перекрывающиеся velocity zones в одной комбинации trigger/articulation/RR group отклоняются.
+- Реестр не объявляет клип готовым только на основании автоматической сегментации: музыкальная проверка и права на распространение подтверждаются отдельно.
 
-1. **Offline/background validation and load**
-   - Parse the manifest and run the existing fail-closed provenance, source hash, derived hash, PCM, frame-range, license, and musical-review checks off the audio thread.
-   - Decode every selected derived WAV into a bounded in-memory representation.
-   - Reject the candidate snapshot as a whole if any selected clip is invalid or exceeds configured memory/clip/voice limits.
-   - Never publish a partially loaded registry.
+### 2. C++ loader
 
-2. **Safe publication and lifetime**
-   - Publish only a fully constructed immutable snapshot.
-   - The audio thread reads a stable snapshot without a mutex, file access, JSON parsing, hashing, allocation, or reference-count destruction.
-   - Snapshot ownership must outlive every voice that references its clip data. Retired snapshots are reclaimed only on a non-audio thread after audio use has ended; a raw atomic pointer alone is not a lifetime strategy.
+- `Source/Performance/PatternClipLoader.h/.cpp`
+- `PatternClipLoader::load(manifestFile)` возвращает snapshot, errors, ready и empty.
+- Проверяются schema, размер manifest, безопасные пути, source/derived hashes, license evidence, musical review, engine target, note-event kind, PCM format, sample/frame limits, memory budget, finite PCM, mapping и pitch ratio.
+- Ошибочная загрузка не публикует частичный snapshot.
 
-3. **Bounded voice engine**
-   - Use fixed-capacity voice storage and preallocated clip data.
-   - Each voice records trigger note, MIDI channel, clip identity, playback cursor, gain/envelope state, and choke group.
-   - Apply sample-rate conversion using the clip's declared source sample rate.
-   - Use deterministic voice stealing when the configured voice cap is reached.
-   - No dynamic allocation, blocking lock, disk/network I/O, or unbounded work in `processBlock`.
+### 3. Runtime
 
-4. **MIDI lifecycle**
-   - Note On chooses the velocity zone and starts the mapped clip at the event's exact sample offset.
-   - Repeated Note On for the same key/channel follows a documented retrigger policy.
-   - Note Off releases only the matching key/channel voices; release must not cut unrelated notes.
-   - Choke groups stop prior matching voices with a short de-click fade, not an abrupt discontinuity.
-   - All Notes Off / All Sound Off and play-mode transitions clear clip voices safely.
-
-5. **Processor integration**
-   - Keep the current MELODY branch unchanged.
-   - Add an explicit PATTERN MODE clip route only when a READY snapshot is installed.
-   - Preserve AutoChords as its own chord interpretation feature; do not let it transform a one-key clip trigger into a chord or alter clip mapping.
-   - If no approved registry is installed, do not fabricate audio or report the feature as ready.
-
-## Acceptance tests before enabling the route
-
-- Manifest rejection: missing source, source/derived hash mismatch, invalid PCM, bad sample range, license evidence missing, unreviewed clip, overlapping velocity zones.
-- Cache bounds: maximum clip count, maximum total decoded bytes, oversized clip, failed decode, failed candidate load leaves previous snapshot active.
-- Audio-thread safety: no allocations, locks, file access, JSON parsing, or hashing in render path.
-- MIDI: sample-accurate Note On, matching Note Off, repeated trigger, same-sample off/on, channel isolation, velocity-zone selection, choke, voice stealing, panic.
-- Audio: expected output, sample-rate conversion, no out-of-bounds reads, no click at release/choke, finite output.
-- Regression: MELODY playback and AutoChords behavior remain unchanged.
-- Host: Windows x64 VST3 build, CTest, pluginval, then manual FL Studio 20 acceptance.
-
-## Current status
-
-The registry validator exists in Python and validates packaged source/derived WAVs offline. The C++ clip runtime, manifest-to-runtime bridge, bounded preloaded cache, and MIDI clip routing are not implemented yet. No approved real clip payload is currently present in the repository. This document is a design gate, not a claim of completed integration.
-
-
-## Implementation progress — isolated C++ runtime prototype
-
-Added:
 - `Source/Performance/PatternClipRuntime.h`
-- `tests/PatternClipRuntimeTests.cpp`
-- CTest target `ppgu_pattern_clip_runtime_contracts`
+- Фиксированный пул из 32 голосов.
+- Ограничения snapshot: до 512 mappings, до 256 clips и до 8,388,608 decoded frames.
+- Preloaded PCM, sample-rate conversion и pitch ratio.
+- Поиск mapping ограничен 512 записями; аудиопоток не выполняет file I/O, JSON parsing, hashing, динамические выделения или блокирующие mutex операции.
+- Velocity zones выбирают соответствующий слой.
+- Round Robin циклически выбирает совпавшие варианты. Счётчики изолированы по первому matching mapping, то есть по trigger key, articulation и velocity lane.
+- Note Off учитывает MIDI channel; предусмотрены release/choke fade и ограниченное voice stealing.
+- All Notes Off применяет release, All Sound Off немедленно завершает голоса.
 
-The prototype has a fixed 32-voice array, a 512-mapping lookup bound, a 256-clip/8,388,608-frame snapshot budget, offline PCM/mapping validation, sample-rate-aware linear interpolation, channel-specific Note Off, release and choke fades, and oldest-voice stealing. Its render and MIDI methods use fixed storage and do not allocate or lock.
+### 4. Processor integration
 
-The prototype is intentionally not connected to `PluginProcessor::processBlock`. Snapshot attach/detach requires audio suspension, and the snapshot owner must retain immutable clip memory until all voices are reset and the runtime is detached. A production publisher/retirement mechanism and manifest-to-PCM loader are still required. Tests have been authored and registered but are not yet reported as passing; Windows CI/build confirmation is pending.
+- `Source/PluginProcessor.h/.cpp`
+- READY snapshot подключается к direct PATTERN MODE маршруту.
+- MIDI события обрабатываются с sample-offset сегментацией.
+- Один MIDI key запускает один mapped clip, без расширения в аккорд через AutoChords.
+- SFZ keyswitch события продолжают обслуживаться sampler.
+- MELODY и legacy chord-driven PATTERN остаются отдельными ветками.
+- При valid empty registry публикация очищается; при invalid registry предыдущий рабочий snapshot сохраняется.
+- Async loader использует отдельный generation state от SFZ загрузки.
+
+### 5. Асинхронность и срок жизни snapshot
+
+- Фоновая загрузка выполняется в двухпоточном `sampleLoadPool`.
+- Generation increment и публикация сериализованы `patternLoadPublicationMutex`; устаревшая загрузка A не может перезаписать более новую B.
+- WAV decode выполняется вне publication mutex.
+- Completion callback доставляется через JUCE Message Thread и проверяет актуальность generation.
+- Snapshot остаётся доступным, пока активные audio calls и voices держат ссылки; сбор retired snapshots выполняется на не-аудиопотоке.
+- Тестовая loader injection seam доступна только при `PPGU_ENABLE_TEST_HOOKS` в отдельной тестовой цели.
+
+## Регрессионные проверки
+
+В репозитории зарегистрированы:
+
+- `ppgu_pattern_clip_registry_contract` — Python registry contract.
+- `ppgu_pattern_clip_loader_contracts` — C++ manifest/PCM loader.
+- `ppgu_pattern_clip_runtime_contracts` — runtime voice/mapping contract.
+- `ppgu_processor_pattern_tests` — интеграция processor, MIDI и async publication.
+
+Runtime tests охватывают snapshot validation/ownership, hot publication, velocity layers, Round Robin, независимость RR между velocity lanes и articulations, channel-specific Note Off, release, choke, voice cap, pitch ratio, All Notes Off и немедленный All Sound Off.
+
+Processor integration tests охватывают audible baseline, invalid registry retention, valid empty registry clearing, Message Thread callback и deterministic A/B generation race (A задерживается управляемым loader seam, B публикуется первой, затем A завершается и должна быть отброшена).
+
+Тесты добавлены в исходники и CMake. Это не равнозначно успешному выполнению: подтверждение компиляции и CTest должно быть получено из Windows CI.
+
+## Оставшиеся gates
+
+1. Успешная Windows x64 конфигурация и сборка VST3 + всех C++ test targets.
+2. Успешный полный CTest, включая `ppgu_pattern_clip_runtime_contracts` и `ppgu_processor_pattern_tests`.
+3. Проверка CI артефактов/skin registry.
+4. Подключение реальных source/derived guitar clips с подтверждённой музыкальной пригодностью и лицензиями. На момент последнего аудита в Git tree нет готовой распространяемой аудиобиблиотеки.
+5. Проверка MIDI Note On/Off, velocity, RR, All Notes Off и All Sound Off на настоящем контенте.
+6. Ручной запуск Windows x64 VST3 в FL Studio 20; эта проверка не может быть заменена CTest.
+
+## Отдельная будущая ветка
+
+Chord-driven PATTERN INSTRUMENT (аккорд → согласованный riff/phrase, chord adaptation, groove и musical sections) не входит в текущий per-key registry. Его нельзя объявлять готовым на основании реализации note-event runtime.
