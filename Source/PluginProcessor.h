@@ -69,6 +69,13 @@ public:
     void clearPatternClipSnapshot() noexcept;
     void loadPatternClipRegistryAsync(const juce::File& manifestFile,
         std::function<void(ppgu::performance::PatternClipLoadResult)> completion);
+    // Deterministic loader injection for concurrency regression tests only.
+    using PatternClipRegistryLoader = std::function<
+        ppgu::performance::PatternClipLoadResult(const juce::File&)>;
+    void loadPatternClipRegistryAsyncForTesting(
+        const juce::File& manifestFile,
+        std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
+        PatternClipRegistryLoader loader);
 
     juce::AudioProcessorValueTreeState parameters;
     juce::MidiKeyboardState keyboardState;
@@ -116,6 +123,12 @@ private:
     void collectRetiredPatternClipSnapshotsLocked();
     std::shared_ptr<std::atomic<std::uint64_t>> patternLoadGeneration {
         std::make_shared<std::atomic<std::uint64_t>>(0) };
+    void loadPatternClipRegistryAsyncImpl(
+        const juce::File& manifestFile,
+        std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
+        PatternClipRegistryLoader loader);
+    // Two workers permit overlapping decodes; generation validation serializes publication.
+    juce::ThreadPool patternLoadPool { 2 };
     ppgu::performance::BlockClock patternTransportClock;
     std::array<std::array<bool, 128>, 16> patternHeldNotes {};
     std::array<ppgu::performance::PatternEvent, 512> patternEvents {};
