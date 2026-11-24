@@ -12,6 +12,7 @@ on:
       - "Source/**"
       - "tests/**"
       - "SKIN/Skin_053/**"
+      - ".gitattributes"
       - "tools/package_active_skins.py"
       - ".github/workflows/skin1-control-state-ci.yml"
 
