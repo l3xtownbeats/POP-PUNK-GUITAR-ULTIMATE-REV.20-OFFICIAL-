@@ -20,7 +20,7 @@ EXPECTED = [
     ("SKIN-7", "TITANIUM STORM", "skin-108", 108, "Skin_108"),
     ("SKIN-8", "EMERALD CIRCUIT", "skin-109", 109, "Skin_109"),
     ("SKIN-9", "SOLAR FLARE", "skin-110", 110, "Skin_110"),
-    ("SKIN-10", "DEEP OCEAN", "skin-111", 111, "Skin_111"),
+    ("SKIN-10", "STILLWATER", "skin-111", 111, "Skin_111"),
     ("SKIN-11", "ROSE CHROME", "skin-112", 112, "Skin_112"),
     ("SKIN-12", "DESERT AMBER", "skin-113", 113, "Skin_113"),
     ("SKIN-13", "GLACIER TEAL", "skin-114", 114, "Skin_114"),
