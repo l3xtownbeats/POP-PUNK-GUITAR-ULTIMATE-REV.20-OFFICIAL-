@@ -69,14 +69,16 @@ public:
     void clearPatternClipSnapshot() noexcept;
     void loadPatternClipRegistryAsync(const juce::File& manifestFile,
         std::function<void(ppgu::performance::PatternClipLoadResult)> completion);
-    // Deterministic loader injection for concurrency regression tests only.
+    // Loader injection is exposed only to the dedicated C++ regression-test target.
     using PatternClipRegistryLoader = std::function<
         ppgu::performance::PatternClipLoadResult(const juce::File&)>;
+#if defined(PPGU_ENABLE_TEST_HOOKS)
     void loadPatternClipRegistryAsyncForTesting(
         const juce::File& manifestFile,
         std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
         PatternClipRegistryLoader loader,
         std::function<void()> workerFinished);
+#endif
 
     juce::AudioProcessorValueTreeState parameters;
     juce::MidiKeyboardState keyboardState;
