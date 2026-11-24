@@ -1,4 +1,5 @@
 #include "PatternClipLoader.h"
+#include <juce_core/cryptography/juce_SHA256.h>
 
 #include <iostream>
 #include <cmath>

@@ -1,4 +1,5 @@
 #include "PatternClipLoader.h"
+#include <juce_core/cryptography/juce_SHA256.h>
 
 #include <algorithm>
 #include <filesystem>
@@ -106,7 +107,10 @@ std::unique_ptr<juce::AudioFormatReader> openPcmWav(
         formats.createReaderFor(juce::File(juce::String(path.string()))));
     if (!reader)
         throw std::runtime_error(assetId + ": cannot decode " + role + " WAV");
-    if (reader->formatName != "WAV" || reader->numChannels < 1 || reader->numChannels > 2
+    auto extension = path.extension().string();
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    if (extension != ".wav" || reader->numChannels < 1 || reader->numChannels > 2
         || reader->bitsPerSample < 16 || reader->bitsPerSample > 32
         || reader->usesFloatingPointData
         || reader->sampleRate < 8000.0 || reader->sampleRate > 192000.0
@@ -144,8 +148,8 @@ PatternClipLoadResult PatternClipLoader::load(const juce::File& manifestFile)
             || static_cast<uint64_t>(manifestFile.getSize()) > maximumManifestBytes)
             throw std::runtime_error("PATTERN clip manifest size is outside the permitted limit");
 
-        juce::Result parseResult;
-        const auto document = juce::JSON::parse(manifestFile.loadFileAsString(), &parseResult);
+        juce::var document;
+        const auto parseResult = juce::JSON::parse(manifestFile.loadFileAsString(), document);
         if (parseResult.failed() || !document.isObject())
             throw std::runtime_error("Invalid PATTERN clip JSON: " + parseResult.getErrorMessage().toStdString());
         if (intValue(property(document, "schema_version"), "schema_version") != 1)
