@@ -77,6 +77,7 @@ juce_add_plugin(PPGU
 
 target_sources(PPGU PRIVATE
     Source/PluginProcessor.cpp
+    Source/Performance/PatternClipLoader.cpp
     Source/PluginEditor.cpp
     Source/UI/ThemeManager.cpp
     Source/UI/AuxiliaryPanelLayout.cpp
@@ -103,6 +104,23 @@ function(ppgu_add_test target source)
     target_sources(${target} PRIVATE ${source})
     add_test(NAME ${target} COMMAND ${target})
 endfunction()
+
+# JUCE-backed PATTERN registry loader: JSON, fail-closed status and WAV infrastructure.
+juce_add_console_app(ppgu_pattern_clip_loader_contracts
+    PRODUCT_NAME "PPGU PATTERN Clip Loader Contract Tests"
+    NEEDS_WEB_BROWSER FALSE
+    NEEDS_CURL FALSE)
+target_sources(ppgu_pattern_clip_loader_contracts PRIVATE
+    tests/PatternClipLoaderTests.cpp
+    Source/Performance/PatternClipLoader.cpp)
+target_include_directories(ppgu_pattern_clip_loader_contracts PRIVATE Source/Performance)
+target_compile_definitions(ppgu_pattern_clip_loader_contracts PRIVATE ${PPGU_JUCE_DEFINITIONS})
+target_link_libraries(ppgu_pattern_clip_loader_contracts PRIVATE
+    juce::juce_audio_formats
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_warning_flags)
+juce_generate_juce_header(ppgu_pattern_clip_loader_contracts)
+add_test(NAME ppgu_pattern_clip_loader_contracts COMMAND ppgu_pattern_clip_loader_contracts)
 
 # Pure C++ contract tests.
 # Pure C++ PATTERN clip voice runtime: fixed-capacity MIDI lifecycle and PCM rendering.
@@ -192,6 +210,7 @@ juce_add_console_app(ppgu_processor_pattern_tests
 target_sources(ppgu_processor_pattern_tests PRIVATE
     tests/ProcessorPatternIntegrationTests.cpp
     Source/PluginProcessor.cpp
+    Source/Performance/PatternClipLoader.cpp
     Source/PluginEditor.cpp
     Source/UI/ThemeManager.cpp
     Source/UI/AuxiliaryPanelLayout.cpp
