@@ -117,8 +117,14 @@ def _build_mapping(record: dict[str, Any], root: Path) -> PatternClipMapping:
     _verify_license(record, root, asset_id)
     _verify_musical_review(record, asset_id)
 
-    _required_text(record.get("source_path"), f"{asset_id}.source_path")
     source_hash = _sha(record.get("source_sha256"), f"{asset_id}.source_sha256")
+    source_path = _resolve_packaged_file(
+        root, record.get("source_path"), f"{asset_id}.source_path"
+    )
+    actual_source_hash = hashlib.sha256(source_path.read_bytes()).hexdigest().upper()
+    if actual_source_hash != source_hash:
+        raise ValueError(f"{asset_id}: source WAV SHA-256 mismatch")
+
     clip_hash = _sha(record.get("derived_sha256"), f"{asset_id}.derived_sha256")
     start = _required_int(record.get("source_start_sample"), f"{asset_id}.source_start_sample")
     end = _required_int(record.get("source_end_sample"), f"{asset_id}.source_end_sample", 1)
@@ -128,6 +134,16 @@ def _build_mapping(record: dict[str, Any], root: Path) -> PatternClipMapping:
     frame_count = _required_int(record.get("frame_count"), f"{asset_id}.frame_count", 1)
     if frame_count != end - start:
         raise ValueError(f"{asset_id}: frame_count must equal source_end_sample - source_start_sample")
+    try:
+        with wave.open(str(source_path), "rb") as source_wav:
+            if source_wav.getcomptype() != "NONE":
+                raise ValueError(f"{asset_id}: source must be uncompressed PCM WAV")
+            if source_wav.getframerate() != sample_rate:
+                raise ValueError(f"{asset_id}: source WAV sample rate does not match manifest")
+            if end > source_wav.getnframes():
+                raise ValueError(f"{asset_id}: source sample range exceeds source WAV frame count")
+    except wave.Error as exc:
+        raise ValueError(f"{asset_id}: invalid source PCM WAV: {exc}") from exc
 
     clip_path = _resolve_packaged_file(root, record.get("clip_path"), f"{asset_id}.clip_path")
     digest = hashlib.sha256(clip_path.read_bytes()).hexdigest().upper()
