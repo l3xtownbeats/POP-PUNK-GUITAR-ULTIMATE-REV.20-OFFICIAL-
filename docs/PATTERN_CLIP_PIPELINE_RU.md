@@ -22,7 +22,7 @@
 pattern_clip_registry.py проверяет каждый опубликованный clip:
 
 - kind=note_event и engine_targets содержит PATTERN_MODE;
-- исходный SHA-256, точный source sample range, sample rate и frame count;
+- исходный PCM WAV должен присутствовать в пакете по безопасному относительному пути; проверяются его SHA-256, PCM-формат, sample rate и то, что точный source sample range не выходит за число исходных кадров;
 - наличие производного PCM WAV, совпадение его SHA-256, sample rate и frame count;
 - MIDI trigger key и source pitch в диапазоне 0–127;
 - articulation ID, velocity range и round-robin group;
@@ -43,4 +43,4 @@ pattern_clip_registry.py проверяет каждый опубликован�
 
 ## Real-time ограничения
 
-Manifest parsing, SHA-256, license checks, file I/O, audio analysis and extraction выполняются только в offline/background LibraryManager. Audio callback должен получать заранее проверенный immutable mapping и не открывать файлы, не парсить JSON и не считать хэши. Runtime bridge, bounded clip cache, sample-offset scheduling, note-off/choke/release и host-sync transitions — отдельный следующий C++ этап; этот commit их не заявляет.
+Manifest parsing, SHA-256, license checks, file I/O, audio analysis and extraction выполняются только в offline/background LibraryManager. Исходный WAV включается в пакетный набор provenance-файлов и проверяется до публикации mapping; если источник отсутствует, изменён или диапазон выходит за его границы, registry отклоняется целиком. Audio callback должен получать заранее проверенный immutable mapping и не открывать файлы, не парсить JSON и не считать хэши. Runtime bridge, bounded clip cache, sample-offset scheduling, note-off/choke/release и host-sync transitions — отдельный следующий C++ этап; этот commit их не заявляет.
