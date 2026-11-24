@@ -437,7 +437,10 @@ void PPGUMultiWindowWorkspace::setPanelGap(int pixels)
     panelGap = juce::jlimit(0, 64, pixels);
     customLayoutMode = false;
     if (persistenceProperties != nullptr)
+    {
         persistenceProperties->setValue("workspace.customLayout", false);
+        persistenceProperties->saveIfNeeded();
+    }
     layoutPanels();
 }
 
@@ -446,7 +449,10 @@ void PPGUMultiWindowWorkspace::setPanelScale(float scale)
     panelScale = std::isfinite(scale) ? juce::jlimit(0.5f, 3.0f, scale) : 1.0f;
     customLayoutMode = false;
     if (persistenceProperties != nullptr)
+    {
         persistenceProperties->setValue("workspace.customLayout", false);
+        persistenceProperties->saveIfNeeded();
+    }
     layoutPanels();
 }
 
@@ -586,9 +592,9 @@ void PPGUMultiWindowWorkspace::layoutPanels()
 
             const auto bounds = window->getBounds();
             surfaceWidth = std::max(surfaceWidth,
-                static_cast<std::int64_t>(bounds.getRight()) + panelGap);
+                static_cast<std::int64_t>(bounds.getX()) + bounds.getWidth() + panelGap);
             surfaceHeight = std::max(surfaceHeight,
-                static_cast<std::int64_t>(bounds.getBottom()) + panelGap);
+                static_cast<std::int64_t>(bounds.getY()) + bounds.getHeight() + panelGap);
         }
 
         constexpr auto safeMaximum = static_cast<std::int64_t>(std::numeric_limits<int>::max());
@@ -682,9 +688,9 @@ void PPGUMultiWindowWorkspace::layoutPanels()
     {
         const auto bounds = window->getBounds();
         surfaceWidth = std::max(surfaceWidth,
-            static_cast<std::int64_t>(bounds.getRight()) + panelGap);
+            static_cast<std::int64_t>(bounds.getX()) + bounds.getWidth() + panelGap);
         surfaceHeight = std::max(surfaceHeight,
-            static_cast<std::int64_t>(bounds.getBottom()) + panelGap);
+            static_cast<std::int64_t>(bounds.getY()) + bounds.getHeight() + panelGap);
     }
     constexpr auto safeMaximum = static_cast<std::int64_t>(std::numeric_limits<int>::max());
     tileSurface->setSize(
