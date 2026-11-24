@@ -107,6 +107,9 @@ private:
     ppgu::sampler::SamplerEngine sampler;
     ppgu::performance::PatternScheduler patternScheduler;
     ppgu::performance::PatternClipRuntime patternClipRuntime;
+    // Serializes load-generation changes with worker-thread snapshot publication.
+    // This mutex is never acquired by processBlock() or the audio renderer.
+    std::mutex patternLoadPublicationMutex;
     std::mutex patternClipSnapshotMutex;
     std::vector<std::unique_ptr<ppgu::performance::PatternClipSnapshot>> patternClipSnapshots;
     std::shared_ptr<std::atomic<std::uint64_t>> patternLoadGeneration {

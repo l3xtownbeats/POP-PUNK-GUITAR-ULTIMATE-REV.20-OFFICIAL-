@@ -252,7 +252,11 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsync(
     std::function<void(ppgu::performance::PatternClipLoadResult)> completion)
 {
     const auto generationState = patternLoadGeneration;
-    const auto generation = generationState->fetch_add(1, std::memory_order_acq_rel) + 1;
+    std::uint64_t generation = 0;
+    {
+        const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
+        generation = generationState->fetch_add(1, std::memory_order_acq_rel) + 1;
+    }
     sampleLoadPool.addJob([this, manifestFile, completion = std::move(completion),
                            generationState, generation]() mutable
     {
@@ -260,18 +264,25 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsync(
             return;
 
         auto result = ppgu::performance::PatternClipLoader::load(manifestFile);
-        if (generationState->load(std::memory_order_acquire) != generation)
-            return;
 
-        // A valid empty registry explicitly disables recorded PATTERN clips.
-        // A malformed registry does not replace a previously working snapshot.
-        if (result.empty)
-            clearPatternClipSnapshot();
-        else if (result.ready && result.snapshot
-                 && !installPatternClipSnapshot(std::move(result.snapshot)))
+        // Serialize generation validation with publication. Without this
+        // control-thread gate, an older slow load could pass its generation
+        // check, then overwrite a newer request that starts before publication.
         {
-            result.ready = false;
-            result.errors.emplace_back("Processor rejected the validated PATTERN snapshot.");
+            const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
+            if (generationState->load(std::memory_order_acquire) != generation)
+                return;
+
+            // A valid empty registry explicitly disables recorded PATTERN clips.
+            // A malformed registry does not replace a previously working snapshot.
+            if (result.empty)
+                clearPatternClipSnapshot();
+            else if (result.ready && result.snapshot
+                     && !installPatternClipSnapshot(std::move(result.snapshot)))
+            {
+                result.ready = false;
+                result.errors.emplace_back("Processor rejected the validated PATTERN snapshot.");
+            }
         }
 
         if (generationState->load(std::memory_order_acquire) != generation)
