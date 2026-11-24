@@ -391,7 +391,8 @@ bool PPGUMultiWindowWorkspace::openPanel(PanelSpec spec)
     tileSurface->addAndMakeVisible(*window);
     windows.push_back(std::move(window));
     layoutPanels();
-    viewport.setViewPosition(0, 0);
+    if (!customLayoutMode)
+        viewport.setViewPosition(0, 0);
     return true;
 }
 
