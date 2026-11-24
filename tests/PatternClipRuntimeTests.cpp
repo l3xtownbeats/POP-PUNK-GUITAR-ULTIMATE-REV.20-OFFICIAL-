@@ -192,6 +192,50 @@ int main()
     }
     pitchRuntime.detachSnapshot();
 
+    // RR progress is independent for each articulation and velocity lane,
+    // even when all lanes share the same MIDI trigger note.
+    PatternClipSnapshot isolatedRoundRobin;
+    isolatedRoundRobin.clips.resize(4);
+    const std::array<float, 4> rrValues { 0.10f, 0.20f, 0.30f, 0.40f };
+    for (std::size_t i = 0; i < rrValues.size(); ++i)
+    {
+        isolatedRoundRobin.clips[i].sampleRate = 48000.0;
+        isolatedRoundRobin.clips[i].samples.assign(1, rrValues[i]);
+    }
+    isolatedRoundRobin.mappings.push_back({64, 1, 63, 0, 0, 0, 4, 1.0f, 0.0f, 1});
+    isolatedRoundRobin.mappings.push_back({64, 1, 63, 1, 0, 0, 4, 1.0f, 0.0f, 2});
+    isolatedRoundRobin.mappings.push_back({64, 64, 127, 2, 0, 0, 4, 1.0f, 0.0f, 1});
+    isolatedRoundRobin.mappings.push_back({64, 64, 127, 3, 0, 0, 4, 1.0f, 0.0f, 2});
+    if (!PatternClipRuntime::validateSnapshot(isolatedRoundRobin))
+    {
+        std::cerr << "Independent velocity RR lanes were rejected.\\n";
+        return 1;
+    }
+    PatternClipRuntime isolatedRrRuntime;
+    isolatedRrRuntime.prepare(48000.0);
+    isolatedRrRuntime.attachSnapshot(&isolatedRoundRobin);
+    const auto renderRrLane = [&](int velocity)
+    {
+        std::array<float, 1> laneLeft {}, laneRight {};
+        if (!isolatedRrRuntime.noteOn(64, velocity, 1))
+            return -1.0f;
+        isolatedRrRuntime.render(laneLeft.data(), laneRight.data(), 1);
+        return laneLeft[0];
+    };
+    const float softFirst = renderRrLane(32);
+    const float hardFirst = renderRrLane(96);
+    const float softSecond = renderRrLane(32);
+    const float hardSecond = renderRrLane(96);
+    if (!(std::abs(softFirst - 0.10f) < 0.0001f
+        && std::abs(hardFirst - 0.30f) < 0.0001f
+        && std::abs(softSecond - 0.20f) < 0.0001f
+        && std::abs(hardSecond - 0.40f) < 0.0001f))
+    {
+        std::cerr << "Round-robin counters leaked between velocity lanes.\\n";
+        return 1;
+    }
+    isolatedRrRuntime.detachSnapshot();
+
     // Velocity zones must select different recorded clips without affecting
     // the round-robin sequence of another velocity zone.
     PatternClipSnapshot velocityLayers;
