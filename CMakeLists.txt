@@ -232,7 +232,7 @@ add_test(NAME ppgu_artifact_splitter_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_artifact_splitter.py)
 
 add_test(NAME ppgu_pattern_clip_registry_contract
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/TestPatternClipRegistry.py)
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/LibraryManager/test_pattern_clip_registry.py)
 
 # The orphaned root-level OverlayManager/SecureSkinImport test files are not
 # registered: their corresponding production headers and implementations are
