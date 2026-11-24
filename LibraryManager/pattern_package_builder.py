@@ -1,6 +1,6 @@
 """Build relocatable PATTERN_MODE packages and validate before publication."""
 from __future__ import annotations
-import hashlib,json,os,re,shutil,tempfile
+import argparse,hashlib,json,re,shutil,tempfile
 from pathlib import Path
 from typing import Any
 from pattern_clip_registry import load_pattern_clip_registry
@@ -82,3 +82,27 @@ def add_pattern_clip_to_package(staging_record:dict[str,Any],package_root:Path,*
   if tmp is not None: tmp.unlink(missing_ok=True)
   for p in reversed(copied): p.unlink(missing_ok=True)
   raise
+
+def _read_json_object(path:Path,field:str)->dict[str,Any]:
+ data=json.loads(Path(path).read_text(encoding="utf-8"))
+ if not isinstance(data,dict): raise ValueError(f"{field} JSON root must be an object")
+ return data
+
+def main()->int:
+ parser=argparse.ArgumentParser(description="Package a reviewed PATTERN_MODE note-event WAV clip.")
+ parser.add_argument("--staging-record",type=Path,required=True,help="Extractor sidecar JSON")
+ parser.add_argument("--package-root",type=Path,required=True,help="Destination library package directory")
+ parser.add_argument("--license-approval",type=Path,required=True,help="Human-reviewed license approval JSON")
+ parser.add_argument("--musical-review",type=Path,required=True,help="Human musical approval JSON")
+ parser.add_argument("--mapping",type=Path,required=True,help="Explicit MIDI/articulation/velocity mapping JSON")
+ args=parser.parse_args()
+ result=add_pattern_clip_to_package(
+  _read_json_object(args.staging_record,"staging record"),args.package_root,
+  license_record=_read_json_object(args.license_approval,"license approval"),
+  musical_review=_read_json_object(args.musical_review,"musical review"),
+  mapping=_read_json_object(args.mapping,"mapping"))
+ print(json.dumps(result,ensure_ascii=False,indent=2))
+ return 0
+
+if __name__=="__main__":
+ raise SystemExit(main())
