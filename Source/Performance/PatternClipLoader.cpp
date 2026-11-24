@@ -160,8 +160,9 @@ PatternClipLoadResult PatternClipLoader::load(const juce::File& manifestFile)
             result.empty = true;
             return result;
         }
-        if (clips->size() > static_cast<int>(PatternClipSnapshot::maximumMappings))
-            throw std::runtime_error("PATTERN registry exceeds the mapping limit");
+        if (clips->size() > static_cast<int>(PatternClipSnapshot::maximumClips)
+            || clips->size() > static_cast<int>(PatternClipSnapshot::maximumMappings))
+            throw std::runtime_error("PATTERN registry exceeds the clip/mapping limit");
 
         std::error_code ec;
         const auto root = std::filesystem::canonical(
@@ -236,18 +237,28 @@ PatternClipLoadResult PatternClipLoader::load(const juce::File& manifestFile)
                 throw std::runtime_error("PATTERN decoded PCM frame budget exceeded");
             totalFrames += static_cast<std::size_t>(frameCount);
 
-            juce::AudioBuffer<float> decoded(static_cast<int>(clipReader->numChannels), frameCount);
-            if (!clipReader->read(&decoded, 0, frameCount, 0, true, true))
-                throw std::runtime_error(assetId + ": failed to decode complete derived WAV");
+            // Decode in small bounded chunks. The immutable cache stores mono
+            // floats; never allocate a second full-size stereo decode buffer.
+            constexpr int decodeChunkFrames = 8192;
+            const int decodeChannels = static_cast<int>(clipReader->numChannels);
+            juce::AudioBuffer<float> decoded(decodeChannels,
+                juce::jmin(decodeChunkFrames, frameCount));
             PatternClipPcm pcm;
             pcm.sampleRate = clipReader->sampleRate;
             pcm.samples.resize(static_cast<std::size_t>(frameCount));
-            for (int frame = 0; frame < frameCount; ++frame)
+            for (int offset = 0; offset < frameCount; offset += decodeChunkFrames)
             {
-                const float sample = monoFrame(decoded, frame);
-                if (!std::isfinite(sample))
-                    throw std::runtime_error(assetId + ": decoded PCM contains non-finite samples");
-                pcm.samples[static_cast<std::size_t>(frame)] = sample;
+                const int chunk = juce::jmin(decodeChunkFrames, frameCount - offset);
+                decoded.clear();
+                if (!clipReader->read(&decoded, 0, chunk, offset, true, true))
+                    throw std::runtime_error(assetId + ": failed to decode complete derived WAV");
+                for (int frame = 0; frame < chunk; ++frame)
+                {
+                    const float sample = monoFrame(decoded, frame);
+                    if (!std::isfinite(sample))
+                        throw std::runtime_error(assetId + ": decoded PCM contains non-finite samples");
+                    pcm.samples[static_cast<std::size_t>(offset + frame)] = sample;
+                }
             }
 
             const auto mapping = property(record, "mapping");
