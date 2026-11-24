@@ -58,7 +58,6 @@ target_include_directories(ppgu_sampler PUBLIC Source Source/Sampler)
 target_compile_definitions(ppgu_sampler PUBLIC ${PPGU_JUCE_DEFINITIONS})
 target_link_libraries(ppgu_sampler PUBLIC
     juce::juce_audio_formats
-    juce::juce_cryptography
     juce::juce_recommended_config_flags
     juce::juce_recommended_warning_flags)
 
@@ -119,6 +118,7 @@ target_include_directories(ppgu_pattern_clip_loader_contracts PRIVATE Source/Per
 target_compile_definitions(ppgu_pattern_clip_loader_contracts PRIVATE ${PPGU_JUCE_DEFINITIONS})
 target_link_libraries(ppgu_pattern_clip_loader_contracts PRIVATE
     juce::juce_audio_formats
+    juce::juce_cryptography
     juce::juce_recommended_config_flags
     juce::juce_recommended_warning_flags)
 juce_generate_juce_header(ppgu_pattern_clip_loader_contracts)
@@ -227,6 +227,7 @@ target_link_libraries(ppgu_processor_pattern_tests PRIVATE
     juce::juce_audio_utils
     juce::juce_dsp
     juce::juce_audio_formats
+    juce::juce_cryptography
     juce::juce_recommended_config_flags
     juce::juce_recommended_warning_flags)
 juce_generate_juce_header(ppgu_processor_pattern_tests)
