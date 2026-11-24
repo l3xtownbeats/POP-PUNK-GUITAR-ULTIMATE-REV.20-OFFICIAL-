@@ -286,6 +286,7 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsync(
         }, {});
 }
 
+#if defined(PPGU_ENABLE_TEST_HOOKS)
 void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncForTesting(
     const juce::File& manifestFile,
     std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
@@ -295,6 +296,8 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncForTesting
     loadPatternClipRegistryAsyncImpl(manifestFile, std::move(completion),
                                      std::move(loader), std::move(workerFinished));
 }
+
+#endif
 
 void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncImpl(
     const juce::File& manifestFile,
