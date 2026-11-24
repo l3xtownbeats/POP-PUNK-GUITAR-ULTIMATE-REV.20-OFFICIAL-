@@ -435,11 +435,16 @@ int PPGUMultiWindowWorkspace::getOpenPanelCount() const noexcept
 void PPGUMultiWindowWorkspace::setPanelGap(int pixels)
 {
     panelGap = juce::jlimit(0, 64, pixels);
-    customLayoutMode = false;
-    if (persistenceProperties != nullptr)
+    // Startup restores persisted scale/gap before any panels exist; do not
+    // mistake that initialization for an explicit user request to retile.
+    if (!windows.empty())
     {
-        persistenceProperties->setValue("workspace.customLayout", false);
-        persistenceProperties->saveIfNeeded();
+        customLayoutMode = false;
+        if (persistenceProperties != nullptr)
+        {
+            persistenceProperties->setValue("workspace.customLayout", false);
+            persistenceProperties->saveIfNeeded();
+        }
     }
     layoutPanels();
 }
@@ -447,11 +452,14 @@ void PPGUMultiWindowWorkspace::setPanelGap(int pixels)
 void PPGUMultiWindowWorkspace::setPanelScale(float scale)
 {
     panelScale = std::isfinite(scale) ? juce::jlimit(0.5f, 3.0f, scale) : 1.0f;
-    customLayoutMode = false;
-    if (persistenceProperties != nullptr)
+    if (!windows.empty())
     {
-        persistenceProperties->setValue("workspace.customLayout", false);
-        persistenceProperties->saveIfNeeded();
+        customLayoutMode = false;
+        if (persistenceProperties != nullptr)
+        {
+            persistenceProperties->setValue("workspace.customLayout", false);
+            persistenceProperties->saveIfNeeded();
+        }
     }
     layoutPanels();
 }
