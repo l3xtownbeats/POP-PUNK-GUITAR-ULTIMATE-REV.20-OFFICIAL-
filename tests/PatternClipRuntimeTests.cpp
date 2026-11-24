@@ -320,6 +320,37 @@ int main()
     }
     allNotesOffRuntime.detachSnapshot();
 
+    // All Sound Off is immediate and must not leave a release tail.
+    PatternClipSnapshot allSoundOffSnapshot;
+    allSoundOffSnapshot.clips.resize(1);
+    allSoundOffSnapshot.clips[0].sampleRate = 48000.0;
+    allSoundOffSnapshot.clips[0].samples.assign(64, 0.45f);
+    allSoundOffSnapshot.mappings.push_back({70, 1, 127, 0, 0, 0, 64, 1.0f, 0.0f, 1});
+    PatternClipRuntime allSoundOffRuntime;
+    allSoundOffRuntime.prepare(48000.0);
+    allSoundOffRuntime.attachSnapshot(&allSoundOffSnapshot);
+    if (!allSoundOffRuntime.noteOn(70, 100, 1)
+        || allSoundOffRuntime.activeVoiceCount() != 1)
+    {
+        std::cerr << "Could not start voice for All Sound Off contract.\\n";
+        return 1;
+    }
+    allSoundOffRuntime.allSoundOff();
+    if (allSoundOffRuntime.activeVoiceCount() != 0)
+    {
+        std::cerr << "All Sound Off did not terminate voices immediately.\\n";
+        return 1;
+    }
+    std::array<float, 8> allSoundLeft {}, allSoundRight {};
+    allSoundOffRuntime.render(allSoundLeft.data(), allSoundRight.data(),
+                              static_cast<int>(allSoundLeft.size()));
+    if (std::abs(allSoundLeft[0]) > 0.000001f)
+    {
+        std::cerr << "All Sound Off left an audible release tail.\\n";
+        return 1;
+    }
+    allSoundOffRuntime.detachSnapshot();
+
     PatternClipRuntime runtime;
     runtime.prepare(48000.0);
     runtime.attachSnapshot(&snapshot);
