@@ -16,6 +16,19 @@ int main()
     snapshot.mappings.push_back({60, 1, 127, 0, 0, 7, 128, 1.0f, 0.0f});
     snapshot.mappings.push_back({61, 1, 127, 1, 0, 7, 128, 1.0f, 0.0f});
 
+    if (!PatternClipRuntime::validateSnapshot(snapshot))
+    {
+        std::cerr << "Valid bounded snapshot was rejected.\\n";
+        return 1;
+    }
+    auto invalidSnapshot = snapshot;
+    invalidSnapshot.mappings.push_back(invalidSnapshot.mappings.front());
+    if (PatternClipRuntime::validateSnapshot(invalidSnapshot))
+    {
+        std::cerr << "Overlapping velocity mapping was accepted.\\n";
+        return 1;
+    }
+
     PatternClipRuntime runtime;
     runtime.prepare(48000.0);
     runtime.attachSnapshot(&snapshot);
