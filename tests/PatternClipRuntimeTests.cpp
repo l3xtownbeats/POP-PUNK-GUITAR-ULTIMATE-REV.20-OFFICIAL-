@@ -119,6 +119,44 @@ int main()
     }
     rrRuntime.detachSnapshot();
 
+    // Pitch ratio must change playback speed, and invalid ratios must fail closed.
+    PatternClipSnapshot pitched;
+    pitched.clips.resize(1);
+    pitched.clips[0].sampleRate = 48000.0;
+    pitched.clips[0].samples.assign(256, 0.2f);
+    PatternClipMapping pitchedMapping;
+    pitchedMapping.triggerNote = 67;
+    pitchedMapping.velocityLow = 1;
+    pitchedMapping.velocityHigh = 127;
+    pitchedMapping.clipIndex = 0;
+    pitchedMapping.releaseSamples = 32;
+    pitchedMapping.pitchRatio = 2.0f;
+    pitched.mappings.push_back(pitchedMapping);
+    if (!PatternClipRuntime::validateSnapshot(pitched))
+    {
+        std::cerr << "Valid pitch-ratio mapping was rejected.\\n";
+        return 1;
+    }
+    PatternClipRuntime pitchRuntime;
+    pitchRuntime.prepare(48000.0);
+    pitchRuntime.attachSnapshot(&pitched);
+    std::array<float, 64> pitchLeft {}, pitchRight {};
+    if (!pitchRuntime.noteOn(67, 100, 1))
+        return 1;
+    pitchRuntime.render(pitchLeft.data(), pitchRight.data(), 64);
+    if (pitchRuntime.activeVoiceCount() != 0)
+    {
+        std::cerr << "Pitch ratio did not advance the clip at the expected rate.\\n";
+        return 1;
+    }
+    pitched.mappings[0].pitchRatio = 4.01f;
+    if (PatternClipRuntime::validateSnapshot(pitched))
+    {
+        std::cerr << "Out-of-range pitch ratio was accepted.\\n";
+        return 1;
+    }
+    pitchRuntime.detachSnapshot();
+
     PatternClipRuntime runtime;
     runtime.prepare(48000.0);
     runtime.attachSnapshot(&snapshot);
