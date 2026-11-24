@@ -33,6 +33,7 @@ PopPunkGuitarUltimateAudioProcessor::~PopPunkGuitarUltimateAudioProcessor()
     // Invalidate queued worker and message-thread completions before waiting
     // for any active bank scan/decode to finish.
     sampleLoadGeneration->fetch_add(1, std::memory_order_acq_rel);
+    patternLoadGeneration->fetch_add(1, std::memory_order_acq_rel);
     sampleLoadPool.removeAllJobs(true, -1);
 }
 
@@ -244,6 +245,47 @@ bool PopPunkGuitarUltimateAudioProcessor::installPatternClipSnapshot(
 void PopPunkGuitarUltimateAudioProcessor::clearPatternClipSnapshot() noexcept
 {
     patternClipRuntime.clearPublishedSnapshot();
+}
+
+void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsync(
+    const juce::File& manifestFile,
+    std::function<void(ppgu::performance::PatternClipLoadResult)> completion)
+{
+    const auto generationState = patternLoadGeneration;
+    const auto generation = generationState->fetch_add(1, std::memory_order_acq_rel) + 1;
+    sampleLoadPool.addJob([this, manifestFile, completion = std::move(completion),
+                           generationState, generation]() mutable
+    {
+        if (generationState->load(std::memory_order_acquire) != generation)
+            return;
+
+        auto result = ppgu::performance::PatternClipLoader::load(manifestFile);
+        if (generationState->load(std::memory_order_acquire) != generation)
+            return;
+
+        // A valid empty registry explicitly disables recorded PATTERN clips.
+        // A malformed registry does not replace a previously working snapshot.
+        if (result.empty)
+            clearPatternClipSnapshot();
+        else if (result.ready && result.snapshot
+                 && !installPatternClipSnapshot(std::move(result.snapshot)))
+        {
+            result.ready = false;
+            result.errors.emplace_back("Processor rejected the validated PATTERN snapshot.");
+        }
+
+        if (generationState->load(std::memory_order_acquire) != generation)
+            return;
+        auto sharedResult = std::make_shared<ppgu::performance::PatternClipLoadResult>(
+            std::move(result));
+        juce::MessageManager::callAsync(
+            [completion = std::move(completion), sharedResult,
+             generationState, generation]() mutable
+            {
+                if (generationState->load(std::memory_order_acquire) == generation && completion)
+                    completion(std::move(*sharedResult));
+            });
+    });
 }
 
 void PopPunkGuitarUltimateAudioProcessor::prepareToPlay(double sampleRate, int expectedBlockSize)

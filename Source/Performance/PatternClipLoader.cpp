@@ -255,7 +255,8 @@ PatternClipLoadResult PatternClipLoader::load(const juce::File& manifestFile)
             const int sourceNote = intValue(property(mapping, "source_midi_note"), "source_midi_note");
             const int velocityLow = intValue(property(mapping, "velocity_min"), "velocity_min", 1);
             const int velocityHigh = intValue(property(mapping, "velocity_max"), "velocity_max", 1);
-            if (trigger > 127 || sourceNote > 127 || velocityHigh > 127 || velocityLow > velocityHigh)
+            if (trigger > 127 || sourceNote > 127 || std::abs(trigger - sourceNote) > 24
+                || velocityHigh > 127 || velocityLow > velocityHigh)
                 throw std::runtime_error(assetId + ": MIDI/velocity mapping out of range");
             const auto articulation = textValue(property(mapping, "articulation_id"), "articulation_id");
             const int articulationId = articulationCode(articulation);
@@ -271,6 +272,8 @@ PatternClipLoadResult PatternClipLoader::load(const juce::File& manifestFile)
             runtimeMapping.clipIndex = static_cast<uint16_t>(snapshot->clips.size());
             runtimeMapping.articulation = static_cast<uint16_t>(articulationId);
             runtimeMapping.releaseSamples = 2400;
+            runtimeMapping.pitchRatio = std::pow(2.0f,
+                static_cast<float>(trigger - sourceNote) / 12.0f);
             snapshot->clips.push_back(std::move(pcm));
             pending.push_back({runtimeMapping, rr});
         }

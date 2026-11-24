@@ -44,3 +44,8 @@ pattern_clip_registry.py проверяет каждый опубликован�
 ## Real-time ограничения
 
 Manifest parsing, SHA-256, license checks, file I/O, audio analysis and extraction выполняются только в offline/background LibraryManager. Исходный WAV включается в пакетный набор provenance-файлов и проверяется до публикации mapping; если источник отсутствует, изменён или диапазон выходит за его границы, registry отклоняется целиком. Audio callback должен получать заранее проверенный immutable mapping и не открывать файлы, не парсить JSON и не считать хэши. Runtime bridge, bounded clip cache, sample-offset scheduling, note-off/choke/release и host-sync transitions — отдельный следующий C++ этап; этот commit их не заявляет.
+
+
+## C++ loader и processor bridge
+
+C++ loader проверяет manifest, provenance, лицензии и WAV, декодирует bounded mono PCM и создаёт immutable snapshot вне audio thread. Артикуляции сопоставляются с четырьмя существующими APVTS-режимами; round-robin группы получают детерминированные числовые ID. Транспонирование от source_midi_note к trigger_midi_note ограничено двумя октавами и рассчитывается заранее. Processor получает snapshot через worker thread; audio callback не выполняет JSON, file I/O, SHA-256 или декодирование. Реальные approved clips и проверка в FL Studio 20 по-прежнему отсутствуют.

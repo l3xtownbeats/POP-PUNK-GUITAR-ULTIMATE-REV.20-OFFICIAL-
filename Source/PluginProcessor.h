@@ -14,7 +14,7 @@
 #endif
 #include "Sampler/SamplePool.h"
 #include "Performance/PatternScheduler.h"
-#include "Performance/PatternClipRuntime.h"
+#include "Performance/PatternClipLoader.h"
 #include <mutex>
 
 class PopPunkGuitarUltimateAudioProcessor final : public juce::AudioProcessor
@@ -67,6 +67,8 @@ public:
     [[nodiscard]] bool installPatternClipSnapshot(
         std::unique_ptr<ppgu::performance::PatternClipSnapshot> snapshot);
     void clearPatternClipSnapshot() noexcept;
+    void loadPatternClipRegistryAsync(const juce::File& manifestFile,
+        std::function<void(ppgu::performance::PatternClipLoadResult)> completion);
 
     juce::AudioProcessorValueTreeState parameters;
     juce::MidiKeyboardState keyboardState;
@@ -107,6 +109,8 @@ private:
     ppgu::performance::PatternClipRuntime patternClipRuntime;
     std::mutex patternClipSnapshotMutex;
     std::vector<std::unique_ptr<ppgu::performance::PatternClipSnapshot>> patternClipSnapshots;
+    std::shared_ptr<std::atomic<std::uint64_t>> patternLoadGeneration {
+        std::make_shared<std::atomic<std::uint64_t>>(0) };
     ppgu::performance::BlockClock patternTransportClock;
     std::array<std::array<bool, 128>, 16> patternHeldNotes {};
     std::array<ppgu::performance::PatternEvent, 512> patternEvents {};

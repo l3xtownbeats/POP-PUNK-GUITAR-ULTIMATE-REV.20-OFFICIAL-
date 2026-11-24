@@ -31,6 +31,7 @@ struct PatternClipMapping
     float gain = 1.0f;
     float pan = 0.0f;
     std::uint16_t roundRobinGroup = 0;
+    float pitchRatio = 1.0f; // target MIDI pitch relative to source_midi_note
 };
 
 struct PatternClipSnapshot
@@ -75,7 +76,8 @@ public:
                 || mapping.velocityHigh > 127 || mapping.velocityLow > mapping.velocityHigh
                 || mapping.clipIndex >= snapshot.clips.size()
                 || !std::isfinite(mapping.gain) || mapping.gain < 0.0f || mapping.gain > 4.0f
-                || !std::isfinite(mapping.pan) || mapping.pan < -1.0f || mapping.pan > 1.0f)
+                || !std::isfinite(mapping.pan) || mapping.pan < -1.0f || mapping.pan > 1.0f
+                || !std::isfinite(mapping.pitchRatio) || mapping.pitchRatio < 0.25f || mapping.pitchRatio > 4.0f)
                 return false;
             for (std::size_t j = 0; j < i; ++j)
             {
@@ -189,7 +191,7 @@ public:
         voice->releaseSamples = selected->releaseSamples;
         voice->gain = selected->gain;
         voice->pan = std::clamp(selected->pan, -1.0f, 1.0f);
-        voice->increment = clip.sampleRate / outputSampleRate;
+        voice->increment = (clip.sampleRate / outputSampleRate) * selected->pitchRatio;
         voice->age = nextAge++;
         return true;
     }
