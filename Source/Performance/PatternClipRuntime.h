@@ -92,7 +92,7 @@ public:
     void attachSnapshot(const PatternClipSnapshot* snapshot) noexcept
     {
         reset();
-        activeSnapshot.store(snapshot, std::memory_order_release);
+        activeSnapshot.store(snapshot != nullptr && validateSnapshot(*snapshot) ? snapshot : nullptr,\n                             std::memory_order_release);
     }
 
     void detachSnapshot() noexcept
