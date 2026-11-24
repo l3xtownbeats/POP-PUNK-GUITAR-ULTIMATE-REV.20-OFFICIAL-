@@ -342,22 +342,6 @@ int main()
     // Only after B's message-thread completion do we release A, then wait for
     // A's worker-side stale-generation check to finish before inspecting audio.
     {
-        PopPunkGuitarUltimateAudioProcessor raceProcessor;
-        raceProcessor.prepareToPlay(48000.0, 256);
-        setParameter(raceProcessor, "playMode", 1.0f);
-        setParameter(raceProcessor, "articulation", 0.0f);
-        setParameter(raceProcessor, "singleMidiNoteAsChordRoot", 1.0f);
-        setParameter(raceProcessor, "ampGain", 5.0f);
-        setParameter(raceProcessor, "master", 1.0f);
-        setParameter(raceProcessor, "eqOn", 0.0f);
-        setParameter(raceProcessor, "compressorOn", 0.0f);
-        setParameter(raceProcessor, "distortionOn", 0.0f);
-        setParameter(raceProcessor, "chorusOn", 0.0f);
-        setParameter(raceProcessor, "flangerOn", 0.0f);
-        setParameter(raceProcessor, "delayOn", 0.0f);
-        setParameter(raceProcessor, "reverbOn", 0.0f);
-        setParameter(raceProcessor, "cabinetOn", 0.0f);
-
         std::mutex raceMutex;
         std::condition_variable raceCv;
         bool aStarted = false;
@@ -380,6 +364,24 @@ int main()
             loaded.ready = true;
             return loaded;
         };
+
+        // Declare the processor after all state captured by worker callbacks so
+        // its destructor joins the pool before those synchronization objects die.
+        PopPunkGuitarUltimateAudioProcessor raceProcessor;
+        raceProcessor.prepareToPlay(48000.0, 256);
+        setParameter(raceProcessor, "playMode", 1.0f);
+        setParameter(raceProcessor, "articulation", 0.0f);
+        setParameter(raceProcessor, "singleMidiNoteAsChordRoot", 1.0f);
+        setParameter(raceProcessor, "ampGain", 5.0f);
+        setParameter(raceProcessor, "master", 1.0f);
+        setParameter(raceProcessor, "eqOn", 0.0f);
+        setParameter(raceProcessor, "compressorOn", 0.0f);
+        setParameter(raceProcessor, "distortionOn", 0.0f);
+        setParameter(raceProcessor, "chorusOn", 0.0f);
+        setParameter(raceProcessor, "flangerOn", 0.0f);
+        setParameter(raceProcessor, "delayOn", 0.0f);
+        setParameter(raceProcessor, "reverbOn", 0.0f);
+        setParameter(raceProcessor, "cabinetOn", 0.0f);
 
         const juce::File loadA("race-load-A.json");
         const juce::File loadB("race-load-B.json");
