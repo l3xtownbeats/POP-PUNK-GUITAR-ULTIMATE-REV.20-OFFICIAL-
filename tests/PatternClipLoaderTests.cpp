@@ -14,10 +14,11 @@ bool writeFixtureWav(const juce::File& file)
     auto stream = file.createOutputStream();
     if (!stream)
         return false;
-    std::unique_ptr<juce::AudioFormatWriter> writer(
-        wav.createWriterFor(std::move(stream), 48000.0, 1, 16, {}, 0));
-    if (!writer)
+    auto* rawWriter = wav.createWriterFor(stream.get(), 48000.0, 1, 16, {}, 0);
+    if (rawWriter == nullptr)
         return false;
+    stream.release(); // AudioFormatWriter owns the stream after successful creation.
+    std::unique_ptr<juce::AudioFormatWriter> writer(rawWriter);
 
     juce::AudioBuffer<float> samples(1, 480);
     for (int i = 0; i < samples.getNumSamples(); ++i)
