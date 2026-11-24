@@ -267,27 +267,14 @@ int main()
                 });
 
             auto* messageManager = juce::MessageManager::getInstance();
-            std::atomic<bool> timedOut { false };
-            std::thread timeoutThread([&]
-            {
-                const auto deadline = std::chrono::steady_clock::now()
-                    + std::chrono::seconds(5);
-                while (!completed.load(std::memory_order_acquire)
-                       && std::chrono::steady_clock::now() < deadline)
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            const auto dispatchDeadline = std::chrono::steady_clock::now()
+                + std::chrono::seconds(5);
+            while (!completed.load(std::memory_order_acquire)
+                   && std::chrono::steady_clock::now() < dispatchDeadline)
+                messageManager->runDispatchLoopUntil(10);
+            const bool timedOut = !completed.load(std::memory_order_acquire);
 
-                if (!completed.load(std::memory_order_acquire))
-                {
-                    timedOut.store(true, std::memory_order_release);
-                    messageManager->stopDispatchLoop();
-                }
-            });
-
-            messageManager->runDispatchLoop();
-            timeoutThread.join();
-
-            if (!completed.load(std::memory_order_acquire)
-                || timedOut.load(std::memory_order_acquire))
+            if (!completed.load(std::memory_order_acquire) || timedOut)
             {
                 std::cerr << "Asynchronous PATTERN registry completion timed out.\n";
                 result = 1;
@@ -465,26 +452,20 @@ int main()
                 {});
 
             auto* messageManager = juce::MessageManager::getInstance();
-            std::thread timeoutThread([&]
+            const auto raceDeadline = std::chrono::steady_clock::now()
+                + std::chrono::seconds(5);
+            while (!raceCompleted.load(std::memory_order_acquire)
+                   && std::chrono::steady_clock::now() < raceDeadline)
+                messageManager->runDispatchLoopUntil(10);
+            if (!raceCompleted.load(std::memory_order_acquire))
             {
-                const auto deadline = std::chrono::steady_clock::now()
-                    + std::chrono::seconds(5);
-                while (!raceCompleted.load(std::memory_order_acquire)
-                       && std::chrono::steady_clock::now() < deadline)
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                if (!raceCompleted.load(std::memory_order_acquire))
+                raceTimedOut.store(true, std::memory_order_release);
                 {
-                    raceTimedOut.store(true, std::memory_order_release);
-                    {
-                        std::lock_guard<std::mutex> lock(raceMutex);
-                        releaseA = true;
-                    }
-                    raceCv.notify_all();
-                    messageManager->stopDispatchLoop();
+                    std::lock_guard<std::mutex> lock(raceMutex);
+                    releaseA = true;
                 }
-            });
-            messageManager->runDispatchLoop();
-            timeoutThread.join();
+                raceCv.notify_all();
+            }
         }
 
         if (raceTimedOut.load(std::memory_order_acquire)
