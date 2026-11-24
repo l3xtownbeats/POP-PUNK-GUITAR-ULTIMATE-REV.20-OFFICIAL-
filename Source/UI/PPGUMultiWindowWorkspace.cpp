@@ -195,8 +195,10 @@ public:
 
     void mouseUp(const juce::MouseEvent&) override
     {
+        const bool movedWindow = draggingHeader;
         draggingHeader = false;
-        owner.handleGeometryChanged(panelId);
+        if (movedWindow)
+            owner.handleGeometryChanged(panelId);
     }
 
     void toggleMaximize()
