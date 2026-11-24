@@ -91,3 +91,25 @@ Processor integration tests охватывают audible baseline, invalid regis
 ## Отдельная будущая ветка
 
 Chord-driven PATTERN INSTRUMENT (аккорд → согласованный riff/phrase, chord adaptation, groove и musical sections) не входит в текущий per-key registry. Его нельзя объявлять готовым на основании реализации note-event runtime.
+
+
+## 7. Упаковка staged-клипа в переносимую библиотеку
+
+`LibraryManager/pattern_package_builder.py` принимает sidecar, созданный `asset_pipeline.py`, и три отдельных JSON-файла с явными решениями человека:
+
+- `--license-approval`: `license_status`, `spdx_id`, HTTPS `source_url`, `evidence_source_path`, `reviewed_by`, `reviewed_at_utc`;
+- `--musical-review`: `status: APPROVED`, `reviewed_by`, `reviewed_at_utc`, `boundary_basis`;
+- `--mapping`: MIDI trigger/source notes, articulation, velocity min/max и Round Robin group.
+
+Пример вызова (пути и JSON-файлы должны быть подготовлены реальным curator-процессом):
+
+```powershell
+python LibraryManager/pattern_package_builder.py `
+  --staging-record .\staging\clips\<asset-id>.json `
+  --package-root .\PatternLibrary `
+  --license-approval .\approvals\<asset-id>-license.json `
+  --musical-review .\approvals\<asset-id>-musical-review.json `
+  --mapping .\approvals\<asset-id>-mapping.json
+```
+
+Builder копирует source WAV, exact derived PCM range и license evidence в `sources/`, `clips/`, `licenses/`, формирует `pattern_clips.json` с относительными путями и перед публикацией повторно прогоняет весь пакет через `load_pattern_clip_registry`. Он не создаёт approvals и не принимает абсолютные пути в итоговом manifest. Существующие одноимённые файлы не перезаписываются; directory symlinks, ведущие за пределы package root, отклоняются.
