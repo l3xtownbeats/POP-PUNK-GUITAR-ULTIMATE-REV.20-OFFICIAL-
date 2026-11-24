@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <map>
 #include <set>
+#include <stdexcept>
 
 namespace ppgu::performance
 {
@@ -39,7 +40,7 @@ std::filesystem::path canonicalInside(const std::filesystem::path& root,
                                       const std::string& raw, const char* field)
 {
     std::string normalized = raw;
-    std::replace(normalized.begin(), normalized.end(), '\\\\', '/');
+    std::replace(normalized.begin(), normalized.end(), '\\', '/');
     const std::filesystem::path relative(normalized);
     if (relative.empty() || relative.is_absolute() || relative.has_root_name()
         || relative.has_root_directory())
@@ -105,7 +106,7 @@ std::unique_ptr<juce::AudioFormatReader> openPcmWav(
         formats.createReaderFor(juce::File(juce::String(path.string()))));
     if (!reader)
         throw std::runtime_error(assetId + ": cannot decode " + role + " WAV");
-    if (reader->numChannels < 1 || reader->numChannels > 2
+    if (reader->formatName != "WAV" || reader->numChannels < 1 || reader->numChannels > 2
         || reader->bitsPerSample < 16 || reader->bitsPerSample > 32
         || reader->usesFloatingPointData
         || reader->sampleRate < 8000.0 || reader->sampleRate > 192000.0
