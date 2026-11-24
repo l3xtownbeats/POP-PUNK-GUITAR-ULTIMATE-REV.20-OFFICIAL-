@@ -36,6 +36,14 @@ class PatternPackageBuilderTests(unittest.TestCase):
   bad=dict(self.review,status="NEEDS_MUSICAL_REVIEW")
   with self.assertRaisesRegex(ValueError,"musical_review APPROVED"): self.package(musical_review=bad)
   self.assertFalse((self.root/"package"/"pattern_clips.json").exists())
+ def test_symlinked_package_directory_is_rejected(self):
+  package=self.root/"package"; package.mkdir()
+  outside=self.root/"outside"; outside.mkdir()
+  try: (package/"sources").symlink_to(outside,target_is_directory=True)
+  except (OSError,NotImplementedError): self.skipTest("directory symlinks unavailable on this runner")
+  with self.assertRaisesRegex(ValueError,"must not be a symlink"):
+   self.package()
+  self.assertFalse((outside/"asset.wav").exists())
  def test_wrong_pcm_even_with_updated_hash_is_rejected(self):
   clip=Path(self.staging["derived_path"])
   with wave.open(str(clip),"wb") as w:
