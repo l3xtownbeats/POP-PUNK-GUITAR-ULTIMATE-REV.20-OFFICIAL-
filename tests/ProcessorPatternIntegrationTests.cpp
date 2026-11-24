@@ -160,7 +160,9 @@ int main()
         std::filesystem::remove_all(asyncRoot, asyncCleanupError);
         std::filesystem::create_directories(asyncRoot);
         const juce::File asyncManifest(asyncRoot.string() + "/pattern_clips.json");
-        if (!asyncManifest.replaceWithText("{\n  \"schema_version\": 1,\n  \"clips\": []\n}"))
+        const juce::File invalidManifest(asyncRoot.string() + "/invalid_pattern_clips.json");
+        if (!asyncManifest.replaceWithText("{\n  \"schema_version\": 1,\n  \"clips\": []\n}")
+            || !invalidManifest.replaceWithText("{ malformed json"))
         {
             std::cerr << "Could not create asynchronous PATTERN registry fixture.\n";
             result = 1;
@@ -193,19 +195,73 @@ int main()
             setParameter(asyncProcessor, "reverbOn", 0.0f);
             setParameter(asyncProcessor, "cabinetOn", 0.0f);
 
+            // First prove the seeded snapshot is genuinely audible. Without this
+            // baseline, a broken MIDI route could make the later clear assertion
+            // pass trivially because the processor was silent all along.
+            juce::AudioBuffer<float> baselineBlock(2, 256);
+            juce::MidiBuffer baselineMidi;
+            baselineMidi.addEvent(
+                juce::MidiMessage::noteOn(1, 72, static_cast<juce::uint8>(110)), 0);
+            baselineMidi.addEvent(juce::MidiMessage::noteOff(1, 72), 128);
+            asyncProcessor.processBlock(baselineBlock, baselineMidi);
+            double baselinePeak = 0.0;
+            for (int channel = 0; channel < baselineBlock.getNumChannels(); ++channel)
+                for (int sample = 0; sample < baselineBlock.getNumSamples(); ++sample)
+                    baselinePeak = juce::jmax(baselinePeak, std::abs(
+                        static_cast<double>(baselineBlock.getSample(channel, sample))));
+            if (!(baselinePeak > 0.05))
+            {
+                std::cerr << "Seed PATTERN snapshot produced no audible baseline; async clear test is invalid. Peak="
+                          << baselinePeak << "\n";
+                result = 1;
+            }
+
             std::atomic<bool> completed { false };
-            std::atomic<bool> callbackOnMessageThread { false };
+            std::atomic<bool> invalidCallbackOnMessageThread { false };
+            std::atomic<bool> invalidRejected { false };
+            std::atomic<bool> retainedSnapshotAudible { false };
+            std::atomic<bool> emptyCallbackOnMessageThread { false };
             std::atomic<bool> reportedEmpty { false };
-            asyncProcessor.loadPatternClipRegistryAsync(asyncManifest,
-                [&](ppgu::performance::PatternClipLoadResult loadResult)
+
+            // A malformed registry must fail closed and leave the already
+            // published snapshot usable. Once that is verified, load a valid
+            // empty registry and verify that it explicitly clears the snapshot.
+            asyncProcessor.loadPatternClipRegistryAsync(invalidManifest,
+                [&](ppgu::performance::PatternClipLoadResult invalidResult)
                 {
-                    callbackOnMessageThread.store(
+                    invalidCallbackOnMessageThread.store(
                         juce::MessageManager::getInstance()->isThisTheMessageThread(),
                         std::memory_order_release);
-                    reportedEmpty.store(loadResult.empty && !loadResult.ready
-                                            && loadResult.errors.empty(),
-                                        std::memory_order_release);
-                    completed.store(true, std::memory_order_release);
+                    const bool rejected = !invalidResult.ready && !invalidResult.empty
+                        && invalidResult.snapshot == nullptr && !invalidResult.errors.empty();
+                    invalidRejected.store(rejected, std::memory_order_release);
+
+                    juce::AudioBuffer<float> retainedBlock(2, 256);
+                    juce::MidiBuffer retainedMidi;
+                    retainedMidi.addEvent(
+                        juce::MidiMessage::noteOn(1, 72, static_cast<juce::uint8>(110)), 0);
+                    retainedMidi.addEvent(juce::MidiMessage::noteOff(1, 72), 128);
+                    asyncProcessor.processBlock(retainedBlock, retainedMidi);
+                    double retainedPeak = 0.0;
+                    for (int channel = 0; channel < retainedBlock.getNumChannels(); ++channel)
+                        for (int sample = 0; sample < retainedBlock.getNumSamples(); ++sample)
+                            retainedPeak = juce::jmax(retainedPeak, std::abs(
+                                static_cast<double>(retainedBlock.getSample(channel, sample))));
+                    retainedSnapshotAudible.store(retainedPeak > 0.05,
+                                                  std::memory_order_release);
+
+                    asyncProcessor.loadPatternClipRegistryAsync(asyncManifest,
+                        [&](ppgu::performance::PatternClipLoadResult emptyResult)
+                        {
+                            emptyCallbackOnMessageThread.store(
+                                juce::MessageManager::getInstance()->isThisTheMessageThread(),
+                                std::memory_order_release);
+                            reportedEmpty.store(emptyResult.empty && !emptyResult.ready
+                                                    && emptyResult.errors.empty()
+                                                    && emptyResult.snapshot == nullptr,
+                                                std::memory_order_release);
+                            completed.store(true, std::memory_order_release);
+                        });
                 });
 
             auto* messageManager = juce::MessageManager::getInstance();
@@ -234,10 +290,21 @@ int main()
                 std::cerr << "Asynchronous PATTERN registry completion timed out.\n";
                 result = 1;
             }
-            else if (!callbackOnMessageThread.load(std::memory_order_acquire)
+            else if (!invalidCallbackOnMessageThread.load(std::memory_order_acquire)
+                     || !invalidRejected.load(std::memory_order_acquire)
+                     || !retainedSnapshotAudible.load(std::memory_order_acquire)
+                     || !emptyCallbackOnMessageThread.load(std::memory_order_acquire)
                      || !reportedEmpty.load(std::memory_order_acquire))
             {
-                std::cerr << "Asynchronous PATTERN completion thread/status contract failed.\n";
+                std::cerr << "Asynchronous PATTERN invalid-retention / empty-clear contract failed."
+                          << " invalidThread="
+                          << invalidCallbackOnMessageThread.load(std::memory_order_acquire)
+                          << " invalidRejected=" << invalidRejected.load(std::memory_order_acquire)
+                          << " retainedAudible=" << retainedSnapshotAudible.load(std::memory_order_acquire)
+                          << " emptyThread="
+                          << emptyCallbackOnMessageThread.load(std::memory_order_acquire)
+                          << " reportedEmpty=" << reportedEmpty.load(std::memory_order_acquire)
+                          << "\n";
                 result = 1;
             }
             else
@@ -247,12 +314,12 @@ int main()
                 clearedMidi.addEvent(
                     juce::MidiMessage::noteOn(1, 72, static_cast<juce::uint8>(110)), 0);
                 asyncProcessor.processBlock(clearedBlock, clearedMidi);
-                double peak = 0.0;
+                double clearedPeak = 0.0;
                 for (int channel = 0; channel < clearedBlock.getNumChannels(); ++channel)
                     for (int sample = 0; sample < clearedBlock.getNumSamples(); ++sample)
-                        peak = juce::jmax(peak, std::abs(
+                        clearedPeak = juce::jmax(clearedPeak, std::abs(
                             static_cast<double>(clearedBlock.getSample(channel, sample))));
-                if (peak > 1.0e-7)
+                if (clearedPeak > 1.0e-7)
                 {
                     std::cerr << "A valid empty async registry did not clear the published PATTERN snapshot.\n";
                     result = 1;
