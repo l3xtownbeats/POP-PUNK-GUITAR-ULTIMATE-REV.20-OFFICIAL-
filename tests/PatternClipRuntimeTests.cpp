@@ -140,10 +140,12 @@ int main()
     PatternClipRuntime pitchRuntime;
     pitchRuntime.prepare(48000.0);
     pitchRuntime.attachSnapshot(&pitched);
-    std::array<float, 128> pitchLeft {}, pitchRight {};
+    std::array<float, 129> pitchLeft {}, pitchRight {};
     if (!pitchRuntime.noteOn(67, 100, 1))
         return 1;
-    pitchRuntime.render(pitchLeft.data(), pitchRight.data(), 128);
+    // The renderer retires a voice at the start of the first sample after
+    // its playback position reaches the clip end, so render one extra frame.
+    pitchRuntime.render(pitchLeft.data(), pitchRight.data(), 129);
     if (pitchRuntime.activeVoiceCount() != 0)
     {
         std::cerr << "Pitch ratio did not advance the clip at the expected rate.\\n";
