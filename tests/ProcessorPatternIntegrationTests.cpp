@@ -104,6 +104,51 @@ int main()
     juce::ScopedJuceInitialiser_GUI juceInitialiser;
     const auto root = std::filesystem::temp_directory_path() / "ppgu-processor-pattern-integration";
     std::error_code cleanupError;
+
+    // Exercise the newly wired recorded-clip route through the real processor.
+    // A single MIDI key must play one clip directly, unaffected by AutoChords.
+    {
+        PopPunkGuitarUltimateAudioProcessor clipProcessor;
+        clipProcessor.prepareToPlay(48000.0, 256);
+        auto snapshot = std::make_unique<ppgu::performance::PatternClipSnapshot>();
+        snapshot->clips.resize(1);
+        snapshot->clips[0].sampleRate = 48000.0;
+        snapshot->clips[0].samples.assign(2048, 0.25f);
+        snapshot->mappings.push_back({72, 1, 127, 0, 0, 0, 64, 1.0f, 0.0f});
+        if (!clipProcessor.installPatternClipSnapshot(std::move(snapshot)))
+        {
+            std::cerr << "Processor rejected a valid immutable PATTERN clip snapshot.\\n";
+            result = 1;
+        }
+        setParameter(clipProcessor, "playMode", 1.0f);
+        setParameter(clipProcessor, "articulation", 0.0f);
+        setParameter(clipProcessor, "singleMidiNoteAsChordRoot", 1.0f);
+        setParameter(clipProcessor, "ampGain", 5.0f);
+        setParameter(clipProcessor, "master", 1.0f);
+        setParameter(clipProcessor, "eqOn", 0.0f);
+        setParameter(clipProcessor, "compressorOn", 0.0f);
+        setParameter(clipProcessor, "distortionOn", 0.0f);
+        setParameter(clipProcessor, "chorusOn", 0.0f);
+        setParameter(clipProcessor, "flangerOn", 0.0f);
+        setParameter(clipProcessor, "delayOn", 0.0f);
+        setParameter(clipProcessor, "reverbOn", 0.0f);
+        setParameter(clipProcessor, "cabinetOn", 0.0f);
+        juce::AudioBuffer<float> clipBlock(2, 256);
+        juce::MidiBuffer clipMidi;
+        clipMidi.addEvent(juce::MidiMessage::noteOn(1, 72, static_cast<juce::uint8>(100)), 32);
+        clipMidi.addEvent(juce::MidiMessage::noteOff(1, 72), 96);
+        clipProcessor.processBlock(clipBlock, clipMidi);
+        const auto* left = clipBlock.getReadPointer(0);
+        bool exactStart = true;
+        for (int i = 0; i < 32; ++i)
+            if (std::abs(left[i]) > 1.0e-7f) exactStart = false;
+        if (!exactStart || !(left[32] > 0.15f) || std::abs(left[180]) > 1.0e-6f)
+        {
+            std::cerr << "Recorded PATTERN clip did not respect sample-accurate Note On / Note Off release.\\n";
+            result = 1;
+        }
+    }
+
     std::filesystem::remove_all(root, cleanupError);
     std::filesystem::create_directories(root);
 
