@@ -110,8 +110,10 @@ private:
     // Serializes load-generation changes with worker-thread snapshot publication.
     // This mutex is never acquired by processBlock() or the audio renderer.
     std::mutex patternLoadPublicationMutex;
+    static constexpr std::size_t maximumRetainedPatternSnapshots = 8;
     std::mutex patternClipSnapshotMutex;
     std::vector<std::unique_ptr<ppgu::performance::PatternClipSnapshot>> patternClipSnapshots;
+    void collectRetiredPatternClipSnapshotsLocked();
     std::shared_ptr<std::atomic<std::uint64_t>> patternLoadGeneration {
         std::make_shared<std::atomic<std::uint64_t>>(0) };
     ppgu::performance::BlockClock patternTransportClock;

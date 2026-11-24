@@ -41,11 +41,30 @@ struct PatternClipSnapshot
     static constexpr std::size_t maximumDecodedFrames = 8U * 1024U * 1024U;
     std::vector<PatternClipPcm> clips;
     std::vector<PatternClipMapping> mappings;
+
+    // Audio voices retain this immutable snapshot across render blocks.
+    // Copying a snapshot creates a fresh, unreferenced ownership generation.
+    std::atomic<std::uint32_t> activeVoiceReferences { 0 };
+
+    PatternClipSnapshot() = default;
+    PatternClipSnapshot(const PatternClipSnapshot& other)
+        : clips(other.clips), mappings(other.mappings) {}
+    PatternClipSnapshot& operator=(const PatternClipSnapshot& other)
+    {
+        if (this != &other)
+        {
+            clips = other.clips;
+            mappings = other.mappings;
+            activeVoiceReferences.store(0, std::memory_order_relaxed);
+        }
+        return *this;
+    }
 };
 
-// Fixed-voice, allocation-free renderer. Snapshot installation and destruction
-// are control-thread operations and require audio processing to be suspended;
-// the snapshot must remain alive until the runtime is detached and reset.
+// Fixed-voice, allocation-free renderer. Published snapshots are immutable.
+// A short lock-free call guard protects pointer acquisition; each active voice
+// holds an atomic snapshot reference until it is retired. Owners may reclaim an
+// unpublished snapshot only when canRetireSnapshot() returns true.
 class PatternClipRuntime final
 {
 public:
@@ -101,29 +120,36 @@ public:
     }
 
     // Publish a fully validated immutable snapshot from a non-audio thread.
-    // Existing voices may still reference the previous snapshot, so the owner
-    // must retain every published snapshot until the runtime is destroyed (or
-    // until audio is explicitly suspended and those voices have been reset).
-    // Unlike attachSnapshot(), this operation is safe while audio is running:
-    // it performs no reset, allocation, lock, or reference-count operation.
+    // Existing voices keep a counted reference to their original snapshot.
     [[nodiscard]] bool publishSnapshot(const PatternClipSnapshot* snapshot) noexcept
     {
         if (snapshot == nullptr || !validateSnapshot(*snapshot))
             return false;
-        activeSnapshot.store(snapshot, std::memory_order_release);
+        activeSnapshot.store(snapshot, std::memory_order_seq_cst);
         return true;
+    }
+
+    // Called by the non-audio owner while it holds ownership of snapshot.
+    // A zero call count plus zero voice references proves no audio operation
+    // can still acquire or dereference this retired snapshot.
+    [[nodiscard]] bool canRetireSnapshot(const PatternClipSnapshot* snapshot) const noexcept
+    {
+        if (snapshot == nullptr || activeCalls.load(std::memory_order_seq_cst) != 0
+            || activeSnapshot.load(std::memory_order_seq_cst) == snapshot)
+            return false;
+        return snapshot->activeVoiceReferences.load(std::memory_order_seq_cst) == 0;
     }
 
     // Stop assigning new notes to the current snapshot. Existing voices keep
     // rendering from their retained immutable snapshot until release/end.
     void clearPublishedSnapshot() noexcept
     {
-        activeSnapshot.store(nullptr, std::memory_order_release);
+        activeSnapshot.store(nullptr, std::memory_order_seq_cst);
     }
 
     [[nodiscard]] bool hasSnapshot() const noexcept
     {
-        return activeSnapshot.load(std::memory_order_acquire) != nullptr;
+        return activeSnapshot.load(std::memory_order_seq_cst) != nullptr;
     }
 
     void detachSnapshot() noexcept
@@ -136,7 +162,8 @@ public:
     [[nodiscard]] bool noteOn(int note, int velocity, int channel,
                               int articulation = 0) noexcept
     {
-        const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
+        const ActiveCall activeCall(*this);
+        const auto* snapshot = activeSnapshot.load(std::memory_order_seq_cst);
         if (snapshot == nullptr || snapshot->mappings.empty()
             || snapshot->mappings.size() > PatternClipSnapshot::maximumMappings
             || note < 0 || note > 127
@@ -182,7 +209,10 @@ public:
                 if (candidate.age < voice->age) voice = &candidate;
         }
 
+        retireVoice(*voice);
         *voice = Voice {};
+        voice->snapshot = snapshot;
+        snapshot->activeVoiceReferences.fetch_add(1, std::memory_order_seq_cst);
         voice->active = true;
         voice->clip = &clip;
         voice->note = note;
@@ -198,6 +228,7 @@ public:
 
     void noteOff(int note, int channel) noexcept
     {
+        const ActiveCall activeCall(*this);
         for (auto& voice : voices)
             if (voice.active && voice.note == note && voice.channel == channel
                 && !voice.releasing)
@@ -206,6 +237,7 @@ public:
 
     void allNotesOff() noexcept
     {
+        const ActiveCall activeCall(*this);
         for (auto& voice : voices)
             if (voice.active && !voice.releasing)
                 beginFade(voice, voice.releaseSamples);
@@ -213,7 +245,12 @@ public:
 
     void reset() noexcept
     {
-        for (auto& voice : voices) voice = Voice {};
+        const ActiveCall activeCall(*this);
+        for (auto& voice : voices)
+        {
+            retireVoice(voice);
+            voice = Voice {};
+        }
         nextAge = 1;
         roundRobinCounters.fill(0);
     }
@@ -229,6 +266,7 @@ public:
     {
         if (left == nullptr || right == nullptr || samples <= 0)
             return;
+        const ActiveCall activeCall(*this);
 
         for (auto& voice : voices)
         {
@@ -243,6 +281,7 @@ public:
                 if (voice.position >= static_cast<double>(frameCount))
                 {
                     voice.active = false;
+                    retireVoice(voice);
                     break;
                 }
                 const auto index = static_cast<std::size_t>(voice.position);
@@ -262,7 +301,10 @@ public:
                         --voice.fadeRemaining;
                     }
                     if (voice.fadeRemaining == 0)
+                    {
                         voice.active = false;
+                        retireVoice(voice);
+                    }
                 }
             }
         }
@@ -278,8 +320,22 @@ public:
 private:
     static constexpr std::uint32_t chokeFadeSamples = 64;
 
+    struct ActiveCall
+    {
+        explicit ActiveCall(const PatternClipRuntime& owner) noexcept : runtime(owner)
+        {
+            runtime.activeCalls.fetch_add(1, std::memory_order_seq_cst);
+        }
+        ~ActiveCall()
+        {
+            runtime.activeCalls.fetch_sub(1, std::memory_order_seq_cst);
+        }
+        const PatternClipRuntime& runtime;
+    };
+
     struct Voice
     {
+        const PatternClipSnapshot* snapshot = nullptr;
         const PatternClipPcm* clip = nullptr;
         double position = 0.0;
         double increment = 1.0;
@@ -297,6 +353,15 @@ private:
         bool releasing = false;
     };
 
+    static void retireVoice(Voice& voice) noexcept
+    {
+        if (voice.snapshot != nullptr)
+        {
+            voice.snapshot->activeVoiceReferences.fetch_sub(1, std::memory_order_seq_cst);
+            voice.snapshot = nullptr;
+        }
+    }
+
     static void beginFade(Voice& voice, std::uint32_t length) noexcept
     {
         voice.releasing = true;
@@ -306,6 +371,7 @@ private:
     }
 
     std::atomic<const PatternClipSnapshot*> activeSnapshot { nullptr };
+    mutable std::atomic<std::uint32_t> activeCalls { 0 };
     std::array<Voice, maximumVoices> voices {};
     std::array<std::uint32_t, 128> roundRobinCounters {};
     double outputSampleRate = 48000.0;

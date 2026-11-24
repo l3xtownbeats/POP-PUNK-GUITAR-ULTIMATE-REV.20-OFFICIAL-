@@ -77,6 +77,39 @@ int main()
     }
     hotSwapRuntime.detachSnapshot();
 
+    // Snapshot ownership is counted per voice and becomes reclaimable after
+    // the final voice retires; active publication itself is never reclaimable.
+    PatternClipSnapshot ownedSnapshot;
+    ownedSnapshot.clips.resize(1);
+    ownedSnapshot.clips[0].sampleRate = 48000.0;
+    ownedSnapshot.clips[0].samples.assign(64, 0.2f);
+    ownedSnapshot.mappings.push_back({65, 1, 127, 0, 0, 0, 1, 1.0f, 0.0f});
+    PatternClipRuntime ownershipRuntime;
+    ownershipRuntime.prepare(48000.0);
+    if (!ownershipRuntime.publishSnapshot(&ownedSnapshot)
+        || ownershipRuntime.canRetireSnapshot(&ownedSnapshot)
+        || !ownershipRuntime.noteOn(65, 100, 1)
+        || ownedSnapshot.activeVoiceReferences.load(std::memory_order_seq_cst) != 1)
+    {
+        std::cerr << "Snapshot voice ownership was not retained correctly.\\n";
+        return 1;
+    }
+    ownershipRuntime.clearPublishedSnapshot();
+    if (ownershipRuntime.canRetireSnapshot(&ownedSnapshot))
+    {
+        std::cerr << "Snapshot with an active voice was incorrectly marked reclaimable.\\n";
+        return 1;
+    }
+    std::array<float, 128> ownershipLeft {}, ownershipRight {};
+    ownershipRuntime.render(ownershipLeft.data(), ownershipRight.data(), 128);
+    if (ownedSnapshot.activeVoiceReferences.load(std::memory_order_seq_cst) != 0
+        || !ownershipRuntime.canRetireSnapshot(&ownedSnapshot))
+    {
+        std::cerr << "Retired snapshot did not become reclaimable after its final voice.\\n";
+        return 1;
+    }
+    ownershipRuntime.detachSnapshot();
+
     // Distinct RR lanes may overlap in velocity and must alternate deterministically.
     PatternClipSnapshot roundRobin;
     roundRobin.clips.resize(2);

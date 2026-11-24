@@ -35,6 +35,9 @@ PopPunkGuitarUltimateAudioProcessor::~PopPunkGuitarUltimateAudioProcessor()
     sampleLoadGeneration->fetch_add(1, std::memory_order_acq_rel);
     patternLoadGeneration->fetch_add(1, std::memory_order_acq_rel);
     sampleLoadPool.removeAllJobs(true, -1);
+    patternClipRuntime.detachSnapshot();
+    const std::lock_guard<std::mutex> snapshotLock(patternClipSnapshotMutex);
+    patternClipSnapshots.clear();
 }
 
 PopPunkGuitarUltimateAudioProcessor::PopPunkGuitarUltimateAudioProcessor()
@@ -226,25 +229,48 @@ int PopPunkGuitarUltimateAudioProcessor::getPatternPreviewSlot() const noexcept
     return patternPreviewSlot.load(std::memory_order_acquire);
 }
 
+void PopPunkGuitarUltimateAudioProcessor::collectRetiredPatternClipSnapshotsLocked()
+{
+    auto iterator = patternClipSnapshots.begin();
+    while (iterator != patternClipSnapshots.end())
+    {
+        const auto* candidate = iterator->get();
+        if (patternClipRuntime.canRetireSnapshot(candidate))
+            iterator = patternClipSnapshots.erase(iterator);
+        else
+            ++iterator;
+    }
+}
+
 bool PopPunkGuitarUltimateAudioProcessor::installPatternClipSnapshot(
     std::unique_ptr<ppgu::performance::PatternClipSnapshot> snapshot)
 {
     if (snapshot == nullptr || !ppgu::performance::PatternClipRuntime::validateSnapshot(*snapshot))
         return false;
 
+    const std::lock_guard<std::mutex> lock(patternClipSnapshotMutex);
+    collectRetiredPatternClipSnapshotsLocked();
+    if (patternClipSnapshots.size() >= maximumRetainedPatternSnapshots)
+        return false;
+
     const auto* published = snapshot.get();
+    patternClipSnapshots.push_back(std::move(snapshot));
+    // Publication is lock-free for the audio thread. Old snapshots are reclaimed
+    // opportunistically once no audio call or active voice references them.
+    if (!patternClipRuntime.publishSnapshot(published))
     {
-        const std::lock_guard<std::mutex> lock(patternClipSnapshotMutex);
-        patternClipSnapshots.push_back(std::move(snapshot));
+        patternClipSnapshots.pop_back();
+        return false;
     }
-    // The snapshot is now owned by the processor. Publication itself is a
-    // single atomic pointer store and does not allocate or lock the audio thread.
-    return patternClipRuntime.publishSnapshot(published);
+    collectRetiredPatternClipSnapshotsLocked();
+    return true;
 }
 
 void PopPunkGuitarUltimateAudioProcessor::clearPatternClipSnapshot() noexcept
 {
     patternClipRuntime.clearPublishedSnapshot();
+    const std::lock_guard<std::mutex> lock(patternClipSnapshotMutex);
+    collectRetiredPatternClipSnapshotsLocked();
 }
 
 void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsync(
