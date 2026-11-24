@@ -95,6 +95,7 @@ void addChordOff(juce::MidiBuffer& midi, int sample, const std::array<int, 3>& n
 
 int main()
 {
+    int result = 0;
     if (PPGUTestData::ppgu_test_data_txtSize <= 0)
     {
         std::cerr << "Generated PPGU test binary-data fixture is empty.\\n";
@@ -184,7 +185,6 @@ int main()
         return 1;
     }
 
-    int result = 0;
     {
         PopPunkGuitarUltimateAudioProcessor processor;
         // Section routing is independent of the legacy global APVTS slot.
