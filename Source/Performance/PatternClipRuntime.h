@@ -44,7 +44,9 @@ struct PatternClipSnapshot
 
     // Audio voices retain this immutable snapshot across render blocks.
     // Copying a snapshot creates a fresh, unreferenced ownership generation.
-    std::atomic<std::uint32_t> activeVoiceReferences { 0 };
+    // Voice lifetime bookkeeping is logically const: snapshots stay immutable
+    // to the audio renderer while their external reference count changes.
+    mutable std::atomic<std::uint32_t> activeVoiceReferences { 0 };
 
     PatternClipSnapshot() = default;
     PatternClipSnapshot(const PatternClipSnapshot& other)
