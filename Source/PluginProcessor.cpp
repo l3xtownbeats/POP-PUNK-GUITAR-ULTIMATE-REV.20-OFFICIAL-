@@ -660,7 +660,12 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
             renderSegment(cursor, eventSample - cursor);
             cursor = eventSample;
 
-            if (message.isAllNotesOff() || message.isAllSoundOff())
+            if (message.isAllSoundOff())
+            {
+                panicRequested.store(true, std::memory_order_release);
+                patternClipRuntime.allSoundOff();
+            }
+            else if (message.isAllNotesOff())
             {
                 panicRequested.store(true, std::memory_order_release);
                 patternClipRuntime.allNotesOff();
