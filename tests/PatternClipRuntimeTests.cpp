@@ -192,6 +192,78 @@ int main()
     }
     pitchRuntime.detachSnapshot();
 
+    // Velocity zones must select different recorded clips without affecting
+    // the round-robin sequence of another velocity zone.
+    PatternClipSnapshot velocityLayers;
+    velocityLayers.clips.resize(2);
+    velocityLayers.clips[0].sampleRate = 48000.0;
+    velocityLayers.clips[0].samples.assign(16, 0.20f);
+    velocityLayers.clips[1].sampleRate = 48000.0;
+    velocityLayers.clips[1].samples.assign(16, 0.70f);
+    velocityLayers.mappings.push_back({72, 1, 63, 0, 0, 0, 4, 1.0f, 0.0f, 1});
+    velocityLayers.mappings.push_back({72, 64, 127, 1, 0, 0, 4, 1.0f, 0.0f, 1});
+    if (!PatternClipRuntime::validateSnapshot(velocityLayers))
+    {
+        std::cerr << "Non-overlapping velocity layers were rejected.\\n";
+        return 1;
+    }
+    PatternClipRuntime velocityRuntime;
+    velocityRuntime.prepare(48000.0);
+    velocityRuntime.attachSnapshot(&velocityLayers);
+    std::array<float, 2> velocityLeft {}, velocityRight {};
+    if (!velocityRuntime.noteOn(72, 40, 1))
+    {
+        std::cerr << "Soft velocity did not trigger a mapped layer.\\n";
+        return 1;
+    }
+    velocityRuntime.render(velocityLeft.data(), velocityRight.data(), 1);
+    if (!(velocityLeft[0] > 0.19f && velocityLeft[0] < 0.21f))
+    {
+        std::cerr << "Soft velocity selected the wrong layer.\\n";
+        return 1;
+    }
+    velocityRuntime.reset();
+    velocityLeft.fill(0.0f);
+    velocityRight.fill(0.0f);
+    if (!velocityRuntime.noteOn(72, 100, 1))
+    {
+        std::cerr << "Hard velocity did not trigger a mapped layer.\\n";
+        return 1;
+    }
+    velocityRuntime.render(velocityLeft.data(), velocityRight.data(), 1);
+    if (!(velocityLeft[0] > 0.69f && velocityLeft[0] < 0.71f))
+    {
+        std::cerr << "Hard velocity selected the wrong layer.\\n";
+        return 1;
+    }
+    velocityRuntime.detachSnapshot();
+
+    // All Notes Off must release every active voice, regardless of channel.
+    PatternClipSnapshot allNotesOffSnapshot;
+    allNotesOffSnapshot.clips.resize(1);
+    allNotesOffSnapshot.clips[0].sampleRate = 48000.0;
+    allNotesOffSnapshot.clips[0].samples.assign(64, 0.35f);
+    allNotesOffSnapshot.mappings.push_back({69, 1, 127, 0, 0, 0, 4, 1.0f, 0.0f, 1});
+    PatternClipRuntime allNotesOffRuntime;
+    allNotesOffRuntime.prepare(48000.0);
+    allNotesOffRuntime.attachSnapshot(&allNotesOffSnapshot);
+    if (!allNotesOffRuntime.noteOn(69, 100, 1)
+        || !allNotesOffRuntime.noteOn(69, 100, 2))
+    {
+        std::cerr << "Could not start voices for All Notes Off contract.\\n";
+        return 1;
+    }
+    allNotesOffRuntime.allNotesOff();
+    std::array<float, 8> allOffLeft {}, allOffRight {};
+    allNotesOffRuntime.render(allOffLeft.data(), allOffRight.data(),
+                              static_cast<int>(allOffLeft.size()));
+    if (allNotesOffRuntime.activeVoiceCount() != 0)
+    {
+        std::cerr << "All Notes Off failed to release every channel voice.\\n";
+        return 1;
+    }
+    allNotesOffRuntime.detachSnapshot();
+
     PatternClipRuntime runtime;
     runtime.prepare(48000.0);
     runtime.attachSnapshot(&snapshot);
