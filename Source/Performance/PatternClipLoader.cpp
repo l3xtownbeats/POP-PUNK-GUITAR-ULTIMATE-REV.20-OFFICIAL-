@@ -2,6 +2,9 @@
 #include <juce_cryptography/juce_cryptography.h>
 
 #include <algorithm>
+#include <cctype>
+#include <cmath>
+#include <cstdint>
 #include <filesystem>
 #include <map>
 #include <set>
@@ -211,7 +214,7 @@ PatternClipLoadResult PatternClipLoader::load(const juce::File& manifestFile)
             const auto sourcePath = canonicalInside(
                 root, textValue(property(record, "source_path"), "source_path"), "source_path");
             const auto sourceHash = textValue(property(record, "source_sha256"), "source_sha256");
-            if (sourceHash.size() != 64 || sha256(juce::File(sourcePath.string())) !=
+            if (sourceHash.size() != 64 || sha256(juce::File(juce::String(sourcePath.string()))) !=
                 juce::String(sourceHash).toUpperCase().toStdString())
                 throw std::runtime_error(assetId + ": source WAV SHA-256 mismatch");
 
@@ -229,7 +232,7 @@ PatternClipLoadResult PatternClipLoader::load(const juce::File& manifestFile)
             const auto clipPath = canonicalInside(
                 root, textValue(property(record, "clip_path"), "clip_path"), "clip_path");
             const auto derivedHash = textValue(property(record, "derived_sha256"), "derived_sha256");
-            if (derivedHash.size() != 64 || sha256(juce::File(clipPath.string())) !=
+            if (derivedHash.size() != 64 || sha256(juce::File(juce::String(clipPath.string()))) !=
                 juce::String(derivedHash).toUpperCase().toStdString())
                 throw std::runtime_error(assetId + ": derived clip SHA-256 mismatch");
             auto clipReader = openPcmWav(formats, clipPath, assetId, "derived clip");
