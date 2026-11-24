@@ -182,7 +182,6 @@ public:
             auto bounds = dragStartBounds.translated(relative.x - dragStartScreen.x, relative.y - dragStartScreen.y);
             bounds.setPosition(juce::jmax(0, bounds.getX()), juce::jmax(0, bounds.getY()));
             setBounds(bounds);
-            owner.handleGeometryChanged(panelId);
         }
     }
 
@@ -193,9 +192,9 @@ public:
             toggleMaximize();
     }
 
-    void mouseUp(const juce::MouseEvent&) override
+    void mouseUp(const juce::MouseEvent& event) override
     {
-        const bool movedWindow = draggingHeader;
+        const bool movedWindow = draggingHeader && event.mouseWasDraggedSinceMouseDown();
         draggingHeader = false;
         if (movedWindow)
             owner.handleGeometryChanged(panelId);
