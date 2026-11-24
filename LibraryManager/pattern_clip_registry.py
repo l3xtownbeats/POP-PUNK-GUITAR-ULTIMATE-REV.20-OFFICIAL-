@@ -117,6 +117,7 @@ def _build_mapping(record: dict[str, Any], root: Path) -> PatternClipMapping:
     _verify_license(record, root, asset_id)
     _verify_musical_review(record, asset_id)
 
+    _required_text(record.get("source_path"), f"{asset_id}.source_path")
     source_hash = _sha(record.get("source_sha256"), f"{asset_id}.source_sha256")
     clip_hash = _sha(record.get("derived_sha256"), f"{asset_id}.derived_sha256")
     start = _required_int(record.get("source_start_sample"), f"{asset_id}.source_start_sample")
