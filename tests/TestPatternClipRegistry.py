@@ -31,6 +31,7 @@ class PatternClipRegistryTests(unittest.TestCase):
             "asset_id": "TEST-CLIP-001",
             "kind": "note_event",
             "engine_targets": ["PATTERN_MODE"],
+            "source_path": "external-source-library/guitar-source.wav",
             "source_sha256": "A" * 64,
             "source_start_sample": 1200,
             "source_end_sample": 6000,
