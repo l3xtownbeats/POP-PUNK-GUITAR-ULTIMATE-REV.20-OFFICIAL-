@@ -133,8 +133,14 @@ def validate_neon_stage_asset_manifest() -> int:
             data = data.replace(b"\r\n", b"\n")
         if len(data) != record.get("bytes"):
             raise SystemExit(f"FAIL: asset byte count mismatch: {asset}")
-        if hashlib.sha256(data).hexdigest() != record.get("sha256"):
-            raise SystemExit(f"FAIL: asset SHA-256 mismatch: {asset}")
+        actual_sha256 = hashlib.sha256(data).hexdigest()
+        expected_sha256 = record.get("sha256")
+        if actual_sha256 != expected_sha256:
+            raise SystemExit(
+                f"FAIL: asset SHA-256 mismatch: {asset}; "
+                f"expected={expected_sha256}; actual={actual_sha256}; "
+                f"bytes={len(data)}; format={record.get('format')!r}"
+            )
         actual_crc = f"{zlib.crc32(data) & 0xFFFFFFFF:08X}"
         if actual_crc != str(record.get("crc32", "")).upper():
             raise SystemExit(f"FAIL: asset CRC32 mismatch: {asset}")
