@@ -18,6 +18,8 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <utility>
 
 namespace
@@ -331,6 +333,170 @@ int main()
         {
             std::cerr << "Could not remove async PATTERN fixtures: "
                       << asyncCleanupError.message() << "\n";
+            result = 1;
+        }
+    }
+
+    // Deterministic A/B load race: A starts first and is held inside its
+    // injected decoder; B starts on the second worker and publishes first.
+    // Only after B's message-thread completion do we release A, then wait for
+    // A's worker-side stale-generation check to finish before inspecting audio.
+    {
+        PopPunkGuitarUltimateAudioProcessor raceProcessor;
+        raceProcessor.prepareToPlay(48000.0, 256);
+        setParameter(raceProcessor, "playMode", 1.0f);
+        setParameter(raceProcessor, "articulation", 0.0f);
+        setParameter(raceProcessor, "singleMidiNoteAsChordRoot", 1.0f);
+        setParameter(raceProcessor, "ampGain", 5.0f);
+        setParameter(raceProcessor, "master", 1.0f);
+        setParameter(raceProcessor, "eqOn", 0.0f);
+        setParameter(raceProcessor, "compressorOn", 0.0f);
+        setParameter(raceProcessor, "distortionOn", 0.0f);
+        setParameter(raceProcessor, "chorusOn", 0.0f);
+        setParameter(raceProcessor, "flangerOn", 0.0f);
+        setParameter(raceProcessor, "delayOn", 0.0f);
+        setParameter(raceProcessor, "reverbOn", 0.0f);
+        setParameter(raceProcessor, "cabinetOn", 0.0f);
+
+        std::mutex raceMutex;
+        std::condition_variable raceCv;
+        bool aStarted = false;
+        bool releaseA = false;
+        std::atomic<bool> aWorkerFinished { false };
+        std::atomic<bool> aCallbackCalled { false };
+        std::atomic<bool> bCallbackOnMessageThread { false };
+        std::atomic<bool> bPublishedAudible { false };
+        std::atomic<bool> raceCompleted { false };
+        std::atomic<bool> raceTimedOut { false };
+
+        const auto makeLoadResult = [](float amplitude)
+        {
+            ppgu::performance::PatternClipLoadResult loaded;
+            loaded.snapshot = std::make_unique<ppgu::performance::PatternClipSnapshot>();
+            loaded.snapshot->clips.resize(1);
+            loaded.snapshot->clips[0].sampleRate = 48000.0;
+            loaded.snapshot->clips[0].samples.assign(2048, amplitude);
+            loaded.snapshot->mappings.push_back({72, 1, 127, 0, 0, 0, 64, 1.0f, 0.0f});
+            loaded.ready = true;
+            return loaded;
+        };
+
+        const juce::File loadA("race-load-A.json");
+        const juce::File loadB("race-load-B.json");
+        raceProcessor.loadPatternClipRegistryAsyncForTesting(
+            loadA,
+            [&](ppgu::performance::PatternClipLoadResult)
+            {
+                aCallbackCalled.store(true, std::memory_order_release);
+            },
+            [&](const juce::File&)
+            {
+                std::unique_lock<std::mutex> lock(raceMutex);
+                aStarted = true;
+                raceCv.notify_all();
+                raceCv.wait(lock, [&] { return releaseA; });
+                lock.unlock();
+                return makeLoadResult(0.10f);
+            },
+            [&]
+            {
+                aWorkerFinished.store(true, std::memory_order_release);
+                raceCv.notify_all();
+            });
+
+        {
+            std::unique_lock<std::mutex> lock(raceMutex);
+            if (!raceCv.wait_for(lock, std::chrono::seconds(3), [&] { return aStarted; }))
+            {
+                std::cerr << "PATTERN race test: load A did not enter its controlled decoder.\n";
+                result = 1;
+                releaseA = true;
+                raceCv.notify_all();
+            }
+        }
+
+        if (aStarted)
+        {
+            raceProcessor.loadPatternClipRegistryAsyncForTesting(
+                loadB,
+                [&](ppgu::performance::PatternClipLoadResult loadedB)
+                {
+                    bCallbackOnMessageThread.store(
+                        juce::MessageManager::getInstance()->isThisTheMessageThread()
+                            && loadedB.ready && loadedB.errors.empty(),
+                        std::memory_order_release);
+                    {
+                        std::lock_guard<std::mutex> lock(raceMutex);
+                        releaseA = true;
+                    }
+                    raceCv.notify_all();
+
+                    {
+                        std::unique_lock<std::mutex> lock(raceMutex);
+                        if (!raceCv.wait_for(lock, std::chrono::seconds(3), [&]
+                            {
+                                return aWorkerFinished.load(std::memory_order_acquire);
+                            }))
+                        {
+                            raceTimedOut.store(true, std::memory_order_release);
+                        }
+                    }
+
+                    juce::AudioBuffer<float> rendered(2, 256);
+                    juce::MidiBuffer midi;
+                    midi.addEvent(
+                        juce::MidiMessage::noteOn(1, 72, static_cast<juce::uint8>(110)), 0);
+                    midi.addEvent(juce::MidiMessage::noteOff(1, 72), 128);
+                    raceProcessor.processBlock(rendered, midi);
+                    double peak = 0.0;
+                    for (int channel = 0; channel < rendered.getNumChannels(); ++channel)
+                        for (int sample = 0; sample < rendered.getNumSamples(); ++sample)
+                            peak = juce::jmax(peak, std::abs(
+                                static_cast<double>(rendered.getSample(channel, sample))));
+                    bPublishedAudible.store(peak > 0.25, std::memory_order_release);
+                    raceCompleted.store(true, std::memory_order_release);
+                },
+                [&](const juce::File&)
+                {
+                    return makeLoadResult(0.55f);
+                },
+                {});
+
+            auto* messageManager = juce::MessageManager::getInstance();
+            std::thread timeoutThread([&]
+            {
+                const auto deadline = std::chrono::steady_clock::now()
+                    + std::chrono::seconds(5);
+                while (!raceCompleted.load(std::memory_order_acquire)
+                       && std::chrono::steady_clock::now() < deadline)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                if (!raceCompleted.load(std::memory_order_acquire))
+                {
+                    raceTimedOut.store(true, std::memory_order_release);
+                    {
+                        std::lock_guard<std::mutex> lock(raceMutex);
+                        releaseA = true;
+                    }
+                    raceCv.notify_all();
+                    messageManager->stopDispatchLoop();
+                }
+            });
+            messageManager->runDispatchLoop();
+            timeoutThread.join();
+        }
+
+        if (raceTimedOut.load(std::memory_order_acquire)
+            || !aWorkerFinished.load(std::memory_order_acquire)
+            || !bCallbackOnMessageThread.load(std::memory_order_acquire)
+            || !bPublishedAudible.load(std::memory_order_acquire)
+            || aCallbackCalled.load(std::memory_order_acquire))
+        {
+            std::cerr << "PATTERN A/B generation race contract failed."
+                      << " aFinished=" << aWorkerFinished.load(std::memory_order_acquire)
+                      << " bCallback=" << bCallbackOnMessageThread.load(std::memory_order_acquire)
+                      << " bAudible=" << bPublishedAudible.load(std::memory_order_acquire)
+                      << " staleACallback=" << aCallbackCalled.load(std::memory_order_acquire)
+                      << " timeout=" << raceTimedOut.load(std::memory_order_acquire) << "\n";
             result = 1;
         }
     }
