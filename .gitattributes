@@ -1,0 +1,4 @@
+# Skin artwork and manifests are byte-addressed by committed SHA-256 records.
+# Disable Git's platform-dependent EOL conversion so Windows checkouts preserve
+# the exact committed bytes validated by the skin asset manifests.
+SKIN/** -text
