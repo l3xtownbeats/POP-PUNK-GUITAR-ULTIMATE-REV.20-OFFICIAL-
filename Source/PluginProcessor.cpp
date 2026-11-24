@@ -302,12 +302,6 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncImpl(
     PatternClipRegistryLoader loader,
     std::function<void()> workerFinished)
 {
-    const auto notifyWorkerFinished = [&workerFinished]
-    {
-        if (workerFinished)
-            workerFinished();
-    };
-
     if (!loader)
     {
         ppgu::performance::PatternClipLoadResult failed;
@@ -318,7 +312,8 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncImpl(
                 {
                     completion(std::move(failed));
                 });
-        notifyWorkerFinished();
+        if (workerFinished)
+            workerFinished();
         return;
     }
 
@@ -328,6 +323,7 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncImpl(
         const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
         generation = generationState->fetch_add(1, std::memory_order_acq_rel) + 1;
     }
+
     patternLoadPool.addJob([this, manifestFile, completion = std::move(completion),
                             loader = std::move(loader), workerFinished = std::move(workerFinished),
                             generationState, generation]() mutable
@@ -381,79 +377,6 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncImpl(
                     completion(std::move(*sharedResult));
             });
         notifyFinished();
-    });
-}
-
-void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncForTesting(
-    const juce::File& manifestFile,
-    std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
-    PatternClipRegistryLoader loader)
-{
-    loadPatternClipRegistryAsyncImpl(manifestFile, std::move(completion), std::move(loader));
-}
-
-void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncImpl(
-    const juce::File& manifestFile,
-    std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
-    PatternClipRegistryLoader loader)
-{
-    if (!loader)
-    {
-        ppgu::performance::PatternClipLoadResult failed;
-        failed.errors.emplace_back("PATTERN registry loader callback is empty.");
-        if (completion)
-            juce::MessageManager::callAsync(
-                [completion = std::move(completion), failed = std::move(failed)]() mutable
-                {
-                    completion(std::move(failed));
-                });
-        return;
-    }
-
-    const auto generationState = patternLoadGeneration;
-    std::uint64_t generation = 0;
-    {
-        const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
-        generation = generationState->fetch_add(1, std::memory_order_acq_rel) + 1;
-    }
-    patternLoadPool.addJob([this, manifestFile, completion = std::move(completion),
-                            loader = std::move(loader), generationState, generation]() mutable
-    {
-        if (generationState->load(std::memory_order_acquire) != generation)
-            return;
-
-        auto result = loader(manifestFile);
-
-        // Serialize generation validation with publication. An older decode may
-        // finish after a newer one, but it must never replace the newer snapshot.
-        {
-            const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
-            if (generationState->load(std::memory_order_acquire) != generation)
-                return;
-
-            // A valid empty registry explicitly disables recorded PATTERN clips.
-            // A malformed registry does not replace a previously working snapshot.
-            if (result.empty)
-                clearPatternClipSnapshot();
-            else if (result.ready && result.snapshot
-                     && !installPatternClipSnapshot(std::move(result.snapshot)))
-            {
-                result.ready = false;
-                result.errors.emplace_back("Processor rejected the validated PATTERN snapshot.");
-            }
-        }
-
-        if (generationState->load(std::memory_order_acquire) != generation)
-            return;
-        auto sharedResult = std::make_shared<ppgu::performance::PatternClipLoadResult>(
-            std::move(result));
-        juce::MessageManager::callAsync(
-            [completion = std::move(completion), sharedResult,
-             generationState, generation]() mutable
-            {
-                if (generationState->load(std::memory_order_acquire) == generation && completion)
-                    completion(std::move(*sharedResult));
-            });
     });
 }
 
