@@ -10,6 +10,10 @@ namespace
 {
 bool writeFixtureWav(const juce::File& file, float frequency = 440.0f)
 {
+    // Recreate the fixture rather than relying on platform-specific overwrite
+    // semantics of FileOutputStream for an existing WAV.
+    if (file.existsAsFile() && !file.deleteFile())
+        return false;
     juce::WavAudioFormat wav;
     auto stream = file.createOutputStream();
     if (!stream)
@@ -119,6 +123,12 @@ int main()
     if (!writeFixtureWav(clip, 660.0f))
         return 1;
     const auto unrelatedClipHash = digest(clip);
+    if (unrelatedClipHash == clipHash || unrelatedClipHash == sourceHash)
+    {
+        std::cerr << "Unrelated WAV fixture did not replace the original PCM.\\n";
+        directory.deleteRecursively();
+        return 1;
+    }
     if (!manifest.replaceWithText(makeManifest(sourceHash, unrelatedClipHash)))
         return 1;
     const auto wrongAudio = ppgu::performance::PatternClipLoader::load(manifest);
