@@ -105,6 +105,10 @@ function(ppgu_add_test target source)
 endfunction()
 
 # Pure C++ contract tests.
+# Pure C++ PATTERN clip voice runtime: fixed-capacity MIDI lifecycle and PCM rendering.
+ppgu_add_test(ppgu_pattern_clip_runtime_contracts tests/PatternClipRuntimeTests.cpp)
+target_include_directories(ppgu_pattern_clip_runtime_contracts PRIVATE Source/Performance)
+
 ppgu_add_test(ppgu_pattern_contracts tests/PatternSchedulerTests.cpp)
 target_include_directories(ppgu_pattern_contracts PRIVATE Source/Performance)
 
