@@ -1,6 +1,6 @@
 """Build relocatable PATTERN_MODE packages and validate before publication."""
 from __future__ import annotations
-import argparse,hashlib,json,re,shutil,tempfile
+import argparse,hashlib,json,os,re,shutil,tempfile
 from pathlib import Path
 from typing import Any
 from pattern_clip_registry import load_pattern_clip_registry
