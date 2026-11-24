@@ -310,11 +310,17 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncImpl(
         ppgu::performance::PatternClipLoadResult failed;
         failed.errors.emplace_back("PATTERN registry loader callback is empty.");
         if (completion)
+        {
+            // JUCE callAsync stores a copyable std::function. Keep the
+            // move-only load result behind shared ownership until dispatch.
+            auto sharedFailed = std::make_shared<ppgu::performance::PatternClipLoadResult>(
+                std::move(failed));
             juce::MessageManager::callAsync(
-                [completion = std::move(completion), failed = std::move(failed)]() mutable
+                [completion = std::move(completion), sharedFailed]() mutable
                 {
-                    completion(std::move(failed));
+                    completion(std::move(*sharedFailed));
                 });
+        }
         if (workerFinished)
             workerFinished();
         return;
