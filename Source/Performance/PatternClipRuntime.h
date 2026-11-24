@@ -96,6 +96,27 @@ public:
                              std::memory_order_release);
     }
 
+    // Publish a fully validated immutable snapshot from a non-audio thread.
+    // Existing voices may still reference the previous snapshot, so the owner
+    // must retain every published snapshot until the runtime is destroyed (or
+    // until audio is explicitly suspended and those voices have been reset).
+    // Unlike attachSnapshot(), this operation is safe while audio is running:
+    // it performs no reset, allocation, lock, or reference-count operation.
+    [[nodiscard]] bool publishSnapshot(const PatternClipSnapshot* snapshot) noexcept
+    {
+        if (snapshot == nullptr || !validateSnapshot(*snapshot))
+            return false;
+        activeSnapshot.store(snapshot, std::memory_order_release);
+        return true;
+    }
+
+    // Stop assigning new notes to the current snapshot. Existing voices keep
+    // rendering from their retained immutable snapshot until release/end.
+    void clearPublishedSnapshot() noexcept
+    {
+        activeSnapshot.store(nullptr, std::memory_order_release);
+    }
+
     void detachSnapshot() noexcept
     {
         reset();
