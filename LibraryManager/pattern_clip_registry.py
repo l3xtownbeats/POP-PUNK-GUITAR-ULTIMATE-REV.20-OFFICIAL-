@@ -134,31 +134,39 @@ def _build_mapping(record: dict[str, Any], root: Path) -> PatternClipMapping:
     frame_count = _required_int(record.get("frame_count"), f"{asset_id}.frame_count", 1)
     if frame_count != end - start:
         raise ValueError(f"{asset_id}: frame_count must equal source_end_sample - source_start_sample")
-    try:
-        with wave.open(str(source_path), "rb") as source_wav:
-            if source_wav.getcomptype() != "NONE":
-                raise ValueError(f"{asset_id}: source must be uncompressed PCM WAV")
-            if source_wav.getframerate() != sample_rate:
-                raise ValueError(f"{asset_id}: source WAV sample rate does not match manifest")
-            if end > source_wav.getnframes():
-                raise ValueError(f"{asset_id}: source sample range exceeds source WAV frame count")
-    except wave.Error as exc:
-        raise ValueError(f"{asset_id}: invalid source PCM WAV: {exc}") from exc
-
     clip_path = _resolve_packaged_file(root, record.get("clip_path"), f"{asset_id}.clip_path")
     digest = hashlib.sha256(clip_path.read_bytes()).hexdigest().upper()
     if digest != clip_hash:
         raise ValueError(f"{asset_id}: derived clip SHA-256 mismatch")
     try:
-        with wave.open(str(clip_path), "rb") as wav:
-            if wav.getcomptype() != "NONE":
+        with wave.open(str(source_path), "rb") as source_wav, wave.open(str(clip_path), "rb") as clip_wav:
+            if source_wav.getcomptype() != "NONE":
+                raise ValueError(f"{asset_id}: source must be uncompressed PCM WAV")
+            if clip_wav.getcomptype() != "NONE":
                 raise ValueError(f"{asset_id}: clip must be uncompressed PCM WAV")
-            if wav.getframerate() != sample_rate:
+            if source_wav.getframerate() != sample_rate:
+                raise ValueError(f"{asset_id}: source WAV sample rate does not match manifest")
+            if end > source_wav.getnframes():
+                raise ValueError(f"{asset_id}: source sample range exceeds source WAV frame count")
+            if clip_wav.getframerate() != sample_rate:
                 raise ValueError(f"{asset_id}: WAV sample rate does not match manifest")
-            if wav.getnframes() != frame_count:
+            if clip_wav.getnframes() != frame_count:
                 raise ValueError(f"{asset_id}: WAV frame count does not match manifest")
+            if (clip_wav.getnchannels() != source_wav.getnchannels()
+                    or clip_wav.getsampwidth() != source_wav.getsampwidth()):
+                raise ValueError(f"{asset_id}: derived clip PCM format does not match source WAV")
+            # The current extraction contract is an exact, unprocessed PCM range.
+            # Matching hashes alone prove file integrity, not that this clip came
+            # from the declared source interval.
+            source_wav.setpos(start)
+            source_frames = source_wav.readframes(frame_count)
+            clip_frames = clip_wav.readframes(frame_count)
+            if len(source_frames) != frame_count * source_wav.getnchannels() * source_wav.getsampwidth():
+                raise ValueError(f"{asset_id}: source WAV returned an incomplete declared range")
+            if clip_frames != source_frames:
+                raise ValueError(f"{asset_id}: derived clip PCM does not match declared source sample range")
     except wave.Error as exc:
-        raise ValueError(f"{asset_id}: invalid PCM WAV clip: {exc}") from exc
+        raise ValueError(f"{asset_id}: invalid source or derived PCM WAV: {exc}") from exc
 
     mapping = record.get("mapping")
     if not isinstance(mapping, dict):
