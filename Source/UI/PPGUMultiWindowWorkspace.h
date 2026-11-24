@@ -70,6 +70,7 @@ private:
     int nextCascadeOffset = 0;
     float panelScale = 1.0f;
     bool layingOutPanels = false;
+    bool customLayoutMode = false;
     bool hasThemePalette = false;
     PPGUThemeManager::Palette currentThemePalette;
     juce::Colour backgroundColour { 0xff090c10 };
