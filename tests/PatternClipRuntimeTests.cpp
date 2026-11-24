@@ -195,8 +195,8 @@ int main()
     // RR progress is independent for each articulation and velocity lane,
     // even when all lanes share the same MIDI trigger note.
     PatternClipSnapshot isolatedRoundRobin;
-    isolatedRoundRobin.clips.resize(4);
-    const std::array<float, 4> rrValues { 0.10f, 0.20f, 0.30f, 0.40f };
+    isolatedRoundRobin.clips.resize(8);
+    const std::array<float, 8> rrValues { 0.10f, 0.20f, 0.30f, 0.40f, 0.50f, 0.60f, 0.70f, 0.80f };
     for (std::size_t i = 0; i < rrValues.size(); ++i)
     {
         isolatedRoundRobin.clips[i].sampleRate = 48000.0;
@@ -206,6 +206,10 @@ int main()
     isolatedRoundRobin.mappings.push_back({64, 1, 63, 1, 0, 0, 4, 1.0f, 0.0f, 2});
     isolatedRoundRobin.mappings.push_back({64, 64, 127, 2, 0, 0, 4, 1.0f, 0.0f, 1});
     isolatedRoundRobin.mappings.push_back({64, 64, 127, 3, 0, 0, 4, 1.0f, 0.0f, 2});
+    isolatedRoundRobin.mappings.push_back({64, 1, 63, 4, 1, 0, 4, 1.0f, 0.0f, 1});
+    isolatedRoundRobin.mappings.push_back({64, 1, 63, 5, 1, 0, 4, 1.0f, 0.0f, 2});
+    isolatedRoundRobin.mappings.push_back({64, 64, 127, 6, 1, 0, 4, 1.0f, 0.0f, 1});
+    isolatedRoundRobin.mappings.push_back({64, 64, 127, 7, 1, 0, 4, 1.0f, 0.0f, 2});
     if (!PatternClipRuntime::validateSnapshot(isolatedRoundRobin))
     {
         std::cerr << "Independent velocity RR lanes were rejected.\\n";
@@ -214,22 +218,30 @@ int main()
     PatternClipRuntime isolatedRrRuntime;
     isolatedRrRuntime.prepare(48000.0);
     isolatedRrRuntime.attachSnapshot(&isolatedRoundRobin);
-    const auto renderRrLane = [&](int velocity)
+    const auto renderRrLane = [&](int velocity, int articulation)
     {
         std::array<float, 1> laneLeft {}, laneRight {};
-        if (!isolatedRrRuntime.noteOn(64, velocity, 1))
+        if (!isolatedRrRuntime.noteOn(64, velocity, 1, articulation))
             return -1.0f;
         isolatedRrRuntime.render(laneLeft.data(), laneRight.data(), 1);
         return laneLeft[0];
     };
-    const float softFirst = renderRrLane(32);
-    const float hardFirst = renderRrLane(96);
-    const float softSecond = renderRrLane(32);
-    const float hardSecond = renderRrLane(96);
+    const float softFirst = renderRrLane(32, 0);
+    const float alternateArticulationFirst = renderRrLane(32, 1);
+    const float hardFirst = renderRrLane(96, 0);
+    const float alternateArticulationHardFirst = renderRrLane(96, 1);
+    const float softSecond = renderRrLane(32, 0);
+    const float alternateArticulationSecond = renderRrLane(32, 1);
+    const float hardSecond = renderRrLane(96, 0);
+    const float alternateArticulationHardSecond = renderRrLane(96, 1);
     if (!(std::abs(softFirst - 0.10f) < 0.0001f
+        && std::abs(alternateArticulationFirst - 0.50f) < 0.0001f
         && std::abs(hardFirst - 0.30f) < 0.0001f
+        && std::abs(alternateArticulationHardFirst - 0.70f) < 0.0001f
         && std::abs(softSecond - 0.20f) < 0.0001f
-        && std::abs(hardSecond - 0.40f) < 0.0001f))
+        && std::abs(alternateArticulationSecond - 0.60f) < 0.0001f
+        && std::abs(hardSecond - 0.40f) < 0.0001f
+        && std::abs(alternateArticulationHardSecond - 0.80f) < 0.0001f))
     {
         std::cerr << "Round-robin counters leaked between velocity lanes.\\n";
         return 1;
