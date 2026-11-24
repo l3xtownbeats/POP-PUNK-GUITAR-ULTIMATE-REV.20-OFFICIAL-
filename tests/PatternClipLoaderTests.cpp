@@ -8,7 +8,7 @@
 
 namespace
 {
-bool writeFixtureWav(const juce::File& file)
+bool writeFixtureWav(const juce::File& file, float frequency = 440.0f)
 {
     juce::WavAudioFormat wav;
     auto stream = file.createOutputStream();
@@ -23,7 +23,7 @@ bool writeFixtureWav(const juce::File& file)
     juce::AudioBuffer<float> samples(1, 480);
     for (int i = 0; i < samples.getNumSamples(); ++i)
         samples.setSample(0, i, 0.2f * std::sin(juce::MathConstants<float>::twoPi
-            * 440.0f * static_cast<float>(i) / 48000.0f));
+            * frequency * static_cast<float>(i) / 48000.0f));
     return writer->writeFromAudioSampleBuffer(samples, 0, samples.getNumSamples());
 }
 
@@ -113,6 +113,23 @@ int main()
         directory.deleteRecursively();
         return 1;
     }
+
+    // A valid derived hash must not allow unrelated audio to masquerade
+    // as the declared source sample range.
+    if (!writeFixtureWav(clip, 660.0f))
+        return 1;
+    const auto unrelatedClipHash = digest(clip);
+    if (!manifest.replaceWithText(makeManifest(sourceHash, unrelatedClipHash)))
+        return 1;
+    const auto wrongAudio = ppgu::performance::PatternClipLoader::load(manifest);
+    if (wrongAudio.ready || wrongAudio.snapshot || wrongAudio.errors.empty())
+    {
+        std::cerr << "Derived PCM unrelated to the declared source range was accepted.\\n";
+        directory.deleteRecursively();
+        return 1;
+    }
+    if (!writeFixtureWav(clip))
+        return 1;
 
     if (!manifest.replaceWithText(makeManifest(juce::String(std::string(64, 'B')), clipHash)))
         return 1;
