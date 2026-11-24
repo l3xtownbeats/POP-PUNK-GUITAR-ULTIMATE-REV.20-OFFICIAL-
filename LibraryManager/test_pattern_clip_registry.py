@@ -33,7 +33,7 @@ class PatternClipRegistryTests(unittest.TestCase):
             wav.setnchannels(1)
             wav.setsampwidth(2)
             wav.setframerate(48000)
-            wav.writeframes(b"\x00\x00" * 4800)
+            wav.writeframes(b"\x01\x00" * 4800)
         digest = hashlib.sha256(self.clip.read_bytes()).hexdigest().upper()
         self.record = {
             "asset_id": "TEST-CLIP-001",
@@ -132,6 +132,17 @@ class PatternClipRegistryTests(unittest.TestCase):
         self.record["derived_sha256"] = "B" * 64
         self.write_manifest()
         with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
+            load_pattern_clip_registry(self.manifest)
+
+    def test_clip_with_valid_hash_but_wrong_source_audio_is_rejected(self):
+        with wave.open(str(self.clip), "wb") as wav:
+            wav.setnchannels(1)
+            wav.setsampwidth(2)
+            wav.setframerate(48000)
+            wav.writeframes(b"\x02\x00" * 4800)
+        self.record["derived_sha256"] = hashlib.sha256(self.clip.read_bytes()).hexdigest().upper()
+        self.write_manifest()
+        with self.assertRaisesRegex(ValueError, "does not match declared source sample range"):
             load_pattern_clip_registry(self.manifest)
 
     def test_path_traversal_is_rejected(self):
