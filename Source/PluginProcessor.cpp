@@ -35,6 +35,7 @@ PopPunkGuitarUltimateAudioProcessor::~PopPunkGuitarUltimateAudioProcessor()
     sampleLoadGeneration->fetch_add(1, std::memory_order_acq_rel);
     patternLoadGeneration->fetch_add(1, std::memory_order_acq_rel);
     sampleLoadPool.removeAllJobs(true, -1);
+    patternLoadPool.removeAllJobs(true, -1);
     patternClipRuntime.detachSnapshot();
     const std::lock_guard<std::mutex> snapshotLock(patternClipSnapshotMutex);
     patternClipSnapshots.clear();
@@ -277,23 +278,56 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsync(
     const juce::File& manifestFile,
     std::function<void(ppgu::performance::PatternClipLoadResult)> completion)
 {
+    loadPatternClipRegistryAsyncImpl(
+        manifestFile, std::move(completion),
+        [](const juce::File& file)
+        {
+            return ppgu::performance::PatternClipLoader::load(file);
+        });
+}
+
+void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncForTesting(
+    const juce::File& manifestFile,
+    std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
+    PatternClipRegistryLoader loader)
+{
+    loadPatternClipRegistryAsyncImpl(manifestFile, std::move(completion), std::move(loader));
+}
+
+void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncImpl(
+    const juce::File& manifestFile,
+    std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
+    PatternClipRegistryLoader loader)
+{
+    if (!loader)
+    {
+        ppgu::performance::PatternClipLoadResult failed;
+        failed.errors.emplace_back("PATTERN registry loader callback is empty.");
+        if (completion)
+            juce::MessageManager::callAsync(
+                [completion = std::move(completion), failed = std::move(failed)]() mutable
+                {
+                    completion(std::move(failed));
+                });
+        return;
+    }
+
     const auto generationState = patternLoadGeneration;
     std::uint64_t generation = 0;
     {
         const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
         generation = generationState->fetch_add(1, std::memory_order_acq_rel) + 1;
     }
-    sampleLoadPool.addJob([this, manifestFile, completion = std::move(completion),
-                           generationState, generation]() mutable
+    patternLoadPool.addJob([this, manifestFile, completion = std::move(completion),
+                            loader = std::move(loader), generationState, generation]() mutable
     {
         if (generationState->load(std::memory_order_acquire) != generation)
             return;
 
-        auto result = ppgu::performance::PatternClipLoader::load(manifestFile);
+        auto result = loader(manifestFile);
 
-        // Serialize generation validation with publication. Without this
-        // control-thread gate, an older slow load could pass its generation
-        // check, then overwrite a newer request that starts before publication.
+        // Serialize generation validation with publication. An older decode may
+        // finish after a newer one, but it must never replace the newer snapshot.
         {
             const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
             if (generationState->load(std::memory_order_acquire) != generation)
