@@ -1,6 +1,8 @@
 #include "PatternClipLoader.h"
 
 #include <iostream>
+#include <cmath>
+#include <string>
 #include <memory>
 
 namespace
