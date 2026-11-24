@@ -86,6 +86,19 @@ int main()
         return 1;
     }
 
+    for (int i = 0; i < 40; ++i)
+        if (!runtime.noteOn(60, 100, 1))
+        {
+            std::cerr << "Repeated mapped trigger failed during voice-capacity test.\\n";
+            return 1;
+        }
+    if (runtime.activeVoiceCount() != static_cast<int>(PatternClipRuntime::maximumVoices))
+    {
+        std::cerr << "Voice pool exceeded its fixed capacity or failed to steal.\\n";
+        return 1;
+    }
+    runtime.reset();
+
     if (runtime.noteOn(62, 100, 1))
     {
         std::cerr << "Unmapped trigger unexpectedly started a clip.\n";
