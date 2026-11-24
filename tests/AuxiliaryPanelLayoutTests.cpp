@@ -118,28 +118,47 @@ int main()
         for (std::size_t j = i + 1; j < twoColumnOverflow.panels.size(); ++j)
             CHECK(!overlaps(twoColumnOverflow.panels[i].bounds, twoColumnOverflow.panels[j].bounds));
 
-    // Mixed-size panels must use per-row/per-column minimums instead of
-    // imposing the largest minimum on every window. This keeps all six
-    // approved auxiliary panels visible at the default editor workspace size.
-    std::vector<PanelRequest> mixedPanels {
-        { 1, { 520, 360 }, { 280, 190 } },
-        { 2, { 520, 360 }, { 280, 190 } },
-        { 3, { 520, 360 }, { 280, 190 } },
-        { 4, { 940, 700 }, { 500, 320 } },
-        { 5, { 700, 520 }, { 420, 260 } },
-        { 6, { 520, 360 }, { 280, 190 } }
+    // Exercise the exact seven auxiliary panel specifications used by REV.20:
+    // FX, PATTERN, PLAYING STYLE, AUTOCHORDS, IMPORT, SETTINGS and SKIN GALLERY.
+    // At the compact editor size all seven remain present on a scrollable grid.
+    const std::vector<PanelRequest> approvedPanels {
+        { 2101, { 1000, 680 }, { 620, 440 } }, // FX EDIT
+        { 2103, { 620, 430 }, { 500, 420 } },  // PATTERN
+        { 2104, { 760, 500 }, { 520, 380 } },  // PLAYING STYLE
+        { 2102, { 900, 620 }, { 560, 420 } },  // AUTOCHORDS
+        { 1001, { 560, 360 }, { 300, 220 } },  // IMPORT GUITAR
+        { 6,    { 700, 520 }, { 420, 260 } },  // SETTINGS
+        { 5,    { 940, 700 }, { 500, 360 } }   // SKIN GALLERY
     };
-    auto mixed = calculatePanelLayout({ 0, 0, 1092, 812 }, mixedPanels, 1.0f, 12);
-    CHECK(!mixed.invalidInput && !mixed.overflow);
-    CHECK(mixed.panels.size() == 6 && mixed.columns == 2 && mixed.rows == 3);
-    for (std::size_t i = 0; i < mixed.panels.size(); ++i)
+
+    const PanelRect compactEditorArea { 0, 0, 1092, 812 };
+    auto approvedCompact = calculatePanelLayout(compactEditorArea, approvedPanels, 1.0f, 12);
+    CHECK(!approvedCompact.invalidInput && approvedCompact.overflow);
+    CHECK(approvedCompact.panels.size() == approvedPanels.size());
+    for (std::size_t i = 0; i < approvedCompact.panels.size(); ++i)
     {
-        CHECK(mixed.panels[i].visible);
-        const auto& request = mixedPanels[i];
-        CHECK(mixed.panels[i].bounds.width >= request.minimum.width);
-        CHECK(mixed.panels[i].bounds.height >= request.minimum.height);
+        CHECK(approvedCompact.panels[i].visible);
+        CHECK(approvedCompact.panels[i].id == approvedPanels[i].id);
+        CHECK(approvedCompact.panels[i].bounds.width >= approvedPanels[i].minimum.width);
+        CHECK(approvedCompact.panels[i].bounds.height >= approvedPanels[i].minimum.height);
     }
-    checkInsideAndDisjoint(mixed, { 0, 0, 1092, 812 });
+    for (std::size_t i = 0; i < approvedCompact.panels.size(); ++i)
+        for (std::size_t j = i + 1; j < approvedCompact.panels.size(); ++j)
+            CHECK(!overlaps(approvedCompact.panels[i].bounds, approvedCompact.panels[j].bounds));
+
+    // A large workspace can fit all seven panels without clipping or overlap.
+    const PanelRect largeEditorArea { 0, 0, 2000, 1800 };
+    auto approvedLarge = calculatePanelLayout(largeEditorArea, approvedPanels, 1.0f, 12);
+    CHECK(!approvedLarge.invalidInput && !approvedLarge.overflow);
+    CHECK(approvedLarge.panels.size() == approvedPanels.size());
+    CHECK(approvedLarge.columns == 2 && approvedLarge.rows == 4);
+    for (std::size_t i = 0; i < approvedLarge.panels.size(); ++i)
+    {
+        CHECK(approvedLarge.panels[i].visible);
+        CHECK(approvedLarge.panels[i].bounds.width >= approvedPanels[i].minimum.width);
+        CHECK(approvedLarge.panels[i].bounds.height >= approvedPanels[i].minimum.height);
+    }
+    checkInsideAndDisjoint(approvedLarge, largeEditorArea);
 
     const PanelRect dpiArea { 0, 0, 1800, 1000 };
     auto dpi = calculatePanelLayout(dpiArea, makePanels(4), 1.5f);
