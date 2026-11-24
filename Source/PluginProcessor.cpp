@@ -283,7 +283,105 @@ void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsync(
         [](const juce::File& file)
         {
             return ppgu::performance::PatternClipLoader::load(file);
-        });
+        }, {});
+}
+
+void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncForTesting(
+    const juce::File& manifestFile,
+    std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
+    PatternClipRegistryLoader loader,
+    std::function<void()> workerFinished)
+{
+    loadPatternClipRegistryAsyncImpl(manifestFile, std::move(completion),
+                                     std::move(loader), std::move(workerFinished));
+}
+
+void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncImpl(
+    const juce::File& manifestFile,
+    std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
+    PatternClipRegistryLoader loader,
+    std::function<void()> workerFinished)
+{
+    const auto notifyWorkerFinished = [&workerFinished]
+    {
+        if (workerFinished)
+            workerFinished();
+    };
+
+    if (!loader)
+    {
+        ppgu::performance::PatternClipLoadResult failed;
+        failed.errors.emplace_back("PATTERN registry loader callback is empty.");
+        if (completion)
+            juce::MessageManager::callAsync(
+                [completion = std::move(completion), failed = std::move(failed)]() mutable
+                {
+                    completion(std::move(failed));
+                });
+        notifyWorkerFinished();
+        return;
+    }
+
+    const auto generationState = patternLoadGeneration;
+    std::uint64_t generation = 0;
+    {
+        const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
+        generation = generationState->fetch_add(1, std::memory_order_acq_rel) + 1;
+    }
+    patternLoadPool.addJob([this, manifestFile, completion = std::move(completion),
+                            loader = std::move(loader), workerFinished = std::move(workerFinished),
+                            generationState, generation]() mutable
+    {
+        const auto notifyFinished = [&workerFinished]
+        {
+            if (workerFinished)
+                workerFinished();
+        };
+
+        if (generationState->load(std::memory_order_acquire) != generation)
+        {
+            notifyFinished();
+            return;
+        }
+
+        auto result = loader(manifestFile);
+        bool staleGeneration = false;
+        {
+            const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
+            staleGeneration = generationState->load(std::memory_order_acquire) != generation;
+            if (!staleGeneration)
+            {
+                // A valid empty registry explicitly disables recorded PATTERN clips.
+                // A malformed registry does not replace a previously working snapshot.
+                if (result.empty)
+                    clearPatternClipSnapshot();
+                else if (result.ready && result.snapshot
+                         && !installPatternClipSnapshot(std::move(result.snapshot)))
+                {
+                    result.ready = false;
+                    result.errors.emplace_back("Processor rejected the validated PATTERN snapshot.");
+                }
+            }
+        }
+
+        if (staleGeneration
+            || generationState->load(std::memory_order_acquire) != generation)
+        {
+            notifyFinished();
+            return;
+        }
+
+        auto sharedResult = std::make_shared<ppgu::performance::PatternClipLoadResult>(
+            std::move(result));
+        juce::MessageManager::callAsync(
+            [completion = std::move(completion), sharedResult,
+             generationState, generation]() mutable
+            {
+                if (generationState->load(std::memory_order_acquire) == generation && completion)
+                    completion(std::move(*sharedResult));
+            });
+        notifyFinished();
+    });
 }
 
 void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncForTesting(
