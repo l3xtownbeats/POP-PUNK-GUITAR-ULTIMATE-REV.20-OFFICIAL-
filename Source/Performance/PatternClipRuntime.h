@@ -72,7 +72,7 @@ public:
             const auto& mapping = snapshot.mappings[i];
             if (mapping.triggerNote > 127 || mapping.velocityLow < 1
                 || mapping.velocityHigh > 127 || mapping.velocityLow > mapping.velocityHigh
-                || mapping.clipIndex >= snapshot.clips.size() || mapping.articulation > 65535
+                || mapping.clipIndex >= snapshot.clips.size()
                 || !std::isfinite(mapping.gain) || mapping.gain < 0.0f || mapping.gain > 4.0f
                 || !std::isfinite(mapping.pan) || mapping.pan < -1.0f || mapping.pan > 1.0f)
                 return false;
