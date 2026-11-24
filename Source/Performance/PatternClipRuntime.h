@@ -253,6 +253,17 @@ public:
                 beginFade(voice, voice.releaseSamples);
     }
 
+    // All Sound Off is immediate; preserve round-robin progression.
+    void allSoundOff() noexcept
+    {
+        const ActiveCall activeCall(*this);
+        for (auto& voice : voices)
+        {
+            retireVoice(voice);
+            voice = Voice {};
+        }
+    }
+
     void reset() noexcept
     {
         const ActiveCall activeCall(*this);
