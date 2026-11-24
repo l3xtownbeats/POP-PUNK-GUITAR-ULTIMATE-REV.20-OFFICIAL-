@@ -174,18 +174,26 @@ public:
 
         std::array<const PatternClipMapping*, PatternClipSnapshot::maximumMappings> matches {};
         std::size_t matchCount = 0;
-        for (const auto& mapping : snapshot->mappings)
+        std::size_t rrCounterIndex = 0;
+        for (std::size_t mappingIndex = 0; mappingIndex < snapshot->mappings.size(); ++mappingIndex)
         {
+            const auto& mapping = snapshot->mappings[mappingIndex];
             if (mapping.triggerNote == note && mapping.articulation == articulation
                 && velocity >= mapping.velocityLow && velocity <= mapping.velocityHigh
                 && matchCount < matches.size())
+            {
+                if (matchCount == 0)
+                    rrCounterIndex = mappingIndex;
                 matches[matchCount++] = &mapping;
+            }
         }
         if (matchCount == 0)
             return false;
-        const auto rrIndex = static_cast<std::size_t>(note);
+        // The first matching mapping is a stable identity for this key,
+        // articulation and velocity zone. Keep independent RR progress for
+        // each such lane rather than coupling all articulations on one key.
         const auto selectedIndex = static_cast<std::size_t>(
-            roundRobinCounters[rrIndex]++ % static_cast<std::uint32_t>(matchCount));
+            roundRobinCounters[rrCounterIndex]++ % static_cast<std::uint32_t>(matchCount));
         const auto* selected = matches[selectedIndex];
         if (selected->clipIndex >= snapshot->clips.size())
             return false;
@@ -375,7 +383,7 @@ private:
     std::atomic<const PatternClipSnapshot*> activeSnapshot { nullptr };
     mutable std::atomic<std::uint32_t> activeCalls { 0 };
     std::array<Voice, maximumVoices> voices {};
-    std::array<std::uint32_t, 128> roundRobinCounters {};
+    std::array<std::uint32_t, PatternClipSnapshot::maximumMappings> roundRobinCounters {};
     double outputSampleRate = 48000.0;
     std::uint64_t nextAge = 1;
 };
