@@ -158,6 +158,20 @@ class PatternClipRegistryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "MIDI notes"):
             load_pattern_clip_registry(self.manifest)
 
+    def test_transposition_must_match_cpp_runtime_limit(self):
+        self.record["mapping"]["trigger_midi_note"] = 85
+        self.record["mapping"]["source_midi_note"] = 60
+        self.write_manifest()
+        with self.assertRaisesRegex(ValueError, "within \\+/-24 semitones"):
+            load_pattern_clip_registry(self.manifest)
+
+    def test_transposition_at_cpp_runtime_limit_is_accepted(self):
+        self.record["mapping"]["trigger_midi_note"] = 84
+        self.record["mapping"]["source_midi_note"] = 60
+        self.write_manifest()
+        result = load_pattern_clip_registry(self.manifest)
+        self.assertTrue(result.ready)
+
     def test_velocity_layers_must_not_overlap(self):
         second = json.loads(json.dumps(self.record))
         second["asset_id"] = "TEST-CLIP-002"

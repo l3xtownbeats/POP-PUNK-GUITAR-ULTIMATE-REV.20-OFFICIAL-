@@ -167,6 +167,8 @@ def _build_mapping(record: dict[str, Any], root: Path) -> PatternClipMapping:
     source_note = _required_int(mapping.get("source_midi_note"), f"{asset_id}.source_midi_note")
     if trigger > 127 or source_note > 127:
         raise ValueError(f"{asset_id}: MIDI notes must be in range 0..127")
+    if abs(trigger - source_note) > 24:
+        raise ValueError(f"{asset_id}: PATTERN transposition must stay within +/-24 semitones")
     articulation = _required_text(mapping.get("articulation_id"), f"{asset_id}.articulation_id")
     velocity_min = _required_int(mapping.get("velocity_min"), f"{asset_id}.velocity_min", 1)
     velocity_max = _required_int(mapping.get("velocity_max"), f"{asset_id}.velocity_max", 1)
