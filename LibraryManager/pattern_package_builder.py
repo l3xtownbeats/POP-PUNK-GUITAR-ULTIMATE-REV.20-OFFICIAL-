@@ -44,9 +44,16 @@ def add_pattern_clip_to_package(staging_record:dict[str,Any],package_root:Path,*
  sr=Path("sources")/f"{aid}.wav"; cr=Path("clips")/f"{aid}.wav"
  en=re.sub(r"[^A-Za-z0-9._-]","_",evidence.name)[:100] or "evidence.txt"; er=Path("licenses")/f"{aid}-{en}"
  dest=[root/sr,root/cr,root/er]
+ # Never follow pre-existing directory symlinks outside the package root.
+ for folder in (root/"sources",root/"clips",root/"licenses"):
+  if folder.is_symlink(): raise ValueError(f"Package directory must not be a symlink: {folder}")
+  folder.mkdir(parents=True,exist_ok=True)
+  try: folder.resolve().relative_to(root)
+  except ValueError as exc: raise ValueError(f"Package directory escapes package root: {folder}") from exc
  for p in dest:
-  if p.exists(): raise FileExistsError(f"Refusing to overwrite packaged asset: {p}")
-  p.parent.mkdir(parents=True,exist_ok=True)
+  if p.exists() or p.is_symlink(): raise FileExistsError(f"Refusing to overwrite packaged asset: {p}")
+  try: p.parent.resolve().relative_to(root)
+  except ValueError as exc: raise ValueError(f"Package destination escapes package root: {p}") from exc
  copied=[]; tmp=None
  try:
   for original,target in zip((source,derived,evidence),dest): shutil.copyfile(original,target); copied.append(target)
