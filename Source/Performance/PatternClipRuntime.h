@@ -92,7 +92,8 @@ public:
     void attachSnapshot(const PatternClipSnapshot* snapshot) noexcept
     {
         reset();
-        activeSnapshot.store(snapshot != nullptr && validateSnapshot(*snapshot) ? snapshot : nullptr,\n                             std::memory_order_release);
+        activeSnapshot.store(snapshot != nullptr && validateSnapshot(*snapshot) ? snapshot : nullptr,
+                             std::memory_order_release);
     }
 
     void detachSnapshot() noexcept
@@ -106,7 +107,9 @@ public:
                               int articulation = 0) noexcept
     {
         const auto* snapshot = activeSnapshot.load(std::memory_order_acquire);
-        if (snapshot == nullptr || snapshot->mappings.empty()\n            || snapshot->mappings.size() > PatternClipSnapshot::maximumMappings\n            || note < 0 || note > 127
+        if (snapshot == nullptr || snapshot->mappings.empty()
+            || snapshot->mappings.size() > PatternClipSnapshot::maximumMappings
+            || note < 0 || note > 127
             || velocity < 1 || velocity > 127 || channel < 1 || channel > 16)
             return false;
 
