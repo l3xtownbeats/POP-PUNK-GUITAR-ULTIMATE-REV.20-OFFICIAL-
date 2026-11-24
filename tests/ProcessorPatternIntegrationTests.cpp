@@ -208,13 +208,28 @@ int main()
                     completed.store(true, std::memory_order_release);
                 });
 
-            const auto deadline = std::chrono::steady_clock::now()
-                + std::chrono::seconds(5);
-            while (!completed.load(std::memory_order_acquire)
-                   && std::chrono::steady_clock::now() < deadline)
-                juce::MessageManager::getInstance()->runDispatchLoopUntil(10);
+            auto* messageManager = juce::MessageManager::getInstance();
+            std::atomic<bool> timedOut { false };
+            std::thread timeoutThread([&]
+            {
+                const auto deadline = std::chrono::steady_clock::now()
+                    + std::chrono::seconds(5);
+                while (!completed.load(std::memory_order_acquire)
+                       && std::chrono::steady_clock::now() < deadline)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-            if (!completed.load(std::memory_order_acquire))
+                if (!completed.load(std::memory_order_acquire))
+                {
+                    timedOut.store(true, std::memory_order_release);
+                    messageManager->stopDispatchLoop();
+                }
+            });
+
+            messageManager->runDispatchLoop();
+            timeoutThread.join();
+
+            if (!completed.load(std::memory_order_acquire)
+                || timedOut.load(std::memory_order_acquire))
             {
                 std::cerr << "Asynchronous PATTERN registry completion timed out.\n";
                 result = 1;
