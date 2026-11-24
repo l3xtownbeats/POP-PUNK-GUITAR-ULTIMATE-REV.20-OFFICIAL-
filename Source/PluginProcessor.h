@@ -14,6 +14,8 @@
 #endif
 #include "Sampler/SamplePool.h"
 #include "Performance/PatternScheduler.h"
+#include "Performance/PatternClipRuntime.h"
+#include <mutex>
 
 class PopPunkGuitarUltimateAudioProcessor final : public juce::AudioProcessor
 {
@@ -97,6 +99,9 @@ private:
     int maximumBlockSize = 512;
     ppgu::sampler::SamplerEngine sampler;
     ppgu::performance::PatternScheduler patternScheduler;
+    ppgu::performance::PatternClipRuntime patternClipRuntime;
+    std::mutex patternClipSnapshotMutex;
+    std::vector<std::unique_ptr<ppgu::performance::PatternClipSnapshot>> patternClipSnapshots;
     ppgu::performance::BlockClock patternTransportClock;
     std::array<std::array<bool, 128>, 16> patternHeldNotes {};
     std::array<ppgu::performance::PatternEvent, 512> patternEvents {};

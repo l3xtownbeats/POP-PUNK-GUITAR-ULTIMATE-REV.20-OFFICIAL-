@@ -117,6 +117,11 @@ public:
         activeSnapshot.store(nullptr, std::memory_order_release);
     }
 
+    [[nodiscard]] bool hasSnapshot() const noexcept
+    {
+        return activeSnapshot.load(std::memory_order_acquire) != nullptr;
+    }
+
     void detachSnapshot() noexcept
     {
         reset();
@@ -235,7 +240,8 @@ public:
                 const float fraction = static_cast<float>(voice.position - static_cast<double>(index));
                 const float source = pcm[index] + (pcm[next] - pcm[index]) * fraction;
                 left[i] += source * leftGain * voice.envelope;
-                right[i] += source * rightGain * voice.envelope;
+                if (right != left)
+                    right[i] += source * rightGain * voice.envelope;
                 voice.position += voice.increment;
 
                 if (voice.releasing)

@@ -225,6 +225,27 @@ int PopPunkGuitarUltimateAudioProcessor::getPatternPreviewSlot() const noexcept
     return patternPreviewSlot.load(std::memory_order_acquire);
 }
 
+bool PopPunkGuitarUltimateAudioProcessor::installPatternClipSnapshot(
+    std::unique_ptr<ppgu::performance::PatternClipSnapshot> snapshot)
+{
+    if (snapshot == nullptr || !ppgu::performance::PatternClipRuntime::validateSnapshot(*snapshot))
+        return false;
+
+    const auto* published = snapshot.get();
+    {
+        const std::lock_guard<std::mutex> lock(patternClipSnapshotMutex);
+        patternClipSnapshots.push_back(std::move(snapshot));
+    }
+    // The snapshot is now owned by the processor. Publication itself is a
+    // single atomic pointer store and does not allocate or lock the audio thread.
+    return patternClipRuntime.publishSnapshot(published);
+}
+
+void PopPunkGuitarUltimateAudioProcessor::clearPatternClipSnapshot() noexcept
+{
+    patternClipRuntime.clearPublishedSnapshot();
+}
+
 void PopPunkGuitarUltimateAudioProcessor::prepareToPlay(double sampleRate, int expectedBlockSize)
 {
     currentSampleRate = juce::jlimit(8000.0, 384000.0, sampleRate);
@@ -232,6 +253,7 @@ void PopPunkGuitarUltimateAudioProcessor::prepareToPlay(double sampleRate, int e
     for (auto& peak : outputPeakMeters)
         peak.store(0.0f, std::memory_order_relaxed);
     sampler.prepare(currentSampleRate);
+    patternClipRuntime.prepare(currentSampleRate);
     patternScheduler.reset();
     for (auto& channel : patternHeldNotes) channel.fill(false);
     patternCycleStarted = false;
@@ -280,6 +302,7 @@ void PopPunkGuitarUltimateAudioProcessor::prepareToPlay(double sampleRate, int e
 void PopPunkGuitarUltimateAudioProcessor::releaseResources()
 {
     sampler.reset();
+    patternClipRuntime.allNotesOff();
     reverb.reset();
     for (auto& line : delayBuffers)
         std::fill(line.begin(), line.end(), 0.0f);
@@ -363,6 +386,7 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
         parameters.getRawParameterValue("velocity")->load(std::memory_order_relaxed));
     const int playMode = juce::jlimit(0, 1,
         static_cast<int>(parameters.getRawParameterValue("playMode")->load(std::memory_order_relaxed)));
+    const bool useRecordedPatternClips = playMode == 1 && patternClipRuntime.hasSnapshot();
 
     // Read one immutable host-position snapshot per block. Pattern timing is
     // derived from PPQ/sample-rate; the scheduler never calls the host from a
@@ -394,6 +418,7 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
     if (playMode != previousPlayMode)
     {
         sampler.allNotesOff();
+        patternClipRuntime.allNotesOff();
         patternScheduler.reset(patternTransportClock.startPpq);
         for (auto& channel : patternHeldNotes) channel.fill(false);
         patternCycleStarted = false;
@@ -424,7 +449,15 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
 
     auto renderSegment = [&](int start, int length)
     {
-        if (length > 0)
+        if (length <= 0) return;
+        if (useRecordedPatternClips)
+        {
+            auto* left = buffer.getWritePointer(0, start);
+            auto* right = buffer.getNumChannels() > 1
+                ? buffer.getWritePointer(1, start) : left;
+            patternClipRuntime.render(left, right, length);
+        }
+        else
             sampler.render(buffer, start, length);
     };
 
@@ -471,6 +504,31 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
             }
             else if (message.isNoteOff())
                 sampler.noteOff(message.getNoteNumber(), message.getChannel());
+        }
+        renderSegment(cursor, samples - cursor);
+    }
+    else if (useRecordedPatternClips)
+    {
+        // Recorded PATTERN MODE is a direct one-key -> one recorded clip route.
+        // It deliberately bypasses chord aggregation and AutoChords: one trigger
+        // key must never be expanded into a generated triad.
+        const int articulation = juce::jlimit(0, 3,
+            static_cast<int>(parameters.getRawParameterValue("articulation")->load(std::memory_order_relaxed)));
+        int cursor = 0;
+        for (const auto metadata : midi)
+        {
+            const auto message = metadata.getMessage();
+            const int eventSample = juce::jlimit(cursor, samples, metadata.samplePosition);
+            renderSegment(cursor, eventSample - cursor);
+            cursor = eventSample;
+
+            if (message.isAllNotesOff() || message.isAllSoundOff())
+                patternClipRuntime.allNotesOff();
+            else if (message.isNoteOn())
+                patternClipRuntime.noteOn(message.getNoteNumber(), message.getVelocity(),
+                                          message.getChannel(), articulation);
+            else if (message.isNoteOff())
+                patternClipRuntime.noteOff(message.getNoteNumber(), message.getChannel());
         }
         renderSegment(cursor, samples - cursor);
     }
