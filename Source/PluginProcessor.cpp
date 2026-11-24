@@ -435,6 +435,7 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
         && (patternTransportClock.transportStopped || patternTransportClock.transportDiscontinuity))
     {
         sampler.allNotesOff();
+        patternClipRuntime.allNotesOff();
         patternScheduler.clearPendingNoteOffs();
         patternCycleStarted = false;
         previousPatternChordCount = 0;
@@ -523,10 +524,19 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
             cursor = eventSample;
 
             if (message.isAllNotesOff() || message.isAllSoundOff())
+            {
+                panicRequested.store(true, std::memory_order_release);
                 patternClipRuntime.allNotesOff();
+            }
+            else if (message.isNoteOn() && sampler.isKeySwitchNote(message.getNoteNumber()))
+                sampler.setKeySwitch(message.getNoteNumber(), message.getChannel());
             else if (message.isNoteOn())
                 patternClipRuntime.noteOn(message.getNoteNumber(), message.getVelocity(),
                                           message.getChannel(), articulation);
+            else if (message.isNoteOff() && sampler.isKeySwitchNote(message.getNoteNumber()))
+            {
+                // SFZ articulation selectors do not release recorded clip voices.
+            }
             else if (message.isNoteOff())
                 patternClipRuntime.noteOff(message.getNoteNumber(), message.getChannel());
         }
