@@ -75,7 +75,8 @@ public:
     void loadPatternClipRegistryAsyncForTesting(
         const juce::File& manifestFile,
         std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
-        PatternClipRegistryLoader loader);
+        PatternClipRegistryLoader loader,
+        std::function<void()> workerFinished);
 
     juce::AudioProcessorValueTreeState parameters;
     juce::MidiKeyboardState keyboardState;
@@ -126,7 +127,8 @@ private:
     void loadPatternClipRegistryAsyncImpl(
         const juce::File& manifestFile,
         std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
-        PatternClipRegistryLoader loader);
+        PatternClipRegistryLoader loader,
+        std::function<void()> workerFinished);
     // Two workers permit overlapping decodes; generation validation serializes publication.
     juce::ThreadPool patternLoadPool { 2 };
     ppgu::performance::BlockClock patternTransportClock;
