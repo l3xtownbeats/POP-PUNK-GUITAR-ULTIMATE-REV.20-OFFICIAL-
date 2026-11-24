@@ -77,6 +77,44 @@ int main()
     }
     hotSwapRuntime.detachSnapshot();
 
+    // Distinct RR lanes may overlap in velocity and must alternate deterministically.
+    PatternClipSnapshot roundRobin;
+    roundRobin.clips.resize(2);
+    roundRobin.clips[0].sampleRate = 48000.0;
+    roundRobin.clips[0].samples.assign(128, 0.5f);
+    roundRobin.clips[1].sampleRate = 48000.0;
+    roundRobin.clips[1].samples.assign(128, 0.25f);
+    roundRobin.mappings.push_back({64, 1, 127, 0, 0, 0, 64, 1.0f, 0.0f, 1});
+    roundRobin.mappings.push_back({64, 1, 127, 1, 0, 0, 64, 1.0f, 0.0f, 2});
+    if (!PatternClipRuntime::validateSnapshot(roundRobin))
+    {
+        std::cerr << "Distinct round-robin lanes with overlapping velocity zones were rejected.\\n";
+        return 1;
+    }
+    PatternClipRuntime rrRuntime;
+    rrRuntime.prepare(48000.0);
+    rrRuntime.attachSnapshot(&roundRobin);
+    std::array<float, 1> rrLeft {}, rrRight {};
+    if (!rrRuntime.noteOn(64, 100, 1))
+        return 1;
+    rrRuntime.render(rrLeft.data(), rrRight.data(), 1);
+    if (!(rrLeft[0] > 0.49f && rrLeft[0] < 0.51f))
+    {
+        std::cerr << "First round-robin lane was not selected.\\n";
+        return 1;
+    }
+    rrLeft.fill(0.0f);
+    rrRight.fill(0.0f);
+    if (!rrRuntime.noteOn(64, 100, 1))
+        return 1;
+    rrRuntime.render(rrLeft.data(), rrRight.data(), 1);
+    if (!(rrLeft[0] > 0.24f && rrLeft[0] < 0.26f))
+    {
+        std::cerr << "Second round-robin lane did not alternate.\\n";
+        return 1;
+    }
+    rrRuntime.detachSnapshot();
+
     PatternClipRuntime runtime;
     runtime.prepare(48000.0);
     runtime.attachSnapshot(&snapshot);
