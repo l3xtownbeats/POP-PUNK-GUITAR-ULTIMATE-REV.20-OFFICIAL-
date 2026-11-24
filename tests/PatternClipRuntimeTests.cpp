@@ -94,7 +94,7 @@ int main()
     PatternClipRuntime rrRuntime;
     rrRuntime.prepare(48000.0);
     rrRuntime.attachSnapshot(&roundRobin);
-    std::array<float, 1> rrLeft {}, rrRight {};
+    std::array<float, 64> rrLeft {}, rrRight {};
     if (!rrRuntime.noteOn(64, 100, 1))
         return 1;
     rrRuntime.render(rrLeft.data(), rrRight.data(), 1);
@@ -103,6 +103,10 @@ int main()
         std::cerr << "First round-robin lane was not selected.\\n";
         return 1;
     }
+    rrRuntime.noteOff(64, 1);
+    rrLeft.fill(0.0f);
+    rrRight.fill(0.0f);
+    rrRuntime.render(rrLeft.data(), rrRight.data(), static_cast<int>(rrLeft.size()));
     rrLeft.fill(0.0f);
     rrRight.fill(0.0f);
     if (!rrRuntime.noteOn(64, 100, 1))
