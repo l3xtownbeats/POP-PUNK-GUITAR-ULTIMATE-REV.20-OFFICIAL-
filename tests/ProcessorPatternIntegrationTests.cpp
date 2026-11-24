@@ -160,9 +160,9 @@ int main()
         std::filesystem::remove_all(asyncRoot, asyncCleanupError);
         std::filesystem::create_directories(asyncRoot);
         const juce::File asyncManifest(asyncRoot.string() + "/pattern_clips.json");
-        if (!asyncManifest.replaceWithText("{\\n  \\"schema_version\\": 1,\\n  \\"clips\\": []\\n}"))
+        if (!asyncManifest.replaceWithText("{\n  \"schema_version\": 1,\n  \"clips\": []\n}"))
         {
-            std::cerr << "Could not create asynchronous PATTERN registry fixture.\\n";
+            std::cerr << "Could not create asynchronous PATTERN registry fixture.\n";
             result = 1;
         }
         else
@@ -216,13 +216,13 @@ int main()
 
             if (!completed.load(std::memory_order_acquire))
             {
-                std::cerr << "Asynchronous PATTERN registry completion timed out.\\n";
+                std::cerr << "Asynchronous PATTERN registry completion timed out.\n";
                 result = 1;
             }
             else if (!callbackOnMessageThread.load(std::memory_order_acquire)
                      || !reportedEmpty.load(std::memory_order_acquire))
             {
-                std::cerr << "Asynchronous PATTERN completion thread/status contract failed.\\n";
+                std::cerr << "Asynchronous PATTERN completion thread/status contract failed.\n";
                 result = 1;
             }
             else
@@ -239,7 +239,7 @@ int main()
                             static_cast<double>(clearedBlock.getSample(channel, sample))));
                 if (peak > 1.0e-7)
                 {
-                    std::cerr << "A valid empty async registry did not clear the published PATTERN snapshot.\\n";
+                    std::cerr << "A valid empty async registry did not clear the published PATTERN snapshot.\n";
                     result = 1;
                 }
             }
@@ -248,7 +248,7 @@ int main()
         if (asyncCleanupError)
         {
             std::cerr << "Could not remove async PATTERN fixtures: "
-                      << asyncCleanupError.message() << "\\n";
+                      << asyncCleanupError.message() << "\n";
             result = 1;
         }
     }
