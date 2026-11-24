@@ -67,3 +67,15 @@ The existing chord-driven rhythm-mask path in `PluginProcessor::processBlock` is
 ## Current status
 
 The registry validator exists in Python and validates packaged source/derived WAVs offline. The C++ clip runtime, manifest-to-runtime bridge, bounded preloaded cache, and MIDI clip routing are not implemented yet. No approved real clip payload is currently present in the repository. This document is a design gate, not a claim of completed integration.
+
+
+## Implementation progress — isolated C++ runtime prototype
+
+Added:
+- `Source/Performance/PatternClipRuntime.h`
+- `tests/PatternClipRuntimeTests.cpp`
+- CTest target `ppgu_pattern_clip_runtime_contracts`
+
+The prototype has a fixed 32-voice array, a 512-mapping lookup bound, a 256-clip/8,388,608-frame snapshot budget, offline PCM/mapping validation, sample-rate-aware linear interpolation, channel-specific Note Off, release and choke fades, and oldest-voice stealing. Its render and MIDI methods use fixed storage and do not allocate or lock.
+
+The prototype is intentionally not connected to `PluginProcessor::processBlock`. Snapshot attach/detach requires audio suspension, and the snapshot owner must retain immutable clip memory until all voices are reset and the runtime is detached. A production publisher/retirement mechanism and manifest-to-PCM loader are still required. Tests have been authored and registered but are not yet reported as passing; Windows CI/build confirmation is pending.
