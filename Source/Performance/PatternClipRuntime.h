@@ -221,7 +221,7 @@ public:
                 {
                     if (voice.fadeRemaining > 0)
                     {
-                        voice.envelope *= voice.fadeMultiplier;
+                        voice.envelope = std::max(0.0f, voice.envelope - voice.fadeStep);
                         --voice.fadeRemaining;
                     }
                     if (voice.fadeRemaining == 0)
@@ -249,7 +249,7 @@ private:
         float gain = 1.0f;
         float pan = 0.0f;
         float envelope = 1.0f;
-        float fadeMultiplier = 1.0f;
+        float fadeStep = 0.0f;
         std::uint64_t age = 0;
         std::uint32_t releaseSamples = 0;
         std::uint32_t fadeRemaining = 0;
@@ -264,7 +264,8 @@ private:
     {
         voice.releasing = true;
         voice.fadeRemaining = std::max<std::uint32_t>(1, length);
-        voice.fadeMultiplier = std::pow(0.0001f, 1.0f / static_cast<float>(voice.fadeRemaining));
+        // Linear de-click ramp avoids pow() on the real-time MIDI event path.
+        voice.fadeStep = voice.envelope / static_cast<float>(voice.fadeRemaining);
     }
 
     std::atomic<const PatternClipSnapshot*> activeSnapshot { nullptr };
