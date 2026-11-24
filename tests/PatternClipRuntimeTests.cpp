@@ -29,6 +29,14 @@ int main()
         return 1;
     }
 
+    PatternClipRuntime rejectedRuntime;
+    rejectedRuntime.attachSnapshot(&invalidSnapshot);
+    if (rejectedRuntime.noteOn(60, 100, 1))
+    {
+        std::cerr << "Invalid snapshot was published to the runtime.\\n";
+        return 1;
+    }
+
     PatternClipRuntime runtime;
     runtime.prepare(48000.0);
     runtime.attachSnapshot(&snapshot);
