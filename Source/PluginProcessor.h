@@ -63,6 +63,11 @@ public:
     void clearPatternPreview() noexcept;
     int getPatternPreviewSlot() const noexcept;
 
+    // Publish a fully validated immutable PATTERN clip set from a non-audio thread.
+    [[nodiscard]] bool installPatternClipSnapshot(
+        std::unique_ptr<ppgu::performance::PatternClipSnapshot> snapshot);
+    void clearPatternClipSnapshot() noexcept;
+
     juce::AudioProcessorValueTreeState parameters;
     juce::MidiKeyboardState keyboardState;
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
