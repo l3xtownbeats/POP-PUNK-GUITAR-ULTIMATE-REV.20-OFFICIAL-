@@ -184,3 +184,10 @@ The Import Guitar panel's real asynchronous loader indicator now uses the author
 ## 2026-11-26 — 16-theme validation gate corrected without false readiness
 
 The previous Windows validation failure was traced: all 26 CTest cases passed, but the registry validator demanded 16 runtimeReady=true entries even though STILLWATER (skin-111) is intentionally gated pending FL Studio 20 host acceptance. The validator now checks all 16 approved theme slots and validates their required artwork/SVG packages, while requiring 15 runtime-ready themes and exactly one explicitly gated STILLWATER slot. The registry status now says its embedded artwork package is validated and FL Studio 20 host acceptance remains pending. runtimeReady remains false; no acceptance was fabricated. This does not waive any visual/runtime host test.
+
+
+## 2026-11-26 — NEON STAGE: подключение atlas folder/power icons
+- Сверены реальные координаты иконок со `neon_stage_spritesheet_manifest.json` (144×144): `power` [360,360,504,504] и `folder` [852,360,996,504]. Эти два ранее неиспользованных кадра подключены к существующим кнопкам FX EDIT POWER и LOAD SFZ в окне Licensed Guitar Library.
+- Для кнопок заданы стабильные component IDs `FX_Edit_Power` и `Import_Guitar_Load`; отрисовка остаётся внутри существующих bounds и не меняет hit targets, callbacks, APVTS, DSP, MIDI или загрузчик SFZ.
+- Также расширена таблица runtime-координат атласа оставшимися документированными кадрами `search` и `play`; новые функции/кнопки не добавлялись, пока для них нет соответствующих подтверждённых действий в текущем интерфейсе.
+- Проверка сборкой/CTest и визуальный снимок после запуска ещё не выполнены для нового commit. FL Studio 20 host acceptance остаётся отдельным gate.
