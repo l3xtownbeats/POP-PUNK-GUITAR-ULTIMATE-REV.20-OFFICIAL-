@@ -1,0 +1,368 @@
+{
+  "schema": "ppgu.neon-stage.atlas-manifest/1",
+  "skin": "skin-053",
+  "theme": "NEON STAGE DEFAULT",
+  "source_format": "SVG vector master sheets; PNG export is a separate packaging step",
+  "sheets": [
+    {
+      "file": "01_ppgu_atlas_backgrounds_frames.svg",
+      "width": 1920,
+      "height": 1000,
+      "groups": [
+        {
+          "id": "background_materials",
+          "count": 5,
+          "items": [
+            "charcoal_gradient",
+            "carbon_weave",
+            "brushed_steel",
+            "matte_leather",
+            "recessed_panel"
+          ],
+          "x": 40,
+          "y": 80,
+          "cell_width": 330,
+          "cell_height": 260,
+          "step_x": 365
+        },
+        {
+          "id": "panel_frames",
+          "items": [
+            {
+              "id": "main_panel_9slice",
+              "x": 40,
+              "y": 410,
+              "w": 560,
+              "h": 300
+            },
+            {
+              "id": "header_bar",
+              "x": 630,
+              "y": 410,
+              "w": 600,
+              "h": 100
+            },
+            {
+              "id": "button_strip",
+              "x": 1260,
+              "y": 410,
+              "w": 600,
+              "h": 100
+            },
+            {
+              "id": "icon_frame",
+              "x": 40,
+              "y": 760,
+              "w": 180,
+              "h": 180
+            },
+            {
+              "id": "glass_display",
+              "x": 250,
+              "y": 760,
+              "w": 600,
+              "h": 180
+            },
+            {
+              "id": "neon_divider",
+              "x": 890,
+              "y": 790,
+              "w": 600,
+              "h": 12
+            },
+            {
+              "id": "midi_rail",
+              "x": 1530,
+              "y": 760,
+              "w": 330,
+              "h": 180
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "02_ppgu_atlas_buttons_switches.svg",
+      "width": 1920,
+      "height": 1020,
+      "groups": [
+        {
+          "id": "button_states",
+          "count": 135,
+          "families": 27,
+          "states": [
+            "normal",
+            "hover",
+            "pressed",
+            "disabled",
+            "active"
+          ],
+          "grid": {
+            "origin_x": 32,
+            "origin_y": 75,
+            "step_x": 375,
+            "step_y": 125,
+            "state_step_x": 68,
+            "cell_width": 62,
+            "cell_height": 42
+          },
+          "family_ids": [
+            "pill",
+            "slab",
+            "tab",
+            "icon",
+            "toggle",
+            "label",
+            "favorite",
+            "power",
+            "load",
+            "save",
+            "browser",
+            "preset",
+            "mode",
+            "midi",
+            "fx",
+            "amp",
+            "tone",
+            "cab",
+            "chorus",
+            "delay",
+            "reverb",
+            "eq",
+            "comp",
+            "drive",
+            "harmony",
+            "scale",
+            "settings"
+          ]
+        },
+        {
+          "id": "fx_switches",
+          "count": 14,
+          "switches": [
+            "compressor",
+            "equalizer",
+            "distortion",
+            "chorus",
+            "delay",
+            "reverb",
+            "ir_cabinet"
+          ],
+          "states": [
+            "off",
+            "on"
+          ],
+          "centers": {
+            "x0": 95,
+            "step_x": 265,
+            "off_x_offset": -40,
+            "on_x_offset": 50,
+            "y": 890
+          },
+          "radius": 28
+        },
+        {
+          "id": "led_indicators",
+          "count": 10,
+          "colors": [
+            "blue",
+            "amber",
+            "red",
+            "green",
+            "white"
+          ],
+          "states": [
+            "dim",
+            "lit"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "03_ppgu_atlas_knob_strips.svg",
+      "width": 1920,
+      "height": 8000,
+      "groups": [
+        {
+          "id": "rotary_filmstrips",
+          "count": 183,
+          "styles": [
+            "conical_chrome",
+            "black_disc",
+            "knurled_steel"
+          ],
+          "frames_per_style": 61,
+          "frame_size": [
+            128,
+            128
+          ],
+          "columns": [
+            20,
+            270,
+            520
+          ],
+          "top": 70,
+          "step_y": 128,
+          "frame_index": 0,
+          "angle_start_deg": 210,
+          "angle_end_deg": 480,
+          "rotation_step_deg": 4.5
+        },
+        {
+          "id": "rotary_layers",
+          "count": 9,
+          "items": [
+            "chrome_cap",
+            "glow_insert",
+            "tick_arc",
+            "outer_ring",
+            "shadow_disc",
+            "indicator_needle",
+            "knurl_ring",
+            "labeled_bezel",
+            "arc_meter_8_levels"
+          ]
+        },
+        {
+          "id": "fx_edit_knobs",
+          "count": 33,
+          "knobs": 11,
+          "poses": [
+            "min",
+            "center",
+            "max"
+          ],
+          "cell_size": [
+            64,
+            64
+          ]
+        }
+      ]
+    },
+    {
+      "file": "04_ppgu_atlas_displays_keyboard.svg",
+      "width": 1920,
+      "height": 1040,
+      "groups": [
+        {
+          "id": "display_components",
+          "items": [
+            "empty_lcd",
+            "spectrum_telemetry",
+            "warning_tile",
+            "error_tile",
+            "seven_segment_888",
+            "volume_meter_12_segment",
+            "status_bar",
+            "value_readout",
+            "notes_held_label",
+            "notes_harmony_label",
+            "scale_key_label"
+          ]
+        },
+        {
+          "id": "midi_keyboard",
+          "white_keys": 24,
+          "octaves": 2,
+          "black_keys_pattern": "C# D# F# G# A#",
+          "states": [
+            "normal",
+            "active_c_e_g"
+          ],
+          "compact_variant": true
+        },
+        {
+          "id": "pitch_mod_faders",
+          "count": 6,
+          "controls": [
+            "pitch",
+            "mod"
+          ],
+          "poses": [
+            "min",
+            "mid",
+            "max"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "05_ppgu_atlas_icons_hardware.svg",
+      "width": 1920,
+      "height": 1020,
+      "groups": [
+        {
+          "id": "icons",
+          "count": 35,
+          "cell_size": [
+            68,
+            68
+          ],
+          "names": [
+            "import",
+            "guitar_pick",
+            "sfz",
+            "waveform",
+            "folder",
+            "search",
+            "music_note",
+            "grid",
+            "hand",
+            "gear",
+            "star",
+            "minus",
+            "stop",
+            "close",
+            "eye",
+            "check",
+            "power",
+            "pulse",
+            "bars",
+            "waveform_2",
+            "shuffle",
+            "clock",
+            "settings_2",
+            "arrow_left",
+            "chevron_up",
+            "chevron_down",
+            "chevron_right",
+            "cube",
+            "midi_plug",
+            "speaker",
+            "users",
+            "warning",
+            "error",
+            "success",
+            "info"
+          ]
+        },
+        {
+          "id": "hardware",
+          "items": [
+            "side_bracket_type_1",
+            "side_bracket_type_2",
+            "side_bracket_type_3",
+            "vent_grille",
+            "blue_light_bar",
+            "rack_ears",
+            "screw_set"
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "button_state_count": 135,
+    "fx_switch_count": 7,
+    "fx_switch_state_pairs": 14,
+    "rotary_frames_per_strip": 61,
+    "rotary_strip_count": 3,
+    "rotary_total_frames": 183,
+    "icon_count": 35,
+    "notes": [
+      "The atlas masters are vector SVG sheets and are not yet PNG exports.",
+      "Some prompt-only semantic variants (e.g. exact warning/error glyph artwork and true 9-slice exports) require a raster/visual QA pass before runtime registration.",
+      "No runtime wiring is claimed by this manifest."
+    ]
+  }
+}
