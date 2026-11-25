@@ -905,7 +905,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         return false;
     }
 
-    // The default NEON STAGE shell has a four-atlas visual package.
+    // The default NEON STAGE shell has a five-atlas visual package.
     // Atlases are decoded only on the UI/control thread and never touched by audio code.
     if (id == "skin-053")
     {
