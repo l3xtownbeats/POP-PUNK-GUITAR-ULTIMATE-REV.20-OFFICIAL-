@@ -118,6 +118,33 @@ def main() -> int:
             if angle != 210 + index * 3:
                 fail(f"rotary strip x={x}: frame {index} has unexpected angle={angle}")
 
+    keyboard = parsed["04_ppgu_atlas_displays_keyboard.svg"]
+    keyboard_rects = children_named(keyboard, "rect")
+    white_keys = [
+        node for node in keyboard_rects
+        if node.attrib.get("y") == "390"
+        and node.attrib.get("width") == "63"
+        and node.attrib.get("height") == "230"
+        and node.attrib.get("fill") == "#d8e5ef"
+    ]
+    black_keys = [
+        node for node in keyboard_rects
+        if node.attrib.get("y") == "390"
+        and node.attrib.get("width") == "38"
+        and node.attrib.get("height") == "135"
+        and node.attrib.get("fill") == "#07101b"
+    ]
+    active_keys = [
+        node for node in keyboard_rects
+        if node.attrib.get("y") == "555"
+        and node.attrib.get("fill") == "#00d9ff"
+    ]
+    if len(white_keys) != 29 or len(black_keys) != 20 or len(active_keys) != 3:
+        fail(
+            "keyboard atlas: expected 29 white keys, 20 black keys and "
+            f"3 C/E/G active overlays; found {len(white_keys)}/{len(black_keys)}/{len(active_keys)}"
+        )
+
     icons = parsed["05_ppgu_atlas_icons_hardware.svg"]
     icon_groups = [
         node for node in children_named(icons, "g")
@@ -146,6 +173,7 @@ def main() -> int:
     print("PASS: 5 SVG masters parse; dimensions/viewBoxes and transparent canvases match.")
     print("PASS: 27 button-family headings match the declared contract.")
     print("PASS: 3 rotary strips × 61 frames; 128px pitch; 210°–390° in 3° steps.")
+    print("PASS: 49-key keyboard contains 29 white keys, 20 black keys and C/E/G active overlays.")
     print("PASS: 35 icon tiles have 35 distinct glyph bodies and all declared labels.")
     print("NOTE: This validator does not render images or replace pixel-level visual QA.")
     return 0
