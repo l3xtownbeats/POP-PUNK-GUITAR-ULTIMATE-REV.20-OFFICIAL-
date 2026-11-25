@@ -52,3 +52,20 @@ The master prompt specifies `danger #FF557A` and `warning #FFBE55`; `theme.json`
 
 ## Export state
 No binary assets were copied into this export directory in this step. Existing source assets remain under `SKIN/Skin_053/`. No ZIP, contact sheets, or 1024×700/1600×1100 final previews are claimed. Do not mark the pack COMPLETE.
+
+
+## Vector-atlas source QA — 2026-11-26
+A static source-structure pass was performed on the five supplemental SVG atlas masters. It is not a rendered/pixel-level visual QA pass and does not certify PNG exports or runtime compatibility.
+
+- All five files declare explicit SVG dimensions and matching viewBox dimensions: 1920×1000, 1920×1020, 1920×8000, 1920×1040 and 1920×1020.
+- The button sheet declares the intended 27 families × 5 states (135), plus seven FX switch pairs and five LED colors × two states. This is a source-structure check, not a per-pixel state-art review.
+- The rotary sheet contains three 61-frame vertical strips (183 frames total) with 128px vertical pitch and 3° needle increments from 210° through 390°. The large sheet still requires rasterization and frame-by-frame visual inspection for clipping, cell alignment and animation continuity.
+- The icon sheet was corrected in this pass: the prior 35 glyph bodies were duplicate plus-sign placeholders. They have been replaced by 35 distinct vector glyph bodies matching the declared icon names. The SVG source was re-fetched and checked for 35 icon groups, 35 distinct glyph bodies and all 35 labels.
+- The display/keyboard sheet is still a compact two-octave 24-white-key atlas, not the final 49-key preview/export requested by the master prompt.
+- The atlas files remain supplemental vector masters. No PNG export, preview/contact sheet, ZIP package, pixel-level approval, or runtime registration is claimed.
+
+### Next required QA gates
+1. Render all five SVGs with a pinned renderer/version and transparent-background policy.
+2. Inspect full-sheet previews and cropped cells at 100% and 200%; correct clipping, repeated/incorrect glyphs, text overflow and inconsistent visual weight.
+3. Export standalone assets and atlases at the exact sizes required by the master prompt; record dimensions, byte counts and SHA-256 in the canonical manifest.
+4. Integrate only assets that pass visual QA and have a verified JUCE consumer; then run Windows x64 build, CTest, Pluginval and FL Studio 20 host acceptance.
