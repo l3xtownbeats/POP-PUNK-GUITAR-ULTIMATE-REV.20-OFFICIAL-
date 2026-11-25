@@ -90,3 +90,9 @@ Added a pinned CairoSVG/Pillow export script and a dedicated GitHub Actions work
 The first successful CI render produced five transparent RGBA PNG atlases and three separate 61-frame rotary strips. Inspection exposed defects not detectable by source-structure checks: carbon-weave strokes escaped their swatch, the three rotary columns were visually near-identical despite different style names, and a green meter sample overlapped the status/keyboard area. Corrections now clip the weave, give the black-disc and knurled-steel strips distinct materials, replace the stray meter with a 12-segment cyan/blue sample, and reduce long icon-label size. The corrected revision requires a fresh render and review before artwork acceptance.
 
 Initial export CI run `45696342834`, artifact `15061271846`, predates these corrections and is not the final pack.
+
+
+### Corrected 1x/2x PNG export and manual review — 2026-11-26
+The corrected source passed the structural validator and both 1x and 2x CairoSVG raster exports. GitHub Actions run `45697271165` completed successfully and uploaded artifact `15062120847` (17,491,765 bytes; SHA-256 `d4f5ec747eb0b85df7a2d01a0cca474fe8a8b1bfcee7dffddb5f0466b1872995`). The artifact contains five transparent RGBA PNG atlases at native dimensions and at 2x, three separate rotary strips at both scales, two contact sheets and two SHA-256 export reports. Manual review of contact sheets and full-size 1x images confirmed the carbon-weave clipping, distinct rotary materials, corrected meter placement and full 49-key keyboard. This is a partial visual pass, not exhaustive per-pixel review of all 135 button states and 183 rotary frames.
+
+See `NEON_STAGE_ATLAS_EXPORT_CI_REPORT.json` for dimensions, hashes and remaining gates. Runtime JUCE integration, VST3/Pluginval validation on the current final head and FL Studio 20 acceptance remain open.
