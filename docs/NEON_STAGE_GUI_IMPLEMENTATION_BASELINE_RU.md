@@ -179,3 +179,8 @@ The live stereo output meter now uses the eight authored VU states in the NEON S
 ## 2026-11-26 — SFZ import status LED uses authored atlas
 
 The Import Guitar panel's real asynchronous loader indicator now uses the authored round status-LED cells from the NEON STAGE meters/sliders atlas when Skin-1 is active: OFF for standby, blue for loading, cyan for ready, warning for error. Cells are 40×40 at y=810 and x=50/160/270/380, per the sprite-sheet manifest. Text status remains visible; other themes and missing-atlas cases retain the semantic vector LED fallback. The indicator reflects the existing loader state and does not invent progress.
+
+
+## 2026-11-26 — 16-theme validation gate corrected without false readiness
+
+The previous Windows validation failure was traced: all 26 CTest cases passed, but the registry validator demanded 16 runtimeReady=true entries even though STILLWATER (skin-111) is intentionally gated pending FL Studio 20 host acceptance. The validator now checks all 16 approved theme slots and validates their required artwork/SVG packages, while requiring 15 runtime-ready themes and exactly one explicitly gated STILLWATER slot. The registry status now says its embedded artwork package is validated and FL Studio 20 host acceptance remains pending. runtimeReady remains false; no acceptance was fabricated. This does not waive any visual/runtime host test.
