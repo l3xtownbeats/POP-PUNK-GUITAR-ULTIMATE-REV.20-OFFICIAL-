@@ -196,6 +196,8 @@ public:
         addAndMakeVisible(subtitle);
 
         search.setTextToShowWhenEmpty("SEARCH SKINS...", palette.token("text_secondary"));
+        search.setComponentID("Skin_Gallery_Search");
+        search.setIndents(28, 0);
         search.setColour(juce::TextEditor::backgroundColourId, palette.token("control_bg"));
         search.setColour(juce::TextEditor::textColourId, palette.token("text_primary"));
         search.setColour(juce::TextEditor::outlineColourId, palette.token("control_border"));
@@ -2926,7 +2928,9 @@ void PPGUPremiumLookAndFeel::fillTextEditorBackground(juce::Graphics& g, int wid
 
     // The preset search uses the authored NEON STAGE search glyph. TextEditor
     // indents reserve this leading slot, so the live text/caret never overlap it.
-    if (editor.getComponentID() == "Preset_Search" && palette.iconsSpriteSheet.isValid())
+    const auto searchId = editor.getComponentID();
+    if ((searchId == "Preset_Search" || searchId == "Skin_Gallery_Search")
+        && palette.iconsSpriteSheet.isValid())
     {
         g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
         constexpr int iconSize = 16;
