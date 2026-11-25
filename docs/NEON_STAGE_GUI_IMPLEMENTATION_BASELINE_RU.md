@@ -81,3 +81,34 @@ Eco mode: учитывать reduceInEco=true.
 8. Pluginval проходит; затем требуется ручное host acceptance в FL Studio 20.
 
 До прохождения проверок статус остаётся IN PROGRESS.
+
+
+## 2026-11-25 — дополнительно предоставленные визуальные эталоны PPGU
+
+Получены и непосредственно просмотрены два пользовательских изображения (1536×1024, RGBA):
+- `Неоновый интерфейс гитарного плагина PPGU.png`, SHA-256 `83964d6e8316c0c3deef7dd7217492b396e36ed3ae448e1b6659ba1904207a26`.
+- `Неоновый атлас UI‑ассетов PPGU.png`, SHA-256 `0ad003b6cfb4d7d8d0f219ca12ef9a49627f5f221a07d46999b0578772e71e99`.
+
+Первое изображение задаёт визуальный ориентир для единой PPGU-оболочки и видимых вспомогательных рабочих областей:
+- верхняя панель бренда и действий;
+- браузер Factory Preset Catalog с фильтрами ALL PRESETS / MELODY / PATTERN и поиском;
+- центральный гитарный баннер и переключение MELODY / PATTERN;
+- девять регуляторов с подписями GAIN, TREBLE, MID, BASS, VELOCITY, DYNAMICS, SWING, HUMANIZE, ACCENT;
+- AMP & TONE и семь FX-переключателей;
+- LIVE HARMONY / CHORD / SCALE-KEY / NOTES HELD;
+- MIDI-клавиатура и статус библиотеки;
+- вспомогательные области NEON STAGE / FX EDIT, AUTOCHORDS / HARMONY SETUP и LICENSED GUITAR LIBRARY / IMPORT GUITAR.
+
+Второе изображение — визуальный атлас из 12 групп: backgrounds/materials; 9-slice frames; button states; семь FX switches; rotary knob layers; FX EDIT rotary family; toggles/power/LED states; display elements; MIDI keyboard; consistent icon family; hardware details; sprite-sheet examples. Это полный перечень групп для визуального аудита, а не утверждение, что каждый показанный спрайт уже подключён к renderer.
+
+### Обязательная сверка перед изменением геометрии
+
+Обнаружено одно явное расхождение между новым главным изображением и ранее зафиксированным implementation baseline:
+- новый скриншот визуально показывает девять регуляторов одной горизонтальной полосой под гитарным баннером;
+- текущий baseline и `PluginEditor.cpp::resized()` задают девять регуляторов сеткой 3×3 в центральной зоне.
+
+Не менять APVTS IDs, порядок, значения или DSP. Не менять геометрию регуляторов вслепую: горизонтальная полоса из нового изображения и сетка 3×3 из прежнего контракта требуют явного разрешения в журнале разработки. До разрешения продолжать безопасную сверку ассетов, материалов, рамок, состояний и оформления вспомогательных панелей.
+
+Вспомогательные панели на референсе показаны одновременно как визуальная композиция. Runtime-контракт REV.20 описывает AutoChords, FX EDIT и Import Guitar как вспомогательные окна/workspace, а не новые главные режимы. Не превращать их в отдельные top-level modes и не выдавать setup-only AutoChords за подключённый preview/playback engine.
+
+Статус: reference received and inspected; implementation alignment in progress; pixel comparison, responsive layout verification and FL Studio 20 host acceptance remain open.
