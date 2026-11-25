@@ -2370,6 +2370,30 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     g.drawEllipse(cx - r + 4.0f, cy - r + 4.0f, d - 8.0f, d - 8.0f,
                   focused ? 2.0f : 1.2f);
 
+    // Machined-metal face treatment for themes without authored rotary PNGs.
+    // These highlights are paint-only: no bounds, hit-testing or parameter changes.
+    const auto faceBounds = juce::Rectangle<float>(cx - r + 6.0f, cy - r + 6.0f,
+                                                    d - 12.0f, d - 12.0f);
+    juce::Path upperBevel;
+    upperBevel.addCentredArc(cx, cy, r - 7.0f, r - 7.0f, 0.0f,
+                             juce::MathConstants<float>::pi * 1.12f,
+                             juce::MathConstants<float>::pi * 1.88f, true);
+    g.setColour(palette.token("highlight").withAlpha(enabled ? 0.20f : 0.06f));
+    g.strokePath(upperBevel, juce::PathStrokeType(1.15f,
+        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+    juce::Path lowerBevel;
+    lowerBevel.addCentredArc(cx, cy, r - 7.0f, r - 7.0f, 0.0f,
+                             juce::MathConstants<float>::pi * 0.12f,
+                             juce::MathConstants<float>::pi * 0.88f, true);
+    g.setColour(palette.token("shadow").withAlpha(enabled ? 0.30f : 0.12f));
+    g.strokePath(lowerBevel, juce::PathStrokeType(1.0f,
+        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+    g.setColour(palette.token("highlight").withAlpha(enabled ? 0.045f : 0.015f));
+    g.fillEllipse(faceBounds.reduced(faceBounds.getWidth() * 0.16f,
+                                     faceBounds.getHeight() * 0.16f));
+
     juce::Path pointer;
     pointer.startNewSubPath(cx, cy);
     pointer.lineTo(cx + std::sin(angle) * r * 0.56f,
