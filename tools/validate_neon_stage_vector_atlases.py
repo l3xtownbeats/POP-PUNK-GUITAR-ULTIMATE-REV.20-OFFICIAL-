@@ -82,7 +82,7 @@ def main() -> int:
     family_labels = {
         (node.text or "").strip()
         for node in children_named(buttons, "text")
-        if re.match(r"^\\d{2} ", (node.text or "").strip())
+        if re.match(r"^\d{2} ", (node.text or "").strip())
     }
     if len(family_labels) != 27:
         fail(f"button atlas: expected 27 family headings, found {len(family_labels)}")
@@ -92,7 +92,7 @@ def main() -> int:
     rotary = parsed["03_ppgu_atlas_knob_strips.svg"]
     strip_groups: dict[int, list[tuple[int, int]]] = {84: [], 334: [], 584: []}
     for node in children_named(rotary, "g"):
-        match = re.fullmatch(r"translate\\((\\d+) (\\d+)\\)", node.attrib.get("transform", ""))
+        match = re.fullmatch(r"translate\((\d+) (\d+)\)", node.attrib.get("transform", ""))
         if not match:
             continue
         x, y = map(int, match.groups())
@@ -104,7 +104,7 @@ def main() -> int:
             ]
             if len(rotations) != 1:
                 fail(f"rotary frame at x={x}, y={y}: expected one needle rotation")
-            angle_match = re.fullmatch(r"rotate\\(([-\\d.]+) 0 0\\)", rotations[0])
+            angle_match = re.fullmatch(r"rotate\(([-\d.]+) 0 0\)", rotations[0])
             if not angle_match:
                 fail(f"rotary frame at x={x}, y={y}: malformed rotation")
             strip_groups[x].append((y, int(float(angle_match.group(1)))))
@@ -121,7 +121,7 @@ def main() -> int:
     icons = parsed["05_ppgu_atlas_icons_hardware.svg"]
     icon_groups = [
         node for node in children_named(icons, "g")
-        if re.fullmatch(r"translate\\(\\d+ \\d+\\)", node.attrib.get("transform", ""))
+        if re.fullmatch(r"translate\(\d+ \d+\)", node.attrib.get("transform", ""))
     ]
     labels = []
     glyph_bodies = []
