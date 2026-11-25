@@ -702,30 +702,50 @@ public:
             10.0f, 10.0f);
         juce::Colour led = palette.token("led_off");
         juce::String stateText = "STANDBY";
+        int atlasLedX = 50; // authored round OFF state
         if (loadState == LoadState::loading)
         {
             led = palette.token("accent");
             stateText = "LOADING";
+            atlasLedX = 270; // authored blue state
         }
         else if (loadState == LoadState::ready)
         {
             led = palette.token("success");
             stateText = "READY";
+            atlasLedX = 160; // authored cyan state
         }
         else if (loadState == LoadState::error)
         {
             led = palette.token("danger");
             stateText = "ERROR";
+            atlasLedX = 380; // authored warning state
         }
-        if (loadState != LoadState::standby)
+
+        const bool hasAuthoredLed = palette.id == "skin-053"
+            && palette.metersSlidersSpriteSheet.isValid();
+        if (hasAuthoredLed)
         {
-            g.setColour(led.withAlpha(0.25f));
-            g.fillEllipse(ledBounds.expanded(4.0f));
+            // Round status LED cells are 40x40 at y=810 in the approved atlas.
+            // The selected state follows the actual asynchronous SFZ loader state.
+            g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
+            g.drawImage(palette.metersSlidersSpriteSheet,
+                        static_cast<int>(ledBounds.getX()), static_cast<int>(ledBounds.getY()),
+                        static_cast<int>(ledBounds.getWidth()), static_cast<int>(ledBounds.getHeight()),
+                        atlasLedX, 810, 40, 40);
         }
-        g.setColour(led);
-        g.fillEllipse(ledBounds);
-        g.setColour(palette.token("control_border"));
-        g.drawEllipse(ledBounds, 1.0f);
+        else
+        {
+            if (loadState != LoadState::standby)
+            {
+                g.setColour(led.withAlpha(0.25f));
+                g.fillEllipse(ledBounds.expanded(4.0f));
+            }
+            g.setColour(led);
+            g.fillEllipse(ledBounds);
+            g.setColour(palette.token("control_border"));
+            g.drawEllipse(ledBounds, 1.0f);
+        }
         g.setColour(palette.token("text_secondary"));
         g.setFont(makeThemeFont(palette, 9.0f, false, true));
         g.drawText(stateText, loadButton.getRight() + 34, loadButton.getY(),
