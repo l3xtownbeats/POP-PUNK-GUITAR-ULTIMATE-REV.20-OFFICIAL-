@@ -52,3 +52,7 @@ python tools/validate_neon_stage_vector_atlases.py
 
 
 PNG-пакет можно сформировать скриптом `tools/export_neon_stage_vector_atlases.py`; в CI экспорт запускается автоматически и публикуется как артефакт проверки. Для повторения локально установи CairoSVG 2.7.1 и Pillow 10.4.0, затем запусти `python tools/export_neon_stage_vector_atlases.py --scale 1.0`. Экспорт включает пять PNG-атласов, три отдельные 61-кадровые полосы регуляторов, контактный лист и SHA-256-отчёт. Это проверка формата и прозрачности, а не художественное одобрение каждого кадра.
+
+
+### Visual QA correction pass
+The first rendered contact sheet revealed carbon-weave overflow, duplicate-looking rotary materials and a misplaced green meter. The source now clips the weave swatch, differentiates black-disc and knurled-steel filmstrips, replaces the stray meter with a 12-segment cyan/blue sample, and reduces icon-label size to fit. Re-run the atlas CI export and inspect its new artifact before accepting the artwork.

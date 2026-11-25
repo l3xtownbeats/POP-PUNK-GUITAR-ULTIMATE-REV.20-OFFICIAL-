@@ -84,3 +84,9 @@ The keyboard area in atlas 04 was replaced with a four-octave 49-key layout (29 
 
 ### Automated raster-export path — 2026-11-26
 Added a pinned CairoSVG/Pillow export script and a dedicated GitHub Actions workflow. The workflow validates source contracts, exports transparent RGBA PNG atlases and three rotary frame-strip crops, creates a contact-sheet preview and records SHA-256 values. Visual acceptance remains a human review gate; the workflow has not yet been observed completing successfully.
+
+
+### First rendered PNG visual-QA pass — 2026-11-26
+The first successful CI render produced five transparent RGBA PNG atlases and three separate 61-frame rotary strips. Inspection exposed defects not detectable by source-structure checks: carbon-weave strokes escaped their swatch, the three rotary columns were visually near-identical despite different style names, and a green meter sample overlapped the status/keyboard area. Corrections now clip the weave, give the black-disc and knurled-steel strips distinct materials, replace the stray meter with a 12-segment cyan/blue sample, and reduce long icon-label size. The corrected revision requires a fresh render and review before artwork acceptance.
+
+Initial export CI run `45696342834`, artifact `15061271846`, predates these corrections and is not the final pack.

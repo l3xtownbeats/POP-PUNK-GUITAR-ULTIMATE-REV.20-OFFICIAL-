@@ -78,6 +78,10 @@ def main() -> int:
                     fail(f"{filename}: opaque full-sheet rectangle defeats transparent atlas canvas")
         parsed[filename] = root
 
+    backgrounds = parsed["01_ppgu_atlas_backgrounds_frames.svg"]
+    if not any(node.attrib.get("id") == "weaveClip" for node in children_named(backgrounds, "clipPath")):
+        fail("background atlas: carbon-weave swatch must be clipped to its own tile")
+
     buttons = parsed["02_ppgu_atlas_buttons_switches.svg"]
     family_labels = {
         (node.text or "").strip()
@@ -145,6 +149,16 @@ def main() -> int:
             f"3 C/E/G active overlays; found {len(white_keys)}/{len(black_keys)}/{len(active_keys)}"
         )
 
+    if len([node for node in keyboard_rects if node.attrib.get("x") == "1080" and node.attrib.get("width") == "42" and node.attrib.get("height") == "9"]) != 12:
+        fail("display atlas: expected a 12-segment meter sample")
+
+    rotary_first_frames = {}
+    for x in (334, 584):
+        frame = next(node for node in children_named(rotary, "g") if node.attrib.get("transform") == f"translate({x} 134)")
+        rotary_first_frames[x] = ET.tostring(frame, encoding="unicode")
+    if rotary_first_frames[334] == rotary_first_frames[584]:
+        fail("rotary atlas: black-disc and knurled-steel materials must be distinct")
+
     icons = parsed["05_ppgu_atlas_icons_hardware.svg"]
     icon_groups = [
         node for node in children_named(icons, "g")
@@ -171,9 +185,11 @@ def main() -> int:
         fail("icon atlas: duplicate glyph body detected")
 
     print("PASS: 5 SVG masters parse; dimensions/viewBoxes and transparent canvases match.")
+    print("PASS: carbon-weave material is clipped to its swatch.")
     print("PASS: 27 button-family headings match the declared contract.")
-    print("PASS: 3 rotary strips × 61 frames; 128px pitch; 210°–390° in 3° steps.")
+    print("PASS: 3 rotary strips × 61 frames; 128px pitch; 210°–390° in 3° steps; materials differ.")
     print("PASS: 49-key keyboard contains 29 white keys, 20 black keys and C/E/G active overlays.")
+    print("PASS: display atlas includes a 12-segment meter sample.")
     print("PASS: 35 icon tiles have 35 distinct glyph bodies and all declared labels.")
     print("NOTE: This validator does not render images or replace pixel-level visual QA.")
     return 0
