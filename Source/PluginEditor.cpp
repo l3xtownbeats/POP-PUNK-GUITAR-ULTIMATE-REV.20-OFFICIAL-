@@ -3246,7 +3246,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
         // stage/banner above the nine-control strip, not a watermark behind knobs.
         auto stage = area.reduced(8, 6);
         stage.removeFromTop(38);
-        const int stageHeight = juce::jlimit(72, 150, area.getHeight() / 3);
+        const int stageHeight = juce::jlimit(72, 150, juce::jmax(1, area.getHeight() - 45) / 3);
         stage = stage.removeFromTop(juce::jmin(stageHeight, stage.getHeight()));
         g.saveState();
         g.reduceClipRegion(stage);
