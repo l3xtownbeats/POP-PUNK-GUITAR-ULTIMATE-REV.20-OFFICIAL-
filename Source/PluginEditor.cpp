@@ -2923,6 +2923,17 @@ void PPGUPremiumLookAndFeel::fillTextEditorBackground(juce::Graphics& g, int wid
     g.setColour(surface);
     g.fillRoundedRectangle(0.5f, 0.5f, static_cast<float>(width) - 1.0f,
                            static_cast<float>(height) - 1.0f, 6.0f);
+
+    // The preset search uses the authored NEON STAGE search glyph. TextEditor
+    // indents reserve this leading slot, so the live text/caret never overlap it.
+    if (editor.getComponentID() == "Preset_Search" && palette.iconsSpriteSheet.isValid())
+    {
+        g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
+        constexpr int iconSize = 16;
+        const int iconY = (height - iconSize) / 2;
+        g.drawImage(palette.iconsSpriteSheet, 7, iconY, iconSize, iconSize,
+                    32, 645, 144, 144);
+    }
 }
 
 void PPGUPremiumLookAndFeel::drawTextEditorOutline(juce::Graphics& g, int width, int height,
@@ -2975,6 +2986,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     categoryBox.setColour(juce::ComboBox::textColourId, themeManager.getPalette().token("text_primary"));
     addAndMakeVisible(categoryBox);
     presetSearch.setTextToShowWhenEmpty("SEARCH PRESETS...", themeManager.getPalette().token("text_secondary"));
+    presetSearch.setComponentID("Preset_Search");
+    presetSearch.setIndents(28, 0);
     presetSearch.setColour(juce::TextEditor::backgroundColourId, themeManager.getPalette().token("control_bg"));
     presetSearch.setColour(juce::TextEditor::textColourId, themeManager.getPalette().token("text_primary"));
     presetSearch.setColour(juce::TextEditor::outlineColourId, themeManager.getPalette().token("accent").withAlpha(0.4f));
