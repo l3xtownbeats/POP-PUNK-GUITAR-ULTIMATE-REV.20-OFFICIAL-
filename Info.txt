@@ -377,3 +377,9 @@ Commits: `954c1d9cf9970c4a0bf524d3c4dfd8c09c00bc1a`, `bd7ecb2bdb5c150e85d54df894
 Проведена проверка `PPGUMultiWindowWorkspace::Window`: подтверждено использование theme palette, texture/bezel artwork и 9-slice frames/panels atlas, отдельные заголовки, кнопки закрытия/разворачивания, resize grip и content bounds. Удалены повторные назначения одинаковых цветов кнопки закрытия в конструкторе; поведение и геометрия не менялись.
 
 Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest после изменений ещё не выполнены/не подтверждены. Следующий этап — проверка реальных panel content-компонентов и соответствия их внутренней графики атласу, без создания фиктивных функций.
+
+
+## 2026-11-25 — FX EDIT telemetry clarity pass
+- FX EDIT response display now labels its data contract as read-only DSP response telemetry and explicitly reports when the processor does not expose that feed. No synthetic response curve or fabricated measurements are drawn.
+- Selected-effect status now includes the real number of APVTS controls in that group, alongside its existing ACTIVE/BYPASSED state. APVTS attachments, parameter IDs, DSP and audio-thread behavior are unchanged.
+- Source commit: 65404c7dd2fdb73804774dd3c56975ea607136a1. Build, CTest, Pluginval, Windows VST3 and FL Studio 20 acceptance remain pending for the current PR head.
