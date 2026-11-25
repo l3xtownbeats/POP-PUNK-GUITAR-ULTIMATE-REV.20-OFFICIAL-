@@ -155,3 +155,8 @@ The FX EDIT graph remains intentionally read-only and does not draw an invented 
 ## 2026-11-25 — AutoChords: no fabricated guitar fingering
 
 The chord diagram no longer starts with a hard-coded A-major shape that could be mistaken for the currently selected harmony. It now displays an explicit “NO VERIFIED GUITAR VOICING DATA” state until a real voicing is passed to setVoicing. The renderer still supports drawing supplied six-string positions. This is a UI truthfulness correction only; chord generation, APVTS, MIDI and DSP are unchanged. A verified fingering database and musical validation remain outstanding.
+
+
+## 2026-11-25 — Import Guitar: truthful SFZ diagnostics
+
+The Import Guitar completion panel now displays the selected SFZ filename, actual LoadReport region/sample totals, warning/error counts, and up to three messages from each non-empty diagnostics list. It labels the selection as one SFZ definition rather than claiming an inferred instrument count. The asynchronous loader and sampler behavior are unchanged; no synthetic progress or filesystem-derived WAV count was introduced. Build and runtime layout validation remain outstanding.
