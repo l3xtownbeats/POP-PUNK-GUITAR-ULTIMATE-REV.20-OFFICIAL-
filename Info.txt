@@ -412,3 +412,10 @@ Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest пос
 - Source rectangles follow the atlas manifest: 82×286 px crops at x=43+117*n, y=34, with eight authored active-segment states. Artwork is resampled at JUCE high quality and rendered only in the UI component.
 - The meter still reads the processor's existing lock-free output peak snapshots; audio/DSP and peak acquisition are unchanged. Visual verification in a built plugin remains pending.
 - Source commit: 331f3d7799f7c245ca83c6204e4d50c65b364967.
+
+
+## 2026-11-26 — SFZ import status LED atlas integration
+- Connected the round status LED states from the Skin-1 meters/sliders atlas to the real asynchronous SFZ import state: OFF=standby, blue=loading, cyan=ready, warning=error. The label continues to show the corresponding textual state.
+- Uses the manifest-defined 40×40 round LED cells in row y=810 (x=50/160/270/380). The existing palette-driven vector LED remains the fallback for all other skins or when the atlas is unavailable.
+- State continues to be derived from the actual loader button/status text; no simulated progress, loader, DSP, or audio-thread behavior added.
+- Source commit: 0d8167611809d4394c791f1de530a559cab84b50.
