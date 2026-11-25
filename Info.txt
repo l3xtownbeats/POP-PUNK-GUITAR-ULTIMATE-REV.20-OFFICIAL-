@@ -399,3 +399,9 @@ Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest пос
 
 
 - Follow-up source fix: the asynchronous completion explicitly captures the selected SFZ file by value, so the filename remains valid after the file-chooser callback returns. Commit: 0642e82c860ccc7e9165f8c62a9b37e9fbe31dce.
+
+
+## 2026-11-25 — Settings / Performance NEON STAGE polish
+- Performance Display now reports the live number of held MIDI notes in its MIDI input heading. The count is derived from the processor's existing lock-free held-note snapshot and updates with the same 20 Hz UI refresh; no MIDI state is written and no audio-thread work is added.
+- Workspace Settings now uses theme-aware elevated cards and accent framing around its existing scale, spacing, restore and gallery controls. Existing settings ranges, callbacks and UI-only scope are unchanged.
+- Source commit: 63fd1f2c762221416150082d4beab786dceb2abc (follow-up cleanup included). Build, CTest, Pluginval, Windows VST3 and FL Studio 20 acceptance remain pending for the current PR head.
