@@ -1867,6 +1867,7 @@ public:
     void setVoicing(const juce::String& name, const std::array<int, 6>& positions)
     {
         chordName = name.isNotEmpty() ? name : "UNNAMED";
+        hasVoicing = true;
         for (size_t i = 0; i < frets.size(); ++i)
             frets[i] = juce::jlimit(-1, 4, positions[i]);
         repaint();
@@ -1891,6 +1892,17 @@ public:
         const auto grid = getLocalBounds().reduced(20, 42);
         if (grid.getWidth() < 40 || grid.getHeight() < 35)
             return;
+
+        // The fingering database is not connected yet. Never present the old
+        // hard-coded A-major sample shape as if it matched the selected harmony.
+        if (!hasVoicing)
+        {
+            g.setColour(palette.token("text_secondary"));
+            g.setFont(makeThemeFont(palette, 9.0f, false, true));
+            g.drawFittedText("NO VERIFIED GUITAR VOICING DATA",
+                             grid.reduced(4), juce::Justification::centred, 2);
+            return;
+        }
 
         constexpr int stringCount = 6;
         constexpr int fretCount = 4;
@@ -1945,8 +1957,9 @@ public:
 
 private:
     PPGUThemeManager::Palette palette;
-    juce::String chordName { "A MAJ  /  REFERENCE" };
-    std::array<int, 6> frets {{ 0, 0, 2, 2, 2, 0 }};
+    juce::String chordName { "VOICING DATA PENDING" };
+    std::array<int, 6> frets {{ -1, -1, -1, -1, -1, -1 }};
+    bool hasVoicing = false;
 };
 
 class PPGUAutoChordsPanel final : public juce::Component, public PPGUThemeAwarePanel,
