@@ -330,3 +330,20 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - Added `LibraryManager/test_pattern_clip_registry.py` with 11 regression cases and registered it as `ppgu_pattern_clip_registry_contract` in CTest. Added the empty template `LibraryManager/pattern_clips.example.json` and technical contract `docs/PATTERN_CLIP_PIPELINE_RU.md`.
 - Scope boundary: this is a LibraryManager/offline validation foundation only. It is NOT yet connected to the C++ processor, does not create real clips, does not approve any source license, and does not implement audio-thread playback. Chord-driven PATTERN INSTRUMENT phrase mapping remains a separate future content/engine track.
 - Next content gate: access the original local source WAV files, reconcile their bytes against the saved SHA-256 inventories, establish redistribution rights, listen and review the musical material, then create sample-accurate staged clips and explicit per-key mappings. Only then implement the C++ immutable registry handoff and bounded real-time clip voice playback.
+
+
+## 2026-11-25 — пользовательские визуальные эталоны PPGU загружены и проверены
+
+Получены и просмотрены два изображения 1536×1024:
+- `Неоновый интерфейс гитарного плагина PPGU.png` — SHA-256 `83964d6e8316c0c3deef7dd7217492b396e36ed3ae448e1b6659ba1904207a26`.
+- `Неоновый атлас UI‑ассетов PPGU.png` — SHA-256 `0ad003b6cfb4d7d8d0f219ca12ef9a49627f5f221a07d46999b0578772e71e99`.
+
+Новый интерфейсный эталон охватывает верхний бренд/action bar, каталог и поиск пресетов, гитарный banner, MELODY/PATTERN, девять подписанных регуляторов (GAIN, TREBLE, MID, BASS, VELOCITY, DYNAMICS, SWING, HUMANIZE, ACCENT), AMP & TONE, семь FX-модулей, LIVE HARMONY, MIDI-клавиатуру, статус библиотеки и три вспомогательные области: FX EDIT, AutoChords/Harmony Setup, Licensed Guitar Library/Import Guitar.
+
+Новый атлас содержит 12 визуальных семейств: материалы/фоны, 9-slice frames, состояния кнопок, FX switches, rotary layers, FX EDIT rotaries, toggles/power/LED, display elements, MIDI keyboard, icons, hardware details и sprite-sheet examples. Наличие изображения в атласе само по себе не подтверждает подключение каждого кадра к runtime renderer.
+
+**Найдено расхождение для решения:** новый главный референс показывает девять регуляторов горизонтальной полосой; текущий REV.20 implementation baseline и `PluginEditor.cpp::resized()` размещают те же девять APVTS-контролов сеткой 3×3. До явного решения не менять геометрию и не менять APVTS IDs/порядок/поведение. Продолжить аудит визуальных ассетов и вспомогательных окон.
+
+Сохранить архитектурное ограничение: AutoChords, FX EDIT и Import Guitar — вспомогательные окна/workspace, а не новые главные режимы. Setup-only / not connected состояния на макете не представлять как готовую генерацию, preview или playback.
+
+Статус: изображения получены и изучены; полное визуальное соответствие ещё не подтверждено. Требуются поэлементная сверка runtime, responsive проверки, exact-SHA Windows build/CTest, pluginval и FL Studio 20 host acceptance.
