@@ -1,0 +1,50 @@
+name: NEON STAGE SVG atlas validation and PNG export
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/*.svg"
+      - "ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/NEON_STAGE_ATLAS_MANIFEST.json"
+      - "tools/validate_neon_stage_vector_atlases.py"
+      - "tools/export_neon_stage_vector_atlases.py"
+      - ".github/workflows/neon-stage-svg-atlas-export.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-stage-svg-atlas-export-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-export:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout PR source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned SVG rasterizer
+        run: python -m pip install --disable-pip-version-check CairoSVG==2.7.1 Pillow==10.4.0
+
+      - name: Validate SVG source contracts
+        run: python tools/validate_neon_stage_vector_atlases.py
+
+      - name: Render transparent PNG atlases and rotary frame strips
+        run: python tools/export_neon_stage_vector_atlases.py --scale 1.0 --output build/neon_stage_vector_atlases
+
+      - name: Upload PNG exports, rotary strips, contact sheet and SHA-256 report
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-NEON-STAGE-SVG-ATLAS-EXPORT
+          path: build/neon_stage_vector_atlases/
+          if-no-files-found: error
+          retention-days: 14
