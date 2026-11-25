@@ -354,3 +354,12 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 Пользователь явно подтвердил замену прежней сетки 3×3 на одну горизонтальную строку согласно новому главному референсу. В `Source/PluginEditor.cpp::resized()` девять APVTS-регуляторов теперь располагаются равномерно в одной строке, подписи — под ними; диаметр адаптируется к доступной ширине. APVTS IDs, порядок, attachments, диапазоны, значения, DSP и MIDI не менялись.
 
 Commit: `9c1b214b8a2dcec06cb68fdcf3b1f04039dfaae1`. Проверки сборки, CTest, масштабирования и FL Studio 20 ещё ожидают выполнения.
+
+
+## 2026-11-25 — главный экран: отдельная гитарная stage-зона и горизонтальная FX-цепочка
+
+В `PluginEditor.cpp` выделена отдельная верхняя stage/banner-зона для существующего `heroArtwork`; девять APVTS-регуляторов остаются в одной горизонтальной строке ниже. Семь существующих FX bypass-кнопок теперь расположены горизонтальной цепочкой. Paint/resized stage geometry синхронизирована. Ни APVTS IDs/attachments, ни DSP/MIDI не менялись.
+
+AMP & TONE пока не имеет подтверждённого набора реальных amp-контролов/изображения в runtime; фиктивные элементы не добавлялись. LIVE HARMONY/CHORD/SCALE-KEY/NOTES HELD остаётся существующим read-only Performance Display. AutoChords generation не заявляется.
+
+Commits: `954c1d9cf9970c4a0bf524d3c4dfd8c09c00bc1a`, `bd7ecb2bdb5c150e85d54df894f8ca9ec2f25089`. Сборка, тесты, responsive screenshots и FL Studio 20 acceptance ожидают проверки.
