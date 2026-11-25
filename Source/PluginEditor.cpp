@@ -3916,7 +3916,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::chooseSfzFile(juce::Label* panel
         safeThis->statusLabel.setText("LOADING SFZ IN BACKGROUND...", juce::dontSendNotification);
         if (safePanelStatus != nullptr)
             safePanelStatus->setText("Loading SFZ in background...", juce::dontSendNotification);
-        safeThis->processor.loadSfzFileAsync(selected, [safeThis, safePanelStatus, safePanelLoadButton](ppgu::sampler::LoadReport report)
+        safeThis->processor.loadSfzFileAsync(selected, [safeThis, safePanelStatus, safePanelLoadButton, selected](ppgu::sampler::LoadReport report)
         {
             if (safeThis == nullptr)
                 return;
