@@ -383,3 +383,9 @@ Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest пос
 - FX EDIT response display now labels its data contract as read-only DSP response telemetry and explicitly reports when the processor does not expose that feed. No synthetic response curve or fabricated measurements are drawn.
 - Selected-effect status now includes the real number of APVTS controls in that group, alongside its existing ACTIVE/BYPASSED state. APVTS attachments, parameter IDs, DSP and audio-thread behavior are unchanged.
 - Source commit: 65404c7dd2fdb73804774dd3c56975ea607136a1. Build, CTest, Pluginval, Windows VST3 and FL Studio 20 acceptance remain pending for the current PR head.
+
+
+## 2026-11-25 — AutoChords voicing honesty guard
+- Removed the misleading hard-coded A-major fingering from the default chord diagram. Until a verified guitar-voicing database supplies a shape, the panel displays an explicit unavailable state instead of implying that a sample shape matches the selected key/chord.
+- The existing diagram renderer still accepts and draws a supplied voicing through setVoicing; that method now marks the shape as present. No chord-generation, APVTS, MIDI or DSP behavior changed.
+- Source commit: 5162addc50ba34956a7e7c5a74c01a02afd4f316. Verified voicing database and tests for its musical correctness remain open.
