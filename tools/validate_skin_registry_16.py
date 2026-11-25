@@ -235,6 +235,8 @@ def main() -> int:
         "neon_stage_frames_panels_sheet.png",
         "neon_stage_icons_sheet.png",
         "neon_stage_rotary_61frame_atlas.png",
+        "neon_stage_rotary_black_disc_61frame_atlas.png",
+        "neon_stage_rotary_knurled_steel_61frame_atlas.png",
     )
     for atlas_name in atlas_names:
         atlas_path = atlas_dir / atlas_name
@@ -262,7 +264,7 @@ def main() -> int:
         raise SystemExit("FAIL: NEON STAGE sprite atlas manifest identity/palette mismatch")
     sheets = atlas_manifest.get("sheets", {})
     if set(sheets) != set(atlas_names):
-        raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly five sheets")
+        raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly seven sheets")
     if sheets.get("neon_stage_rotary_61frame_atlas.png", {}).get("resolution") != [1024, 1024] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("cell_size") != [128, 128] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("grid") != [8, 8] \
@@ -270,6 +272,28 @@ def main() -> int:
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("angle_range_deg") != [-135, 135] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("angle_step_deg") != 4.5:
         raise SystemExit("FAIL: NEON STAGE 61-frame rotary atlas geometry mismatch")
+    for variant_name in ("neon_stage_rotary_black_disc_61frame_atlas.png",
+                         "neon_stage_rotary_knurled_steel_61frame_atlas.png"):
+        variant = sheets.get(variant_name, {})
+        if variant.get("resolution") != [1024, 1024] \
+                or variant.get("cell_size") != [128, 128] \
+                or variant.get("grid") != [8, 8] \
+                or variant.get("frame_count") != 61 \
+                or variant.get("angle_range_deg") != [210, 390] \
+                or variant.get("angle_step_deg") != 3.0:
+            raise SystemExit(f"FAIL: {variant_name} geometry mismatch")
+        frames = variant.get("frames", [])
+        if len(frames) != 61:
+            raise SystemExit(f"FAIL: {variant_name} must declare 61 frames")
+        for frame_index, frame in enumerate(frames):
+            expected_angle = 210.0 + frame_index * 3.0
+            expected_x = (frame_index % 8) * 128
+            expected_y = (frame_index // 8) * 128
+            if frame.get("frame") != frame_index \
+                    or frame.get("angle_deg") != expected_angle \
+                    or frame.get("bbox") != [expected_x, expected_y, expected_x + 128, expected_y + 128]:
+                raise SystemExit(f"FAIL: {variant_name} frame {frame_index} geometry mismatch")
+
     controls = sheets["neon_stage_controls_spritesheet.png"]["elements"]
     if controls.get("knobs", {}).get("frames") != 8 \
             or controls.get("knobs", {}).get("angle_step_deg") != 45 \

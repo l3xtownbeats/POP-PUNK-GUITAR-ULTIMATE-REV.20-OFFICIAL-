@@ -56,3 +56,7 @@ PNG-пакет можно сформировать скриптом `tools/expor
 
 ### Visual QA correction pass
 The first rendered contact sheet revealed carbon-weave overflow, duplicate-looking rotary materials and a misplaced green meter. The source now clips the weave swatch, differentiates black-disc and knurled-steel filmstrips, replaces the stray meter with a 12-segment cyan/blue sample, and reduces icon-label size to fit. Re-run the atlas CI export and inspect its new artifact before accepting the artwork.
+
+
+### Runtime FX EDIT rotary variants
+The Skin-1 runtime pack now includes two additional 1024×1024 61-frame atlases: black-disc for the compressor FX EDIT group and knurled-steel for the EQ FX EDIT group. Their 128×128 cells cover 210°–390° in 3° steps. The corresponding controls use the matching 180° rotary interaction arc; APVTS parameter ranges remain unchanged. The generator creates these assets before build and the package stage copies them only into Skin_053.
