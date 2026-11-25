@@ -31,7 +31,7 @@ concurrency:
 jobs:
   validate-and-export:
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout PR source
         uses: actions/checkout@v4
@@ -47,13 +47,18 @@ jobs:
       - name: Validate SVG source contracts
         run: python tools/validate_neon_stage_vector_atlases.py
 
-      - name: Render transparent PNG atlases and rotary frame strips
-        run: python tools/export_neon_stage_vector_atlases.py --scale 1.0 --output build/neon_stage_vector_atlases
+      - name: Render transparent PNG atlases at 1x runtime dimensions
+        run: python tools/export_neon_stage_vector_atlases.py --scale 1.0 --output build/neon_stage_vector_atlases_1x
 
-      - name: Upload PNG exports, rotary strips, contact sheet and SHA-256 report
+      - name: Render high-resolution transparent PNG atlases at 2x
+        run: python tools/export_neon_stage_vector_atlases.py --scale 2.0 --output build/neon_stage_vector_atlases_2x
+
+      - name: Upload 1x and 2x PNG exports, rotary strips, contact sheets and SHA-256 reports
         uses: actions/upload-artifact@v4
         with:
           name: PPGU-NEON-STAGE-SVG-ATLAS-EXPORT
-          path: build/neon_stage_vector_atlases/
+          path: |
+            build/neon_stage_vector_atlases_1x/
+            build/neon_stage_vector_atlases_2x/
           if-no-files-found: error
           retention-days: 14
