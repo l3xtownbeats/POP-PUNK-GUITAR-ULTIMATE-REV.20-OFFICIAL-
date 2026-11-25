@@ -145,3 +145,8 @@ Source commits: `954c1d9cf9970c4a0bf524d3c4dfd8c09c00bc1a` (stage/banner + horiz
 ## 2026-11-25 — техническая чистка workspace window
 
 Проверена оболочка вспомогательных окон: theme palette, текстуры/рамка, frames/panels atlas, заголовок, close/maximize, resize grip и content bounds уже поддерживаются. Удалены дублирующиеся назначения цветов closeButton. Коммит `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Изменение не меняет внешний вид, геометрию или runtime-контракты. Проверки после изменения ожидают выполнения.
+
+
+## 2026-11-25 — FX EDIT: telemetry-gated response display
+
+The FX EDIT graph remains intentionally read-only and does not draw an invented response curve. Its caption now identifies the area as DSP response telemetry, and the empty-state message states that the processor does not yet expose this feed. The selected-effect status reports ACTIVE/BYPASSED plus the actual count of APVTS controls in the selected group. No parameter IDs, attachments, DSP, MIDI or audio-thread behavior changed. Exact-SHA build and runtime validation remain required.
