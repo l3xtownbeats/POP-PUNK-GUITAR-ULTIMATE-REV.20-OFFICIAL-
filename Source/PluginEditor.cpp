@@ -2773,6 +2773,17 @@ void PPGUPremiumLookAndFeel::drawToggleButton(juce::Graphics& g,
     g.setColour(trackColour);
     g.fillRoundedRectangle(switchBounds, switchHeight * 0.5f);
 
+    // Fine metallic rim; active state remains bound to the real ToggleButton state.
+    const auto trackInset = switchBounds.reduced(1.0f * scale);
+    g.setColour(palette.token("highlight").withAlpha(enabled ? 0.22f : 0.06f));
+    g.drawLine(trackInset.getX() + 4.0f * scale, trackInset.getY() + 0.6f * scale,
+               trackInset.getRight() - 4.0f * scale, trackInset.getY() + 0.6f * scale,
+               0.75f * scale);
+    g.setColour(palette.token("lowlight").withAlpha(enabled ? 0.46f : 0.24f));
+    g.drawLine(trackInset.getX() + 4.0f * scale, trackInset.getBottom() - 0.6f * scale,
+               trackInset.getRight() - 4.0f * scale, trackInset.getBottom() - 0.6f * scale,
+               0.75f * scale);
+
     g.setColour(focused ? palette.token("highlight")
                         : palette.token("control_border").withAlpha(enabled ? 0.95f : 0.42f));
     g.drawRoundedRectangle(switchBounds, switchHeight * 0.5f,
@@ -2787,6 +2798,11 @@ void PPGUPremiumLookAndFeel::drawToggleButton(juce::Graphics& g,
                                                      knobDiameter, knobDiameter);
     g.setColour(enabled ? palette.token("highlight") : palette.token("text_disabled"));
     g.fillEllipse(knobBounds);
+    const auto knobHighlight = knobBounds.reduced(2.0f * scale);
+    g.setColour(palette.token("text_primary").withAlpha(enabled ? 0.28f : 0.08f));
+    g.drawLine(knobHighlight.getX() + 1.0f * scale, knobHighlight.getY() + 1.0f * scale,
+               knobHighlight.getRight() - 1.0f * scale, knobHighlight.getY() + 1.0f * scale,
+               0.7f * scale);
     g.setColour(palette.token("shadow").withAlpha(0.35f));
     g.drawEllipse(knobBounds, 0.8f);
 
