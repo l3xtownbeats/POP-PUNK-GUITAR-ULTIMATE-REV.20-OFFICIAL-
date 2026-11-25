@@ -396,3 +396,6 @@ Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest пос
 - The Import Guitar panel lists up to three real warning and error messages, with a remainder count when longer. The summary explicitly describes one selected SFZ definition; it does not infer an instrument count from regions.
 - The loader contract is unchanged. No progress is simulated, no WAVs are counted by filesystem guessing, and no sampler/DSP/MIDI behavior was modified.
 - Source commit: 28d54921cc119d1126076f03847162958c055ec3. UI layout/build and runtime validation remain pending.
+
+
+- Follow-up source fix: the asynchronous completion explicitly captures the selected SFZ file by value, so the filename remains valid after the file-chooser callback returns. Commit: 0642e82c860ccc7e9165f8c62a9b37e9fbe31dce.
