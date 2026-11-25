@@ -579,8 +579,28 @@ public:
 
     void paint(juce::Graphics& g) override
     {
+        auto bounds = getLocalBounds();
         g.fillAll(palette.token("window_bg"));
-        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.12f, 0.34f, 0.04f);
+        drawThemeArtworkLayers(g, bounds, palette, 0.12f, 0.34f, 0.04f);
+
+        const auto drawSettingCard = [&g, this](juce::Rectangle<int> card, bool highlighted)
+        {
+            if (card.isEmpty())
+                return;
+            auto area = card.toFloat();
+            g.setColour(palette.token("panel_elevated").withAlpha(0.82f));
+            g.fillRoundedRectangle(area, 7.0f);
+            g.setColour((highlighted ? palette.token("accent") : palette.token("control_border"))
+                            .withAlpha(highlighted ? 0.42f : 0.72f));
+            g.drawRoundedRectangle(area.reduced(0.5f), 7.0f, 1.0f);
+        };
+        drawSettingCard(scaleSlider.getBounds().expanded(5, 4), false);
+        drawSettingCard(gapSlider.getBounds().expanded(5, 4), false);
+        drawSettingCard(restoreButton.getBounds().expanded(4, 3), false);
+        drawSettingCard(galleryButton.getBounds().expanded(4, 3), true);
+
+        auto badge = bounds.removeFromTop(1);
+        juce::ignoreUnused(badge);
     }
 
     void resized() override
@@ -816,7 +836,7 @@ public:
         g.setColour(palette.tokens.textSecondary);
         g.setFont(makeThemeFont(palette, 8.5f, false, true));
         auto notesHeading = area.removeFromTop(13);
-        g.drawText("NOTES HELD", notesHeading, juce::Justification::left);
+        g.drawText("MIDI INPUT  /  " + juce::String(heldNoteCount) + " NOTES HELD", notesHeading, juce::Justification::left);
         const float midiLedX = static_cast<float>(notesHeading.getRight() - 9);
         const float midiLedY = static_cast<float>(notesHeading.getCentreY());
         const auto midiLedColour = midiActive ? palette.token("accent") : palette.token("led_off");
@@ -960,13 +980,16 @@ private:
                          : mode == 2 ? pitchName(root) + " MINOR"
                                      : juce::String("CHROMATIC");
 
+        const int newHeldNoteCount = static_cast<int>(held.size());
         if (newChord != chordText || newNotes != notesText
-            || newKey != keyText || newMidiActive != midiActive)
+            || newKey != keyText || newMidiActive != midiActive
+            || newHeldNoteCount != heldNoteCount)
         {
             chordText = newChord;
             notesText = newNotes;
             keyText = newKey;
             midiActive = newMidiActive;
+            heldNoteCount = newHeldNoteCount;
             repaint();
         }
     }
@@ -980,6 +1003,7 @@ private:
     juce::String notesText { "Waiting for MIDI input" };
     juce::String keyText { "CHROMATIC" };
     bool midiActive = false;
+    int heldNoteCount = 0;
 };
 
 
