@@ -69,3 +69,11 @@ A static source-structure pass was performed on the five supplemental SVG atlas 
 2. Inspect full-sheet previews and cropped cells at 100% and 200%; correct clipping, repeated/incorrect glyphs, text overflow and inconsistent visual weight.
 3. Export standalone assets and atlases at the exact sizes required by the master prompt; record dimensions, byte counts and SHA-256 in the canonical manifest.
 4. Integrate only assets that pass visual QA and have a verified JUCE consumer; then run Windows x64 build, CTest, Pluginval and FL Studio 20 host acceptance.
+
+
+Additional source-preparation changes in the same pass:
+- Removed the opaque full-sheet black canvas rectangle from all five SVG masters. The atlas canvases are now transparent at source level; individual background/material swatches remain as explicit artwork elements.
+- Added `tools/validate_neon_stage_vector_atlases.py`, a standard-library structural validator for XML validity, declared dimensions/viewBoxes, transparent canvas, 27 button-family headings, 3×61 rotary frame positions/angles, and 35 distinct icon glyphs.
+- Documented the supplemental atlas format and validator command in `README_ASSET_PACK_RU.md`.
+
+The validator has been added but has not yet been executed in a repository runner. Its PASS output must not be assumed until it runs. Raster export and visual QA remain open.
