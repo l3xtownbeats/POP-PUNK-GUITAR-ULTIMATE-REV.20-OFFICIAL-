@@ -1239,6 +1239,10 @@ public:
 
                 auto slider = std::make_unique<juce::Slider>();
                 slider->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+                slider->setComponentID("FXEdit_" + juce::String(static_cast<int>(groupIndex)) + "_" + item.second);
+                if (groupIndex == 0 || groupIndex == 1)
+                    slider->setRotaryParameters(210.0f * juce::MathConstants<float>::pi / 180.0f,
+                                                390.0f * juce::MathConstants<float>::pi / 180.0f, true);
                 slider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 70, 18);
                 slider->setColour(juce::Slider::rotarySliderFillColourId, palette.token("accent"));
                 slider->setColour(juce::Slider::rotarySliderOutlineColourId, palette.token("control_border"));
@@ -1275,6 +1279,9 @@ public:
         powerButton.setColour(juce::TextButton::textColourOnId, palette.token("window_bg"));
         for (auto& control : controls)
         {
+            if (control.group == 0 || control.group == 1)
+                control.slider->setRotaryParameters(210.0f * juce::MathConstants<float>::pi / 180.0f,
+                                                    390.0f * juce::MathConstants<float>::pi / 180.0f, true);
             control.label->setColour(juce::Label::textColourId, palette.token("text_secondary"));
             control.slider->setColour(juce::Slider::rotarySliderFillColourId, palette.token("accent"));
             control.slider->setColour(juce::Slider::rotarySliderOutlineColourId, palette.token("control_border"));
@@ -2206,7 +2213,12 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     // interpolation work to the audio thread, or alter the APVTS value.
     g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
     const auto controlId = slider.getComponentID();
-    if (palette.rotarySpriteSheet.isValid())
+    const juce::Image* rotaryAtlas = &palette.rotarySpriteSheet;
+    if (controlId.startsWith("FXEdit_0_") && palette.rotaryBlackDiscSpriteSheet.isValid())
+        rotaryAtlas = &palette.rotaryBlackDiscSpriteSheet;
+    else if (controlId.startsWith("FXEdit_1_") && palette.rotaryKnurledSteelSpriteSheet.isValid())
+        rotaryAtlas = &palette.rotaryKnurledSteelSpriteSheet;
+    if (rotaryAtlas->isValid())
     {
         // Canonical NEON STAGE rotary atlas: 61 authored positions in an 8x8
         // grid of 128px cells. Frame selection follows the live normalized
@@ -2218,7 +2230,7 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         const int diameter = juce::jmax(1, juce::jmin(w, h) - 2);
         const int destinationX = x + (w - diameter) / 2;
         const int destinationY = y + (h - diameter) / 2;
-        g.drawImage(palette.rotarySpriteSheet, destinationX, destinationY,
+        g.drawImage(*rotaryAtlas, destinationX, destinationY,
                     diameter, diameter, sourceX, sourceY, cellSize, cellSize);
 
         // Premium value ring: its position is the real APVTS value, while

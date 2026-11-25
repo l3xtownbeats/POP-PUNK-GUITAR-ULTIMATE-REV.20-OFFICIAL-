@@ -905,7 +905,7 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         return false;
     }
 
-    // The default NEON STAGE shell has a five-atlas visual package.
+    // The default NEON STAGE shell has a seven-atlas visual package.
     // Atlases are decoded only on the UI/control thread and never touched by audio code.
     if (id == "skin-053")
     {
@@ -921,6 +921,10 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
                                    1024, 1024, candidate.iconsSpriteSheet, error)
             || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("rotary", "").toString(),
                                    1024, 1024, candidate.rotarySpriteSheet, error)
+            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("rotary_black_disc", "").toString(),
+                                   1024, 1024, candidate.rotaryBlackDiscSpriteSheet, error)
+            || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("rotary_knurled_steel", "").toString(),
+                                   1024, 1024, candidate.rotaryKnurledSteelSpriteSheet, error)
             || !loadSafePngArtwork(themeRoot, "assets/background/main.png",
                                    2560, 1440, candidate.backgroundArtwork, error)
             || !loadSafePngArtwork(themeRoot, "assets/textures/material.png",

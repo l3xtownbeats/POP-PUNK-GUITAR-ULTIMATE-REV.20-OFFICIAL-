@@ -165,6 +165,76 @@ def draw_premium_rotary(angle_deg):
     d.arc(box((23, 18, 233, 228)), 195, 300, fill=rgba("#FFFFFF", 100), width=2)
     return tile.resize((120, 120), Image.Resampling.LANCZOS)
 
+def draw_premium_rotary_variant(angle_deg, style):
+    """Render a 210°–390° 61-frame FX EDIT rotary style at 128px cells."""
+    scale = 2
+    tile = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+    if style == "black_disc":
+        halo_colour, rim_colour = "#8FA2B4", "#A9BBCB"
+        face_colour, accent_colour, pointer_colour = "#05080C", "#9AAFC2", "#EDF6FC"
+        tick_colour = "#DCE8F0"
+    elif style == "knurled_steel":
+        halo_colour, rim_colour = P["glow_blue"], "#B7C9DA"
+        face_colour, accent_colour, pointer_colour = "#0B1725", P["glow_blue"], "#EAF3FC"
+        tick_colour = "#C5D3E0"
+    else:
+        raise ValueError("unknown rotary material: " + str(style))
+    def box(values):
+        return tuple(int(round(value * scale)) for value in values)
+    halo = Image.new("RGBA", tile.size, (0, 0, 0, 0))
+    hd = ImageDraw.Draw(halo)
+    hd.ellipse(box((17, 17, 239, 239)), outline=rgba(halo_colour, 160), width=8)
+    tile = Image.alpha_composite(tile, halo.filter(ImageFilter.GaussianBlur(12)))
+    d = ImageDraw.Draw(tile)
+    d.ellipse(box((15, 19, 241, 245)), fill=rgba("#02050A"), outline=rgba("#000000"), width=5)
+    d.ellipse(box((19, 14, 237, 232)), fill=rgba("#172330" if style == "black_disc" else "#253747"), outline=rgba(rim_colour, 220), width=4)
+    d.ellipse(box((27, 22, 229, 224)), fill=rgba(face_colour), outline=rgba("#43566A" if style == "black_disc" else "#536A7E"), width=5)
+    d.ellipse(box((35, 30, 221, 216)), fill=rgba("#03070D" if style == "black_disc" else "#0B1522"), outline=rgba(accent_colour, 190), width=3)
+    d.ellipse(box((43, 38, 213, 208)), fill=rgba("#0B1018" if style == "black_disc" else "#101D2B"), outline=rgba(rim_colour, 150), width=2)
+    for tick in range(210, 391, 15):
+        a = math.radians(tick - 90)
+        major = (tick % 45 == 30)
+        r1, r2 = (79, 91) if major else (82, 88)
+        p1 = (128 + r1 * math.cos(a), 128 + r1 * math.sin(a))
+        p2 = (128 + r2 * math.cos(a), 128 + r2 * math.sin(a))
+        d.line((*box(p1), *box(p2)), fill=rgba(tick_colour, 230 if major else 145), width=3 if major else 2)
+    d.arc(box((29, 24, 227, 222)), 210, 390, fill=rgba(accent_colour, 180), width=3)
+    if style == "knurled_steel":
+        for tick in range(0, 360, 6):
+            a = math.radians(tick)
+            p1 = (128 + 110 * math.cos(a), 128 + 110 * math.sin(a))
+            p2 = (128 + 119 * math.cos(a), 128 + 119 * math.sin(a))
+            d.line((*box(p1), *box(p2)), fill=rgba("#D0DCE6", 205), width=3)
+    a = math.radians(angle_deg - 90)
+    tip = (128 + 66 * math.cos(a), 128 + 66 * math.sin(a))
+    d.line((*box((128, 128)), *box(tip)), fill=rgba(pointer_colour), width=9)
+    d.line((*box((128, 128)), *box((128 + 62 * math.cos(a), 128 + 62 * math.sin(a)))),
+           fill=rgba(accent_colour), width=3)
+    d.ellipse(box((116, 116, 140, 140)), fill=rgba("#344B5D"), outline=rgba("#E8FAFF"), width=4)
+    d.ellipse(box((121, 121, 135, 135)), fill=rgba("#06121E"), outline=rgba(accent_colour), width=3)
+    d.ellipse(box((125, 125, 131, 131)), fill=rgba("#EAFBFF"))
+    d.arc(box((23, 18, 233, 228)), 210, 390, fill=rgba("#FFFFFF", 100), width=2)
+    return tile.resize((120, 120), Image.Resampling.LANCZOS)
+
+def build_rotary_variant(style, filename):
+    sheet = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
+    frames = []
+    for frame in range(61):
+        angle = 210.0 + frame * 3.0
+        tile = draw_premium_rotary_variant(angle, style)
+        col, row = frame % 8, frame // 8
+        x, y = col * 128, row * 128
+        sheet.alpha_composite(tile, (x + 4, y + 4))
+        frames.append({"frame": frame, "angle_deg": angle, "bbox": [x, y, x + 128, y + 128]})
+    save(sheet, filename)
+    manifest["sheets"][filename] = {
+        "resolution": [1024, 1024], "cell_size": [128, 128], "grid": [8, 8],
+        "frame_count": 61, "style": style, "angle_range_deg": [210, 390],
+        "angle_step_deg": 3.0, "frames": frames
+    }
+
+build_rotary_variant("black_disc", "neon_stage_rotary_black_disc_61frame_atlas.png")
+build_rotary_variant("knurled_steel", "neon_stage_rotary_knurled_steel_61frame_atlas.png")
 for frame in range(61):
     angle = -135.0 + frame * 4.5
     tile = draw_premium_rotary(angle)
@@ -412,6 +482,6 @@ manifest["sheets"]["neon_stage_icons_sheet.png"]={
 
 (OUT/"neon_stage_spritesheet_manifest.json").write_text(
     json.dumps(manifest,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
-print("Generated 4 NEON STAGE 1024x1024 RGBA sprite sheets and manifest:")
+print("Generated 7 NEON STAGE 1024x1024 RGBA sprite sheets and manifest:")
 for path in sorted(OUT.glob("*")):
     print(f"{path.relative_to(ROOT)}\t{path.stat().st_size} bytes")

@@ -88,6 +88,14 @@ int main()
                            "NEON STAGE frames/panels atlas decoded");
                     expect(artworkCandidate.getPalette().iconsSpriteSheet.isValid(),
                            "NEON STAGE icon atlas decoded");
+                    expect(artworkCandidate.getPalette().rotaryBlackDiscSpriteSheet.isValid()
+                               && artworkCandidate.getPalette().rotaryBlackDiscSpriteSheet.getWidth() == 1024
+                               && artworkCandidate.getPalette().rotaryBlackDiscSpriteSheet.getHeight() == 1024,
+                           "NEON STAGE black-disc rotary atlas decoded at 1024x1024");
+                    expect(artworkCandidate.getPalette().rotaryKnurledSteelSpriteSheet.isValid()
+                               && artworkCandidate.getPalette().rotaryKnurledSteelSpriteSheet.getWidth() == 1024
+                               && artworkCandidate.getPalette().rotaryKnurledSteelSpriteSheet.getHeight() == 1024,
+                           "NEON STAGE knurled-steel rotary atlas decoded at 1024x1024");
                     const auto& skinOne = artworkCandidate.getPalette();
                     expect(skinOne.backgroundArtwork.isValid()
                                && skinOne.backgroundArtwork.getWidth() == 2560
