@@ -77,3 +77,10 @@ Additional source-preparation changes in the same pass:
 - Documented the supplemental atlas format and validator command in `README_ASSET_PACK_RU.md`.
 
 The validator has been added but has not yet been executed in a repository runner. Its PASS output must not be assumed until it runs. Raster export and visual QA remain open.
+
+
+### 49-key keyboard completion — 2026-11-26
+The keyboard area in atlas 04 was replaced with a four-octave 49-key layout (29 white + 20 black) and C/E/G active overlays. The canonical NEON STAGE manifest and structural validator were updated to match. This is still atlas artwork only; it does not change the live JUCE keyboard's key count or behavior.
+
+### Automated raster-export path — 2026-11-26
+Added a pinned CairoSVG/Pillow export script and a dedicated GitHub Actions workflow. The workflow validates source contracts, exports transparent RGBA PNG atlases and three rotary frame-strip crops, creates a contact-sheet preview and records SHA-256 values. Visual acceptance remains a human review gate; the workflow has not yet been observed completing successfully.
