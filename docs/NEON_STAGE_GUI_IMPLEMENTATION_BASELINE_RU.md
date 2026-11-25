@@ -121,3 +121,17 @@ Eco mode: учитывать reduceInEco=true.
 Изменена только компоновка UI. APVTS IDs, порядок массива регуляторов, attachments, диапазоны, значения параметров, DSP и MIDI-контракты не менялись. Требуется подтвердить визуальную компоновку сборкой и проверкой на минимальном/стандартном/максимальном размерах, затем в FL Studio 20.
 
 Реализация: commit `9c1b214b8a2dcec06cb68fdcf3b1f04039dfaae1`. Статус: source change committed; build/CTest/host verification pending.
+
+
+## 2026-11-25 — main-screen layout alignment pass 2
+
+После подтверждения горизонтального ряда девяти регуляторов внесён следующий source-backed layout pass:
+- выделена отдельная верхняя stage/banner-зона для существующего `Palette::heroArtwork`; изображение больше не растягивается полупрозрачным фоном за всей зоной регуляторов;
+- девять существующих APVTS-регуляторов остаются одной горизонтальной строкой под stage/banner;
+- семь существующих FX bypass-кнопок размещены горизонтальной цепочкой, каждая сохраняет прежний APVTS attachment и ID;
+- stage/banner — декоративный слой и не перекрывает hit-targets контролов;
+- высота banner рассчитывается согласованно в `paint()` и `resized()`, с ограничением для компактного окна.
+
+Не добавлялись фиктивные AMP-контролы, новые эффекты, AutoChords generation или несуществующие backend-функции. AMP & TONE в runtime пока представлен заголовком/визуальной зоной; полноценная amp image/control parity остаётся отдельным gap, пока не найден подтверждённый runtime asset/parameter contract. LIVE HARMONY / CHORD / SCALE-KEY / NOTES HELD отображаются существующим read-only Performance Display; никакие новые MIDI/scale writes не добавлялись.
+
+Source commits: `954c1d9cf9970c4a0bf524d3c4dfd8c09c00bc1a` (stage/banner + horizontal FX chain), `bd7ecb2bdb5c150e85d54df894f8ca9ec2f25089` (paint/layout stage geometry sync). Build, CTest, screenshots at 900×640 / 1024×700 / 1600×1100, package asset validation and FL Studio 20 acceptance remain pending.
