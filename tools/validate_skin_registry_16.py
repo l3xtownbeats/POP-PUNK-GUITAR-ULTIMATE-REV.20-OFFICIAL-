@@ -352,10 +352,16 @@ def main() -> int:
             or icons.get("nav_icons") != ["crown", "power", "settings", "info", "folder", "search", "guitar", "antenna", "palette", "play"]:
         raise SystemExit("FAIL: NEON STAGE icon names/order mismatch")
 
-    expected_ready = [item[2] for item in EXPECTED]
+    # STILLWATER is intentionally host-acceptance-gated. Its embedded six-layer
+    # artwork package, preview/hero PNGs and all required SVGs are validated above,
+    # but it must not be advertised as runtime-ready until FL Studio 20 acceptance.
+    expected_ready = [item[2] for item in EXPECTED if item[2] != "skin-111"]
     if ready != expected_ready:
-        raise SystemExit(f"FAIL: all 16 approved themes must be runtime-ready after exact-SHA SVG decode/package validation; got {ready}")
-    print(f"PASS: exactly 16 runtime-ready themes; all theme artwork/SVGs; {verified_asset_count} NEON STAGE assets match byte counts, SHA-256, CRC32 and PNG dimensions; five 1024x1024 sprite atlases and exact atlas geometry; no extra theme directories.")
+        raise SystemExit(f"FAIL: expected the 15 host-ready themes and a separately gated STILLWATER slot; got {ready}")
+    stillwater = next(entry for entry in entries if entry.get("id") == "skin-111")
+    if stillwater.get("runtimeReady") is not False or "FL_STUDIO_20_HOST_ACCEPTANCE_PENDING" not in stillwater.get("status", ""):
+        raise SystemExit("FAIL: STILLWATER must remain explicitly gated until FL Studio 20 host acceptance")
+    print(f"PASS: exactly 16 approved theme slots; 15 runtime-ready themes plus host-acceptance-gated STILLWATER; all theme artwork/SVGs; {verified_asset_count} NEON STAGE assets match byte counts, SHA-256, CRC32 and PNG dimensions; five 1024x1024 sprite atlases and exact atlas geometry; no extra theme directories.")
     return 0
 
 if __name__ == "__main__":
