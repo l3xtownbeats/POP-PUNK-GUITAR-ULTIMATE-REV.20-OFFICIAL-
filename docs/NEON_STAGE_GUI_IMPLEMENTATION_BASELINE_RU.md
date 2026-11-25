@@ -163,3 +163,9 @@ The Import Guitar completion panel now displays the selected SFZ filename, actua
 
 
 The async completion captures the selected file by value before the chooser callback exits, ensuring the displayed filename is valid for the deferred completion callback. Follow-up source commit: 0642e82c860ccc7e9165f8c62a9b37e9fbe31dce.
+
+
+## 2026-11-25 — Settings and Performance: NEON STAGE polish
+
+The Performance Display now includes a live held-MIDI-note count alongside the chord, scale/key and note-name readouts. It is computed from the processor's existing lock-free display snapshot, using the established 20 Hz UI timer; it does not write MIDI/APVTS state or add audio-thread work. Workspace Settings now draws theme-aware elevated cards and accent framing behind the existing scale, spacing, restore-default and skin-gallery controls. Settings ranges and callbacks are unchanged. Exact-head build and runtime validation are still required.
+
