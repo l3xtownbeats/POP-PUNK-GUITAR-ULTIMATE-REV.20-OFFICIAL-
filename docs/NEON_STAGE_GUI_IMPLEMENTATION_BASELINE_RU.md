@@ -174,3 +174,8 @@ The Performance Display now includes a live held-MIDI-note count alongside the c
 ## 2026-11-25 — VU meter: authored atlas states wired to runtime
 
 The live stereo output meter now uses the eight authored VU states in the NEON STAGE meters/sliders sprite atlas when Skin-1 is active. It selects the nearest of eight artwork states from the real post-output peak level and crops the manifest-defined 82×286 px cells (x=43+117*n, y=34). Zero level and the other 15 themes continue to use the existing semantic vector meter, preserving cross-skin behavior. Peak acquisition remains the processor's lock-free UI snapshot; no audio/DSP behavior changed. A built-plugin visual check is still required.
+
+
+## 2026-11-26 — SFZ import status LED uses authored atlas
+
+The Import Guitar panel's real asynchronous loader indicator now uses the authored round status-LED cells from the NEON STAGE meters/sliders atlas when Skin-1 is active: OFF for standby, blue for loading, cyan for ready, warning for error. Cells are 40×40 at y=810 and x=50/160/270/380, per the sprite-sheet manifest. Text status remains visible; other themes and missing-atlas cases retain the semantic vector LED fallback. The indicator reflects the existing loader state and does not invent progress.
