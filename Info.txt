@@ -363,3 +363,10 @@ Commit: `9c1b214b8a2dcec06cb68fdcf3b1f04039dfaae1`. Проверки сборк�
 AMP & TONE пока не имеет подтверждённого набора реальных amp-контролов/изображения в runtime; фиктивные элементы не добавлялись. LIVE HARMONY/CHORD/SCALE-KEY/NOTES HELD остаётся существующим read-only Performance Display. AutoChords generation не заявляется.
 
 Commits: `954c1d9cf9970c4a0bf524d3c4dfd8c09c00bc1a`, `bd7ecb2bdb5c150e85d54df894f8ca9ec2f25089`. Сборка, тесты, responsive screenshots и FL Studio 20 acceptance ожидают проверки.
+
+
+## 2026-11-25 — компоновка вспомогательных окон по референсу
+
+В новом главном референсе три нижние вспомогательные области показаны рядом: FX EDIT, AutoChords / Harmony Setup и Licensed Guitar Library / Import Guitar. В чистом геометрическом модуле `AuxiliaryPanelLayout` расширен перебор компоновок с максимум двух до максимум трёх колонок. Это позволяет трём открытым вспомогательным окнам размещаться в одной строке на достаточно широком рабочем поле; для большего числа окон алгоритм по-прежнему выбирает компоновку по доступной геометрии и минимальным размерам.
+
+Обновлены контрактные тесты `tests/AuxiliaryPanelLayoutTests.cpp` и README workspace. Runtime ownership, APVTS, DSP, MIDI и содержимое панелей не менялись. Коммиты: `3817616` (layout), `e7574d6` (tests), `a00130b` (README). Проверка сборкой/CTest после изменения ещё не подтверждена; PR #20 остаётся Draft.
