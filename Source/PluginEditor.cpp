@@ -1024,11 +1024,36 @@ public:
 
     void paint(juce::Graphics& g) override
     {
-        constexpr int segments = 20;
-        constexpr float gap = 2.0f;
         auto area = getLocalBounds().toFloat().reduced(2.0f);
         if (area.isEmpty())
             return;
+
+        // Skin-1 provides eight authored VU states (1..8 active segments) in
+        // the meters/sliders atlas. Select the closest authored state for the
+        // live peak level; keep the semantic vector meter for all other skins
+        // and for the true zero state, which has no active atlas frame.
+        if (palette.id == "skin-053" && palette.metersSlidersSpriteSheet.isValid())
+        {
+            const int activeSegments = juce::jlimit(0, 8, juce::roundToInt(level * 8.0f));
+            if (activeSegments > 0)
+            {
+                constexpr int sourceX = 43;
+                constexpr int sourceY = 34;
+                constexpr int frameStride = 117;
+                constexpr int sourceWidth = 82;
+                constexpr int sourceHeight = 286;
+                const int frameX = sourceX + (activeSegments - 1) * frameStride;
+                g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
+                g.drawImage(palette.metersSlidersSpriteSheet,
+                            getLocalBounds().getX(), getLocalBounds().getY(),
+                            getLocalBounds().getWidth(), getLocalBounds().getHeight(),
+                            frameX, sourceY, sourceWidth, sourceHeight);
+                return;
+            }
+        }
+
+        constexpr int segments = 20;
+        constexpr float gap = 2.0f;
         const float segmentHeight = juce::jmax(1.0f,
             (area.getHeight() - gap * static_cast<float>(segments - 1)) / static_cast<float>(segments));
         const int activeCount = juce::roundToInt(level * static_cast<float>(segments));
