@@ -2644,6 +2644,19 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
     g.setColour(focused ? palette.focus : (enabled ? palette.border : palette.token("lowlight")));
     g.drawRoundedRectangle(bounds, 7.0f, focused ? 2.0f : 1.0f);
 
+    // Subtle machined top/bottom edge for the non-atlas button fallback.
+    // Keep this strictly inside the existing paint bounds; no layout or hit-test changes.
+    if (enabled)
+    {
+        const auto edge = bounds.reduced(1.5f);
+        g.setColour(palette.token("highlight").withAlpha(hovered ? 0.34f : 0.20f));
+        g.drawLine(edge.getX() + 6.0f, edge.getY() + 0.8f,
+                   edge.getRight() - 6.0f, edge.getY() + 0.8f, 0.8f);
+        g.setColour(palette.token("lowlight").withAlpha(down ? 0.52f : 0.30f));
+        g.drawLine(edge.getX() + 6.0f, edge.getBottom() - 0.8f,
+                   edge.getRight() - 6.0f, edge.getBottom() - 0.8f, 0.8f);
+    }
+
     if (button.getToggleState() && enabled)
     {
         g.setColour(palette.accentSecondary);
