@@ -51,7 +51,7 @@ Outstanding deliverables:
 The master prompt specifies `danger #FF557A` and `warning #FFBE55`; `theme.json` currently specifies `danger #FF665E` and `warning #FFB454`. The theme manifest is currently consumed by runtime; product owner must decide whether to update the theme tokens or amend the prompt. Until resolved, preserve runtime tokens and do not create new semantic-color assets from the conflicting values.
 
 ## Export state
-No binary assets were copied into this export directory in this step. Existing source assets remain under `SKIN/Skin_053/`. No ZIP, contact sheets, or 1024×700/1600×1100 final previews are claimed. Do not mark the pack COMPLETE.
+No binary assets were committed into this export directory in this step. The new CI workflow is designed to produce downloadable PNG/contact-sheet artifacts from the supplemental SVG masters. Existing canonical runtime assets remain under `SKIN/Skin_053/`. No ZIP or 1024×700/1600×1100 final interface previews are claimed. Do not mark the pack COMPLETE.
 
 
 ## Vector-atlas source QA — 2026-11-26
@@ -61,12 +61,12 @@ A static source-structure pass was performed on the five supplemental SVG atlas 
 - The button sheet declares the intended 27 families × 5 states (135), plus seven FX switch pairs and five LED colors × two states. This is a source-structure check, not a per-pixel state-art review.
 - The rotary sheet contains three 61-frame vertical strips (183 frames total) with 128px vertical pitch and 3° needle increments from 210° through 390°. The large sheet still requires rasterization and frame-by-frame visual inspection for clipping, cell alignment and animation continuity.
 - The icon sheet was corrected in this pass: the prior 35 glyph bodies were duplicate plus-sign placeholders. They have been replaced by 35 distinct vector glyph bodies matching the declared icon names. The SVG source was re-fetched and checked for 35 icon groups, 35 distinct glyph bodies and all 35 labels.
-- The display/keyboard sheet is still a compact two-octave 24-white-key atlas, not the final 49-key preview/export requested by the master prompt.
-- The atlas files remain supplemental vector masters. No PNG export, preview/contact sheet, ZIP package, pixel-level approval, or runtime registration is claimed.
+- The display/keyboard atlas now contains a full 49-key layout (29 white + 20 black keys) and C/E/G active overlays. Standalone key-state assets and a separately composed 49-key preview remain outstanding.
+- The atlas files remain supplemental vector masters. The deterministic PNG export script and CI workflow have now been added, but a successful run/artifact has not yet been verified. No pixel-level approval, ZIP package, or runtime registration is claimed.
 
 ### Next required QA gates
 1. Render all five SVGs with a pinned renderer/version and transparent-background policy.
-2. Inspect full-sheet previews and cropped cells at 100% and 200%; correct clipping, repeated/incorrect glyphs, text overflow and inconsistent visual weight.
+2. Inspect the CI-generated full-sheet previews and cropped cells at 100% and 200%; correct clipping, repeated/incorrect glyphs, text overflow and inconsistent visual weight.
 3. Export standalone assets and atlases at the exact sizes required by the master prompt; record dimensions, byte counts and SHA-256 in the canonical manifest.
 4. Integrate only assets that pass visual QA and have a verified JUCE consumer; then run Windows x64 build, CTest, Pluginval and FL Studio 20 host acceptance.
 
@@ -76,7 +76,7 @@ Additional source-preparation changes in the same pass:
 - Added `tools/validate_neon_stage_vector_atlases.py`, a standard-library structural validator for XML validity, declared dimensions/viewBoxes, transparent canvas, 27 button-family headings, 3×61 rotary frame positions/angles, and 35 distinct icon glyphs.
 - Documented the supplemental atlas format and validator command in `README_ASSET_PACK_RU.md`.
 
-The validator has been added but has not yet been executed in a repository runner. Its PASS output must not be assumed until it runs. Raster export and visual QA remain open.
+The validator and raster exporter have been added but have not yet been observed completing in a repository runner. Their PASS output and PNG artifacts must not be assumed until the workflow completes. Pixel-level visual QA remains open.
 
 
 ### 49-key keyboard completion — 2026-11-26
