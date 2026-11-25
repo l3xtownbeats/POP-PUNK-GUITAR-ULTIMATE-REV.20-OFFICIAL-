@@ -205,8 +205,8 @@
           "step_y": 128,
           "frame_index": 0,
           "angle_start_deg": 210,
-          "angle_end_deg": 480,
-          "rotation_step_deg": 4.5
+          "angle_end_deg": 390,
+          "rotation_step_deg": 3
         },
         {
           "id": "rotary_layers",
@@ -362,7 +362,8 @@
     "notes": [
       "The atlas masters are vector SVG sheets and are not yet PNG exports.",
       "Some prompt-only semantic variants (e.g. exact warning/error glyph artwork and true 9-slice exports) require a raster/visual QA pass before runtime registration.",
-      "No runtime wiring is claimed by this manifest."
+      "No runtime wiring is claimed by this manifest.",
+      "Rotary strips use 61 frames per style, 128px vertical pitch, and 3-degree increments from 210° to 390°."
     ]
   }
 }
