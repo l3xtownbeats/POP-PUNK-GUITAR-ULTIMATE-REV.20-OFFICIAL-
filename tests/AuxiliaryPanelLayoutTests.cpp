@@ -74,7 +74,7 @@ int main()
         auto layout = calculatePanelLayout(desktop, makePanels(count), 1.0f);
         CHECK(layout.panels.size() == static_cast<std::size_t>(count));
         CHECK(!layout.overflow && !layout.invalidInput);
-        const int expectedColumns = count == 3 ? 3 : (count == 2 ? 2 : 2);
+        const int expectedColumns = count == 2 ? 2 : 3;
         CHECK(layout.columns == expectedColumns);
         CHECK(layout.rows == (count + expectedColumns - 1) / expectedColumns);
         for (const auto& p : layout.panels)
