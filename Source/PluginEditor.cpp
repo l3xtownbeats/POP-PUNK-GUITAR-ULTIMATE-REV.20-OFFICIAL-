@@ -3314,7 +3314,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
         chordDiagram->setBounds(left.reduced(4, 2));
     }
 
-    // CENTER: the nine real APVTS controls in the approved 3x3 Playing Core grid.
+    // CENTER: approved reference layout — all nine real APVTS controls in one horizontal row.
     auto modeRow = centre.removeFromTop(38);
     melodyTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
     patternTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
@@ -3322,22 +3322,24 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     startModeBox.setBounds(modeRow.reduced(2, 3));
     centre.removeFromTop(7);
 
-    constexpr int knobColumns = 3;
-    constexpr int knobRows = 3;
-    const int knobCellWidth = centre.getWidth() / knobColumns;
-    const int knobCellHeight = centre.getHeight() / knobRows;
+    // Keep the nine controls in a single evenly-spaced row at every supported
+    // editor size. The APVTS attachments, IDs, ordering and DSP are unchanged.
+    const int knobCellWidth = centre.getWidth() / static_cast<int>(knobs.size());
+    const int knobDiameter = juce::jlimit(40, 92,
+        juce::jmin(knobCellWidth - 8, centre.getHeight() - 26));
+    const int labelHeight = 20;
+    const int rowHeight = knobDiameter + labelHeight;
+    const int rowY = centre.getY() + juce::jmax(0, (centre.getHeight() - rowHeight) / 2);
     for (size_t i = 0; i < knobs.size(); ++i)
     {
-        const int column = static_cast<int>(i) % knobColumns;
-        const int row = static_cast<int>(i) / knobColumns;
-        auto cell = juce::Rectangle<int>(
-            centre.getX() + column * knobCellWidth,
-            centre.getY() + row * knobCellHeight,
-            column == knobColumns - 1 ? centre.getRight() - (centre.getX() + column * knobCellWidth) : knobCellWidth,
-            row == knobRows - 1 ? centre.getBottom() - (centre.getY() + row * knobCellHeight) : knobCellHeight
-        ).reduced(3, 2);
-        knobLabels[i].setBounds(cell.removeFromTop(17));
-        knobs[i].setBounds(cell.reduced(2, 1));
+        const int x = centre.getX() + static_cast<int>(i) * knobCellWidth;
+        const int cellWidth = (i + 1 == knobs.size())
+            ? centre.getRight() - x : knobCellWidth;
+        const int diameter = juce::jmin(knobDiameter, cellWidth - 6);
+        const int knobX = x + (cellWidth - diameter) / 2;
+        knobs[i].setBounds(knobX, rowY, diameter, diameter);
+        knobLabels[i].setBounds(x + 1, rowY + knobDiameter + 2,
+                                juce::jmax(1, cellWidth - 2), labelHeight);
     }
 
     // RIGHT: AMP & TONE rack with exactly seven real APVTS FX switches.
