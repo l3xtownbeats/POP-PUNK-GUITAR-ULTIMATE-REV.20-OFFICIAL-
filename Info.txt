@@ -347,3 +347,10 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 Сохранить архитектурное ограничение: AutoChords, FX EDIT и Import Guitar — вспомогательные окна/workspace, а не новые главные режимы. Setup-only / not connected состояния на макете не представлять как готовую генерацию, preview или playback.
 
 Статус: изображения получены и изучены; полное визуальное соответствие ещё не подтверждено. Требуются поэлементная сверка runtime, responsive проверки, exact-SHA Windows build/CTest, pluginval и FL Studio 20 host acceptance.
+
+
+## 2026-11-25 — подтверждена горизонтальная компоновка девяти регуляторов
+
+Пользователь явно подтвердил замену прежней сетки 3×3 на одну горизонтальную строку согласно новому главному референсу. В `Source/PluginEditor.cpp::resized()` девять APVTS-регуляторов теперь располагаются равномерно в одной строке, подписи — под ними; диаметр адаптируется к доступной ширине. APVTS IDs, порядок, attachments, диапазоны, значения, DSP и MIDI не менялись.
+
+Commit: `9c1b214b8a2dcec06cb68fdcf3b1f04039dfaae1`. Проверки сборки, CTest, масштабирования и FL Studio 20 ещё ожидают выполнения.
