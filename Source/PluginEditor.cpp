@@ -599,8 +599,7 @@ public:
         drawSettingCard(restoreButton.getBounds().expanded(4, 3), false);
         drawSettingCard(galleryButton.getBounds().expanded(4, 3), true);
 
-        auto badge = bounds.removeFromTop(1);
-        juce::ignoreUnused(badge);
+
     }
 
     void resized() override
