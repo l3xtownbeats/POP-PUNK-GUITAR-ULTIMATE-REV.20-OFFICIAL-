@@ -1147,7 +1147,7 @@ public:
         powerButton.setButtonText("POWER");
         powerButton.setClickingTogglesState(true);
         addAndMakeVisible(powerButton);
-        graphCaption.setText("RESPONSE DISPLAY  /  LIVE DATA NOT CONNECTED", juce::dontSendNotification);
+        graphCaption.setText("DSP RESPONSE  /  READ-ONLY TELEMETRY", juce::dontSendNotification);
         graphCaption.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(graphCaption);
         status.setText("Controls are attached to the existing APVTS parameters.", juce::dontSendNotification);
@@ -1258,13 +1258,13 @@ public:
                 g.drawHorizontalLine(graphArea.getY() + graphArea.getHeight() * i / 5, graphArea.getX(), graphArea.getRight());
             for (int i = 1; i < 9; ++i)
                 g.drawVerticalLine(graphArea.getX() + graphArea.getWidth() * i / 9, graphArea.getY(), graphArea.getBottom());
-            // Do not draw a fabricated response curve: no live DSP response
-            // telemetry is currently exposed to this visual workspace.
-            g.setColour(palette.token("text_secondary").withAlpha(0.82f));
+            // Keep this display explicitly telemetry-gated. No response curve is
+            // rendered until the processor exposes measured DSP response data.
+            auto notice = graphArea.reduced(10, 4);
+            g.setColour(palette.token("accent").withAlpha(0.72f));
             g.setFont(makeThemeFont(palette, 9.0f, false, true));
-            g.drawFittedText("LIVE RESPONSE DATA NOT AVAILABLE",
-                             graphArea.reduced(10, 4),
-                             juce::Justification::centred, 1);
+            g.drawFittedText("DSP RESPONSE TELEMETRY NOT EXPOSED",
+                             notice, juce::Justification::centred, 1);
         }
     }
 
@@ -1355,8 +1355,10 @@ private:
 
             // Keep the textual state correct on first open and after changing groups,
             // even when the newly selected effect happens to be bypassed (false).
+            const auto controlCount = static_cast<int>(group.parameters.size());
             const auto expectedStatus = group.name
-                + (enabled ? "  /  ACTIVE" : "  /  BYPASSED");
+                + (enabled ? "  /  ACTIVE" : "  /  BYPASSED")
+                + "  /  " + juce::String(controlCount) + " CONTROLS";
             if (status.getText() != expectedStatus)
                 status.setText(expectedStatus, juce::dontSendNotification);
             if (stateChanged)
