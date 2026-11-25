@@ -14,6 +14,8 @@
 #endif
 #include "Sampler/SamplePool.h"
 #include "Performance/PatternScheduler.h"
+#include "Performance/PatternClipLoader.h"
+#include <mutex>
 
 class PopPunkGuitarUltimateAudioProcessor final : public juce::AudioProcessor
 {
@@ -61,6 +63,23 @@ public:
     void clearPatternPreview() noexcept;
     int getPatternPreviewSlot() const noexcept;
 
+    // Publish a fully validated immutable PATTERN clip set from a non-audio thread.
+    [[nodiscard]] bool installPatternClipSnapshot(
+        std::unique_ptr<ppgu::performance::PatternClipSnapshot> snapshot);
+    void clearPatternClipSnapshot() noexcept;
+    void loadPatternClipRegistryAsync(const juce::File& manifestFile,
+        std::function<void(ppgu::performance::PatternClipLoadResult)> completion);
+    // Loader injection is exposed only to the dedicated C++ regression-test target.
+    using PatternClipRegistryLoader = std::function<
+        ppgu::performance::PatternClipLoadResult(const juce::File&)>;
+#if defined(PPGU_ENABLE_TEST_HOOKS)
+    void loadPatternClipRegistryAsyncForTesting(
+        const juce::File& manifestFile,
+        std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
+        PatternClipRegistryLoader loader,
+        std::function<void()> workerFinished);
+#endif
+
     juce::AudioProcessorValueTreeState parameters;
     juce::MidiKeyboardState keyboardState;
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
@@ -97,6 +116,23 @@ private:
     int maximumBlockSize = 512;
     ppgu::sampler::SamplerEngine sampler;
     ppgu::performance::PatternScheduler patternScheduler;
+    ppgu::performance::PatternClipRuntime patternClipRuntime;
+    // Serializes load-generation changes with worker-thread snapshot publication.
+    // This mutex is never acquired by processBlock() or the audio renderer.
+    std::mutex patternLoadPublicationMutex;
+    static constexpr std::size_t maximumRetainedPatternSnapshots = 8;
+    std::mutex patternClipSnapshotMutex;
+    std::vector<std::unique_ptr<ppgu::performance::PatternClipSnapshot>> patternClipSnapshots;
+    void collectRetiredPatternClipSnapshotsLocked();
+    std::shared_ptr<std::atomic<std::uint64_t>> patternLoadGeneration {
+        std::make_shared<std::atomic<std::uint64_t>>(0) };
+    void loadPatternClipRegistryAsyncImpl(
+        const juce::File& manifestFile,
+        std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
+        PatternClipRegistryLoader loader,
+        std::function<void()> workerFinished);
+    // Two workers permit overlapping decodes; generation validation serializes publication.
+    juce::ThreadPool patternLoadPool { 2 };
     ppgu::performance::BlockClock patternTransportClock;
     std::array<std::array<bool, 128>, 16> patternHeldNotes {};
     std::array<ppgu::performance::PatternEvent, 512> patternEvents {};

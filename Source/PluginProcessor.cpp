@@ -33,7 +33,12 @@ PopPunkGuitarUltimateAudioProcessor::~PopPunkGuitarUltimateAudioProcessor()
     // Invalidate queued worker and message-thread completions before waiting
     // for any active bank scan/decode to finish.
     sampleLoadGeneration->fetch_add(1, std::memory_order_acq_rel);
+    patternLoadGeneration->fetch_add(1, std::memory_order_acq_rel);
     sampleLoadPool.removeAllJobs(true, -1);
+    patternLoadPool.removeAllJobs(true, -1);
+    patternClipRuntime.detachSnapshot();
+    const std::lock_guard<std::mutex> snapshotLock(patternClipSnapshotMutex);
+    patternClipSnapshots.clear();
 }
 
 PopPunkGuitarUltimateAudioProcessor::PopPunkGuitarUltimateAudioProcessor()
@@ -225,6 +230,165 @@ int PopPunkGuitarUltimateAudioProcessor::getPatternPreviewSlot() const noexcept
     return patternPreviewSlot.load(std::memory_order_acquire);
 }
 
+void PopPunkGuitarUltimateAudioProcessor::collectRetiredPatternClipSnapshotsLocked()
+{
+    auto iterator = patternClipSnapshots.begin();
+    while (iterator != patternClipSnapshots.end())
+    {
+        const auto* candidate = iterator->get();
+        if (patternClipRuntime.canRetireSnapshot(candidate))
+            iterator = patternClipSnapshots.erase(iterator);
+        else
+            ++iterator;
+    }
+}
+
+bool PopPunkGuitarUltimateAudioProcessor::installPatternClipSnapshot(
+    std::unique_ptr<ppgu::performance::PatternClipSnapshot> snapshot)
+{
+    if (snapshot == nullptr || !ppgu::performance::PatternClipRuntime::validateSnapshot(*snapshot))
+        return false;
+
+    const std::lock_guard<std::mutex> lock(patternClipSnapshotMutex);
+    collectRetiredPatternClipSnapshotsLocked();
+    if (patternClipSnapshots.size() >= maximumRetainedPatternSnapshots)
+        return false;
+
+    const auto* published = snapshot.get();
+    patternClipSnapshots.push_back(std::move(snapshot));
+    // Publication is lock-free for the audio thread. Old snapshots are reclaimed
+    // opportunistically once no audio call or active voice references them.
+    if (!patternClipRuntime.publishSnapshot(published))
+    {
+        patternClipSnapshots.pop_back();
+        return false;
+    }
+    collectRetiredPatternClipSnapshotsLocked();
+    return true;
+}
+
+void PopPunkGuitarUltimateAudioProcessor::clearPatternClipSnapshot() noexcept
+{
+    const std::lock_guard<std::mutex> lock(patternClipSnapshotMutex);
+    patternClipRuntime.clearPublishedSnapshot();
+    collectRetiredPatternClipSnapshotsLocked();
+}
+
+void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsync(
+    const juce::File& manifestFile,
+    std::function<void(ppgu::performance::PatternClipLoadResult)> completion)
+{
+    loadPatternClipRegistryAsyncImpl(
+        manifestFile, std::move(completion),
+        [](const juce::File& file)
+        {
+            return ppgu::performance::PatternClipLoader::load(file);
+        }, {});
+}
+
+#if defined(PPGU_ENABLE_TEST_HOOKS)
+void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncForTesting(
+    const juce::File& manifestFile,
+    std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
+    PatternClipRegistryLoader loader,
+    std::function<void()> workerFinished)
+{
+    loadPatternClipRegistryAsyncImpl(manifestFile, std::move(completion),
+                                     std::move(loader), std::move(workerFinished));
+}
+
+#endif
+
+void PopPunkGuitarUltimateAudioProcessor::loadPatternClipRegistryAsyncImpl(
+    const juce::File& manifestFile,
+    std::function<void(ppgu::performance::PatternClipLoadResult)> completion,
+    PatternClipRegistryLoader loader,
+    std::function<void()> workerFinished)
+{
+    if (!loader)
+    {
+        ppgu::performance::PatternClipLoadResult failed;
+        failed.errors.emplace_back("PATTERN registry loader callback is empty.");
+        if (completion)
+        {
+            // JUCE callAsync stores a copyable std::function. Keep the
+            // move-only load result behind shared ownership until dispatch.
+            auto sharedFailed = std::make_shared<ppgu::performance::PatternClipLoadResult>(
+                std::move(failed));
+            juce::MessageManager::callAsync(
+                [completion = std::move(completion), sharedFailed]() mutable
+                {
+                    completion(std::move(*sharedFailed));
+                });
+        }
+        if (workerFinished)
+            workerFinished();
+        return;
+    }
+
+    const auto generationState = patternLoadGeneration;
+    std::uint64_t generation = 0;
+    {
+        const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
+        generation = generationState->fetch_add(1, std::memory_order_acq_rel) + 1;
+    }
+
+    patternLoadPool.addJob([this, manifestFile, completion = std::move(completion),
+                            loader = std::move(loader), workerFinished = std::move(workerFinished),
+                            generationState, generation]() mutable
+    {
+        const auto notifyFinished = [&workerFinished]
+        {
+            if (workerFinished)
+                workerFinished();
+        };
+
+        if (generationState->load(std::memory_order_acquire) != generation)
+        {
+            notifyFinished();
+            return;
+        }
+
+        auto result = loader(manifestFile);
+        bool staleGeneration = false;
+        {
+            const std::lock_guard<std::mutex> publicationLock(patternLoadPublicationMutex);
+            staleGeneration = generationState->load(std::memory_order_acquire) != generation;
+            if (!staleGeneration)
+            {
+                // A valid empty registry explicitly disables recorded PATTERN clips.
+                // A malformed registry does not replace a previously working snapshot.
+                if (result.empty)
+                    clearPatternClipSnapshot();
+                else if (result.ready && result.snapshot
+                         && !installPatternClipSnapshot(std::move(result.snapshot)))
+                {
+                    result.ready = false;
+                    result.errors.emplace_back("Processor rejected the validated PATTERN snapshot.");
+                }
+            }
+        }
+
+        if (staleGeneration
+            || generationState->load(std::memory_order_acquire) != generation)
+        {
+            notifyFinished();
+            return;
+        }
+
+        auto sharedResult = std::make_shared<ppgu::performance::PatternClipLoadResult>(
+            std::move(result));
+        juce::MessageManager::callAsync(
+            [completion = std::move(completion), sharedResult,
+             generationState, generation]() mutable
+            {
+                if (generationState->load(std::memory_order_acquire) == generation && completion)
+                    completion(std::move(*sharedResult));
+            });
+        notifyFinished();
+    });
+}
+
 void PopPunkGuitarUltimateAudioProcessor::prepareToPlay(double sampleRate, int expectedBlockSize)
 {
     currentSampleRate = juce::jlimit(8000.0, 384000.0, sampleRate);
@@ -232,6 +396,7 @@ void PopPunkGuitarUltimateAudioProcessor::prepareToPlay(double sampleRate, int e
     for (auto& peak : outputPeakMeters)
         peak.store(0.0f, std::memory_order_relaxed);
     sampler.prepare(currentSampleRate);
+    patternClipRuntime.prepare(currentSampleRate);
     patternScheduler.reset();
     for (auto& channel : patternHeldNotes) channel.fill(false);
     patternCycleStarted = false;
@@ -280,6 +445,7 @@ void PopPunkGuitarUltimateAudioProcessor::prepareToPlay(double sampleRate, int e
 void PopPunkGuitarUltimateAudioProcessor::releaseResources()
 {
     sampler.reset();
+    patternClipRuntime.allNotesOff();
     reverb.reset();
     for (auto& line : delayBuffers)
         std::fill(line.begin(), line.end(), 0.0f);
@@ -363,6 +529,7 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
         parameters.getRawParameterValue("velocity")->load(std::memory_order_relaxed));
     const int playMode = juce::jlimit(0, 1,
         static_cast<int>(parameters.getRawParameterValue("playMode")->load(std::memory_order_relaxed)));
+    const bool useRecordedPatternClips = playMode == 1 && patternClipRuntime.hasSnapshot();
 
     // Read one immutable host-position snapshot per block. Pattern timing is
     // derived from PPQ/sample-rate; the scheduler never calls the host from a
@@ -394,6 +561,7 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
     if (playMode != previousPlayMode)
     {
         sampler.allNotesOff();
+        patternClipRuntime.allNotesOff();
         patternScheduler.reset(patternTransportClock.startPpq);
         for (auto& channel : patternHeldNotes) channel.fill(false);
         patternCycleStarted = false;
@@ -410,6 +578,7 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
         && (patternTransportClock.transportStopped || patternTransportClock.transportDiscontinuity))
     {
         sampler.allNotesOff();
+        patternClipRuntime.allNotesOff();
         patternScheduler.clearPendingNoteOffs();
         patternCycleStarted = false;
         previousPatternChordCount = 0;
@@ -424,7 +593,15 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
 
     auto renderSegment = [&](int start, int length)
     {
-        if (length > 0)
+        if (length <= 0) return;
+        if (useRecordedPatternClips)
+        {
+            auto* left = buffer.getWritePointer(0, start);
+            auto* right = buffer.getNumChannels() > 1
+                ? buffer.getWritePointer(1, start) : left;
+            patternClipRuntime.render(left, right, length);
+        }
+        else
             sampler.render(buffer, start, length);
     };
 
@@ -471,6 +648,45 @@ void PopPunkGuitarUltimateAudioProcessor::processBlock(
             }
             else if (message.isNoteOff())
                 sampler.noteOff(message.getNoteNumber(), message.getChannel());
+        }
+        renderSegment(cursor, samples - cursor);
+    }
+    else if (useRecordedPatternClips)
+    {
+        // Recorded PATTERN MODE is a direct one-key -> one recorded clip route.
+        // It deliberately bypasses chord aggregation and AutoChords: one trigger
+        // key must never be expanded into a generated triad.
+        const int articulation = juce::jlimit(0, 3,
+            static_cast<int>(parameters.getRawParameterValue("articulation")->load(std::memory_order_relaxed)));
+        int cursor = 0;
+        for (const auto metadata : midi)
+        {
+            const auto message = metadata.getMessage();
+            const int eventSample = juce::jlimit(cursor, samples, metadata.samplePosition);
+            renderSegment(cursor, eventSample - cursor);
+            cursor = eventSample;
+
+            if (message.isAllSoundOff())
+            {
+                panicRequested.store(true, std::memory_order_release);
+                patternClipRuntime.allSoundOff();
+            }
+            else if (message.isAllNotesOff())
+            {
+                panicRequested.store(true, std::memory_order_release);
+                patternClipRuntime.allNotesOff();
+            }
+            else if (message.isNoteOn() && sampler.isKeySwitchNote(message.getNoteNumber()))
+                sampler.setKeySwitch(message.getNoteNumber(), message.getChannel());
+            else if (message.isNoteOn())
+                patternClipRuntime.noteOn(message.getNoteNumber(), message.getVelocity(),
+                                          message.getChannel(), articulation);
+            else if (message.isNoteOff() && sampler.isKeySwitchNote(message.getNoteNumber()))
+            {
+                // SFZ articulation selectors do not release recorded clip voices.
+            }
+            else if (message.isNoteOff())
+                patternClipRuntime.noteOff(message.getNoteNumber(), message.getChannel());
         }
         renderSegment(cursor, samples - cursor);
     }

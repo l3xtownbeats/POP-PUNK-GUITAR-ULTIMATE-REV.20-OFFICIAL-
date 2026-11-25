@@ -9,6 +9,26 @@ on:
       - "Source/**"
       - "tests/**"
       - "SKIN/**"
+      - ".gitattributes"
+      - "assets/library/**"
+      - "tools/validate_skin_registry_16.py"
+      - "tools/generate_neon_stage_spritesheets.py"
+      - "tools/package_active_skins.py"
+      - "tools/validate_library_tiers.py"
+      - "SoundHunter/**"
+      - "tools/audit_soundbank.py"
+      - "tools/split_artifact.py"
+      - "tools/sfz_path_safety.py"
+      - ".github/workflows/rev20-windows-vst3-skin-validation.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "CMakeLists.txt"
+      - "Source/**"
+      - "tests/**"
+      - "SKIN/**"
+      - ".gitattributes"
       - "assets/library/**"
       - "tools/validate_skin_registry_16.py"
       - "tools/generate_neon_stage_spritesheets.py"

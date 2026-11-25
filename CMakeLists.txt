@@ -77,6 +77,7 @@ juce_add_plugin(PPGU
 
 target_sources(PPGU PRIVATE
     Source/PluginProcessor.cpp
+    Source/Performance/PatternClipLoader.cpp
     Source/PluginEditor.cpp
     Source/UI/ThemeManager.cpp
     Source/UI/AuxiliaryPanelLayout.cpp
@@ -91,6 +92,7 @@ target_link_libraries(PPGU PRIVATE
     juce::juce_audio_utils
     juce::juce_dsp
     juce::juce_audio_formats
+    juce::juce_cryptography
     juce::juce_recommended_config_flags
     juce::juce_recommended_warning_flags)
 juce_generate_juce_header(PPGU)
@@ -104,7 +106,29 @@ function(ppgu_add_test target source)
     add_test(NAME ${target} COMMAND ${target})
 endfunction()
 
+# JUCE-backed PATTERN registry loader: JSON, fail-closed status and WAV infrastructure.
+juce_add_console_app(ppgu_pattern_clip_loader_contracts
+    PRODUCT_NAME "PPGU PATTERN Clip Loader Contract Tests"
+    NEEDS_WEB_BROWSER FALSE
+    NEEDS_CURL FALSE)
+target_sources(ppgu_pattern_clip_loader_contracts PRIVATE
+    tests/PatternClipLoaderTests.cpp
+    Source/Performance/PatternClipLoader.cpp)
+target_include_directories(ppgu_pattern_clip_loader_contracts PRIVATE Source/Performance)
+target_compile_definitions(ppgu_pattern_clip_loader_contracts PRIVATE ${PPGU_JUCE_DEFINITIONS})
+target_link_libraries(ppgu_pattern_clip_loader_contracts PRIVATE
+    juce::juce_audio_formats
+    juce::juce_cryptography
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_warning_flags)
+juce_generate_juce_header(ppgu_pattern_clip_loader_contracts)
+add_test(NAME ppgu_pattern_clip_loader_contracts COMMAND ppgu_pattern_clip_loader_contracts)
+
 # Pure C++ contract tests.
+# Pure C++ PATTERN clip voice runtime: fixed-capacity MIDI lifecycle and PCM rendering.
+ppgu_add_test(ppgu_pattern_clip_runtime_contracts tests/PatternClipRuntimeTests.cpp)
+target_include_directories(ppgu_pattern_clip_runtime_contracts PRIVATE Source/Performance)
+
 ppgu_add_test(ppgu_pattern_contracts tests/PatternSchedulerTests.cpp)
 target_include_directories(ppgu_pattern_contracts PRIVATE Source/Performance)
 
@@ -188,13 +212,14 @@ juce_add_console_app(ppgu_processor_pattern_tests
 target_sources(ppgu_processor_pattern_tests PRIVATE
     tests/ProcessorPatternIntegrationTests.cpp
     Source/PluginProcessor.cpp
+    Source/Performance/PatternClipLoader.cpp
     Source/PluginEditor.cpp
     Source/UI/ThemeManager.cpp
     Source/UI/AuxiliaryPanelLayout.cpp
     Source/UI/PPGUMultiWindowWorkspace.cpp)
 target_include_directories(ppgu_processor_pattern_tests PRIVATE
     Source Source/Sampler Source/Performance Source/UI)
-target_compile_definitions(ppgu_processor_pattern_tests PRIVATE ${PPGU_JUCE_DEFINITIONS})
+target_compile_definitions(ppgu_processor_pattern_tests PRIVATE ${PPGU_JUCE_DEFINITIONS} JUCE_MODAL_LOOPS_PERMITTED=1 PPGU_ENABLE_TEST_HOOKS=1)
 target_link_libraries(ppgu_processor_pattern_tests PRIVATE
     ppgu_sampler
     PPGUData
@@ -202,6 +227,7 @@ target_link_libraries(ppgu_processor_pattern_tests PRIVATE
     juce::juce_audio_utils
     juce::juce_dsp
     juce::juce_audio_formats
+    juce::juce_cryptography
     juce::juce_recommended_config_flags
     juce::juce_recommended_warning_flags)
 juce_generate_juce_header(ppgu_processor_pattern_tests)
@@ -230,6 +256,12 @@ add_test(NAME ppgu_soundbank_policy_contract
 
 add_test(NAME ppgu_artifact_splitter_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_artifact_splitter.py)
+
+add_test(NAME ppgu_pattern_clip_registry_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/LibraryManager/test_pattern_clip_registry.py)
+
+add_test(NAME ppgu_pattern_package_builder_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/LibraryManager/test_pattern_package_builder.py)
 
 # The orphaned root-level OverlayManager/SecureSkinImport test files are not
 # registered: their corresponding production headers and implementations are

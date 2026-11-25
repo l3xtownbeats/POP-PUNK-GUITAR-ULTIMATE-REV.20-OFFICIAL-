@@ -20,7 +20,7 @@ EXPECTED = [
     ("SKIN-7", "TITANIUM STORM", "skin-108", 108, "Skin_108"),
     ("SKIN-8", "EMERALD CIRCUIT", "skin-109", 109, "Skin_109"),
     ("SKIN-9", "SOLAR FLARE", "skin-110", 110, "Skin_110"),
-    ("SKIN-10", "DEEP OCEAN", "skin-111", 111, "Skin_111"),
+    ("SKIN-10", "STILLWATER", "skin-111", 111, "Skin_111"),
     ("SKIN-11", "ROSE CHROME", "skin-112", 112, "Skin_112"),
     ("SKIN-12", "DESERT AMBER", "skin-113", 113, "Skin_113"),
     ("SKIN-13", "GLACIER TEAL", "skin-114", 114, "Skin_114"),
@@ -133,8 +133,14 @@ def validate_neon_stage_asset_manifest() -> int:
             data = data.replace(b"\r\n", b"\n")
         if len(data) != record.get("bytes"):
             raise SystemExit(f"FAIL: asset byte count mismatch: {asset}")
-        if hashlib.sha256(data).hexdigest() != record.get("sha256"):
-            raise SystemExit(f"FAIL: asset SHA-256 mismatch: {asset}")
+        actual_sha256 = hashlib.sha256(data).hexdigest()
+        expected_sha256 = record.get("sha256")
+        if actual_sha256 != expected_sha256:
+            raise SystemExit(
+                f"FAIL: asset SHA-256 mismatch: {asset}; "
+                f"expected={expected_sha256}; actual={actual_sha256}; "
+                f"bytes={len(data)}; format={record.get('format')!r}"
+            )
         actual_crc = f"{zlib.crc32(data) & 0xFFFFFFFF:08X}"
         if actual_crc != str(record.get("crc32", "")).upper():
             raise SystemExit(f"FAIL: asset CRC32 mismatch: {asset}")

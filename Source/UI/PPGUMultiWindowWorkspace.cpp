@@ -98,7 +98,21 @@ public:
     ppgu::ui::PanelSize getDesiredSize() const noexcept { return desired; }
     ppgu::ui::PanelSize getMinimumSize() const noexcept { return minimum; }
     bool isMaximized() const noexcept { return maximized; }
-    void restoreBounds(juce::Rectangle<int> bounds) { setBounds(bounds); maximized = false; }
+    void restoreBounds(juce::Rectangle<int> bounds)
+    {
+        maximized = false;
+        bounds.setWidth(juce::jmax(static_cast<int>(minimum.width), bounds.getWidth()));
+        bounds.setHeight(juce::jmax(static_cast<int>(minimum.height), bounds.getHeight()));
+        bounds.setPosition(juce::jmax(0, bounds.getX()), juce::jmax(0, bounds.getY()));
+        setBounds(bounds);
+        maximizeButton.setButtonText("□");
+    }
+
+    void setMaximizedBounds(juce::Rectangle<int> bounds)
+    {
+        if (maximized)
+            setBounds(bounds);
+    }
 
     void setThemePalette(const PPGUThemeManager::Palette& palette)
     {
@@ -168,7 +182,6 @@ public:
             auto bounds = dragStartBounds.translated(relative.x - dragStartScreen.x, relative.y - dragStartScreen.y);
             bounds.setPosition(juce::jmax(0, bounds.getX()), juce::jmax(0, bounds.getY()));
             setBounds(bounds);
-            owner.handleGeometryChanged(panelId);
         }
     }
 
@@ -179,10 +192,12 @@ public:
             toggleMaximize();
     }
 
-    void mouseUp(const juce::MouseEvent&) override
+    void mouseUp(const juce::MouseEvent& event) override
     {
+        const bool movedWindow = draggingHeader && event.mouseWasDraggedSinceMouseDown();
         draggingHeader = false;
-        owner.handleGeometryChanged(panelId);
+        if (movedWindow)
+            owner.handleGeometryChanged(panelId);
     }
 
     void toggleMaximize()
@@ -323,6 +338,7 @@ PPGUMultiWindowWorkspace::PPGUMultiWindowWorkspace()
     options.osxLibrarySubFolder = "Application Support";
     ownedProperties = std::make_unique<juce::PropertiesFile>(options);
     persistenceProperties = ownedProperties.get();
+    customLayoutMode = persistenceProperties->getBoolValue("workspace.customLayout", false);
 }
 
 PPGUMultiWindowWorkspace::~PPGUMultiWindowWorkspace()
@@ -350,18 +366,32 @@ bool PPGUMultiWindowWorkspace::openPanel(PanelSpec spec)
     auto bounds = juce::Rectangle<int>(nextCascadeOffset, nextCascadeOffset,
         static_cast<int>(window->getDesiredSize().width), static_cast<int>(window->getDesiredSize().height));
     nextCascadeOffset = (nextCascadeOffset + 34) % 170;
-    if (persistenceProperties != nullptr)
+    if (persistenceProperties != nullptr && customLayoutMode)
     {
         juce::StringArray values;
         values.addTokens(persistenceProperties->getValue(geometryKey(panelId, "bounds")), ",", "");
         if (values.size() == 4)
-            bounds = { values[0].getIntValue(), values[1].getIntValue(), values[2].getIntValue(), values[3].getIntValue() };
+        {
+            const int x = values[0].getIntValue();
+            const int y = values[1].getIntValue();
+            const int width = values[2].getIntValue();
+            const int height = values[3].getIntValue();
+            constexpr int maximumRestoredCoordinate = 32768;
+            constexpr int maximumRestoredSize = 16384;
+            if (x >= 0 && y >= 0 && x <= maximumRestoredCoordinate
+                && y <= maximumRestoredCoordinate
+                && width >= static_cast<int>(window->getMinimumSize().width)
+                && height >= static_cast<int>(window->getMinimumSize().height)
+                && width <= maximumRestoredSize && height <= maximumRestoredSize)
+                bounds = { x, y, width, height };
+        }
     }
-    window->setBounds(bounds);
+    window->restoreBounds(bounds);
     tileSurface->addAndMakeVisible(*window);
     windows.push_back(std::move(window));
     layoutPanels();
-    viewport.setViewPosition(0, 0);
+    if (!customLayoutMode)
+        viewport.setViewPosition(0, 0);
     return true;
 }
 
@@ -407,18 +437,40 @@ int PPGUMultiWindowWorkspace::getOpenPanelCount() const noexcept
 void PPGUMultiWindowWorkspace::setPanelGap(int pixels)
 {
     panelGap = juce::jlimit(0, 64, pixels);
+    // Startup restores persisted scale/gap before any panels exist; do not
+    // mistake that initialization for an explicit user request to retile.
+    if (!windows.empty())
+    {
+        customLayoutMode = false;
+        if (persistenceProperties != nullptr)
+        {
+            persistenceProperties->setValue("workspace.customLayout", false);
+            persistenceProperties->saveIfNeeded();
+        }
+    }
     layoutPanels();
 }
 
 void PPGUMultiWindowWorkspace::setPanelScale(float scale)
 {
     panelScale = std::isfinite(scale) ? juce::jlimit(0.5f, 3.0f, scale) : 1.0f;
+    if (!windows.empty())
+    {
+        customLayoutMode = false;
+        if (persistenceProperties != nullptr)
+        {
+            persistenceProperties->setValue("workspace.customLayout", false);
+            persistenceProperties->saveIfNeeded();
+        }
+    }
     layoutPanels();
 }
 
 void PPGUMultiWindowWorkspace::setPersistenceProperties(juce::PropertiesFile* properties)
 {
     persistenceProperties = properties;
+    customLayoutMode = persistenceProperties != nullptr
+        && persistenceProperties->getBoolValue("workspace.customLayout", false);
 }
 
 void PPGUMultiWindowWorkspace::setThemePalette(const PPGUThemeManager::Palette& palette)
@@ -489,12 +541,17 @@ void PPGUMultiWindowWorkspace::handleGeometryChanged(int id)
     if (it == windows.end())
         return;
 
-    const auto bounds = (*it)->getBounds();
-    if (persistenceProperties != nullptr && !(*it)->isMaximized())
+    customLayoutMode = true;
+    if (persistenceProperties != nullptr)
     {
-        persistenceProperties->setValue(geometryKey(id, "bounds"),
-            juce::String(bounds.getX()) + "," + juce::String(bounds.getY()) + ","
-            + juce::String(bounds.getWidth()) + "," + juce::String(bounds.getHeight()));
+        persistenceProperties->setValue("workspace.customLayout", true);
+        if (!(*it)->isMaximized())
+        {
+            const auto bounds = (*it)->getBounds();
+            persistenceProperties->setValue(geometryKey(id, "bounds"),
+                juce::String(bounds.getX()) + "," + juce::String(bounds.getY()) + ","
+                + juce::String(bounds.getWidth()) + "," + juce::String(bounds.getHeight()));
+        }
         persistenceProperties->saveIfNeeded();
     }
     // Manual drag/resize/maximize is user geometry, not a request to retile.
@@ -530,6 +587,32 @@ void PPGUMultiWindowWorkspace::layoutPanels()
     const auto view = viewport.getViewArea();
     const int viewWidth = juce::jmax(1, view.getWidth());
     const int viewHeight = juce::jmax(1, view.getHeight());
+
+    // Once the user moves or resizes a panel, preserve the complete free-form
+    // workspace. Reflowing the grid here used to overwrite the saved bounds
+    // whenever the editor was resized, a theme changed, or a panel reopened.
+    if (customLayoutMode)
+    {
+        std::int64_t surfaceWidth = viewWidth;
+        std::int64_t surfaceHeight = viewHeight;
+        for (auto& window : windows)
+        {
+            if (window->isMaximized())
+                window->setMaximizedBounds(viewport.getViewArea());
+
+            const auto bounds = window->getBounds();
+            surfaceWidth = std::max(surfaceWidth,
+                static_cast<std::int64_t>(bounds.getX()) + bounds.getWidth() + panelGap);
+            surfaceHeight = std::max(surfaceHeight,
+                static_cast<std::int64_t>(bounds.getY()) + bounds.getHeight() + panelGap);
+        }
+
+        constexpr auto safeMaximum = static_cast<std::int64_t>(std::numeric_limits<int>::max());
+        tileSurface->setSize(
+            static_cast<int>(std::min(surfaceWidth, safeMaximum)),
+            static_cast<int>(std::min(surfaceHeight, safeMaximum)));
+        return;
+    }
 
     std::vector<ppgu::ui::PanelRequest> requests;
     requests.reserve(windows.size());
@@ -576,13 +659,13 @@ void PPGUMultiWindowWorkspace::layoutPanels()
         return;
     }
 
-    // Overflow uses the helper's minimum-size grid. Every panel is placed
-    // exactly once and remains reachable through the workspace Viewport.
+    // Minimum-size overflow is intentionally scrollable: never hide a panel
+    // merely because the plugin editor is smaller than the combined windows.
     if (layout.overflow && !layout.invalidInput
         && layout.panels.size() == windows.size())
     {
-        int surfaceWidth = viewWidth;
-        int surfaceHeight = viewHeight;
+        std::int64_t surfaceWidth = viewWidth;
+        std::int64_t surfaceHeight = viewHeight;
         for (const auto& placement : layout.panels)
         {
             const auto it = std::find_if(windows.begin(), windows.end(),
@@ -595,26 +678,32 @@ void PPGUMultiWindowWorkspace::layoutPanels()
 
             const auto& b = placement.bounds;
             (*it)->setPanelBounds({ b.x, b.y, b.width, b.height });
-            const auto right = static_cast<std::int64_t>(b.x) + b.width + panelGap;
-            const auto bottom = static_cast<std::int64_t>(b.y) + b.height + panelGap;
-            surfaceWidth = juce::jmax(surfaceWidth, static_cast<int>(
-                juce::jmin<std::int64_t>(right, std::numeric_limits<int>::max())));
-            surfaceHeight = juce::jmax(surfaceHeight, static_cast<int>(
-                juce::jmin<std::int64_t>(bottom, std::numeric_limits<int>::max())));
+            surfaceWidth = std::max(surfaceWidth,
+                static_cast<std::int64_t>(b.x) + b.width + panelGap);
+            surfaceHeight = std::max(surfaceHeight,
+                static_cast<std::int64_t>(b.y) + b.height + panelGap);
         }
-        tileSurface->setSize(surfaceWidth, surfaceHeight);
+        constexpr auto safeMaximum = static_cast<std::int64_t>(std::numeric_limits<int>::max());
+        tileSurface->setSize(
+            static_cast<int>(std::min(surfaceWidth, safeMaximum)),
+            static_cast<int>(std::min(surfaceHeight, safeMaximum)));
         return;
     }
 
-    // Invalid/extreme geometry: keep the previous bounds rather than applying
-    // saturated coordinates that could overflow JUCE's component geometry.
-    int surfaceWidth = viewWidth;
-    int surfaceHeight = viewHeight;
-    for (auto& window : windows)
+    // Invalid geometry: retain the last valid panel bounds without overflowing
+    // the Viewport's integer dimensions.
+    std::int64_t surfaceWidth = viewWidth;
+    std::int64_t surfaceHeight = viewHeight;
+    for (const auto& window : windows)
     {
         const auto bounds = window->getBounds();
-        surfaceWidth = juce::jmax(surfaceWidth, bounds.getRight() + panelGap);
-        surfaceHeight = juce::jmax(surfaceHeight, bounds.getBottom() + panelGap);
+        surfaceWidth = std::max(surfaceWidth,
+            static_cast<std::int64_t>(bounds.getX()) + bounds.getWidth() + panelGap);
+        surfaceHeight = std::max(surfaceHeight,
+            static_cast<std::int64_t>(bounds.getY()) + bounds.getHeight() + panelGap);
     }
-    tileSurface->setSize(surfaceWidth, surfaceHeight);
+    constexpr auto safeMaximum = static_cast<std::int64_t>(std::numeric_limits<int>::max());
+    tileSurface->setSize(
+        static_cast<int>(std::min(surfaceWidth, safeMaximum)),
+        static_cast<int>(std::min(surfaceHeight, safeMaximum)));
 }

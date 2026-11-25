@@ -2885,6 +2885,13 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     loadButton.onClick = [this] { openImportGuitarPanel(); };
     addAndMakeVisible(loadButton);
     auxiliaryWorkspace = std::make_unique<PPGUMultiWindowWorkspace>();
+    if (auto* workspaceSettings = uiProperties.getUserSettings())
+    {
+        auxiliaryWorkspace->setPanelScale(static_cast<float>(
+            workspaceSettings->getDoubleValue("workspacePanelScale", 1.0)));
+        auxiliaryWorkspace->setPanelGap(
+            workspaceSettings->getIntValue("workspacePanelGap", 12));
+    }
     auxiliaryWorkspace->setSurfaceColours(themeManager.getPalette().token("window_bg"),
         themeManager.getPalette().token("panel"), themeManager.getPalette().token("control_border"),
         themeManager.getPalette().token("accent"), themeManager.getPalette().token("text_primary"));
