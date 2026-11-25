@@ -219,7 +219,7 @@ target_sources(ppgu_processor_pattern_tests PRIVATE
     Source/UI/PPGUMultiWindowWorkspace.cpp)
 target_include_directories(ppgu_processor_pattern_tests PRIVATE
     Source Source/Sampler Source/Performance Source/UI)
-target_compile_definitions(ppgu_processor_pattern_tests PRIVATE ${PPGU_JUCE_DEFINITIONS} PPGU_ENABLE_TEST_HOOKS=1)
+target_compile_definitions(ppgu_processor_pattern_tests PRIVATE ${PPGU_JUCE_DEFINITIONS} JUCE_MODAL_LOOPS_PERMITTED=1 PPGU_ENABLE_TEST_HOOKS=1)
 target_link_libraries(ppgu_processor_pattern_tests PRIVATE
     ppgu_sampler
     PPGUData
