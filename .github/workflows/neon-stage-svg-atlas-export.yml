@@ -1,6 +1,15 @@
 name: NEON STAGE SVG atlas validation and PNG export
 
 on:
+  push:
+    branches:
+      - "feature/**"
+    paths:
+      - "ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/*.svg"
+      - "ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/NEON_STAGE_ATLAS_MANIFEST.json"
+      - "tools/validate_neon_stage_vector_atlases.py"
+      - "tools/export_neon_stage_vector_atlases.py"
+      - ".github/workflows/neon-stage-svg-atlas-export.yml"
   pull_request:
     branches:
       - main
