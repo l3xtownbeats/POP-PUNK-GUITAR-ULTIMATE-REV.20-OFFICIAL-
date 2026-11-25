@@ -140,3 +140,8 @@ Source commits: `954c1d9cf9970c4a0bf524d3c4dfd8c09c00bc1a` (stage/banner + horiz
 ## 2026-11-25 — три вспомогательные панели в одной строке
 
 Согласно новому визуальному эталону, расширен алгоритм `AuxiliaryPanelLayout`: он рассматривает до трёх колонок вместо максимум двух, чтобы FX EDIT, AutoChords и Import Guitar могли отображаться рядом при достаточной ширине workspace. Обновлены `tests/AuxiliaryPanelLayoutTests.cpp` и `PPGUMultiWindowWorkspace_README_RU.md`. Изменения не затрагивают DSP/APVTS/MIDI. Коммиты: `3817616`, `e7574d6`, `a00130b`. CI/CTest на новом SHA ожидают проверки.
+
+
+## 2026-11-25 — техническая чистка workspace window
+
+Проверена оболочка вспомогательных окон: theme palette, текстуры/рамка, frames/panels atlas, заголовок, close/maximize, resize grip и content bounds уже поддерживаются. Удалены дублирующиеся назначения цветов closeButton. Коммит `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Изменение не меняет внешний вид, геометрию или runtime-контракты. Проверки после изменения ожидают выполнения.
