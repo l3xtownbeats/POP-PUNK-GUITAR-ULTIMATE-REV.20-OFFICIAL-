@@ -3242,15 +3242,24 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
     drawPanel(g, area, "PLAYING CORE");
     if (p.heroArtwork.isValid())
     {
-        // Keep the approved 3x3 control geometry fully visible; the hero is a
-        // restrained backdrop beneath child controls, not a replacement layout.
+        // The approved main-screen reference gives the guitar artwork its own
+        // stage/banner above the nine-control strip, not a watermark behind knobs.
+        auto stage = area.reduced(8, 6);
+        stage.removeFromTop(38);
+        const int stageHeight = juce::jlimit(72, 150, area.getHeight() / 3);
+        stage = stage.removeFromTop(juce::jmin(stageHeight, stage.getHeight()));
         g.saveState();
-        g.setOpacity(0.10f);
-        g.drawImageWithin(p.heroArtwork, area.getX() + 8, area.getY() + 36,
-                          juce::jmax(1, area.getWidth() - 16),
-                          juce::jmax(1, area.getHeight() - 44),
+        g.reduceClipRegion(stage);
+        g.setOpacity(0.96f);
+        g.drawImageWithin(p.heroArtwork, stage.getX(), stage.getY(),
+                          juce::jmax(1, stage.getWidth()),
+                          juce::jmax(1, stage.getHeight()),
                           juce::RectanglePlacement::centred);
+        g.setColour(p.token("window_bg").withAlpha(0.16f));
+        g.fillRect(stage);
         g.restoreState();
+        g.setColour(p.token("control_border").withAlpha(0.8f));
+        g.drawRoundedRectangle(stage.toFloat(), 7.0f, 1.0f);
     }
     drawPanel(g, right, "AMP & TONE");
 }
@@ -3322,11 +3331,18 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     startModeBox.setBounds(modeRow.reduced(2, 3));
     centre.removeFromTop(7);
 
+    // Dedicated guitar stage/banner above the controls, matching the approved
+    // main-screen reference. Artwork is decorative only; no control hit target
+    // or processor parameter is placed over this region.
+    const int stageHeight = juce::jlimit(72, 150, centre.getHeight() / 3);
+    centre.removeFromTop(juce::jmin(stageHeight, centre.getHeight()));
+    centre.removeFromTop(6);
+
     // Keep the nine controls in a single evenly-spaced row at every supported
     // editor size. The APVTS attachments, IDs, ordering and DSP are unchanged.
     const int knobCellWidth = centre.getWidth() / static_cast<int>(knobs.size());
-    const int knobDiameter = juce::jlimit(40, 92,
-        juce::jmin(knobCellWidth - 8, centre.getHeight() - 26));
+    const int knobDiameter = juce::jmax(32,
+        juce::jmin(92, juce::jmin(knobCellWidth - 8, centre.getHeight() - 26)));
     const int labelHeight = 20;
     const int rowHeight = knobDiameter + labelHeight;
     const int rowY = centre.getY() + juce::jmax(0, (centre.getHeight() - rowHeight) / 2);
@@ -3344,19 +3360,22 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
 
     // RIGHT: AMP & TONE rack with exactly seven real APVTS FX switches.
     right.removeFromTop(34);
-    ampTitle.setBounds(right.removeFromTop(23).reduced(5, 1));
+    const int ampHeaderHeight = juce::jlimit(30, 42, right.getHeight() / 4);
+    ampTitle.setBounds(right.removeFromTop(ampHeaderHeight).reduced(5, 1));
     fxTitle.setVisible(true);
     fxTitle.setBounds(right.removeFromTop(24).reduced(5, 1));
     right.removeFromTop(3);
-    const int rackGap = 4;
-    const int rackButtonHeight = juce::jlimit(36, 46,
-        (right.getHeight() - rackGap * static_cast<int>(fxButtons.size() - 1))
-            / static_cast<int>(fxButtons.size()));
+
+    // Seven existing FX bypass controls form one horizontal chain, as in the
+    // approved reference. Each button remains bound to its original APVTS ID.
+    const int fxCellWidth = right.getWidth() / static_cast<int>(fxButtons.size());
     for (size_t i = 0; i < fxButtons.size(); ++i)
     {
-        fxButtons[i].setBounds(right.removeFromTop(rackButtonHeight).reduced(4, 2));
-        if (i + 1 < fxButtons.size())
-            right.removeFromTop(rackGap);
+        const int x = right.getX() + static_cast<int>(i) * fxCellWidth;
+        const int width = (i + 1 == fxButtons.size())
+            ? right.getRight() - x : fxCellWidth;
+        fxButtons[i].setBounds(x + 1, right.getY() + 2,
+                               juce::jmax(1, width - 2), juce::jmax(1, right.getHeight() - 4));
     }
     if (mainFxEdit != nullptr)
         mainFxEdit->setVisible(false);
