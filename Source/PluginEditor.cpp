@@ -670,6 +670,7 @@ public:
         status.setColour(juce::Label::textColourId, palette.token("lcd_text"));
         addAndMakeVisible(status);
         loadButton.setButtonText("LOAD SFZ");
+        loadButton.setComponentID("Import_Guitar_Load");
         loadButton.onClick = [this] { if (loadAction) loadAction(&status, &loadButton); };
         addAndMakeVisible(loadButton);
         startTimerHz(8);
@@ -1213,6 +1214,7 @@ public:
         addAndMakeVisible(effectSelector);
 
         powerButton.setButtonText("POWER");
+        powerButton.setComponentID("FX_Edit_Power");
         powerButton.setClickingTogglesState(true);
         addAndMakeVisible(powerButton);
         graphCaption.setText("DSP RESPONSE  /  READ-ONLY TELEMETRY", juce::dontSendNotification);
@@ -2633,6 +2635,8 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         else if (controlId == "About") icon = "info";
         else if (controlId == "SKIN_button") icon = "palette";
         else if (controlId == "Import_Guitar") icon = "guitar";
+        else if (controlId == "Import_Guitar_Load") icon = "folder";
+        else if (controlId == "FX_Edit_Power") icon = "power";
         else if (controlId == "Auto_Discover") icon = "antenna";
         else if (controlId == "Curator") icon = "crown";
         if (icon.isEmpty()) return;
@@ -2642,9 +2646,11 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
             { "distortion", {360,75,144,144} }, { "chorus", {524,75,144,144} },
             { "delay", {688,75,144,144} }, { "reverb", {852,75,144,144} },
             { "cabinet", {32,360,144,144} }, { "crown", {196,360,144,144} },
-            { "settings", {524,360,144,144} }, { "info", {688,360,144,144} },
-            { "guitar", {196,645,144,144} }, { "antenna", {360,645,144,144} },
-            { "palette", {524,645,144,144} }
+            { "power", {360,360,144,144} }, { "settings", {524,360,144,144} },
+            { "info", {688,360,144,144} }, { "folder", {852,360,144,144} },
+            { "search", {32,645,144,144} }, { "guitar", {196,645,144,144} },
+            { "antenna", {360,645,144,144} }, { "palette", {524,645,144,144} },
+            { "play", {688,645,144,144} }
         };
         const auto found = iconBounds.find(icon.toStdString());
         if (found == iconBounds.end()) return;
@@ -2657,6 +2663,7 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                     source.getX(), source.getY(), source.getWidth(), source.getHeight());
     };
     if (controlId.startsWith("fx_switch") || controlId == "Import_Guitar"
+        || controlId == "Import_Guitar_Load" || controlId == "FX_Edit_Power"
         || controlId == "Auto_Discover" || controlId == "Curator"
         || controlId == "Settings" || controlId == "About"
         || controlId == "SKIN_button")
