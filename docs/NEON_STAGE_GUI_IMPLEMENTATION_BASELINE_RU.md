@@ -112,3 +112,12 @@ Eco mode: учитывать reduceInEco=true.
 Вспомогательные панели на референсе показаны одновременно как визуальная композиция. Runtime-контракт REV.20 описывает AutoChords, FX EDIT и Import Guitar как вспомогательные окна/workspace, а не новые главные режимы. Не превращать их в отдельные top-level modes и не выдавать setup-only AutoChords за подключённый preview/playback engine.
 
 Статус: reference received and inspected; implementation alignment in progress; pixel comparison, responsive layout verification and FL Studio 20 host acceptance remain open.
+
+
+## 2026-11-25 — решение по компоновке девяти регуляторов
+
+Пользователь подтвердил, что новый визуальный референс с девятью регуляторами в одной горизонтальной полосе заменяет прежнее требование сетки 3×3. Геометрия `PluginEditor.cpp::resized()` обновлена: девять реальных APVTS-регуляторов размещаются в одной равномерной горизонтальной строке; подписи находятся под регуляторами. Размеры адаптируются к доступной ширине редактора.
+
+Изменена только компоновка UI. APVTS IDs, порядок массива регуляторов, attachments, диапазоны, значения параметров, DSP и MIDI-контракты не менялись. Требуется подтвердить визуальную компоновку сборкой и проверкой на минимальном/стандартном/максимальном размерах, затем в FL Studio 20.
+
+Реализация: commit `9c1b214b8a2dcec06cb68fdcf3b1f04039dfaae1`. Статус: source change committed; build/CTest/host verification pending.
