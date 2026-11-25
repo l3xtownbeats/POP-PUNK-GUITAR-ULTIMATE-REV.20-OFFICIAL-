@@ -405,3 +405,10 @@ Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest пос
 - Performance Display now reports the live number of held MIDI notes in its MIDI input heading. The count is derived from the processor's existing lock-free held-note snapshot and updates with the same 20 Hz UI refresh; no MIDI state is written and no audio-thread work is added.
 - Workspace Settings now uses theme-aware elevated cards and accent framing around its existing scale, spacing, restore and gallery controls. Existing settings ranges, callbacks and UI-only scope are unchanged.
 - Source commit: 63fd1f2c762221416150082d4beab786dceb2abc (follow-up cleanup included). Build, CTest, Pluginval, Windows VST3 and FL Studio 20 acceptance remain pending for the current PR head.
+
+
+## 2026-11-25 — NEON STAGE authored VU meter atlas integration
+- Connected the Skin-1 meters/sliders atlas VU artwork to the live stereo output meter. The renderer selects one of eight authored states using the actual post-output peak level; the zero state and non-Skin-1 themes retain the existing semantic vector meter fallback.
+- Source rectangles follow the atlas manifest: 82×286 px crops at x=43+117*n, y=34, with eight authored active-segment states. Artwork is resampled at JUCE high quality and rendered only in the UI component.
+- The meter still reads the processor's existing lock-free output peak snapshots; audio/DSP and peak acquisition are unchanged. Visual verification in a built plugin remains pending.
+- Source commit: 331f3d7799f7c245ca83c6204e4d50c65b364967.
