@@ -426,3 +426,10 @@ Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest пос
 - Updated the validator to require exactly 15 runtime-ready themes plus the single explicitly gated STILLWATER slot, while continuing to validate all 16 manifests, all required theme SVGs, artwork, the 135-record NEON STAGE package, five atlases and exact atlas geometry.
 - Updated the registry status to distinguish completed embedded artwork-package validation from the still-pending FL Studio 20 host acceptance. STILLWATER remains runtimeReady=false until that acceptance is performed.
 - Validator commit: 000666776aacdfb5d51a31403cc541b765400a31; registry commit: edffdbce062b42c24340191de3002896859c01c6.
+
+
+## 2026-11-26 — NEON STAGE: подключение atlas folder/power icons
+- Сверены реальные координаты иконок со `neon_stage_spritesheet_manifest.json` (144×144): `power` [360,360,504,504] и `folder` [852,360,996,504]. Эти два ранее неиспользованных кадра подключены к существующим кнопкам FX EDIT POWER и LOAD SFZ в окне Licensed Guitar Library.
+- Для кнопок заданы стабильные component IDs `FX_Edit_Power` и `Import_Guitar_Load`; отрисовка остаётся внутри существующих bounds и не меняет hit targets, callbacks, APVTS, DSP, MIDI или загрузчик SFZ.
+- Также расширена таблица runtime-координат атласа оставшимися документированными кадрами `search` и `play`; новые функции/кнопки не добавлялись, пока для них нет соответствующих подтверждённых действий в текущем интерфейсе.
+- Проверка сборкой/CTest и визуальный снимок после запуска ещё не выполнены для нового commit. FL Studio 20 host acceptance остаётся отдельным gate.
