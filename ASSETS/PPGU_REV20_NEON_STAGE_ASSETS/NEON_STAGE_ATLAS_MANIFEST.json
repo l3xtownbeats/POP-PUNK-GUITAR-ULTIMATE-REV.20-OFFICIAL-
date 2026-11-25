@@ -262,14 +262,20 @@
         },
         {
           "id": "midi_keyboard",
-          "white_keys": 24,
-          "octaves": 2,
+          "white_keys": 29,
+          "octaves": 4,
           "black_keys_pattern": "C# D# F# G# A#",
           "states": [
             "normal",
             "active_c_e_g"
           ],
-          "compact_variant": true
+          "compact_variant": false,
+          "black_keys": 20,
+          "active_key_overlay": [
+            "C",
+            "E",
+            "G"
+          ]
         },
         {
           "id": "pitch_mod_faders",
