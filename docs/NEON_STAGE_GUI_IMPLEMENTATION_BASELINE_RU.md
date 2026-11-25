@@ -160,3 +160,6 @@ The chord diagram no longer starts with a hard-coded A-major shape that could be
 ## 2026-11-25 — Import Guitar: truthful SFZ diagnostics
 
 The Import Guitar completion panel now displays the selected SFZ filename, actual LoadReport region/sample totals, warning/error counts, and up to three messages from each non-empty diagnostics list. It labels the selection as one SFZ definition rather than claiming an inferred instrument count. The asynchronous loader and sampler behavior are unchanged; no synthetic progress or filesystem-derived WAV count was introduced. Build and runtime layout validation remain outstanding.
+
+
+The async completion captures the selected file by value before the chooser callback exits, ensuring the displayed filename is valid for the deferred completion callback. Follow-up source commit: 0642e82c860ccc7e9165f8c62a9b37e9fbe31dce.
