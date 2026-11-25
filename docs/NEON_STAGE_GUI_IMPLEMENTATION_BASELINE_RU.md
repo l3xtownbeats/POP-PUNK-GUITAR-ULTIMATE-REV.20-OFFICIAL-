@@ -135,3 +135,8 @@ Eco mode: учитывать reduceInEco=true.
 Не добавлялись фиктивные AMP-контролы, новые эффекты, AutoChords generation или несуществующие backend-функции. AMP & TONE в runtime пока представлен заголовком/визуальной зоной; полноценная amp image/control parity остаётся отдельным gap, пока не найден подтверждённый runtime asset/parameter contract. LIVE HARMONY / CHORD / SCALE-KEY / NOTES HELD отображаются существующим read-only Performance Display; никакие новые MIDI/scale writes не добавлялись.
 
 Source commits: `954c1d9cf9970c4a0bf524d3c4dfd8c09c00bc1a` (stage/banner + horizontal FX chain), `bd7ecb2bdb5c150e85d54df894f8ca9ec2f25089` (paint/layout stage geometry sync). Build, CTest, screenshots at 900×640 / 1024×700 / 1600×1100, package asset validation and FL Studio 20 acceptance remain pending.
+
+
+## 2026-11-25 — три вспомогательные панели в одной строке
+
+Согласно новому визуальному эталону, расширен алгоритм `AuxiliaryPanelLayout`: он рассматривает до трёх колонок вместо максимум двух, чтобы FX EDIT, AutoChords и Import Guitar могли отображаться рядом при достаточной ширине workspace. Обновлены `tests/AuxiliaryPanelLayoutTests.cpp` и `PPGUMultiWindowWorkspace_README_RU.md`. Изменения не затрагивают DSP/APVTS/MIDI. Коммиты: `3817616`, `e7574d6`, `a00130b`. CI/CTest на новом SHA ожидают проверки.
