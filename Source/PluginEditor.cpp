@@ -639,8 +639,8 @@ public:
         heading.setFont(makeThemeFont(palette, 18.0f, false, true));
         heading.setJustificationType(juce::Justification::centredLeft);
         addAndMakeVisible(heading);
-        description.setText("Load an SFZ guitar instrument and its referenced WAV samples. "
-                            "The existing background loader validates and registers the bank.",
+        description.setText("Load one SFZ definition and its referenced WAV samples. "
+                            "The report below lists actual regions, samples, warnings and errors.",
                             juce::dontSendNotification);
         description.setJustificationType(juce::Justification::topLeft);
         description.setColour(juce::Label::textColourId, palette.token("text_secondary"));
@@ -723,7 +723,7 @@ public:
         area.removeFromTop(18);
         loadButton.setBounds(area.removeFromTop(42).removeFromLeft(180));
         area.removeFromTop(16);
-        status.setBounds(area.removeFromTop(90));
+        status.setBounds(area.removeFromTop(juce::jmax(120, area.getHeight())));
     }
 private:
     enum class LoadState { standby, loading, ready, error };
@@ -3923,21 +3923,40 @@ void PopPunkGuitarUltimateAudioProcessorEditor::chooseSfzFile(juce::Label* panel
             safeThis->loadButton.setEnabled(true);
             if (safePanelLoadButton != nullptr)
                 safePanelLoadButton->setEnabled(true);
-            if (report.success)
+            const auto warningCount = static_cast<int>(report.warnings.size());
+            const auto errorCount = static_cast<int>(report.errors.size());
+            const auto fileName = selected.getFileName();
+            const auto summary = juce::String(report.success ? "READY" : "LOAD FAILED")
+                + "  /  " + fileName
+                + "  /  " + juce::String(static_cast<int>(report.loadedRegions)) + " REGIONS"
+                + "  /  " + juce::String(static_cast<int>(report.loadedSamples)) + " WAV SAMPLES"
+                + "  /  " + juce::String(warningCount) + " WARNINGS"
+                + "  /  " + juce::String(errorCount) + " ERRORS";
+            safeThis->statusLabel.setText(summary, juce::dontSendNotification);
+
+            if (safePanelStatus != nullptr)
             {
-                const auto readyText = "READY  /  " + juce::String(static_cast<int>(report.loadedRegions))
-                    + " REGIONS  /  " + juce::String(static_cast<int>(report.loadedSamples)) + " WAV SAMPLES";
-                safeThis->statusLabel.setText(readyText, juce::dontSendNotification);
-                if (safePanelStatus != nullptr)
-                    safePanelStatus->setText(readyText, juce::dontSendNotification);
-            }
-            else
-            {
-                const auto errorText = report.errors.empty()
-                    ? juce::String("SFZ LOAD FAILED") : juce::String(report.errors.front());
-                safeThis->statusLabel.setText(errorText, juce::dontSendNotification);
-                if (safePanelStatus != nullptr)
-                    safePanelStatus->setText(errorText, juce::dontSendNotification);
+                juce::String details = summary;
+                details += "\nSFZ DEFINITION: 1 selected file";
+                if (!report.warnings.empty())
+                {
+                    details += "\n\nWARNINGS:";
+                    const auto shown = juce::jmin(3, warningCount);
+                    for (int i = 0; i < shown; ++i)
+                        details += "\n• " + juce::String(report.warnings[static_cast<size_t>(i)]);
+                    if (warningCount > shown)
+                        details += "\n• ... +" + juce::String(warningCount - shown) + " more";
+                }
+                if (!report.errors.empty())
+                {
+                    details += "\n\nERRORS:";
+                    const auto shown = juce::jmin(3, errorCount);
+                    for (int i = 0; i < shown; ++i)
+                        details += "\n• " + juce::String(report.errors[static_cast<size_t>(i)]);
+                    if (errorCount > shown)
+                        details += "\n• ... +" + juce::String(errorCount - shown) + " more";
+                }
+                safePanelStatus->setText(details, juce::dontSendNotification);
             }
         });
     });
