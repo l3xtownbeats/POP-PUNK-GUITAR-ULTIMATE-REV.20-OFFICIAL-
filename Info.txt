@@ -419,3 +419,10 @@ Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest пос
 - Uses the manifest-defined 40×40 round LED cells in row y=810 (x=50/160/270/380). The existing palette-driven vector LED remains the fallback for all other skins or when the atlas is unavailable.
 - State continues to be derived from the actual loader button/status text; no simulated progress, loader, DSP, or audio-thread behavior added.
 - Source commit: 0d8167611809d4394c791f1de530a559cab84b50.
+
+
+## 2026-11-26 — truthful 16-theme CI gate for STILLWATER
+- Investigated the failing Windows validation run: all 26 CTest cases passed, then the 16-theme validator failed solely because STILLWATER (skin-111) is deliberately marked runtimeReady=false pending FL Studio 20 host acceptance. Its six embedded base SVG layers and preview/hero package are still validated; this gate must not be bypassed by falsely setting runtimeReady=true.
+- Updated the validator to require exactly 15 runtime-ready themes plus the single explicitly gated STILLWATER slot, while continuing to validate all 16 manifests, all required theme SVGs, artwork, the 135-record NEON STAGE package, five atlases and exact atlas geometry.
+- Updated the registry status to distinguish completed embedded artwork-package validation from the still-pending FL Studio 20 host acceptance. STILLWATER remains runtimeReady=false until that acceptance is performed.
+- Validator commit: 000666776aacdfb5d51a31403cc541b765400a31; registry commit: edffdbce062b42c24340191de3002896859c01c6.
