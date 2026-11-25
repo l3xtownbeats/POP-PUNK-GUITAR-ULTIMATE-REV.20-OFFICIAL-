@@ -169,3 +169,8 @@ The async completion captures the selected file by value before the chooser call
 
 The Performance Display now includes a live held-MIDI-note count alongside the chord, scale/key and note-name readouts. It is computed from the processor's existing lock-free display snapshot, using the established 20 Hz UI timer; it does not write MIDI/APVTS state or add audio-thread work. Workspace Settings now draws theme-aware elevated cards and accent framing behind the existing scale, spacing, restore-default and skin-gallery controls. Settings ranges and callbacks are unchanged. Exact-head build and runtime validation are still required.
 
+
+
+## 2026-11-25 — VU meter: authored atlas states wired to runtime
+
+The live stereo output meter now uses the eight authored VU states in the NEON STAGE meters/sliders sprite atlas when Skin-1 is active. It selects the nearest of eight artwork states from the real post-output peak level and crops the manifest-defined 82×286 px cells (x=43+117*n, y=34). Zero level and the other 15 themes continue to use the existing semantic vector meter, preserving cross-skin behavior. Peak acquisition remains the processor's lock-free UI snapshot; no audio/DSP behavior changed. A built-plugin visual check is still required.
