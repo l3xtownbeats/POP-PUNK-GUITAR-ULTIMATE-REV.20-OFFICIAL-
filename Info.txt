@@ -389,3 +389,10 @@ Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest пос
 - Removed the misleading hard-coded A-major fingering from the default chord diagram. Until a verified guitar-voicing database supplies a shape, the panel displays an explicit unavailable state instead of implying that a sample shape matches the selected key/chord.
 - The existing diagram renderer still accepts and draws a supplied voicing through setVoicing; that method now marks the shape as present. No chord-generation, APVTS, MIDI or DSP behavior changed.
 - Source commit: 5162addc50ba34956a7e7c5a74c01a02afd4f316. Verified voicing database and tests for its musical correctness remain open.
+
+
+## 2026-11-25 — Import Guitar: detailed SFZ load report
+- The asynchronous SFZ completion now presents the selected SFZ filename, actual loaded region count, actual loaded WAV sample count, and warning/error totals.
+- The Import Guitar panel lists up to three real warning and error messages, with a remainder count when longer. The summary explicitly describes one selected SFZ definition; it does not infer an instrument count from regions.
+- The loader contract is unchanged. No progress is simulated, no WAVs are counted by filesystem guessing, and no sampler/DSP/MIDI behavior was modified.
+- Source commit: 28d54921cc119d1126076f03847162958c055ec3. UI layout/build and runtime validation remain pending.
