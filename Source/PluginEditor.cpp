@@ -3926,7 +3926,20 @@ void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette()
  for (auto* unavailable : { &autoSoundHunterButton, &curatorButton }) { unavailable->setColour(juce::TextButton::buttonColourId,p.token("lowlight")); unavailable->setColour(juce::TextButton::textColourOffId,p.token("text_disabled")); unavailable->setEnabled(false); }
  aboutButton.setEnabled(true); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));
  for(auto* b:{&melodyTab,&patternTab}){b->setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b->setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b->setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b->setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
- for(auto& s:knobs){s.setColour(juce::Slider::rotarySliderFillColourId,p.token("accent"));s.setColour(juce::Slider::rotarySliderOutlineColourId,p.token("control_border"));s.setColour(juce::Slider::thumbColourId,p.token("text_primary"));s.setColour(juce::Slider::textBoxTextColourId,p.token("text_primary"));}
+ for(auto& s:knobs){
+     // Skin-1's authored six-layer scale spans 210°..390°. Other themes keep
+     // JUCE's previous 1.2π..2.8π rotary sweep.
+     if (p.id == "skin-053")
+         s.setRotaryParameters(210.0f * juce::MathConstants<float>::pi / 180.0f,
+                               390.0f * juce::MathConstants<float>::pi / 180.0f, true);
+     else
+         s.setRotaryParameters(1.2f * juce::MathConstants<float>::pi,
+                               2.8f * juce::MathConstants<float>::pi, true);
+     s.setColour(juce::Slider::rotarySliderFillColourId,p.token("accent"));
+     s.setColour(juce::Slider::rotarySliderOutlineColourId,p.token("control_border"));
+     s.setColour(juce::Slider::thumbColourId,p.token("text_primary"));
+     s.setColour(juce::Slider::textBoxTextColourId,p.token("text_primary"));
+ }
  for(auto& l:knobLabels){l.setFont(makeThemeFont(p,9.5f,false,true));l.setColour(juce::Label::textColourId,p.token("text_secondary"));}
  for(auto& b:fxButtons){b.setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b.setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b.setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
  if(keyboard){keyboard->setColour(juce::MidiKeyboardComponent::whiteNoteColourId,p.token("highlight"));keyboard->setColour(juce::MidiKeyboardComponent::blackNoteColourId,p.token("control_bg"));keyboard->setColour(juce::MidiKeyboardComponent::keySeparatorLineColourId,p.token("control_border"));keyboard->setColour(juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId,p.token("accent_glow").withAlpha(.3f));keyboard->setColour(juce::MidiKeyboardComponent::keyDownOverlayColourId,p.token("accent").withAlpha(.88f));}
