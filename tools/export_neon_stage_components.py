@@ -120,13 +120,49 @@ def main() -> int:
     icon_group = atlas_manifest["sheets"][4]["groups"][0]
     icon_names = icon_group["names"]
     icon_grid = icon_group["grid"]
+    background_group = atlas_manifest["sheets"][0]["groups"][0]
+    frame_group = atlas_manifest["sheets"][0]["groups"][1]
+    display_group = atlas_manifest["sheets"][3]["groups"][0]
+    keyboard_group = atlas_manifest["sheets"][3]["groups"][1]
+    fader_group = atlas_manifest["sheets"][3]["groups"][2]
+    hardware_group = atlas_manifest["sheets"][4]["groups"][1]
     if (len(family_ids) != 27 or len(button_states) != 5 or len(switch_names) != 7
             or len(switch_states) != 2 or len(led_colours) != 5 or len(led_states) != 2
             or len(icon_names) != 35):
         raise SystemExit("Canonical atlas manifest counts do not match 27/7/5/35 contract")
 
     records: list[dict] = []
-    counts = {"buttons": 0, "fx_switches": 0, "leds": 0, "knob_frames": 0, "icons": 0}
+    counts = {
+        "backgrounds": 0, "panel_frames": 0,
+        "buttons": 0, "fx_switches": 0, "leds": 0,
+        "knob_frames": 0, "icons": 0,
+        "display_frames": 0, "meter_segments": 0,
+        "white_keys": 0, "black_keys": 0, "active_key_overlays": 0,
+        "fader_parts": 0, "hardware_parts": 0,
+    }
+
+    # Background material swatches and standalone bezel/frame elements.
+    background_path = src / "01_ppgu_atlas_backgrounds_frames.png"
+    with Image.open(background_path) as sheet:
+        sheet.load()
+        sheet = sheet.convert("RGBA")
+        grid = background_group["grid"]
+        for index, name in enumerate(background_group["items"]):
+            x = int(grid["origin_x"]) + index * int(grid["step_x"])
+            y = int(grid["origin_y"])
+            width, height = int(grid["cell_width"]), int(grid["cell_height"])
+            box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
+            target = out / "backgrounds" / f"{name}.png"
+            save_crop(sheet, box, target, f"background:{name}", records)
+            counts["backgrounds"] += 1
+        padding = int(frame_group.get("crop_padding", 0))
+        for item in frame_group["items"]:
+            x, y, width, height = (int(item[k]) for k in ("x", "y", "w", "h"))
+            box = ((x - padding) * scale, (y - padding) * scale,
+                   (x + width + padding) * scale, (y + height + padding) * scale)
+            target = out / "panel_frames" / f"{item['id']}.png"
+            save_crop(sheet, box, target, f"panel_frame:{item['id']}", records)
+            counts["panel_frames"] += 1
 
     # The source sheet uses a four-column family matrix, 5 states per family.
     button_path = src / "02_ppgu_atlas_buttons_switches.png"
@@ -199,6 +235,97 @@ def main() -> int:
                           f"knob:{style_name}:frame_{frame:03d}", records)
                 counts["knob_frames"] += 1
 
+    # Display frames, value/status tiles and twelve individual meter segments.
+    displays_path = src / "04_ppgu_atlas_displays_keyboard.png"
+    with Image.open(displays_path) as sheet:
+        sheet.load()
+        sheet = sheet.convert("RGBA")
+        for name, bounds in display_group["bounds"].items():
+            x, y, width, height = map(int, bounds)
+            box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
+            target = out / "displays" / f"{name}.png"
+            save_crop(sheet, box, target, f"display:{name}", records)
+            counts["display_frames"] += 1
+
+        meter = display_group["meter_segments"]
+        for index in range(int(meter["count"])):
+            x = int(meter["x"])
+            y = int(meter["y"]) + index * int(meter["step_y"])
+            width, height = int(meter["width"]), int(meter["height"])
+            box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
+            target = out / "meters" / "reference_sample" / f"segment_{index + 1:02d}.png"
+            save_crop(sheet, box, target, f"meter_segment:{index + 1:02d}", records)
+            counts["meter_segments"] += 1
+
+        # Individual 29 white keys and 20 black keys, plus C/E/G overlays.
+        white = keyboard_group["white_key_layout"]
+        for index in range(int(white["count"])):
+            x = int(white["x0"]) + index * int(white["step_x"])
+            y, width, height = (int(white[k]) for k in ("y", "width", "height"))
+            box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
+            target = out / "keyboard" / "white" / f"white_{index + 1:02d}.png"
+            save_crop(sheet, box, target, f"key:white:{index + 1:02d}", records)
+            counts["white_keys"] += 1
+
+        black = keyboard_group["black_key_layout"]
+        y, width, height = (int(black[k]) for k in ("y", "width", "height"))
+        for index, x_value in enumerate(black["x_positions"]):
+            x = int(x_value)
+            box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
+            target = out / "keyboard" / "black" / f"black_{index + 1:02d}.png"
+            save_crop(sheet, box, target, f"key:black:{index + 1:02d}", records)
+            counts["black_keys"] += 1
+
+        for overlay in keyboard_group["active_key_overlays"]:
+            name = overlay["name"]
+            x, y, width, height = (int(overlay[k]) for k in ("x", "y", "width", "height"))
+            box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
+            target = out / "keyboard" / "active_overlays" / f"{name}.png"
+            save_crop(sheet, box, target, f"key:active:{name}", records)
+            counts["active_key_overlays"] += 1
+
+        # Pitch and modulation rails and their three distinct positions.
+        for name in ("pitch", "mod"):
+            layout = fader_group["fader_layout"][name]
+            x, y, width, height = map(int, layout["track"])
+            box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
+            target = out / "faders" / name / "track.png"
+            save_crop(sheet, box, target, f"fader:{name}:track", records)
+            counts["fader_parts"] += 1
+            thumb_x = int(layout["thumb_x"])
+            thumb_w, thumb_h = map(int, fader_group["fader_layout"]["thumb_size"])
+            for pose, thumb_y in zip(("min", "mid", "max"), fader_group["fader_layout"]["thumb_y_positions"]):
+                thumb_y = int(thumb_y)
+                box = (thumb_x * scale, thumb_y * scale,
+                       (thumb_x + thumb_w) * scale, (thumb_y + thumb_h) * scale)
+                target = out / "faders" / name / f"thumb_{pose}.png"
+                save_crop(sheet, box, target, f"fader:{name}:thumb:{pose}", records)
+                counts["fader_parts"] += 1
+
+    # Standalone hardware pieces from the icon/hardware atlas.
+    hardware_path = src / "05_ppgu_atlas_icons_hardware.png"
+    with Image.open(hardware_path) as sheet:
+        sheet.load()
+        sheet = sheet.convert("RGBA")
+        geometry = hardware_group["crop_geometry"]
+        for name in ("side_bracket_type_1", "side_bracket_type_2",
+                     "side_bracket_type_3", "vent_grille", "blue_light_bar"):
+            x, y, width, height = map(int, geometry[name])
+            box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
+            target = out / "hardware" / f"{name}.png"
+            save_crop(sheet, box, target, f"hardware:{name}", records)
+            counts["hardware_parts"] += 1
+        screws = geometry["screw_set"]
+        radius = int(screws["radius"])
+        centre_y = int(screws["centre_y"])
+        for index, centre_x in enumerate(screws["centres_x"]):
+            centre_x = int(centre_x)
+            box = ((centre_x - radius) * scale, (centre_y - radius) * scale,
+                   (centre_x + radius) * scale, (centre_y + radius) * scale)
+            target = out / "hardware" / "screws" / f"screw_{index + 1:02d}.png"
+            save_crop(sheet, box, target, f"hardware:screw:{index + 1:02d}", records)
+            counts["hardware_parts"] += 1
+
     # Icon tiles are laid out according to their canonical atlas manifest grid.
     icons_path = src / "05_ppgu_atlas_icons_hardware.png"
     with Image.open(icons_path) as sheet:
@@ -216,18 +343,29 @@ def main() -> int:
             counts["icons"] += 1
 
     expected = {
+        "backgrounds": 5, "panel_frames": 7,
         "buttons": 135, "fx_switches": 14, "leds": 10,
         "knob_frames": 183, "icons": 35,
+        "display_frames": 10, "meter_segments": 12,
+        "white_keys": 29, "black_keys": 20, "active_key_overlays": 3,
+        "fader_parts": 8, "hardware_parts": 13,
     }
     if counts != expected:
         raise SystemExit(f"Export count mismatch: expected {expected}, got {counts}")
 
     previews = {
+        "backgrounds": save_contact_sheet(records, "background:", 5, out, (120, 80)),
+        "panel_frames": save_contact_sheet(records, "panel_frame:", 4, out, (120, 70)),
         "buttons": save_contact_sheet(records, "button:", 5, out, (76, 48)),
         "fx_switches": save_contact_sheet(records, "fx_switch:", 2, out, (108, 62)),
         "leds": save_contact_sheet(records, "led:", 2, out, (52, 52)),
         "knobs": {style: save_contact_sheet(records, f"knob:{style}:", 16, out, (48, 48)) for style in rotary_styles},
         "icons": save_contact_sheet(records, "icon:", 7, out, (68, 68)),
+        "displays": save_contact_sheet(records, "display:", 4, out, (120, 70)),
+        "meter_segments": save_contact_sheet(records, "meter_segment:", 6, out, (46, 18)),
+        "keyboard": save_contact_sheet(records, "key:", 7, out, (36, 82)),
+        "faders": save_contact_sheet(records, "fader:", 4, out, (68, 62)),
+        "hardware": save_contact_sheet(records, "hardware:", 5, out, (68, 58)),
     }
 
     package_manifest = {
@@ -248,7 +386,7 @@ def main() -> int:
         json.dumps(package_manifest, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    print("PASS: 377 standalone component PNGs extracted with RGBA and SHA-256.")
+    print(f"PASS: {sum(counts.values())} standalone component PNGs extracted with RGBA and SHA-256.")
     for name, count in counts.items():
         print(f"{name}: {count}")
     print(f"Manifest: {manifest_path}")
