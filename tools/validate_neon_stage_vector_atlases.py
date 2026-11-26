@@ -131,13 +131,25 @@ def main() -> int:
         and node.attrib.get("height") == "230"
         and node.attrib.get("fill") == "#d8e5ef"
     ]
-    black_keys = [
-        node for node in keyboard_rects
-        if node.attrib.get("y") == "390"
-        and node.attrib.get("width") == "38"
-        and node.attrib.get("height") == "135"
-        and node.attrib.get("fill") == "#07101b"
+    black_key_groups = [
+        node for node in children_named(keyboard, "g")
+        if node.attrib.get("class") == "ppgu-black-key"
     ]
+    black_keys = []
+    for group in black_key_groups:
+        bodies = [
+            node for node in list(group)
+            if local_name(node.tag) == "rect"
+            and node.attrib.get("y") == "390"
+            and node.attrib.get("width") == "38"
+            and node.attrib.get("height") == "135"
+            and node.attrib.get("fill") == "url(#blackKey)"
+        ]
+        if len(bodies) != 1:
+            fail("keyboard atlas: black-key group must contain one gradient key body")
+        black_keys.extend(bodies)
+    if not any(node.attrib.get("id") == "blackKey" for node in children_named(keyboard, "linearGradient")):
+        fail("keyboard atlas: metallic black-key gradient is missing")
     active_keys = [
         node for node in keyboard_rects
         if node.attrib.get("y") == "555"
