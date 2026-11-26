@@ -3252,6 +3252,10 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     modeBox.setColour(juce::ComboBox::textColourId, themeManager.getPalette().token("text_primary"));
     modeBox.setColour(juce::ComboBox::outlineColourId, themeManager.getPalette().token("accent").withAlpha(0.5f));
     addAndMakeVisible(modeBox);
+    // Keep the APVTS-backed selector as the single source of truth for playMode.
+    // The visible MELODY / PATTERN tabs below are its only main-window controls;
+    // showing this combo as well duplicates the same mode selector in the stage row.
+    modeBox.setVisible(false);
     modeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(processor.parameters, "playMode", modeBox);
     startModeBox.addItem("HOST", 1);
     startModeBox.addItem("HOST START", 2);
@@ -3556,9 +3560,11 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     // CENTER: approved reference layout — all nine real APVTS controls in one horizontal row.
     auto modeRow = centre.removeFromTop(38);
     melodyTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
+    modeRow.removeFromLeft(4);
     patternTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
-    modeBox.setBounds(modeRow.removeFromLeft(138).reduced(2, 3));
-    startModeBox.setBounds(modeRow.reduced(2, 3));
+    // Keep HOST / HOST START / INTERNAL available without a second play-mode
+    // dropdown. Right-align the sync selector so the two mode tabs stay grouped.
+    startModeBox.setBounds(modeRow.removeFromRight(128).reduced(2, 3));
     centre.removeFromTop(7);
 
     // Dedicated guitar stage/banner above the controls, matching the approved
