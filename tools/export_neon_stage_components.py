@@ -189,7 +189,7 @@ def main() -> int:
     hardware_group = atlas_manifest["sheets"][4]["groups"][1]
     if (len(family_ids) != 27 or len(button_states) != 5 or len(switch_names) != 7
             or len(switch_states) != 2 or len(led_colours) != 5 or len(led_states) != 2
-            or len(icon_names) != 35):
+            or len(icon_names) != 41):
         raise SystemExit("Canonical atlas manifest counts do not match 27/7/5/35 contract")
 
     records: list[dict] = []
@@ -415,7 +415,7 @@ def main() -> int:
     expected = {
         "backgrounds": 5, "panel_frames": 7,
         "buttons": 135, "fx_switches": 14, "leds": 10,
-        "knob_frames": 183, "icons": 35,
+        "knob_frames": 183, "icons": 41,
         "display_frames": 10, "meter_segments": 12,
         "white_keys": 29, "black_keys": 20, "active_key_overlays": 3,
         "fader_parts": 8, "hardware_parts": 13,
