@@ -40,13 +40,13 @@ def safe_crop(image: Image.Image, box: tuple[int, int, int, int], label: str) ->
 
 
 def save_crop(image: Image.Image, box: tuple[int, int, int, int],
-              target: Path, label: str, records: list[dict]) -> None:
+              target: Path, label: str, records: list[dict], output_root: Path) -> None:
     crop = safe_crop(image, box, label)
     target.parent.mkdir(parents=True, exist_ok=True)
     crop.save(target, format="PNG", optimize=True)
     records.append({
         "asset": label,
-        "file": target.as_posix(),
+        "file": target.relative_to(output_root).as_posix(),
         "width": crop.width,
         "height": crop.height,
         "mode": crop.mode,
@@ -83,7 +83,7 @@ def save_contact_sheet(records: list[dict], prefix: str, columns: int,
     target.parent.mkdir(parents=True, exist_ok=True)
     sheet.convert("RGB").save(target, format="JPEG", quality=91, optimize=True)
     return {
-        "file": target.as_posix(),
+        "file": target.relative_to(output).as_posix(),
         "width": sheet.width,
         "height": sheet.height,
         "bytes": target.stat().st_size,
@@ -153,7 +153,7 @@ def main() -> int:
             width, height = int(grid["cell_width"]), int(grid["cell_height"])
             box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
             target = out / "backgrounds" / f"{name}.png"
-            save_crop(sheet, box, target, f"background:{name}", records)
+            save_crop(sheet, box, target, f"background:{name}", records, out)
             counts["backgrounds"] += 1
         padding = int(frame_group.get("crop_padding", 0))
         for item in frame_group["items"]:
@@ -161,7 +161,7 @@ def main() -> int:
             box = ((x - padding) * scale, (y - padding) * scale,
                    (x + width + padding) * scale, (y + height + padding) * scale)
             target = out / "panel_frames" / f"{item['id']}.png"
-            save_crop(sheet, box, target, f"panel_frame:{item['id']}", records)
+            save_crop(sheet, box, target, f"panel_frame:{item['id']}", records, out)
             counts["panel_frames"] += 1
 
     # The source sheet uses a four-column family matrix, 5 states per family.
@@ -182,7 +182,7 @@ def main() -> int:
                 box = ((x - padding) * scale, (y - padding) * scale,
                        (x + width + padding) * scale, (y + height + padding) * scale)
                 target = out / "buttons" / family / f"{state}.png"
-                save_crop(sheet, box, target, f"button:{family}:{state}", records)
+                save_crop(sheet, box, target, f"button:{family}:{state}", records, out)
                 counts["buttons"] += 1
 
         # Seven dedicated FX card switch pairs in the lower atlas band.
@@ -199,7 +199,7 @@ def main() -> int:
                        (switch_x + width + pad_x) * scale,
                        (switch_y + height + pad_y) * scale)
                 target = out / "fx_switches" / name / f"{state}.png"
-                save_crop(sheet, box, target, f"fx_switch:{name}:{state}", records)
+                save_crop(sheet, box, target, f"fx_switch:{name}:{state}", records, out)
                 counts["fx_switches"] += 1
 
         # Five LED colours, each with a dim and lit visual.
@@ -212,7 +212,7 @@ def main() -> int:
                 box = ((centre_x - radius) * scale, (centre_y - radius) * scale,
                        (centre_x + radius) * scale, (centre_y + radius) * scale)
                 target = out / "leds" / colour / f"{state}.png"
-                save_crop(sheet, box, target, f"led:{colour}:{state}", records)
+                save_crop(sheet, box, target, f"led:{colour}:{state}", records, out)
                 counts["leds"] += 1
 
     # Three 61-frame vertical filmstrips are already exported as exact cell crops.
@@ -232,7 +232,7 @@ def main() -> int:
                 box = (0, y, frame_width * scale, y + frame_height * scale)
                 target = out / "knobs" / style_name / f"frame_{frame:03d}.png"
                 save_crop(strip, box, target,
-                          f"knob:{style_name}:frame_{frame:03d}", records)
+                          f"knob:{style_name}:frame_{frame:03d}", records, out)
                 counts["knob_frames"] += 1
 
     # Display frames, value/status tiles and twelve individual meter segments.
@@ -244,7 +244,7 @@ def main() -> int:
             x, y, width, height = map(int, bounds)
             box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
             target = out / "displays" / f"{name}.png"
-            save_crop(sheet, box, target, f"display:{name}", records)
+            save_crop(sheet, box, target, f"display:{name}", records, out)
             counts["display_frames"] += 1
 
         meter = display_group["meter_segments"]
@@ -254,7 +254,7 @@ def main() -> int:
             width, height = int(meter["width"]), int(meter["height"])
             box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
             target = out / "meters" / "reference_sample" / f"segment_{index + 1:02d}.png"
-            save_crop(sheet, box, target, f"meter_segment:{index + 1:02d}", records)
+            save_crop(sheet, box, target, f"meter_segment:{index + 1:02d}", records, out)
             counts["meter_segments"] += 1
 
         # Individual 29 white keys and 20 black keys, plus C/E/G overlays.
@@ -264,7 +264,7 @@ def main() -> int:
             y, width, height = (int(white[k]) for k in ("y", "width", "height"))
             box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
             target = out / "keyboard" / "white" / f"white_{index + 1:02d}.png"
-            save_crop(sheet, box, target, f"key:white:{index + 1:02d}", records)
+            save_crop(sheet, box, target, f"key:white:{index + 1:02d}", records, out)
             counts["white_keys"] += 1
 
         black = keyboard_group["black_key_layout"]
@@ -273,7 +273,7 @@ def main() -> int:
             x = int(x_value)
             box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
             target = out / "keyboard" / "black" / f"black_{index + 1:02d}.png"
-            save_crop(sheet, box, target, f"key:black:{index + 1:02d}", records)
+            save_crop(sheet, box, target, f"key:black:{index + 1:02d}", records, out)
             counts["black_keys"] += 1
 
         for overlay in keyboard_group["active_key_overlays"]:
@@ -281,7 +281,7 @@ def main() -> int:
             x, y, width, height = (int(overlay[k]) for k in ("x", "y", "width", "height"))
             box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
             target = out / "keyboard" / "active_overlays" / f"{name}.png"
-            save_crop(sheet, box, target, f"key:active:{name}", records)
+            save_crop(sheet, box, target, f"key:active:{name}", records, out)
             counts["active_key_overlays"] += 1
 
         # Pitch and modulation rails and their three distinct positions.
@@ -290,7 +290,7 @@ def main() -> int:
             x, y, width, height = map(int, layout["track"])
             box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
             target = out / "faders" / name / "track.png"
-            save_crop(sheet, box, target, f"fader:{name}:track", records)
+            save_crop(sheet, box, target, f"fader:{name}:track", records, out)
             counts["fader_parts"] += 1
             thumb_x = int(layout["thumb_x"])
             thumb_w, thumb_h = map(int, fader_group["fader_layout"]["thumb_size"])
@@ -299,7 +299,7 @@ def main() -> int:
                 box = (thumb_x * scale, thumb_y * scale,
                        (thumb_x + thumb_w) * scale, (thumb_y + thumb_h) * scale)
                 target = out / "faders" / name / f"thumb_{pose}.png"
-                save_crop(sheet, box, target, f"fader:{name}:thumb:{pose}", records)
+                save_crop(sheet, box, target, f"fader:{name}:thumb:{pose}", records, out)
                 counts["fader_parts"] += 1
 
     # Standalone hardware pieces from the icon/hardware atlas.
@@ -313,7 +313,7 @@ def main() -> int:
             x, y, width, height = map(int, geometry[name])
             box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
             target = out / "hardware" / f"{name}.png"
-            save_crop(sheet, box, target, f"hardware:{name}", records)
+            save_crop(sheet, box, target, f"hardware:{name}", records, out)
             counts["hardware_parts"] += 1
         screws = geometry["screw_set"]
         radius = int(screws["radius"])
@@ -323,7 +323,7 @@ def main() -> int:
             box = ((centre_x - radius) * scale, (centre_y - radius) * scale,
                    (centre_x + radius) * scale, (centre_y + radius) * scale)
             target = out / "hardware" / "screws" / f"screw_{index + 1:02d}.png"
-            save_crop(sheet, box, target, f"hardware:screw:{index + 1:02d}", records)
+            save_crop(sheet, box, target, f"hardware:screw:{index + 1:02d}", records, out)
             counts["hardware_parts"] += 1
 
     # Icon tiles are laid out according to their canonical atlas manifest grid.
@@ -339,7 +339,7 @@ def main() -> int:
             box = (x * scale, y * scale,
                    (x + icon_width) * scale, (y + icon_height) * scale)
             target = out / "icons" / f"{name}.png"
-            save_crop(sheet, box, target, f"icon:{name}", records)
+            save_crop(sheet, box, target, f"icon:{name}", records, out)
             counts["icons"] += 1
 
     expected = {
