@@ -3621,14 +3621,73 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
 
 juce::File PopPunkGuitarUltimateAudioProcessorEditor::getRuntimeSkinRoot() const
 {
+    // Prefer a complete packaged skin registry, not merely an existing folder.
+    // Test runners and developer builds can have an empty "Skins" directory
+    // beside the executable; accepting it would mask the repository's SKIN tree
+    // and silently force the editor onto its artwork-free fallback palette.
+    const auto hasSkinRegistry = [](const juce::File& root)
+    {
+        return root.isDirectory()
+            && root.getChildFile("theme_manifest.json").existsAsFile();
+    };
+
 #if JUCE_WINDOWS
- HMODULE module=nullptr;auto address=reinterpret_cast<LPCWSTR>(reinterpret_cast<std::uintptr_t>(&getPluginModuleAnchor));
- DWORD flags=GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT;
- if(GetModuleHandleExW(flags,address,&module)!=0&&module){std::array<wchar_t,32768> path{};DWORD n=GetModuleFileNameW(module,path.data(),(DWORD)path.size());
-  if(n>0&&n<path.size()){juce::File f(fromWidePath(path.data(), static_cast<int>(n)));for(int i=0;i<8;++i){auto d=f.isDirectory()?f:f.getParentDirectory();if(d.getFileName().endsWithIgnoreCase(".vst3"))return d.getParentDirectory().getChildFile("Skins");f=d.getParentDirectory();}}}
+    HMODULE module = nullptr;
+    auto address = reinterpret_cast<LPCWSTR>(
+        reinterpret_cast<std::uintptr_t>(&getPluginModuleAnchor));
+    const DWORD flags = GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
+        | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT;
+    if (GetModuleHandleExW(flags, address, &module) != 0 && module != nullptr)
+    {
+        std::array<wchar_t, 32768> path {};
+        const DWORD length = GetModuleFileNameW(module, path.data(),
+                                                static_cast<DWORD>(path.size()));
+        if (length > 0 && length < path.size())
+        {
+            juce::File location(fromWidePath(path.data(), static_cast<int>(length)));
+            for (int depth = 0; depth < 8; ++depth)
+            {
+                const auto directory = location.isDirectory()
+                    ? location : location.getParentDirectory();
+                if (directory.getFileName().endsWithIgnoreCase(".vst3"))
+                {
+                    const auto packaged = directory.getParentDirectory()
+                        .getChildFile("Skins");
+                    if (hasSkinRegistry(packaged))
+                        return packaged;
+                    break;
+                }
+                location = directory.getParentDirectory();
+            }
+        }
+    }
 #endif
- auto exe=juce::File::getSpecialLocation(juce::File::currentExecutableFile);auto beside=exe.getParentDirectory().getChildFile("Skins");if(beside.isDirectory())return beside;
- auto dev=juce::File::getCurrentWorkingDirectory().getChildFile("SKIN");return dev.isDirectory()?dev:beside;
+
+    const auto executable = juce::File::getSpecialLocation(
+        juce::File::currentExecutableFile);
+    const auto besideExecutable = executable.getParentDirectory()
+        .getChildFile("Skins");
+    if (hasSkinRegistry(besideExecutable))
+        return besideExecutable;
+
+    // Walk upward from the process working directory so CTest, IDE and
+    // out-of-tree build folders all discover the same checked-in SKIN package.
+    auto directory = juce::File::getCurrentWorkingDirectory();
+    for (int depth = 0; depth < 10 && directory.isDirectory(); ++depth)
+    {
+        const auto developmentSkins = directory.getChildFile("SKIN");
+        if (hasSkinRegistry(developmentSkins))
+            return developmentSkins;
+
+        const auto parent = directory.getParentDirectory();
+        if (parent == directory)
+            break;
+        directory = parent;
+    }
+
+    // Keep the conventional install location as the final fallback. The caller
+    // will use the embedded safe theme if no external registry is available.
+    return besideExecutable;
 }
 int PopPunkGuitarUltimateAudioProcessorEditor::getSkinCount() const
 {
