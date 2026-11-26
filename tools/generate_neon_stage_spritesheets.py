@@ -8,22 +8,27 @@ sampler, MIDI, preset data, control geometry, or the audio callback.
 from __future__ import annotations
 import json
 import math
+from io import BytesIO
 from pathlib import Path
+
+import cairosvg
 from PIL import Image, ImageDraw, ImageFilter
+
+from rotary_master_layers import load_rotary_master_layers
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "SKIN" / "Skin_053" / "assets" / "spritesheets"
 OUT.mkdir(parents=True, exist_ok=True)
 SIZE = (1024, 1024)
 P = {
-    "background": "#05070E",
-    "metal_border": "#00D2FF",
-    "glow_cyan": "#00E5FF",
+    "background": "#080B14",
+    "metal_border": "#31506F",
+    "glow_cyan": "#00D9FF",
     "glow_blue": "#6B8CFF",
     "accent_warning": "#FFB454",
-    "metal": "#101622",
-    "metal_light": "#1B2A3B",
-    "dim": "#7A8C9E",
+    "metal": "#101827",
+    "metal_light": "#17243A",
+    "dim": "#71829D",
 }
 def rgba(value, alpha=255):
     value = value.lstrip("#")
@@ -40,7 +45,7 @@ def save(im, name):
 manifest = {
   "schemaVersion":"1.1.0",
   "textPolicy":"No baked labels, captions, parameter values, channel names, state names, or live status text. Render all text in JUCE.",
-  "project":"NEON_STAGE_MANAGER_3_0",
+  "project":"POP_PUNK_GUITAR_ULTIMATE_REV_20",
   "theme":"NEON_STAGE_DEFAULT_SKIN_1",
   "canvas":[1024,1024],
   "base_palette":{
@@ -499,101 +504,27 @@ main_knob_atlas = Image.new(
     (0, 0, 0, 0)
 )
 
+# All six layer surfaces are extracted verbatim from the canonical 512x512
+# rotary SVG master. The generator does not redraw or reinterpret its geometry.
+MAIN_KNOB_LAYER_SVGS = load_rotary_master_layers(ROOT)
+
+
 def draw_main_knob_layer(layer_name):
-    """Build one alpha-separated physical-knob layer using only Pillow."""
-    size = 192
-    centre = (size // 2, size // 2)
-    cx, cy = centre
-    tile = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-
-    if layer_name == "BASE":
-        shadow = Image.new("RGBA", tile.size, (0, 0, 0, 0))
-        sd = ImageDraw.Draw(shadow)
-        sd.ellipse((13, 18, 179, 184), fill=rgba("#02060B", 205))
-        tile = Image.alpha_composite(tile, shadow.filter(ImageFilter.GaussianBlur(5)))
-        d = ImageDraw.Draw(tile)
-        d.ellipse((11, 11, 181, 181), fill=rgba("#111F30"),
-                  outline=rgba("#435B72"), width=3)
-        d.ellipse((20, 20, 172, 172), fill=rgba("#07121F"),
-                  outline=rgba("#233B52"), width=3)
-        d.ellipse((29, 29, 163, 163), fill=rgba("#0A1625"),
-                  outline=rgba("#32495F"), width=2)
-
-    elif layer_name == "RIM":
-        d = ImageDraw.Draw(tile)
-        d.ellipse((11, 11, 181, 181), fill=rgba("#AABBC9"),
-                  outline=rgba("#E6F2FA"), width=2)
-        d.ellipse((20, 20, 172, 172), fill=(0, 0, 0, 0),
-                  outline=rgba("#536A80"), width=3)
-        for tick in range(72):
-            angle = math.radians(tick * 5.0)
-            r1 = 78
-            r2 = 85 if tick % 3 == 0 else 82
-            p1 = (cx + r1 * math.cos(angle), cy + r1 * math.sin(angle))
-            p2 = (cx + r2 * math.cos(angle), cy + r2 * math.sin(angle))
-            colour = "#EDF7FD" if tick % 3 == 0 else "#8197AA"
-            d.line((p1, p2), fill=rgba(colour, 225 if tick % 3 == 0 else 150),
-                   width=2 if tick % 3 == 0 else 1)
-        d.ellipse((27, 27, 165, 165), outline=rgba("#D6E4EF", 135), width=2)
-
-    elif layer_name == "FACE":
-        d = ImageDraw.Draw(tile)
-        d.ellipse((27, 27, 165, 165), fill=rgba("#253A50"),
-                  outline=rgba("#B7C9D8"), width=2)
-        d.ellipse((34, 34, 158, 158), fill=rgba("#0D1A29"),
-                  outline=rgba("#5D7489"), width=2)
-        for tick in range(48):
-            angle = math.radians(tick * 7.5)
-            p1 = (cx + 25 * math.cos(angle), cy + 25 * math.sin(angle))
-            p2 = (cx + 58 * math.cos(angle), cy + 58 * math.sin(angle))
-            d.line((p1, p2), fill=rgba("#E8F4FC", 25), width=1)
-        d.ellipse((42, 42, 150, 150), outline=rgba("#D9E8F3", 38), width=1)
-        d.ellipse((49, 49, 143, 143), outline=rgba("#020811", 145), width=2)
-        d.ellipse((48, 44, 101, 67), fill=rgba("#FFFFFF", 24))
-
-    elif layer_name == "POINTER":
-        d = ImageDraw.Draw(tile)
-        d.polygon([(cx - 5, cy + 17), (cx - 4, cy - 56),
-                   (cx, cy - 73), (cx + 4, cy - 56),
-                   (cx + 5, cy + 17)],
-                  fill=rgba("#DDEAF3"), outline=rgba("#FFFFFF", 220))
-        d.line((cx, cy - 63, cx, cy - 77),
-               fill=rgba(P["glow_cyan"]), width=4)
-        d.ellipse((cx - 12, cy - 12, cx + 12, cy + 12),
-                  fill=rgba("#71889B"), outline=rgba("#F2FAFF"), width=2)
-        d.ellipse((cx - 7, cy - 7, cx + 7, cy + 7),
-                  fill=rgba("#12243A"), outline=rgba(P["glow_cyan"]), width=2)
-
-    elif layer_name == "SCALE":
-        d = ImageDraw.Draw(tile)
-        for step in range(61):
-            angle_deg = 210 + step * 3
-            angle = math.radians(angle_deg - 90.0)
-            major = (step % 5 == 0)
-            r1, r2 = (66, 76) if major else (69, 75)
-            p1 = (cx + r1 * math.cos(angle), cy + r1 * math.sin(angle))
-            p2 = (cx + r2 * math.cos(angle), cy + r2 * math.sin(angle))
-            d.line((p1, p2),
-                   fill=rgba("#D8EAF5", 225 if major else 150),
-                   width=2 if major else 1)
-        d.arc((17, 17, 175, 175), 120, 300,
-              fill=rgba(P["glow_cyan"], 185), width=3)
-        d.ellipse((28, 28, 164, 164), outline=rgba("#8BA5BA", 55), width=1)
-
-    elif layer_name == "GLOW":
-        glow = Image.new("RGBA", tile.size, (0, 0, 0, 0))
-        gd = ImageDraw.Draw(glow)
-        gd.ellipse((8, 8, 184, 184), outline=rgba(P["glow_blue"], 180), width=5)
-        gd.arc((10, 10, 182, 182), 120, 300,
-               fill=rgba(P["glow_cyan"], 215), width=5)
-        tile = Image.alpha_composite(tile, glow.filter(ImageFilter.GaussianBlur(7)))
-        d = ImageDraw.Draw(tile)
-        d.arc((12, 12, 180, 180), 120, 300,
-              fill=rgba(P["glow_cyan"], 105), width=2)
-    else:
-        raise ValueError("unknown main knob layer: " + str(layer_name))
-
-    return tile.resize((MAIN_KNOB_CELL, MAIN_KNOB_CELL), Image.Resampling.LANCZOS)
+    if layer_name not in MAIN_KNOB_LAYER_SVGS:
+        raise ValueError("unknown canonical main-knob layer: " + str(layer_name))
+    rendered = cairosvg.svg2png(
+        bytestring=MAIN_KNOB_LAYER_SVGS[layer_name].encode("utf-8"),
+        output_width=MAIN_KNOB_CELL,
+        output_height=MAIN_KNOB_CELL,
+    )
+    with Image.open(BytesIO(rendered)) as source:
+        source.load()
+        layer = source.convert("RGBA")
+    if layer.size != (MAIN_KNOB_CELL, MAIN_KNOB_CELL):
+        raise RuntimeError(f"{layer_name}: canonical layer has unexpected dimensions {layer.size}")
+    if layer.getchannel("A").getbbox() is None:
+        raise RuntimeError(f"{layer_name}: canonical SVG layer rendered fully transparent")
+    return layer
 
 main_knob_frame_manifest = []
 for parameter_index, parameter_name in enumerate(MAIN_KNOB_PARAMETERS):
@@ -621,6 +552,9 @@ manifest["sheets"][main_knob_atlas_name] = {
     "parameter_order": list(MAIN_KNOB_PARAMETERS),
     "layer_order": list(MAIN_KNOB_LAYERS),
     "frames": main_knob_frame_manifest,
+    "source_reference": "SKIN/Skin_053/assets/vector/rotary_knob_master.svg",
+    "source_layers": "Original SVG elements are grouped without redrawing; the dynamic pointer is painted by JUCE from APVTS.",
+    "palette_reference": "SKIN/Skin_053/theme.json",
     "runtime_policy": "MAIN_KNOBS_ONLY; FX_EDIT_CONTINUES_TO_USE_DEDICATED_61_FRAME_MATERIAL_ATLASES",
 }
 
