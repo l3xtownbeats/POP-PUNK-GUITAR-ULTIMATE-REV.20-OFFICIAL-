@@ -18,6 +18,7 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <cstdlib>
 #include <condition_variable>
 #include <mutex>
 #include <utility>
@@ -93,6 +94,95 @@ void addChordOff(juce::MidiBuffer& midi, int sample, const std::array<int, 3>& n
     for (const int note : notes)
         midi.addEvent(juce::MidiMessage::noteOff(1, note), sample);
 }
+
+bool renderNeonStageUiSnapshots()
+{
+    const char* outputPath = std::getenv("PPGU_UI_SNAPSHOT_DIR");
+    if (outputPath == nullptr || outputPath[0] == '\\0')
+        return true; // Local CTest runs may opt out; CI sets the output path.
+
+    const juce::File outputDirectory(juce::String::fromUTF8(outputPath));
+    if (outputDirectory.createDirectory() != juce::Result::ok)
+    {
+        std::cerr << "Could not create NEON STAGE UI snapshot directory: "
+                  << outputDirectory.getFullPathName() << "\\n";
+        return false;
+    }
+
+    PopPunkGuitarUltimateAudioProcessor snapshotProcessor;
+    std::unique_ptr<juce::AudioProcessorEditor> editor(snapshotProcessor.createEditor());
+    if (editor == nullptr)
+    {
+        std::cerr << "The REV.20 processor did not create its UI editor.\\n";
+        return false;
+    }
+
+    juce::Component snapshotHost;
+    snapshotHost.setOpaque(true);
+    snapshotHost.addAndMakeVisible(*editor);
+    snapshotHost.setVisible(true);
+
+    const std::array<std::pair<int, int>, 3> sizes {{
+        { 900, 640 }, { 1024, 700 }, { 1600, 1100 }
+    }};
+    juce::PNGImageFormat png;
+    juce::String manifest = "{\\n  \"schema\": \"ppgu.neon-stage-juce-snapshots/1\",\\n"
+                            "  \"theme\": \"skin-053\",\\n"
+                            "  \"source\": \"AudioProcessorEditor::createComponentSnapshot\",\\n"
+                            "  \"renders\": [\\n";
+    bool first = true;
+
+    for (const auto& size : sizes)
+    {
+        const int width = size.first;
+        const int height = size.second;
+        snapshotHost.setSize(width, height);
+        editor->setBounds(snapshotHost.getLocalBounds());
+        juce::MessageManager::getInstance()->runDispatchLoopUntil(80);
+
+        const auto image = snapshotHost.createComponentSnapshot(
+            snapshotHost.getLocalBounds(), true, 1.0f);
+        if (!image.isValid() || image.getWidth() != width || image.getHeight() != height)
+        {
+            std::cerr << "NEON STAGE snapshot returned unexpected dimensions at "
+                      << width << "x" << height << ".\\n";
+            return false;
+        }
+
+        const auto fileName = "PPGU_NEON_STAGE_" + juce::String(width)
+            + "x" + juce::String(height) + ".png";
+        const auto imageFile = outputDirectory.getChildFile(fileName);
+        auto stream = imageFile.createOutputStream();
+        if (stream == nullptr || !png.writeImageToStream(image, *stream)
+            || !stream->flush())
+        {
+            std::cerr << "Could not write NEON STAGE snapshot: "
+                      << imageFile.getFullPathName() << "\\n";
+            return false;
+        }
+        stream.reset();
+
+        if (!first)
+            manifest += ",\\n";
+        manifest += "    { \"file\": \"" + fileName + "\", \"width\": "
+            + juce::String(width) + ", \"height\": " + juce::String(height)
+            + ", \"pixel_review\": \"PENDING\" }";
+        first = false;
+    }
+
+    manifest += "\\n  ]\\n}\\n";
+    const auto manifestFile = outputDirectory.getChildFile("PPGU_NEON_STAGE_UI_SNAPSHOTS.json");
+    if (!manifestFile.replaceWithText(manifest))
+    {
+        std::cerr << "Could not write NEON STAGE snapshot manifest.\\n";
+        return false;
+    }
+
+    std::cout << "PASS — rendered NEON STAGE JUCE editor snapshots at "
+              << "900x640, 1024x700 and 1600x1100. Pixel-level mockup review remains a separate gate.\\n";
+    return true;
+}
+
 }
 
 int main()
@@ -105,7 +195,7 @@ int main()
     }
 
     juce::ScopedJuceInitialiser_GUI juceInitialiser;
-    const auto root = std::filesystem::temp_directory_path() / "ppgu-processor-pattern-integration";
+    if (!renderNeonStageUiSnapshots())\n        return 1;\n    const auto root = std::filesystem::temp_directory_path() / "ppgu-processor-pattern-integration";
     std::error_code cleanupError;
 
     // Exercise the newly wired recorded-clip route through the real processor.
