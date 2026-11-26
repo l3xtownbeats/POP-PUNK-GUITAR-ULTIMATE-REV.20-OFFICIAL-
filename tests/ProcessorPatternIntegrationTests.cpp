@@ -195,7 +195,9 @@ int main()
     }
 
     juce::ScopedJuceInitialiser_GUI juceInitialiser;
-    if (!renderNeonStageUiSnapshots())\n        return 1;\n    const auto root = std::filesystem::temp_directory_path() / "ppgu-processor-pattern-integration";
+    if (!renderNeonStageUiSnapshots())
+        return 1;
+    const auto root = std::filesystem::temp_directory_path() / "ppgu-processor-pattern-integration";
     std::error_code cleanupError;
 
     // Exercise the newly wired recorded-clip route through the real processor.
