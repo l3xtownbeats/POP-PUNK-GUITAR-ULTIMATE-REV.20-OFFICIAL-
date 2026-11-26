@@ -10,7 +10,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "ASSETS" / "PPGU_REV20_NEON_STAGE_ASSETS"
@@ -54,6 +54,42 @@ def save_crop(image: Image.Image, box: tuple[int, int, int, int],
         "sha256": digest(target),
     })
 
+
+
+def save_contact_sheet(records: list[dict], prefix: str, columns: int,
+                       output: Path, thumb_size: tuple[int, int]) -> dict | None:
+    selected = [item for item in records if item["asset"].startswith(prefix)]
+    if not selected:
+        return None
+    thumb_w, thumb_h = thumb_size
+    cell_w, cell_h = thumb_w + 18, thumb_h + 30
+    rows = (len(selected) + columns - 1) // columns
+    sheet = Image.new("RGBA", (columns * cell_w, rows * cell_h), (5, 10, 18, 255))
+    draw = ImageDraw.Draw(sheet)
+    for index, item in enumerate(selected):
+        col, row = index % columns, index // columns
+        x, y = col * cell_w, row * cell_h
+        with Image.open(item["file"]) as source:
+            thumb = source.convert("RGBA")
+            thumb.thumbnail((thumb_w, thumb_h), Image.Resampling.LANCZOS)
+            px = x + (thumb_w - thumb.width) // 2 + 9
+            py = y + 2 + (thumb_h - thumb.height) // 2
+            sheet.alpha_composite(thumb, (px, py))
+        label = item["asset"].replace(prefix, "").replace(":", " / ")
+        if len(label) > 25:
+            label = label[:22] + "..."
+        draw.text((x + 6, y + thumb_h + 5), label, fill=(183, 221, 239, 255))
+    target = output / "previews" / f"{prefix.rstrip(':').replace(':', '_')}_contact_sheet.jpg"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    sheet.convert("RGB").save(target, format="JPEG", quality=91, optimize=True)
+    return {
+        "file": target.as_posix(),
+        "width": sheet.width,
+        "height": sheet.height,
+        "bytes": target.stat().st_size,
+        "sha256": digest(target),
+        "items": len(selected),
+    }
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -186,6 +222,14 @@ def main() -> int:
     if counts != expected:
         raise SystemExit(f"Export count mismatch: expected {expected}, got {counts}")
 
+    previews = {
+        "buttons": save_contact_sheet(records, "button:", 5, out, (76, 48)),
+        "fx_switches": save_contact_sheet(records, "fx_switch:", 2, out, (108, 62)),
+        "leds": save_contact_sheet(records, "led:", 2, out, (52, 52)),
+        "knobs": save_contact_sheet(records, "knob:", 8, out, (64, 64)),
+        "icons": save_contact_sheet(records, "icon:", 7, out, (68, 68)),
+    }
+
     package_manifest = {
         "schema": "ppgu.neon-stage.standalone-components/1",
         "skin": "skin-053",
@@ -195,6 +239,7 @@ def main() -> int:
         "source_dir": src.as_posix(),
         "counts": counts,
         "total_assets": sum(counts.values()),
+        "contact_sheets": previews,
         "visual_acceptance": "EXPORTED_AND_HASHED; PIXEL_PARITY_AND_RUNTIME_WIRING_REMAIN_SEPARATE_GATES",
         "records": records,
     }
