@@ -1,7 +1,12 @@
 # NEON STAGE DEFAULT — ASSET OPEN ISSUES
 
-## Reference image — not visually reviewed
-The exact repository reference `01 INTERFACE  NEON STAGE DEFAULT .png` has not been decoded/visually inspected in this session. Therefore exact geometry, proportions, spacing and pixel parity are not certified. The master prompt explicitly forbids inventing the mockup. Closure requires a directly viewable upload of the reference image and comparison with the 1024×700 editor.
+## Reference handling — owner clarification (2026-11-26)
+The owner explicitly excluded the repository-root image `01 INTERFACE  NEON STAGE DEFAULT .png` from the required visual reference set. It must not block asset production or be requested again. The visual reference set for this work is the stored PPGU mockup collection named:
+- `Неоновый атлас UI-ассетов PPGU`
+- `Неоновый интерфейс PPGU — поп-панк гитара`
+- `Неоновый интерфейс гитарного плагина PPGU`
+
+Use the stored mockups and the development journal as the visual/design evidence. Where older mockups disagree with the current REV.20 runtime contract (control names/count, panel availability, parameter semantics), preserve the current REV.20 source contract and record the discrepancy; do not silently copy obsolete REV.18 labels or behavior. Exact visual acceptance is based on the applicable stored mockup(s), source contract and a rendered JUCE comparison, not on the excluded repository-root image.
 
 ## Existing asset inventory vs requested production deliverables
 The canonical Skin-053 manifest contains 307 records. These include hero/preview, 2560×1440 background, material texture, four FX overlay layers, 135 master and 135 runtime control-state records, six topbar icon families/atlases, and three SVG shell layers. This is not the complete separate export inventory requested by the master prompt.
