@@ -153,14 +153,21 @@ bool renderNeonStageUiSnapshots()
             + "x" + juce::String(height) + ".png";
         const auto imageFile = outputDirectory.getChildFile(fileName);
         auto stream = imageFile.createOutputStream();
-        if (stream == nullptr || !png.writeImageToStream(image, *stream)
-            || !stream->flush())
+        if (stream == nullptr)
+        {
+            std::cerr << "Could not open NEON STAGE snapshot output: "
+                      << imageFile.getFullPathName() << "\n";
+            return false;
+        }
+        const bool imageWritten = png.writeImageToStream(image, *stream);
+        stream->flush();
+        stream.reset();
+        if (!imageWritten || !imageFile.existsAsFile() || imageFile.getSize() <= 0)
         {
             std::cerr << "Could not write NEON STAGE snapshot: "
                       << imageFile.getFullPathName() << "\n";
             return false;
         }
-        stream.reset();
 
         if (!first)
             manifest += ",\n";
