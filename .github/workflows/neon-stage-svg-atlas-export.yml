@@ -55,10 +55,10 @@ jobs:
       - name: Render high-resolution transparent PNG atlases at 2x
         run: python tools/export_neon_stage_vector_atlases.py --scale 2.0 --output build/neon_stage_vector_atlases_2x
 
-      - name: Export 484 standalone components at 1x
+      - name: Export 490 standalone components at 1x
         run: python tools/export_neon_stage_components.py --scale 1 --input-dir build/neon_stage_vector_atlases_1x --output build/neon_stage_components_1x
 
-      - name: Export 484 standalone components at 2x
+      - name: Export 490 standalone components at 2x
         run: python tools/export_neon_stage_components.py --scale 2 --input-dir build/neon_stage_vector_atlases_2x --output build/neon_stage_components_2x
 
       - name: Upload 1x and 2x PNG exports, rotary strips, contact sheets and SHA-256 reports
