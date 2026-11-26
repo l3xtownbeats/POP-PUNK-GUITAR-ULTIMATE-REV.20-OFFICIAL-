@@ -495,3 +495,19 @@ The atlas workflow was updated to run this extraction after the SVG atlas/compon
 The 70 crops cover five FX-card states; Major/Minor/Custom and Strum/Arp/Latch states; MELODY/PATTERN plus reference-only Punk Group pair; ON/OFF toggles; two action buttons; four status LEDs; five large rotary poses; four mini amp knobs; five horizontal sliders; five thumb variants; two vertical meters; five horizontal progress/meter treatments; one multicolor segment strip and twelve individual meter segments.
 
 Important limits: the 2x files are resampled, not native 2x; some crops preserve baked labels/scales; the reference artwork is not automatically runtime approved; dynamic values and real meter telemetry remain live JUCE layers. No claim of 1:1 UI acceptance or completed asset library is made from this export alone.
+
+
+## 2026-11-26 — 41 icons, 70 source crops and nine six-layer main knobs verified
+
+**Status:** EXTENDED ARTWORK EXPORT VERIFIED; FULL 1:1 UI PARITY AND JUCE RUNTIME INTEGRATION REMAIN IN PROGRESS.
+
+GitHub Actions atlas export run 45834419111 succeeded on source commit f0c1807c6a89f735bec71461456f9b51f3fec0e5. Artifact 15124661281, PPGU-NEON-STAGE-SVG-ATLAS-EXPORT, is 88,485,111 bytes with SHA-256 7577b9c1550dff7e872209850164914ee07d084f6d23d1ae3e1eb3687cf91ede. The branch subsequently advanced to 1ceca6e5124e1308364c97087c9d06e93b7276a2 with a documentation-only correction to the accepted baseline.
+
+Independently verified archive inventory:
+- 490 standalone components at 1x and the same 490 at 2x;
+- 41 standalone SVG icons plus 164 RGBA PNG variants at 16/24/32/48 px;
+- 70 source-faithful reference crops at both 1x/2x (140 files; 2x is resampled, not native source detail);
+- 54 SVG layers for the nine REV.20 main rotary controls (BASE/RIM/FACE/POINTER/SCALE/GLOW) plus 108 RGBA PNG renders at 192/384 px.
+The 1,545-entry ZIP contains 1,410 PNG, 95 SVG, 31 JPG, 7 JSON, 1 TXT and 1 nested ZIP. Every record in the five export manifests was checked: zero missing paths and zero size/SHA-256 mismatches. The icon and knob contact sheets and the source-reference crop contact sheet were visually reviewed.
+
+Remaining gaps: runtime registration/use of the new layers; separate FX EDIT knob layers and parameter-specific scales; complete LED/button/keyboard states; finished content-rich panels (the 16 SVG frames remain shells); full editor previews and JUCE screenshot overlay/difference review at 900×640, 1024×700 and 1600×1100; current-head Windows x64 VST3/CTest/Pluginval validation; and separate FL Studio 20 manual host acceptance. The exact 1:1 UI and full asset pack are **not** declared complete. The single itemized gap list remains ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/ASSET_OPEN_ISSUES.md.
