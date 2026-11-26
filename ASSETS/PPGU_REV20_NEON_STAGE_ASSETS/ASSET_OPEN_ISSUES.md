@@ -37,7 +37,7 @@ Outstanding deliverables:
 - PPGU_SKIN053_PANEL_DIALOG_BASE.png
 - PPGU_SKIN053_PANEL_DIALOG_WARNING.png
 - PPGU_SKIN053_PANEL_DIALOG_ERROR.png
-- separate main rotary component layers for all 9 controls (BASE/RIM/FACE/POINTER/SCALE/GLOW)
+- FX EDIT rotary component layers and parameter-specific scale overlays
 - FX EDIT rotary component layers and parameter-specific scale overlays
 - standalone per-state export for all required buttons and seven FX switches
 - standalone LED state assets (OFF/ON/GLOW/WARNING/ERROR/SUCCESS/DISABLED)
@@ -49,8 +49,17 @@ Outstanding deliverables:
 - main interface previews 1024x700 and 1600x1100 and five contact sheets
 - ZIP archive of the complete export package
 
-## Sprite sheet manifest conflict
-`SKIN/Skin_053/assets/spritesheets/neon_stage_spritesheet_manifest.json` identifies its project as `NEON_STAGE_MANAGER_3_0` and specifies base colors `#05070E`, `#00D2FF`, `#00E5FF`, `#6B8CFF`, `#FFB454`. PPGU REV.20 master prompt and `theme.json` define a different authoritative palette and PPGU product identity. Treat this manifest as unapproved for PPGU until reconciled; do not silently overwrite either source.
+## Sprite sheet manifest identity/palette conflict — resolved 2026-11-26
+The old sprite generator/manifest used `NEON_STAGE_MANAGER_3_0` and a separate palette (`#05070E`, `#00D2FF`, `#00E5FF`, `#6B8CFF`, `#FFB454`). This was not the PPGU REV.20 runtime palette. The conflict is now resolved in the source generator, checked-in sprite manifest and `tools/validate_skin_registry_16.py`:
+- project identity: `POP_PUNK_GUITAR_ULTIMATE_REV_20`;
+- background: `#080B14`;
+- panel: `#101827`;
+- raised panel: `#17243A`;
+- control border: `#31506F`;
+- cyan accent: `#00D9FF`;
+- blue accent/glow: `#6B8CFF`;
+- warning: `#FFB454`.
+The runtime theme remains the palette authority. The separate `danger` token conflict below remains open.
 
 ## Palette conflict
 The master prompt specifies `danger #FF557A` and `warning #FFBE55`; `theme.json` currently specifies `danger #FF665E` and `warning #FFB454`. The theme manifest is currently consumed by runtime; product owner must decide whether to update the theme tokens or amend the prompt. Until resolved, preserve runtime tokens and do not create new semantic-color assets from the conflicting values.
@@ -238,7 +247,7 @@ The downloaded ZIP was independently inspected: 1,545 entries (1,410 PNG, 95 SVG
 
 ### Remaining work — not yet 1:1 accepted
 
-1. Integrate the approved individual artwork in the JUCE runtime renderer, keeping APVTS bindings, dynamic values, meter telemetry, note states, hit regions and automation real. The new six-layer main knob pack is an export, not runtime integration.
+1. Continue runtime registration of approved standalone artwork groups beyond the main rotary controls. The nine main controls now use the six-layer atlas in JUCE; retain APVTS bindings, live pointer/value, meter telemetry, note states, hit regions and automation.
 2. Create separate FX EDIT knob layers and parameter-specific scales/overlays; review the three rotary styles against the exact FX EDIT mockup crops.
 3. Complete the full LED state set (OFF/ON/GLOW/WARNING/ERROR/SUCCESS/DISABLED), all additional button focus/state variants and independent keyboard hover/pressed states; the current atlas only covers its declared 27×5, seven OFF/ON pairs and five LED colour DIM/LIT samples.
 4. Complete content-rich panel artwork. The existing 16 SVG panels remain scalable shell frames, not finished compositions containing all visible reference content.
@@ -267,3 +276,16 @@ GitHub Actions on source commit `bffd02d9ac0c01427517258e659f71cbbc4d03dd`:
 - `45836777065` Windows x64 workflow was queued/pending at last check.
 
 Do not mark this integration build-verified until all three current-head build/test workflows finish successfully. Rendered JUCE screenshot comparison against the stored mockups at 900×640, 1024×700 and 1600×1100, plus manual FL Studio 20 host acceptance, remain open.
+
+
+## 2026-11-26 — canonical rotary master and palette-source correction
+
+The prior generated six-layer main-knob atlas used a separate Pillow-drawn silhouette. That was visually serviceable as a draft but was not tied to the canonical PPGU rotary master. This has now been corrected at source level:
+- Added `tools/rotary_master_layers.py` to validate and extract `BASE/RIM/FACE/POINTER/SCALE/GLOW` groups from `SKIN/Skin_053/assets/vector/rotary_knob_master.svg`. The extractor rejects unexpected SVG child structure instead of silently creating different artwork.
+- The Ubuntu atlas export produces independent SVG layer masters from the original source elements and rasterizes them at 192/384 px through pinned CairoSVG.
+- The Windows build keeps its dependency surface portable: `draw_rotary_master_layer_pillow` mirrors the same source geometry, radii, marks, paths and source colors using Pillow only; it does not require a Cairo DLL on the Windows runner. This raster counterpart is not claimed to be pixel-identical to the CairoSVG render.
+- The nine columns use one consistent physical control design from the master; labels, values and live pointer angle remain dynamic JUCE layers.
+- The former project/palette mismatch with NEON STAGE Manager 3.0 is resolved; the generator, checked-in sprite manifest and validator now use PPGU REV.20 identity and SKIN-1 theme tokens.
+- The SVG icon atlas contained two malformed, duplicated fragment strings (duplicate CANCEL/NOTES labels). Those two stray fragments have been removed; the sheet now declares 41 transform groups and 41 unique icon labels.
+
+Verification is running on the current branch head. Do not mark the update build-verified until atlas generation, Windows configure/build, CTest, asset validation, Pluginval and visual review complete successfully. The 1:1 full-interface comparison and FL Studio 20 host acceptance remain open.
