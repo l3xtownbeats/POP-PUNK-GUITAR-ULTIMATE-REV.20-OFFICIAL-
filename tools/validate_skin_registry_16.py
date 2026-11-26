@@ -237,12 +237,14 @@ def main() -> int:
         "neon_stage_rotary_61frame_atlas.png",
         "neon_stage_rotary_black_disc_61frame_atlas.png",
         "neon_stage_rotary_knurled_steel_61frame_atlas.png",
+        "neon_stage_main_knob_layers_atlas.png",
     )
     for atlas_name in atlas_names:
         atlas_path = atlas_dir / atlas_name
         if not atlas_path.is_file():
             raise SystemExit(f"FAIL: missing NEON STAGE sprite atlas: {atlas_path}")
-        validate_png(atlas_path, (1024, 1024))
+        expected_size = (1152, 768) if atlas_name == "neon_stage_main_knob_layers_atlas.png" else (1024, 1024)
+        validate_png(atlas_path, expected_size)
     atlas_manifest_path = atlas_dir / "neon_stage_spritesheet_manifest.json"
     default_theme = json.loads((SKIN / "Skin_053" / "theme.json").read_text(encoding="utf-8"))
     if default_theme.get("assets", {}).get("spriteSheetManifest") != "assets/spritesheets/neon_stage_spritesheet_manifest.json":
@@ -264,7 +266,7 @@ def main() -> int:
         raise SystemExit("FAIL: NEON STAGE sprite atlas manifest identity/palette mismatch")
     sheets = atlas_manifest.get("sheets", {})
     if set(sheets) != set(atlas_names):
-        raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly seven sheets")
+        raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly eight sheets")
     if sheets.get("neon_stage_rotary_61frame_atlas.png", {}).get("resolution") != [1024, 1024] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("cell_size") != [128, 128] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("grid") != [8, 8] \
@@ -272,6 +274,38 @@ def main() -> int:
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("angle_range_deg") != [-135, 135] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("angle_step_deg") != 4.5:
         raise SystemExit("FAIL: NEON STAGE 61-frame rotary atlas geometry mismatch")
+    main_layers = sheets.get("neon_stage_main_knob_layers_atlas.png", {})
+    expected_parameters = [
+        "GAIN", "TREBLE", "MID", "BASS", "VELOCITY",
+        "DYNAMICS", "SWING", "HUMANIZE", "ACCENT",
+    ]
+    expected_layers = ["BASE", "RIM", "FACE", "POINTER", "SCALE", "GLOW"]
+    if main_layers.get("resolution") != [1152, 768] \
+            or main_layers.get("cell_size") != [128, 128] \
+            or main_layers.get("grid") != [9, 6] \
+            or main_layers.get("parameter_order") != expected_parameters \
+            or main_layers.get("layer_order") != expected_layers:
+        raise SystemExit("FAIL: nine-control main-knob layer atlas contract mismatch")
+    main_frames = main_layers.get("frames", [])
+    if len(main_frames) != 54:
+        raise SystemExit("FAIL: main-knob layer atlas must declare 54 parameter/layer cells")
+    for parameter_index, parameter in enumerate(expected_parameters):
+        for layer_index, layer in enumerate(expected_layers):
+            frame_index = parameter_index * 6 + layer_index
+            frame = main_frames[frame_index]
+            x, y = parameter_index * 128, layer_index * 128
+            if frame.get("parameter") != parameter \
+                    or frame.get("control_id") != f"knob{parameter_index + 1:02d}" \
+                    or frame.get("layer") != layer \
+                    or frame.get("bbox") != [x, y, x + 128, y + 128]:
+                raise SystemExit(
+                    f"FAIL: main-knob layer atlas cell mismatch: {parameter}/{layer}"
+                )
+    default_sheets = default_theme.get("assets", {}).get("spriteSheets", {})
+    if default_sheets.get("main_knob_layers") != \
+            "assets/spritesheets/neon_stage_main_knob_layers_atlas.png":
+        raise SystemExit("FAIL: NEON STAGE theme does not register its main-knob layer atlas")
+
     for variant_name in ("neon_stage_rotary_black_disc_61frame_atlas.png",
                          "neon_stage_rotary_knurled_steel_61frame_atlas.png"):
         variant = sheets.get(variant_name, {})
