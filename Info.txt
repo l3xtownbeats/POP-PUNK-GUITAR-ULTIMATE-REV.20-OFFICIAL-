@@ -511,3 +511,30 @@ Independently verified archive inventory:
 The 1,545-entry ZIP contains 1,410 PNG, 95 SVG, 31 JPG, 7 JSON, 1 TXT and 1 nested ZIP. Every record in the five export manifests was checked: zero missing paths and zero size/SHA-256 mismatches. The icon and knob contact sheets and the source-reference crop contact sheet were visually reviewed.
 
 Remaining gaps: runtime registration/use of the new layers; separate FX EDIT knob layers and parameter-specific scales; complete LED/button/keyboard states; finished content-rich panels (the 16 SVG frames remain shells); full editor previews and JUCE screenshot overlay/difference review at 900×640, 1024×700 and 1600×1100; current-head Windows x64 VST3/CTest/Pluginval validation; and separate FL Studio 20 manual host acceptance. The exact 1:1 UI and full asset pack are **not** declared complete. The single itemized gap list remains ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/ASSET_OPEN_ISSUES.md.
+
+
+## 2026-11-26 — canonical NEON STAGE atlas export re-verified on REV.20 source
+
+**Status:** ATLAS / COMPONENT EXPORT VERIFIED; JUCE BUILD AND HOST/VISUAL ACCEPTANCE STILL IN PROGRESS.
+
+The latest successful atlas workflow at source commit `432db3c5d398b7ad86f57120ed87e3c4a60a09bf` is run `45838805335`. Artifact `15126143428`, `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`, is 87,923,180 bytes; SHA-256 `4d59b08cb1c06bbf316c3583239623721ffc679f42edbd48f757a7ace82a9e17`. The full archive is independently inspectable at `/mnt/data/PPGU-NEON-STAGE-REV20-ATLAS-COMPONENTS-AND-REFERENCE-CROPS.zip` in this work session.
+
+The archive contains 1,545 entries. The five export manifests were independently re-checked against the ZIP: **zero missing files and zero byte-count/SHA-256 mismatches** across all 490 standalone components at 1x, 490 at 2x, 205 icon files (41 SVG + 164 PNG at 16/24/32/48), 162 main-knob layer files (54 SVG + 108 PNG at 192/384), and 140 source-reference crops (70 at 1x + 70 at 2x). The source-reference 2x files are LANCZOS enlargements, not native 2x artwork. The source crop manifest records source sheet SHA-256 and exact crop coordinates; it flags baked labels/scales. The main knob SVG layers are split from `SKIN/Skin_053/assets/vector/rotary_knob_master.svg`; the Pillow PNG renderer is a portable raster counterpart, not pixel-identical to the original SVG/CairoSVG raster.
+
+Visual review of the latest contact sheets confirms: the main-knob pack uses one consistent physical hardware design for the nine real parameters; the detailed source-reference crops preserve the high-gloss button, rotary, slider and meter examples from the two stored Meshy sheets; and the 27×5 button atlas is now a coherent five-state set rather than plain empty rectangles. These are still separate asset/reference deliveries, not proof that every crop exactly matches the full approved interface, and no JUCE screenshot overlay comparison has been accepted.
+
+Current runtime implementation changes on this branch:
+- the six-layer 9×6 main knob atlas is registered through `theme.json` / `ThemeManager` and assembled in `PPGUPremiumLookAndFeel::drawRotarySlider`;
+- static POINTER art is not overlaid on the live control: JUCE draws pointer and value arc from the continuous APVTS slider value;
+- the SKIN-1 main rotary sweep is now `-135°..+135°`, matching the main rotary master; the `210°..390°` sweep remains reserved for FX EDIT material variants;
+- a new ThemeManager regression test verifies that all 54 atlas cells contain visible alpha pixels;
+- the main editor geometry remains the accepted horizontal row of nine controls, with APVTS IDs, order and DSP unchanged.
+
+CI on the current source head:
+- atlas export run `45838805335`: SUCCESS (all render, component, icon, reference crop and six-layer export steps passed);
+- panel frame export run `45838805563`: SUCCESS (export only; panel frames are not full content-rich panel implementations);
+- SKIN-1 runtime CI run `45838807152`: Windows configure passed; VST3/contract-test build was still running at last check;
+- NEON STAGE native CI run `45838805325`: Windows configure passed; C++ build was still running at last check;
+- Windows x64 validation run `45838805387`: Windows configure passed; VST3 build was still running at last check, with CTest, skin registry and Pluginval still pending.
+
+The exact 1:1 full-interface comparison remains open. In particular, the main panel SVGs are largely shell frames; several auxiliary SVGs include static guide/placeholder content, but are not connected to live JUCE data. Still outstanding: complete production background/material pack; separate FX EDIT rotary scales/layers; all required LED and focus/disabled states; independent keyboard hover/pressed states; completed main panel artwork/composition; JUCE render previews and overlay/difference review at 900×640, 1024×700 and 1600×1100; plus manual FL Studio 20 host acceptance. Do not declare the full UI or release complete until these gates close.
