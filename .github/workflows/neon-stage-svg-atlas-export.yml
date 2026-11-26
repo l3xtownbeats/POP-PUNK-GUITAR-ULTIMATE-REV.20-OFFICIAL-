@@ -11,6 +11,9 @@ on:
       - "tools/export_neon_stage_vector_atlases.py"
       - "tools/export_neon_stage_components.py"
       - "tools/export_neon_stage_icons.py"
+      - "tools/extract_neon_stage_reference_components.py"
+      - "Assets/3D/References/Meshy_AI_neon_stage_buttons_and_switches.png"
+      - "Assets/3D/References/Meshy_AI_neon_stage_knobs_and_meters (1).png"
       - ".github/workflows/neon-stage-svg-atlas-export.yml"
   pull_request:
     branches:
@@ -66,6 +69,13 @@ jobs:
       - name: Export 41 standalone SVG icons and 16/24/32/48 PNG variants
         run: python tools/export_neon_stage_icons.py --output build/neon_stage_icons
 
+      - name: Extract 70 source-faithful reference components at 1x and 2x
+        run: >-
+          python tools/extract_neon_stage_reference_components.py
+          --buttons "Assets/3D/References/Meshy_AI_neon_stage_buttons_and_switches.png"
+          --knobs "Assets/3D/References/Meshy_AI_neon_stage_knobs_and_meters (1).png"
+          --output build/neon_stage_reference_components
+
       - name: Upload 1x and 2x PNG exports, rotary strips, contact sheets and SHA-256 reports
         uses: actions/upload-artifact@v4
         with:
@@ -76,5 +86,6 @@ jobs:
             build/neon_stage_components_1x/
             build/neon_stage_components_2x/
             build/neon_stage_icons/
+            build/neon_stage_reference_components/
           if-no-files-found: error
           retention-days: 14
