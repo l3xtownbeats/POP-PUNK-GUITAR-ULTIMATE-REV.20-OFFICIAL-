@@ -72,10 +72,21 @@ def main() -> int:
     )
     button_group = atlas_manifest["sheets"][1]["groups"]
     family_ids = button_group[0]["family_ids"]
+    button_states = button_group[0]["states"]
+    button_grid = button_group[0]["grid"]
     switch_names = button_group[1]["switches"]
+    switch_layout = button_group[1]["card_layout"]
+    switch_states = button_group[1]["states"]
     led_colours = button_group[2]["colors"]
-    icon_names = atlas_manifest["sheets"][4]["groups"][0]["names"]
-    if len(family_ids) != 27 or len(switch_names) != 7 or len(led_colours) != 5 or len(icon_names) != 35:
+    led_states = button_group[2]["states"]
+    led_layout = button_group[2]["layout"]
+    rotary_group = atlas_manifest["sheets"][2]["groups"][0]
+    icon_group = atlas_manifest["sheets"][4]["groups"][0]
+    icon_names = icon_group["names"]
+    icon_grid = icon_group["grid"]
+    if (len(family_ids) != 27 or len(button_states) != 5 or len(switch_names) != 7
+            or len(switch_states) != 2 or len(led_colours) != 5 or len(led_states) != 2
+            or len(icon_names) != 35):
         raise SystemExit("Canonical atlas manifest counts do not match 27/7/5/35 contract")
 
     records: list[dict] = []
@@ -87,38 +98,45 @@ def main() -> int:
         sheet.load()
         sheet = sheet.convert("RGBA")
         for index, family in enumerate(family_ids):
-            row, col = divmod(index, 4)
-            family_x = 28 + col * 472
-            family_y = 72 + row * 92
-            for state_index, state in enumerate(STATE_NAMES):
-                x = family_x + state_index * 88 + 5
-                y = family_y + 15
-                # Two pixels of bleed retain the hover/active glow outside the face.
-                box = ((x - 2) * scale, (y - 2) * scale,
-                       (x + 80) * scale, (y + 50) * scale)
+            row, col = divmod(index, int(button_grid["family_columns"]))
+            family_x = int(button_grid["origin_x"]) + col * int(button_grid["family_step_x"])
+            family_y = int(button_grid["origin_y"]) + row * int(button_grid["family_step_y"])
+            for state_index, state in enumerate(button_states):
+                x = family_x + state_index * int(button_grid["state_step_x"]) + int(button_grid["state_offset_x"])
+                y = family_y + int(button_grid["state_offset_y"])
+                padding = int(button_grid["crop_padding"])
+                width = int(button_grid["control_width"])
+                height = int(button_grid["control_height"])
+                box = ((x - padding) * scale, (y - padding) * scale,
+                       (x + width + padding) * scale, (y + height + padding) * scale)
                 target = out / "buttons" / family / f"{state}.png"
                 save_crop(sheet, box, target, f"button:{family}:{state}", records)
                 counts["buttons"] += 1
 
         # Seven dedicated FX card switch pairs in the lower atlas band.
         for index, name in enumerate(switch_names):
-            group_x = 24 + index * 268
-            for state_index, state in enumerate(SWITCH_STATES):
-                switch_x = group_x + (10 if state_index == 0 else 126)
-                # Preserve bezel and state text, plus a 3px halo allowance.
-                box = ((switch_x - 3) * scale, 781 * scale,
-                       (switch_x + 111) * scale, 849 * scale)
+            group_x = int(switch_layout["origin_x"]) + index * int(switch_layout["card_step_x"])
+            for state in switch_states:
+                state_layout = switch_layout["states"][state]
+                switch_x = group_x + int(state_layout["offset"][0])
+                switch_y = int(switch_layout["origin_y"]) + int(state_layout["offset"][1])
+                width, height = map(int, state_layout["size"])
+                pad_x, pad_y = map(int, state_layout["crop_padding"])
+                # Preserve bezel and state text, plus the authored halo allowance.
+                box = ((switch_x - pad_x) * scale, (switch_y - pad_y) * scale,
+                       (switch_x + width + pad_x) * scale,
+                       (switch_y + height + pad_y) * scale)
                 target = out / "fx_switches" / name / f"{state}.png"
                 save_crop(sheet, box, target, f"fx_switch:{name}:{state}", records)
                 counts["fx_switches"] += 1
 
         # Five LED colours, each with a dim and lit visual.
         for index, colour in enumerate(led_colours):
-            group_x = 470 + index * 205
-            for state_index, state in enumerate(LED_STATES):
-                centre_x = group_x + (28 if state_index == 0 else 102)
-                centre_y = 963
-                radius = 24
+            group_x = int(led_layout["origin_x"]) + index * int(led_layout["group_step_x"])
+            for state_index, state in enumerate(led_states):
+                centre_x = group_x + int(led_layout["state_center_offsets"][state_index][0])
+                centre_y = int(led_layout["origin_y"]) + int(led_layout["state_center_offsets"][state_index][1])
+                radius = int(led_layout["crop_radius"])
                 box = ((centre_x - radius) * scale, (centre_y - radius) * scale,
                        (centre_x + radius) * scale, (centre_y + radius) * scale)
                 target = out / "leds" / colour / f"{state}.png"
@@ -126,32 +144,37 @@ def main() -> int:
                 counts["leds"] += 1
 
     # Three 61-frame vertical filmstrips are already exported as exact cell crops.
-    for style_index, style_name in enumerate(("conical_chrome", "black_disc", "knurled_steel"), start=1):
-        strip_path = src / f"rotary_strip_{style_index}_61_frames.png"
+    rotary_styles = rotary_group["styles"]
+    frame_count = int(rotary_group["frames_per_style"])
+    frame_width, frame_height = map(int, rotary_group["frame_size"])
+    for style_index, style_name in enumerate(rotary_styles, start=1):
+        strip_path = src / f"rotary_strip_{style_index}_{frame_count}_frames.png"
         with Image.open(strip_path) as strip:
             strip.load()
             strip = strip.convert("RGBA")
-            expected = (128 * scale, 61 * 128 * scale)
+            expected = (frame_width * scale, frame_count * frame_height * scale)
             if strip.size != expected:
                 raise SystemExit(f"{strip_path.name}: expected {expected}, got {strip.size}")
-            for frame in range(61):
-                y = frame * 128 * scale
-                box = (0, y, 128 * scale, y + 128 * scale)
+            for frame in range(frame_count):
+                y = frame * frame_height * scale
+                box = (0, y, frame_width * scale, y + frame_height * scale)
                 target = out / "knobs" / style_name / f"frame_{frame:03d}.png"
                 save_crop(strip, box, target,
                           f"knob:{style_name}:frame_{frame:03d}", records)
                 counts["knob_frames"] += 1
 
-    # Icon tiles are laid out left-to-right, seven columns, five rows.
+    # Icon tiles are laid out according to their canonical atlas manifest grid.
     icons_path = src / "05_ppgu_atlas_icons_hardware.png"
     with Image.open(icons_path) as sheet:
         sheet.load()
         sheet = sheet.convert("RGBA")
         for index, name in enumerate(icon_names):
-            row, col = divmod(index, 7)
-            x = 40 + col * 265
-            y = 80 + row * 135
-            box = (x * scale, y * scale, (x + 68) * scale, (y + 68) * scale)
+            row, col = divmod(index, int(icon_grid["columns"]))
+            x = int(icon_grid["origin_x"]) + col * int(icon_grid["step_x"])
+            y = int(icon_grid["origin_y"]) + row * int(icon_grid["step_y"])
+            icon_width, icon_height = map(int, icon_group["cell_size"])
+            box = (x * scale, y * scale,
+                   (x + icon_width) * scale, (y + icon_height) * scale)
             target = out / "icons" / f"{name}.png"
             save_crop(sheet, box, target, f"icon:{name}", records)
             counts["icons"] += 1
