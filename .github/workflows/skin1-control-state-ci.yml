@@ -60,6 +60,16 @@ jobs:
         shell: pwsh
         run: ctest --test-dir build -C Release --output-on-failure
 
+      - name: Upload rendered NEON STAGE UI snapshots at reference sizes
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-NEON-STAGE-JUCE-UI-SNAPSHOTS
+          path: |
+            build/ui-snapshots/*.png
+            build/ui-snapshots/PPGU_NEON_STAGE_UI_SNAPSHOTS.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Validate 16-skin registry
         shell: pwsh
         run: python tools/validate_skin_registry_16.py
