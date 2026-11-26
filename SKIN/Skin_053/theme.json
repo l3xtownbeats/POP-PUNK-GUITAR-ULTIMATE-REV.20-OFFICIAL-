@@ -345,7 +345,14 @@
       "rotary_knurled_steel": "assets/spritesheets/neon_stage_rotary_knurled_steel_61frame_atlas.png",
       "main_knob_layers": "assets/spritesheets/neon_stage_main_knob_layers_atlas.png"
     },
-    "spriteSheetManifest": "assets/spritesheets/neon_stage_spritesheet_manifest.json"
+    "spriteSheetManifest": "assets/spritesheets/neon_stage_spritesheet_manifest.json",
+    "panels": {
+      "header": "assets/panels/header.png",
+      "preset_browser": "assets/panels/preset_browser.png",
+      "playing_core": "assets/panels/playing_core.png",
+      "midi_keyboard_bay": "assets/panels/midi_keyboard_bay.png",
+      "status_footer": "assets/panels/status_footer.png"
+    }
   },
   "compatibility": {
     "minimumPluginVersion": "4.0.0",
