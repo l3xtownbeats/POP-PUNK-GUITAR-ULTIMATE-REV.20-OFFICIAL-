@@ -253,13 +253,13 @@ def main() -> int:
         raise SystemExit("FAIL: missing NEON STAGE sprite atlas manifest")
     atlas_manifest = json.loads(atlas_manifest_path.read_text(encoding="utf-8"))
     expected_palette = {
-        "background": "#05070E",
-        "metal_border": "#00D2FF",
-        "glow_cyan": "#00E5FF",
+        "background": "#080B14",
+        "metal_border": "#31506F",
+        "glow_cyan": "#00D9FF",
         "glow_blue": "#6B8CFF",
         "semantic_warning": "#FFB454",
     }
-    if atlas_manifest.get("project") != "NEON_STAGE_MANAGER_3_0" \
+    if atlas_manifest.get("project") != "POP_PUNK_GUITAR_ULTIMATE_REV_20" \
             or atlas_manifest.get("theme") != "NEON_STAGE_DEFAULT_SKIN_1" \
             or atlas_manifest.get("canvas") != [1024, 1024] \
             or atlas_manifest.get("base_palette") != expected_palette:
