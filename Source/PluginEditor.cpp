@@ -2213,6 +2213,117 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     // interpolation work to the audio thread, or alter the APVTS value.
     g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
     const auto controlId = slider.getComponentID();
+
+    // The nine REV.20 main controls use the independently authored 6-layer
+    // stack. FX EDIT remains on its own 61-frame material atlases below.
+    // Only paint is changed here: Slider/APVTS range, value, attachments,
+    // parameter IDs, automation and hit regions remain untouched.
+    if (controlId.startsWith("knob") && palette.mainKnobLayerSpriteSheet.isValid())
+    {
+        const int parameterIndex = controlId.substring(4).getIntValue() - 1;
+        if (parameterIndex >= 0 && parameterIndex < 9)
+        {
+            constexpr int cellSize = 128;
+            const int diameter = juce::jmax(1, juce::jmin(w, h) - 2);
+            const int destinationX = x + (w - diameter) / 2;
+            const int destinationY = y + (h - diameter) / 2;
+            const int sourceX = parameterIndex * cellSize;
+
+            const auto drawLayer = [&](int layerIndex)
+            {
+                const int sourceY = layerIndex * cellSize;
+                g.drawImage(palette.mainKnobLayerSpriteSheet,
+                            destinationX, destinationY, diameter, diameter,
+                            sourceX, sourceY, cellSize, cellSize);
+            };
+
+            // Atlas rows are declared in the canonical manifest:
+            // 0 BASE, 1 RIM, 2 FACE, 3 POINTER, 4 SCALE, 5 GLOW.
+            drawLayer(0); // BASE
+            drawLayer(5); // GLOW
+            drawLayer(1); // RIM
+            drawLayer(2); // FACE
+            drawLayer(4); // SCALE
+
+            const auto stateName = ppguSliderArtworkState(slider);
+            if (const auto* stateArtwork = palette.findControlArtwork(controlId, stateName))
+            {
+                if (stateArtwork->isValid() && stateName != "default")
+                {
+                    g.saveState();
+                    g.setOpacity(stateName == "disabled" ? 0.42f
+                                  : (stateName == "pressed" || stateName == "dragged" ? 0.16f : 0.10f));
+                    g.drawImageWithin(*stateArtwork, destinationX, destinationY,
+                                      diameter, diameter, juce::RectanglePlacement::centred);
+                    g.restoreState();
+                }
+            }
+
+            const bool enabled = slider.isEnabled();
+            const bool hovered = enabled && slider.isMouseOverOrDragging();
+            const bool focused = enabled && slider.hasKeyboardFocus(true);
+            const float centreX = static_cast<float>(destinationX) + diameter * 0.5f;
+            const float centreY = static_cast<float>(destinationY) + diameter * 0.5f;
+            const float arcRadius = static_cast<float>(diameter) * 0.455f;
+            const float pointerRadius = static_cast<float>(diameter) * 0.315f;
+            const float angle = start + pos * (end - start);
+
+            // Dynamic POINTER is painted live from the continuous parameter
+            // value rather than selecting a quantised pointer bitmap.
+            juce::Path arcTrack;
+            arcTrack.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                                   0.0f, start, end, true);
+            g.setColour(enabled ? palette.token("control_border").withAlpha(0.82f)
+                                : palette.token("text_disabled").withAlpha(0.40f));
+            g.strokePath(arcTrack, juce::PathStrokeType(2.8f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+            if (enabled && pos > 0.0001f)
+            {
+                juce::Path valueArc;
+                valueArc.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                                       0.0f, start, angle, true);
+                const auto accent = focused ? palette.token("highlight")
+                    : (hovered ? palette.token("accent") : palette.token("accent_glow"));
+                g.setColour(accent.withAlpha(hovered ? 0.52f : 0.34f));
+                g.strokePath(valueArc, juce::PathStrokeType(hovered ? 7.0f : 5.5f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                g.setColour(accent.withAlpha(0.98f));
+                g.strokePath(valueArc, juce::PathStrokeType(hovered ? 2.8f : 2.3f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            }
+
+            juce::Path pointer;
+            pointer.startNewSubPath(centreX, centreY);
+            pointer.lineTo(centreX + std::sin(angle) * pointerRadius,
+                           centreY - std::cos(angle) * pointerRadius);
+            const auto pointerColour = !enabled ? palette.token("text_disabled")
+                : (focused ? palette.token("highlight") : palette.token("text_primary"));
+            g.setColour(pointerColour.withAlpha(enabled ? 0.98f : 0.52f));
+            g.strokePath(pointer, juce::PathStrokeType(2.6f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            g.setColour(enabled ? palette.token("accent") : palette.token("text_disabled"));
+            g.fillEllipse(centreX - 3.0f, centreY - 3.0f, 6.0f, 6.0f);
+
+            if (!enabled)
+            {
+                g.setColour(palette.token("window_bg").withAlpha(0.30f));
+                g.fillEllipse(static_cast<float>(destinationX), static_cast<float>(destinationY),
+                              static_cast<float>(diameter), static_cast<float>(diameter));
+            }
+            else if (hovered || focused)
+            {
+                const auto ringColour = hovered ? palette.token("accent") : palette.token("highlight");
+                g.setColour(ringColour.withAlpha(hovered ? 0.72f : 0.52f));
+                g.drawEllipse(static_cast<float>(destinationX) + 1.5f,
+                              static_cast<float>(destinationY) + 1.5f,
+                              static_cast<float>(diameter) - 3.0f,
+                              static_cast<float>(diameter) - 3.0f, 1.5f);
+            }
+            return;
+        }
+    }
+
     const juce::Image* rotaryAtlas = &palette.rotarySpriteSheet;
     if (controlId.startsWith("FXEdit_0_") && palette.rotaryBlackDiscSpriteSheet.isValid())
         rotaryAtlas = &palette.rotaryBlackDiscSpriteSheet;
