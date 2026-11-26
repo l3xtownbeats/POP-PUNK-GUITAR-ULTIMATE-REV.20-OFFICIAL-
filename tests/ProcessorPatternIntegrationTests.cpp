@@ -102,7 +102,7 @@ bool renderNeonStageUiSnapshots()
         return true; // Local CTest runs may opt out; CI sets the output path.
 
     const juce::File outputDirectory(juce::String::fromUTF8(outputPath));
-    if (outputDirectory.createDirectory() != juce::Result::ok)
+    if (!outputDirectory.createDirectory().wasOk())
     {
         std::cerr << "Could not create NEON STAGE UI snapshot directory: "
                   << outputDirectory.getFullPathName() << "\n";
