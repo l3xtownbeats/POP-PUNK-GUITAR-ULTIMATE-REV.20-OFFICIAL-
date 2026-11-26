@@ -25,6 +25,9 @@ on:
       - "tools/export_neon_stage_vector_atlases.py"
       - "tools/export_neon_stage_components.py"
       - "tools/export_neon_stage_icons.py"
+      - "tools/extract_neon_stage_reference_components.py"
+      - "Assets/3D/References/Meshy_AI_neon_stage_buttons_and_switches.png"
+      - "Assets/3D/References/Meshy_AI_neon_stage_knobs_and_meters (1).png"
       - ".github/workflows/neon-stage-svg-atlas-export.yml"
   workflow_dispatch:
 
