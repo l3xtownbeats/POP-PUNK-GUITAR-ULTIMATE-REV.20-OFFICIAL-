@@ -246,3 +246,24 @@ The downloaded ZIP was independently inspected: 1,545 entries (1,410 PNG, 95 SVG
 6. Continue current-head Windows x64 VST3/CTest/Pluginval validation and separately perform FL Studio 20 manual host acceptance. These are not proven by the atlas-export workflow.
 
 Do not mark the UI, asset pack or release COMPLETE until the runtime rendering and screenshot comparisons close the remaining visual mismatches. Source-reference crops are comparison aids; do not automatically register crops with baked labels/scales as production controls.
+
+
+## 2026-11-26 — main-knob layer atlas is now wired into the JUCE renderer
+
+**Implementation status:** SOURCE INTEGRATION COMMITTED / WINDOWS BUILD AND RUNTIME TESTS PENDING.
+
+The canonical SKIN-1 sprite-sheet generator now also emits `neon_stage_main_knob_layers_atlas.png`, 1152×768 RGBA, with a 9-column × 6-row grid. Columns are the REV.20 parameter order `GAIN, TREBLE, MID, BASS, VELOCITY, DYNAMICS, SWING, HUMANIZE, ACCENT`; rows are `BASE, RIM, FACE, POINTER, SCALE, GLOW`. Atlas geometry is declared in `neon_stage_spritesheet_manifest.json`.
+
+The eighth atlas is declared in `SKIN/Skin_053/theme.json`, loaded by `PPGUThemeManager` with safe local-path checks and exact dimension validation, and included by `tools/package_active_skins.py`. `tests/ThemeManagerTests.cpp` requires the decoded image to be valid and exactly 1152×768. `tools/validate_skin_registry_16.py` validates the 54 atlas cells, their parameter IDs, layer names and coordinates.
+
+`PPGUPremiumLookAndFeel::drawRotarySlider` now assembles the nine main controls from the independent BASE/GLOW/RIM/FACE/SCALE rows and paints the POINTER and live value arc from the actual JUCE Slider position. The 61-frame rotary atlas path remains intact for FX EDIT. The FX EDIT controls retain their current three material-family mapping. No APVTS parameter IDs, value ranges, DSP or audio-thread code were changed.
+
+The main SKIN-1 sweep has been aligned to 210°–390° across the six-layer scale, JUCE slider and live pointer. Other themes explicitly retain their previous JUCE sweep so they do not inherit the SKIN-1 geometry.
+
+GitHub Actions on source commit `bffd02d9ac0c01427517258e659f71cbbc4d03dd`:
+- `45836777081` NEON STAGE atlas render/export: 1×/2× atlas renders, 490 component exports at both scales and 41 icon exports completed; source-reference extraction was still running at last check, followed by the six-layer pack and artifact upload.
+- `45836777135` NEON STAGE native integration CI: atlas generator and Windows configure passed; VST3/C++ build was running.
+- `45836777085` SKIN-1 runtime CI: atlas generator and Windows configure passed; build was running.
+- `45836777065` Windows x64 workflow was queued/pending at last check.
+
+Do not mark this integration build-verified until all three current-head build/test workflows finish successfully. Rendered JUCE screenshot comparison against the stored mockups at 900×640, 1024×700 and 1600×1100, plus manual FL Studio 20 host acceptance, remain open.
