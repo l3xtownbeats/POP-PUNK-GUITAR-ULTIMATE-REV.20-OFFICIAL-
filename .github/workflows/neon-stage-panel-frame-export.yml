@@ -46,12 +46,17 @@ jobs:
       - name: Export standalone panel frames at 2x
         run: python tools/export_neon_stage_panel_frames.py --scale 2.0 --output build/neon_stage_panel_frames_2x
 
-      - name: Upload panel PNGs, contact sheets and SHA-256 reports
+      - name: Build verified standalone panel-frame ZIP package
+        run: python tools/package_neon_stage_panel_frames.py
+
+      - name: Upload panel PNGs, contact sheets, SHA-256 reports and ZIP package
         uses: actions/upload-artifact@v4
         with:
           name: PPGU-NEON-STAGE-PANEL-FRAMES-1X-2X
           path: |
             build/neon_stage_panel_frames_1x/
             build/neon_stage_panel_frames_2x/
+            build/PPGU-NEON-STAGE-PANEL-FRAMES-1X-2X.zip
+            build/PPGU-NEON-STAGE-PANEL-FRAMES-1X-2X/PANEL_FRAME_PACKAGE_MANIFEST.json
           if-no-files-found: error
           retention-days: 14
