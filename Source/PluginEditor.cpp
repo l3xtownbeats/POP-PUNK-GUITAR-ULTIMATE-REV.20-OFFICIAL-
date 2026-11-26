@@ -3393,6 +3393,11 @@ bool PopPunkGuitarUltimateAudioProcessorEditor::hasApprovedNeonStageRuntimeArtwo
         && palette.heroArtwork.getWidth() == 1600
         && palette.heroArtwork.getHeight() == 900
         && palette.backgroundArtwork.isValid()
+        && palette.headerPanelArtwork.isValid()
+        && palette.presetBrowserPanelArtwork.isValid()
+        && palette.playingCorePanelArtwork.isValid()
+        && palette.midiKeyboardBayPanelArtwork.isValid()
+        && palette.statusFooterPanelArtwork.isValid()
         && palette.controlsSpriteSheet.isValid()
         && palette.framesPanelsSpriteSheet.isValid()
         && palette.iconsSpriteSheet.isValid()
@@ -3421,6 +3426,11 @@ juce::String PopPunkGuitarUltimateAudioProcessorEditor::getSkinRuntimeDiagnostic
         + ";icons_atlas=" + dimensions(palette.iconsSpriteSheet)
         + ";rotary_atlas=" + dimensions(palette.rotarySpriteSheet)
         + ";main_knob_atlas=" + dimensions(palette.mainKnobLayerSpriteSheet)
+        + ";header_panel=" + dimensions(palette.headerPanelArtwork)
+        + ";browser_panel=" + dimensions(palette.presetBrowserPanelArtwork)
+        + ";playing_core_panel=" + dimensions(palette.playingCorePanelArtwork)
+        + ";keyboard_bay_panel=" + dimensions(palette.midiKeyboardBayPanelArtwork)
+        + ";status_footer_panel=" + dimensions(palette.statusFooterPanelArtwork)
         + ";control_states=" + juce::String(static_cast<int>(palette.controlStateArtwork.size()))
         + ";last_error=" + themeManager.getLastError();
 }
@@ -3445,10 +3455,26 @@ void PopPunkGuitarUltimateAudioProcessorEditor::configureKnob(juce::Slider& s, j
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::drawPanel(
-    juce::Graphics& g, juce::Rectangle<int> area, const juce::String& sectionTitle)
+    juce::Graphics& g, juce::Rectangle<int> area, const juce::String& sectionTitle,
+    const juce::Image* panelArtwork)
 {
     const auto& p = themeManager.getPalette();
     const auto bounds = area.toFloat();
+
+    if (panelArtwork != nullptr && panelArtwork->isValid())
+    {
+        // Use the separately authored panel plate; headings and all controls
+        // remain live JUCE components drawn above this background layer.
+        g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
+        g.drawImageWithin(*panelArtwork, area.getX(), area.getY(),
+                          area.getWidth(), area.getHeight(),
+                          juce::RectanglePlacement::stretchToFit);
+        g.setColour(p.token("text_secondary"));
+        g.setFont(makeThemeFont(p, 9.5f, false, true));
+        auto heading = area.reduced(15, 7).removeFromTop(19);
+        g.drawText(sectionTitle, heading, juce::Justification::centredLeft, true);
+        return;
+    }
 
     // Layered graphite chassis: a restrained soft shadow separates each
     // module from the stage without introducing a fake animated highlight.
@@ -3501,6 +3527,28 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
     g.fillAll(p.token("window_bg"));
     drawThemeArtworkLayers(g, getLocalBounds(), p, 0.16f, 0.78f, 0.055f, true);
 
+    // Draw the separate shell plates behind the interactive JUCE components.
+    auto shell = getLocalBounds().reduced(14);
+    const auto headerPanel = shell.removeFromTop(48);
+    if (p.headerPanelArtwork.isValid())
+        g.drawImageWithin(p.headerPanelArtwork, headerPanel.getX(), headerPanel.getY(),
+                          headerPanel.getWidth(), headerPanel.getHeight(),
+                          juce::RectanglePlacement::stretchToFit);
+    auto footerPanels = shell.removeFromBottom(132);
+    const auto statusPanel = footerPanels.removeFromBottom(22);
+    if (p.statusFooterPanelArtwork.isValid())
+        g.drawImageWithin(p.statusFooterPanelArtwork, statusPanel.getX(), statusPanel.getY(),
+                          statusPanel.getWidth(), statusPanel.getHeight(),
+                          juce::RectanglePlacement::stretchToFit);
+    footerPanels.removeFromBottom(4);
+    footerPanels.removeFromTop(42);
+    footerPanels.removeFromTop(5);
+    const auto keyboardBay = footerPanels.reduced(2, 2);
+    if (p.midiKeyboardBayPanelArtwork.isValid())
+        g.drawImageWithin(p.midiKeyboardBayPanelArtwork, keyboardBay.getX(), keyboardBay.getY(),
+                          keyboardBay.getWidth(), keyboardBay.getHeight(),
+                          juce::RectanglePlacement::stretchToFit);
+
     auto area = getLocalBounds().reduced(14);
     area.removeFromTop(48);
     area.removeFromBottom(132);
@@ -3513,8 +3561,8 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
     auto right = area.removeFromRight(rightWidth);
     area.removeFromRight(10);
 
-    drawPanel(g, left, "PRESETS");
-    drawPanel(g, area, "PLAYING CORE");
+    drawPanel(g, left, "PRESETS", &p.presetBrowserPanelArtwork);
+    drawPanel(g, area, "PLAYING CORE", &p.playingCorePanelArtwork);
     if (p.heroArtwork.isValid())
     {
         // The approved main-screen reference gives the guitar artwork its own
