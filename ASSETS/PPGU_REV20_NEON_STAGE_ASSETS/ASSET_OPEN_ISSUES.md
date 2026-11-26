@@ -216,3 +216,33 @@ Added `tools/extract_neon_stage_reference_components.py` and `REFERENCE_COMPONEN
 The atlas CI workflow now runs this extractor and includes the review package in the `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT` artifact. The two reference sources have different repository byte sizes from the earlier Library copies used for local crop-bound design; therefore the GitHub Actions output/contact sheet must be reviewed before any crop coordinates or visual fidelity are accepted. First workflow run for this integration is pending.
 
 This is a traceable reference-extraction deliverable, **not** runtime integration. Baked labels/scales are explicitly flagged; 2x files are resampled, not native 2x; dynamic JUCE text and meters must remain live. The crops are not yet accepted as standalone final artwork, and they do not close the 1:1 visual parity, 9-knob layered asset, complete panel, main-interface preview or FL Studio 20 gates.
+
+
+## 2026-11-26 — 41 icons, 70 source crops and nine six-layer main knobs verified
+
+**Status:** EXTENDED ARTWORK EXPORT VERIFIED / FULL 1:1 UI PARITY AND JUCE RUNTIME INTEGRATION STILL OPEN.
+
+GitHub Actions atlas export run `45834419111` succeeded on source commit `f0c1807c6a89f735bec71461456f9b51f3fec0e5`. The branch then advanced to `1ceca6e5124e1308364c97087c9d06e93b7276a2` with a documentation-only correction to the accepted baseline; the asset source files used in this export were not changed by that follow-up.
+
+Artifact `15124661281`, `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`: 88,485,111 bytes; SHA-256 `7577b9c1550dff7e872209850164914ee07d084f6d23d1ae3e1eb3687cf91ede`.
+
+### Verified output inventory
+
+- **490 independent components at 1x and 490 at 2x**: backgrounds/materials, panel-frame motifs, 27×5 button-state artwork, seven FX switch pairs, LED sample states, 183 rotary frames, 41 icon tiles, display frames, meter samples, 49 keys, three independent active-key overlays, fader parts and hardware details.
+- **41 standalone SVG icon masters + 164 transparent RGBA PNGs** at 16, 24, 32 and 48 px. All 205 manifest records resolve to an archive file and all byte counts/SHA-256 values match.
+- **70 source-faithful reference crops** from the stored button/switch and knob/meter reference sheets, each at 1x and 2x (140 PNG records). The 2x files are explicitly marked as LANCZOS-resampled versions of the source pixels; they are not native 2x artwork. Baked labels/scales are flagged in the manifest.
+- **Nine main rotary controls × six separate layers** (BASE, RIM, FACE, POINTER, SCALE, GLOW): 54 SVG masters and 108 RGBA PNGs at 192 and 384 px. The layers are separately addressable; they have not yet been registered as the JUCE renderer's runtime drawing path.
+- Contact sheets are included for the 41 icons, nine composite main knobs, source-reference crops and component categories.
+
+The downloaded ZIP was independently inspected: 1,545 entries (1,410 PNG, 95 SVG, 31 JPG, 7 JSON, 1 TXT and 1 nested ZIP). All manifest records across the two component exports, icon export, knob-layer export and source-reference export were checked: **0 missing paths and 0 size/SHA-256 mismatches**. The 41-icon and nine-knob contact sheets were visually reviewed.
+
+### Remaining work — not yet 1:1 accepted
+
+1. Integrate the approved individual artwork in the JUCE runtime renderer, keeping APVTS bindings, dynamic values, meter telemetry, note states, hit regions and automation real. The new six-layer main knob pack is an export, not runtime integration.
+2. Create separate FX EDIT knob layers and parameter-specific scales/overlays; review the three rotary styles against the exact FX EDIT mockup crops.
+3. Complete the full LED state set (OFF/ON/GLOW/WARNING/ERROR/SUCCESS/DISABLED), all additional button focus/state variants and independent keyboard hover/pressed states; the current atlas only covers its declared 27×5, seven OFF/ON pairs and five LED colour DIM/LIT samples.
+4. Complete content-rich panel artwork. The existing 16 SVG panels remain scalable shell frames, not finished compositions containing all visible reference content.
+5. Produce full-interface previews at 1024×700 and 1600×1100, then render the JUCE editor at 900×640, 1024×700 and 1600×1100 for registered overlay/difference review against the stored mockups.
+6. Continue current-head Windows x64 VST3/CTest/Pluginval validation and separately perform FL Studio 20 manual host acceptance. These are not proven by the atlas-export workflow.
+
+Do not mark the UI, asset pack or release COMPLETE until the runtime rendering and screenshot comparisons close the remaining visual mismatches. Source-reference crops are comparison aids; do not automatically register crops with baked labels/scales as production controls.
