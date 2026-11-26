@@ -32,6 +32,8 @@ public:
     void paint(juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
+    bool hasApprovedNeonStageRuntimeArtwork() const noexcept;
+    juce::String getSkinRuntimeDiagnostics() const;
 
 private:
     void chooseSfzFile(juce::Label* panelStatus = nullptr, juce::Button* panelLoadButton = nullptr);
@@ -51,7 +53,8 @@ private:
     void applyPalette();
     void persistSkinPreference();
     void configureKnob(juce::Slider&, juce::Label&, const juce::String&);
-    void drawPanel(juce::Graphics&, juce::Rectangle<int>, const juce::String& sectionTitle);
+    void drawPanel(juce::Graphics&, juce::Rectangle<int>, const juce::String& sectionTitle,
+                   const juce::Image* panelArtwork = nullptr);
     void loadFactoryPresetCatalog();
     void applyFactoryPreset(int index);
     PopPunkGuitarUltimateAudioProcessor& processor;
