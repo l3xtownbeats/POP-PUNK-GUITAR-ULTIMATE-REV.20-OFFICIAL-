@@ -568,7 +568,7 @@ def draw_main_knob_layer(layer_name):
         d = ImageDraw.Draw(tile)
         for step in range(61):
             angle_deg = 210 + step * 3
-            angle = math.radians(angle_deg)
+            angle = math.radians(angle_deg - 90.0)
             major = (step % 5 == 0)
             r1, r2 = (66, 76) if major else (69, 75)
             p1 = (cx + r1 * math.cos(angle), cy + r1 * math.sin(angle))
@@ -576,7 +576,7 @@ def draw_main_knob_layer(layer_name):
             d.line((p1, p2),
                    fill=rgba("#D8EAF5", 225 if major else 150),
                    width=2 if major else 1)
-        d.arc((17, 17, 175, 175), 210, 390,
+        d.arc((17, 17, 175, 175), 120, 300,
               fill=rgba(P["glow_cyan"], 185), width=3)
         d.ellipse((28, 28, 164, 164), outline=rgba("#8BA5BA", 55), width=1)
 
@@ -584,11 +584,11 @@ def draw_main_knob_layer(layer_name):
         glow = Image.new("RGBA", tile.size, (0, 0, 0, 0))
         gd = ImageDraw.Draw(glow)
         gd.ellipse((8, 8, 184, 184), outline=rgba(P["glow_blue"], 180), width=5)
-        gd.arc((10, 10, 182, 182), 210, 390,
+        gd.arc((10, 10, 182, 182), 120, 300,
                fill=rgba(P["glow_cyan"], 215), width=5)
         tile = Image.alpha_composite(tile, glow.filter(ImageFilter.GaussianBlur(7)))
         d = ImageDraw.Draw(tile)
-        d.arc((12, 12, 180, 180), 210, 390,
+        d.arc((12, 12, 180, 180), 120, 300,
               fill=rgba(P["glow_cyan"], 105), width=2)
     else:
         raise ValueError("unknown main knob layer: " + str(layer_name))
