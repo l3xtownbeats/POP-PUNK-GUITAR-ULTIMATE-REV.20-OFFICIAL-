@@ -94,17 +94,22 @@
             "normal",
             "hover",
             "pressed",
-            "disabled",
-            "active"
+            "active",
+            "disabled"
           ],
           "grid": {
-            "origin_x": 32,
-            "origin_y": 75,
-            "step_x": 375,
-            "step_y": 125,
-            "state_step_x": 68,
-            "cell_width": 62,
-            "cell_height": 42
+            "origin_x": 28,
+            "origin_y": 72,
+            "family_columns": 4,
+            "family_rows": 7,
+            "family_step_x": 472,
+            "family_step_y": 92,
+            "state_offset_x": 5,
+            "state_offset_y": 15,
+            "state_step_x": 88,
+            "control_width": 78,
+            "control_height": 48,
+            "crop_padding": 2
           },
           "family_ids": [
             "pill",
@@ -159,7 +164,46 @@
             "on_x_offset": 50,
             "y": 890
           },
-          "radius": 28
+          "radius": 28,
+          "card_layout": {
+            "origin_x": 24,
+            "origin_y": 756,
+            "card_step_x": 268,
+            "card_size": [
+              248,
+              102
+            ],
+            "states": {
+              "off": {
+                "offset": [
+                  10,
+                  28
+                ],
+                "size": [
+                  108,
+                  62
+                ],
+                "crop_padding": [
+                  3,
+                  3
+                ]
+              },
+              "on": {
+                "offset": [
+                  126,
+                  28
+                ],
+                "size": [
+                  108,
+                  62
+                ],
+                "crop_padding": [
+                  3,
+                  3
+                ]
+              }
+            }
+          }
         },
         {
           "id": "led_indicators",
@@ -174,7 +218,23 @@
           "states": [
             "dim",
             "lit"
-          ]
+          ],
+          "layout": {
+            "origin_x": 470,
+            "origin_y": 963,
+            "group_step_x": 205,
+            "state_center_offsets": [
+              [
+                28,
+                0
+              ],
+              [
+                102,
+                0
+              ]
+            ],
+            "crop_radius": 24
+          }
         }
       ]
     },
@@ -206,7 +266,17 @@
           "frame_index": 0,
           "angle_start_deg": 210,
           "angle_end_deg": 390,
-          "rotation_step_deg": 3
+          "rotation_step_deg": 3,
+          "strip_crop": {
+            "origin_x": 0,
+            "top_in_source_png": 70,
+            "step_y": 128,
+            "frame_size": [
+              128,
+              128
+            ],
+            "frame_count": 61
+          }
         },
         {
           "id": "rotary_layers",
@@ -340,7 +410,14 @@
             "error",
             "success",
             "info"
-          ]
+          ],
+          "grid": {
+            "origin_x": 40,
+            "origin_y": 80,
+            "columns": 7,
+            "step_x": 265,
+            "step_y": 135
+          }
         },
         {
           "id": "hardware",
