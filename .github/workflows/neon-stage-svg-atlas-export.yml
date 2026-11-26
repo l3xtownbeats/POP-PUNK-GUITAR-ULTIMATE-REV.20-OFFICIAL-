@@ -11,6 +11,7 @@ on:
       - "tools/export_neon_stage_vector_atlases.py"
       - "tools/export_neon_stage_components.py"
       - "tools/export_neon_stage_icons.py"
+      - "tools/export_neon_stage_knob_layers.py"
       - "tools/extract_neon_stage_reference_components.py"
       - "Assets/3D/References/Meshy_AI_neon_stage_buttons_and_switches.png"
       - "Assets/3D/References/Meshy_AI_neon_stage_knobs_and_meters (1).png"
@@ -25,6 +26,7 @@ on:
       - "tools/export_neon_stage_vector_atlases.py"
       - "tools/export_neon_stage_components.py"
       - "tools/export_neon_stage_icons.py"
+      - "tools/export_neon_stage_knob_layers.py"
       - "tools/extract_neon_stage_reference_components.py"
       - "Assets/3D/References/Meshy_AI_neon_stage_buttons_and_switches.png"
       - "Assets/3D/References/Meshy_AI_neon_stage_knobs_and_meters (1).png"
@@ -79,6 +81,9 @@ jobs:
           --knobs "Assets/3D/References/Meshy_AI_neon_stage_knobs_and_meters (1).png"
           --output build/neon_stage_reference_components
 
+      - name: Export nine main knobs as six independent visual layers
+        run: python tools/export_neon_stage_knob_layers.py --output build/neon_stage_knob_layers
+
       - name: Upload 1x and 2x PNG exports, rotary strips, contact sheets and SHA-256 reports
         uses: actions/upload-artifact@v4
         with:
@@ -89,6 +94,7 @@ jobs:
             build/neon_stage_components_1x/
             build/neon_stage_components_2x/
             build/neon_stage_icons/
+            build/neon_stage_knob_layers/
             build/neon_stage_reference_components/
           if-no-files-found: error
           retention-days: 14
