@@ -203,3 +203,16 @@ These two changes were committed after the successful artifact run (`a5d93c9`, `
 - Runtime use of every new standalone asset, Windows x64 build/CTest/Pluginval on the final visual branch head, and FL Studio 20 manual host acceptance are separate gates.
 
 The 484-component export is a verified intermediate asset package, **not** final 1:1 visual acceptance and **not** a complete release asset library.
+
+
+## 2026-11-26 — detailed source-reference crop pipeline added
+
+A new review-export path now extracts separate components directly from the detailed reference sheets stored in `Assets/3D/References/`:
+- `Meshy_AI_neon_stage_buttons_and_switches.png`;
+- `Meshy_AI_neon_stage_knobs_and_meters (1).png`.
+
+Added `tools/extract_neon_stage_reference_components.py` and `REFERENCE_COMPONENT_MAP.md`. The extractor defines **70 unique crop rectangles**: five FX-card states; six selector states; six rhythm-button states; six mode-button states including the reference-only Punk Group pair; ON/OFF toggle; two action buttons; four status LEDs; nine rotary examples; ten slider/thumb elements; eight meter/progress elements; and twelve individual meter segments. Each crop is exported at source-native 1x and a documented 2x LANCZOS review enlargement (140 PNGs total), with per-crop source coordinates, dimensions, baked-label flag, byte count and SHA-256.
+
+The atlas CI workflow now runs this extractor and includes the review package in the `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT` artifact. The two reference sources have different repository byte sizes from the earlier Library copies used for local crop-bound design; therefore the GitHub Actions output/contact sheet must be reviewed before any crop coordinates or visual fidelity are accepted. First workflow run for this integration is pending.
+
+This is a traceable reference-extraction deliverable, **not** runtime integration. Baked labels/scales are explicitly flagged; 2x files are resampled, not native 2x; dynamic JUCE text and meters must remain live. The crops are not yet accepted as standalone final artwork, and they do not close the 1:1 visual parity, 9-knob layered asset, complete panel, main-interface preview or FL Studio 20 gates.
