@@ -23,7 +23,15 @@
           "y": 80,
           "cell_width": 330,
           "cell_height": 260,
-          "step_x": 365
+          "step_x": 365,
+          "grid": {
+            "origin_x": 40,
+            "origin_y": 80,
+            "columns": 5,
+            "step_x": 365,
+            "cell_width": 330,
+            "cell_height": 260
+          }
         },
         {
           "id": "panel_frames",
@@ -77,7 +85,8 @@
               "w": 330,
               "h": 180
             }
-          ]
+          ],
+          "crop_padding": 2
         }
       ]
     },
@@ -328,7 +337,77 @@
             "notes_held_label",
             "notes_harmony_label",
             "scale_key_label"
-          ]
+          ],
+          "bounds": {
+            "empty_lcd": [
+              35,
+              70,
+              320,
+              130
+            ],
+            "spectrum_telemetry": [
+              375,
+              70,
+              400,
+              130
+            ],
+            "warning_tile": [
+              795,
+              70,
+              260,
+              130
+            ],
+            "error_tile": [
+              1075,
+              70,
+              260,
+              130
+            ],
+            "seven_segment_888": [
+              1355,
+              70,
+              220,
+              130
+            ],
+            "value_readout": [
+              1500,
+              225,
+              380,
+              140
+            ],
+            "status_bar": [
+              1504,
+              229,
+              372,
+              132
+            ],
+            "notes_held_label": [
+              40,
+              235,
+              220,
+              58
+            ],
+            "notes_harmony_label": [
+              290,
+              235,
+              220,
+              58
+            ],
+            "scale_key_label": [
+              540,
+              235,
+              220,
+              58
+            ]
+          },
+          "meter_segments": {
+            "x": 1080,
+            "y": 229,
+            "width": 42,
+            "height": 9,
+            "count": 12,
+            "step_y": 12
+          }
         },
         {
           "id": "midi_keyboard",
@@ -345,6 +424,66 @@
             "C",
             "E",
             "G"
+          ],
+          "white_key_layout": {
+            "x0": 40,
+            "y": 390,
+            "step_x": 63,
+            "width": 63,
+            "height": 230,
+            "count": 29,
+            "padding": 0
+          },
+          "black_key_layout": {
+            "x_positions": [
+              84,
+              147,
+              273,
+              336,
+              399,
+              525,
+              588,
+              714,
+              777,
+              840,
+              966,
+              1029,
+              1155,
+              1218,
+              1281,
+              1407,
+              1470,
+              1596,
+              1659,
+              1722
+            ],
+            "y": 390,
+            "width": 38,
+            "height": 135,
+            "padding": 0
+          },
+          "active_key_overlays": [
+            {
+              "name": "C",
+              "x": 44,
+              "y": 555,
+              "width": 55,
+              "height": 58
+            },
+            {
+              "name": "E",
+              "x": 170,
+              "y": 555,
+              "width": 55,
+              "height": 58
+            },
+            {
+              "name": "G",
+              "x": 296,
+              "y": 555,
+              "width": 55,
+              "height": 58
+            }
           ]
         },
         {
@@ -358,7 +497,38 @@
             "min",
             "mid",
             "max"
-          ]
+          ],
+          "fader_layout": {
+            "pitch": {
+              "track": [
+                100,
+                700,
+                50,
+                260
+              ],
+              "thumb_x": 85,
+              "label_y": 990
+            },
+            "mod": {
+              "track": [
+                400,
+                700,
+                50,
+                260
+              ],
+              "thumb_x": 385,
+              "label_y": 990
+            },
+            "thumb_y_positions": [
+              708,
+              818,
+              928
+            ],
+            "thumb_size": [
+              80,
+              24
+            ]
+          }
         }
       ]
     },
@@ -429,7 +599,53 @@
             "blue_light_bar",
             "rack_ears",
             "screw_set"
-          ]
+          ],
+          "crop_geometry": {
+            "side_bracket_type_1": [
+              50,
+              820,
+              170,
+              95
+            ],
+            "side_bracket_type_2": [
+              280,
+              820,
+              170,
+              95
+            ],
+            "side_bracket_type_3": [
+              510,
+              820,
+              170,
+              95
+            ],
+            "vent_grille": [
+              795,
+              815,
+              355,
+              120
+            ],
+            "blue_light_bar": [
+              36,
+              951,
+              488,
+              20
+            ],
+            "screw_set": {
+              "centres_x": [
+                600,
+                648,
+                696,
+                744,
+                792,
+                840,
+                888,
+                936
+              ],
+              "centre_y": 960,
+              "radius": 14
+            }
+          }
         }
       ]
     }
