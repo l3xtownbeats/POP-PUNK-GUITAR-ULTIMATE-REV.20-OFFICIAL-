@@ -98,14 +98,14 @@ void addChordOff(juce::MidiBuffer& midi, int sample, const std::array<int, 3>& n
 bool renderNeonStageUiSnapshots()
 {
     const char* outputPath = std::getenv("PPGU_UI_SNAPSHOT_DIR");
-    if (outputPath == nullptr || outputPath[0] == '\\0')
+    if (outputPath == nullptr || outputPath[0] == '\0')
         return true; // Local CTest runs may opt out; CI sets the output path.
 
     const juce::File outputDirectory(juce::String::fromUTF8(outputPath));
     if (outputDirectory.createDirectory() != juce::Result::ok)
     {
         std::cerr << "Could not create NEON STAGE UI snapshot directory: "
-                  << outputDirectory.getFullPathName() << "\\n";
+                  << outputDirectory.getFullPathName() << "\n";
         return false;
     }
 
@@ -113,7 +113,7 @@ bool renderNeonStageUiSnapshots()
     std::unique_ptr<juce::AudioProcessorEditor> editor(snapshotProcessor.createEditor());
     if (editor == nullptr)
     {
-        std::cerr << "The REV.20 processor did not create its UI editor.\\n";
+        std::cerr << "The REV.20 processor did not create its UI editor.\n";
         return false;
     }
 
@@ -126,10 +126,10 @@ bool renderNeonStageUiSnapshots()
         { 900, 640 }, { 1024, 700 }, { 1600, 1100 }
     }};
     juce::PNGImageFormat png;
-    juce::String manifest = "{\\n  \"schema\": \"ppgu.neon-stage-juce-snapshots/1\",\\n"
-                            "  \"theme\": \"skin-053\",\\n"
-                            "  \"source\": \"AudioProcessorEditor::createComponentSnapshot\",\\n"
-                            "  \"renders\": [\\n";
+    juce::String manifest = "{\n  \"schema\": \"ppgu.neon-stage-juce-snapshots/1\",\n"
+                            "  \"theme\": \"skin-053\",\n"
+                            "  \"source\": \"AudioProcessorEditor::createComponentSnapshot\",\n"
+                            "  \"renders\": [\n";
     bool first = true;
 
     for (const auto& size : sizes)
@@ -145,7 +145,7 @@ bool renderNeonStageUiSnapshots()
         if (!image.isValid() || image.getWidth() != width || image.getHeight() != height)
         {
             std::cerr << "NEON STAGE snapshot returned unexpected dimensions at "
-                      << width << "x" << height << ".\\n";
+                      << width << "x" << height << ".\n";
             return false;
         }
 
@@ -157,29 +157,29 @@ bool renderNeonStageUiSnapshots()
             || !stream->flush())
         {
             std::cerr << "Could not write NEON STAGE snapshot: "
-                      << imageFile.getFullPathName() << "\\n";
+                      << imageFile.getFullPathName() << "\n";
             return false;
         }
         stream.reset();
 
         if (!first)
-            manifest += ",\\n";
+            manifest += ",\n";
         manifest += "    { \"file\": \"" + fileName + "\", \"width\": "
             + juce::String(width) + ", \"height\": " + juce::String(height)
             + ", \"pixel_review\": \"PENDING\" }";
         first = false;
     }
 
-    manifest += "\\n  ]\\n}\\n";
+    manifest += "\n  ]\n}\n";
     const auto manifestFile = outputDirectory.getChildFile("PPGU_NEON_STAGE_UI_SNAPSHOTS.json");
     if (!manifestFile.replaceWithText(manifest))
     {
-        std::cerr << "Could not write NEON STAGE snapshot manifest.\\n";
+        std::cerr << "Could not write NEON STAGE snapshot manifest.\n";
         return false;
     }
 
     std::cout << "PASS — rendered NEON STAGE JUCE editor snapshots at "
-              << "900x640, 1024x700 and 1600x1100. Pixel-level mockup review remains a separate gate.\\n";
+              << "900x640, 1024x700 and 1600x1100. Pixel-level mockup review remains a separate gate.\n";
     return true;
 }
 
