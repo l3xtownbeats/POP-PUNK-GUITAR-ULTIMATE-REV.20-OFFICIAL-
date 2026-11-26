@@ -88,6 +88,10 @@ int main()
                            "NEON STAGE frames/panels atlas decoded");
                     expect(artworkCandidate.getPalette().iconsSpriteSheet.isValid(),
                            "NEON STAGE icon atlas decoded");
+                    expect(artworkCandidate.getPalette().mainKnobLayerSpriteSheet.isValid()
+                               && artworkCandidate.getPalette().mainKnobLayerSpriteSheet.getWidth() == 1152
+                               && artworkCandidate.getPalette().mainKnobLayerSpriteSheet.getHeight() == 768,
+                           "NEON STAGE nine-control six-layer rotary atlas decoded at 1152x768");
                     expect(artworkCandidate.getPalette().rotaryBlackDiscSpriteSheet.isValid()
                                && artworkCandidate.getPalette().rotaryBlackDiscSpriteSheet.getWidth() == 1024
                                && artworkCandidate.getPalette().rotaryBlackDiscSpriteSheet.getHeight() == 1024,
