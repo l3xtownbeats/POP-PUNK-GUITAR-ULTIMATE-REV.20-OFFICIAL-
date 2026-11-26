@@ -69,7 +69,7 @@ def save_contact_sheet(records: list[dict], prefix: str, columns: int,
     for index, item in enumerate(selected):
         col, row = index % columns, index // columns
         x, y = col * cell_w, row * cell_h
-        with Image.open(item["file"]) as source:
+        with Image.open(output / item["file"]) as source:
             thumb = source.convert("RGBA")
             thumb.thumbnail((thumb_w, thumb_h), Image.Resampling.LANCZOS)
             px = x + (thumb_w - thumb.width) // 2 + 9
