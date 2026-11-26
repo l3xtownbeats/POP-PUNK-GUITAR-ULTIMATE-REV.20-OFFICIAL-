@@ -38,7 +38,7 @@ jobs:
 
       - name: Install NEON STAGE asset generator dependency
         shell: pwsh
-        run: python -m pip install --disable-pip-version-check Pillow
+        run: python -m pip install --disable-pip-version-check Pillow CairoSVG==2.7.1
 
       - name: Generate canonical NEON STAGE sprite atlases
         shell: pwsh
