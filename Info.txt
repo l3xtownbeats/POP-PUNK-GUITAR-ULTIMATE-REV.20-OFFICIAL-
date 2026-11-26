@@ -445,3 +445,23 @@ Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest пос
 - Тот же manifest-backed кадр `search` подключён к поисковому полю галереи тем `SEARCH SKINS...`, а не только к каталогу пресетов. Компонент получил ID `Skin_Gallery_Search` и такой же 28 px левый отступ.
 - Иконка рисуется в фоне TextEditor; фильтрация тем, избранное, preview/apply/cancel и логика выбора скина не менялись. Если sprite atlas недоступен, поле продолжает работать в штатном виде.
 - Сборка/CTest для этой последней правки ещё ожидаются.
+
+
+## 2026-11-26 — точное требование 1:1 для NEON STAGE UI
+
+**Статус:** VISUAL PARITY NOT ACCEPTED / ASSET PACK IN PROGRESS.  
+Пользователь повторно зафиксировал обязательное требование: интерфейс и все визуальные группы должны быть точной 1:1 копией применимых макетов/атласов, а не стилистически похожей темой. Источники: Неоновый атлас UI-ассетов PPGU / ppgu_atlas, Неоновый интерфейс PPGU — поп-панк гитара, Неоновый интерфейс гитарного плагина PPGU, 02_ppgu_atlas_buttons_switches.png, 03_ppgu_atlas_knob_strips.png.
+
+Владелец исключил только repository-root 01 INTERFACE  NEON STAGE DEFAULT .png; этот файл не является обязательным референсом и не должен запрашиваться.
+
+Текущий проверенный результат на HEAD 86b4eae7983806193ad7b1ea8843039858e1d1c7:
+- atlas export CI 45824703792 — SUCCESS; пакет содержит пять SVG-master-derived PNG-атласов в 1x/2x, включая файлы 02_ppgu_atlas_buttons_switches.png и 03_ppgu_atlas_knob_strips.png, три 61-frame rotary strips и contact sheets;
+- panel export CI 45824703759 — SUCCESS; пакет содержит 16 SVG-derived PNG panel frames в 1x/2x и SHA-256 manifest;
+- native integration CI 45824703793 — SUCCESS на этом HEAD;
+- Windows x64 VST3 и SKIN-1 runtime CI на момент записи ещё выполняются.
+
+Ручной просмотр экспортов выявил важный разрыв: текущий button atlas содержит упрощённые прямоугольные state swatches; rotary atlas — упрощённые круглые элементы; 16 панелей в основном являются пустыми shell frames. Это НЕ 1:1 с детализированными макетами и исходными glossy/neon asset references. Успешная растеризация, размеры и SHA-256 подтверждают экспорт/целостность, но не визуальное соответствие.
+
+Следующий обязательный этап: составить component-to-reference map с crop bounds; переработать кнопки/переключатели/кнобы/LED/метры/дисплеи/иконки/клавиатуру/материалы/аппаратные детали по исходным референсам; затем закончить индивидуальные экспорты, панели и full-interface composition; провести JUCE screenshot overlay/difference review на 900×640, 1024×700 и 1600×1100. REV.20 parameter/DSP/runtime contracts остаются авторитетными при конфликтах с устаревшими REV.18 надписями/поведением.
+
+Не объявлять 100% готовность до закрытия полного asset inventory, runtime integration, visual comparison и отдельной FL Studio 20 host acceptance. Подробная ведомость разрывов и критерии находятся в ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/ASSET_OPEN_ISSUES.md.
