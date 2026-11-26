@@ -3462,18 +3462,21 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
     area.removeFromTop(8);
 
     const int leftWidth = juce::jlimit(180, 220, area.getWidth() / 5);
+    const int rightWidth = juce::jlimit(240, 285, area.getWidth() / 4);
     auto left = area.removeFromLeft(leftWidth);
     area.removeFromLeft(10);
+    auto right = area.removeFromRight(rightWidth);
+    area.removeFromRight(10);
 
     drawPanel(g, left, "PRESETS");
     drawPanel(g, area, "PLAYING CORE");
     if (p.heroArtwork.isValid())
     {
-        // Dedicated guitar stage/banner follows the supplied PPGU mockup:
-        // artwork above the nine controls; FX chain remains a separate lower row.
+        // The approved main-screen reference gives the guitar artwork its own
+        // stage/banner above the nine-control strip, not a watermark behind knobs.
         auto stage = area.reduced(8, 6);
         stage.removeFromTop(38);
-        const int stageHeight = juce::jlimit(72, 150, juce::jmax(1, area.getHeight() - 130) / 3);
+        const int stageHeight = juce::jlimit(72, 150, juce::jmax(1, area.getHeight() - 45) / 3);
         stage = stage.removeFromTop(juce::jmin(stageHeight, stage.getHeight()));
         g.saveState();
         g.reduceClipRegion(stage);
@@ -3488,6 +3491,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
         g.setColour(p.token("control_border").withAlpha(0.8f));
         g.drawRoundedRectangle(stage.toFloat(), 7.0f, 1.0f);
     }
+    drawPanel(g, right, "AMP & TONE");
 }
 
 void PopPunkGuitarUltimateAudioProcessorEditor::resized()
@@ -3500,8 +3504,8 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     if (auxiliaryWorkspace != nullptr)
         auxiliaryWorkspace->setBounds(bounds);
 
-    // Main-screen composition follows the supplied PPGU reference:
-    // LEFT preset browser / CENTER guitar stage + nine controls + horizontal FX chain.
+    // Approved NEON STAGE three-zone composition:
+    // LEFT preset browser / CENTER Playing Core (nine controls) / RIGHT Amp & Tone + FX rack.
     auto header = bounds.removeFromTop(48);
     titleLabel.setBounds(header.removeFromLeft(105).reduced(2, 4));
     subtitleLabel.setBounds(18, 47, 150, 14);
@@ -3528,8 +3532,11 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     bounds.removeFromTop(8);
     constexpr int workspaceGap = 10;
     const int leftWidth = juce::jlimit(180, 220, bounds.getWidth() / 5);
+    const int rightWidth = juce::jlimit(240, 285, bounds.getWidth() / 4);
     auto left = bounds.removeFromLeft(leftWidth);
     bounds.removeFromLeft(workspaceGap);
+    auto right = bounds.removeFromRight(rightWidth);
+    bounds.removeFromRight(workspaceGap);
     auto centre = bounds;
 
     // LEFT: searchable factory catalog and the PATTERN-only chord reference.
@@ -3546,33 +3553,23 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
         chordDiagram->setBounds(left.reduced(4, 2));
     }
 
-    // CENTER TOP: mode row and dedicated guitar/banner stage.
+    // CENTER: approved reference layout — all nine real APVTS controls in one horizontal row.
     auto modeRow = centre.removeFromTop(38);
     melodyTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
     patternTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
     modeBox.setBounds(modeRow.removeFromLeft(138).reduced(2, 3));
     startModeBox.setBounds(modeRow.reduced(2, 3));
     centre.removeFromTop(7);
-    const int stageHeight = juce::jlimit(72, 150, juce::jmax(1, centre.getHeight() - 130) / 3);
+
+    // Dedicated guitar stage/banner above the controls, matching the approved
+    // main-screen reference. Artwork is decorative only; no control hit target
+    // or processor parameter is placed over this region.
+    const int stageHeight = juce::jlimit(72, 150, centre.getHeight() / 3);
     centre.removeFromTop(juce::jmin(stageHeight, centre.getHeight()));
     centre.removeFromTop(6);
 
-    // CENTER BOTTOM: seven real FX switches in one horizontal chain, as in the
-    // reference mockup. Each remains attached to its existing APVTS bypass ID.
-    auto fxRow = centre.removeFromBottom(76);
-    fxTitle.setVisible(true);
-    fxTitle.setBounds(fxRow.removeFromTop(22).reduced(5, 0));
-    const int fxCellWidth = fxRow.getWidth() / static_cast<int>(fxButtons.size());
-    for (size_t i = 0; i < fxButtons.size(); ++i)
-    {
-        const int x = fxRow.getX() + static_cast<int>(i) * fxCellWidth;
-        const int width = (i + 1 == fxButtons.size())
-            ? fxRow.getRight() - x : fxCellWidth;
-        fxButtons[i].setBounds(x + 2, fxRow.getY() + 2,
-                               juce::jmax(1, width - 4), juce::jmax(1, fxRow.getHeight() - 4));
-    }
-
-    // CENTER MIDDLE: all nine live APVTS controls in one horizontal row.
+    // Keep the nine controls in a single evenly-spaced row at every supported
+    // editor size. The APVTS attachments, IDs, ordering and DSP are unchanged.
     const int knobCellWidth = centre.getWidth() / static_cast<int>(knobs.size());
     const int knobDiameter = juce::jmax(32,
         juce::jmin(92, juce::jmin(knobCellWidth - 8, centre.getHeight() - 26)));
@@ -3591,12 +3588,29 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
                                 juce::jmax(1, cellWidth - 2), labelHeight);
     }
 
-    // The REV.20 main amp/tone controls are the first four real APVTS knobs;
-    // do not fabricate a second set of amp controls in a decorative side rack.
-    ampTitle.setVisible(false);
-    playbackTitle.setVisible(false);
+    // RIGHT: AMP & TONE rack with exactly seven real APVTS FX switches.
+    right.removeFromTop(34);
+    const int ampHeaderHeight = juce::jlimit(30, 42, right.getHeight() / 4);
+    ampTitle.setBounds(right.removeFromTop(ampHeaderHeight).reduced(5, 1));
+    fxTitle.setVisible(true);
+    fxTitle.setBounds(right.removeFromTop(24).reduced(5, 1));
+    right.removeFromTop(3);
+
+    // Seven real FX bypass controls remain in the RIGHT AMP & TONE / FX CHAIN zone.
+    // Give each control a compact full-width row; never stretch a button to the
+    // entire rack height. Existing APVTS IDs and click-to-open FX EDIT behavior stay intact.
+    const int fxRowHeight = juce::jlimit(38, 52, right.getHeight() / 8);
+    const int fxRowGap = 4;
+    for (size_t i = 0; i < fxButtons.size(); ++i)
+    {
+        const int y = right.getY() + 2 + static_cast<int>(i) * (fxRowHeight + fxRowGap);
+        fxButtons[i].setBounds(right.getX() + 5, y,
+                               juce::jmax(1, right.getWidth() - 10),
+                               juce::jmax(1, fxRowHeight));
+    }
     if (mainFxEdit != nullptr)
         mainFxEdit->setVisible(false);
+    playbackTitle.setVisible(false);
 }
 
 juce::File PopPunkGuitarUltimateAudioProcessorEditor::getRuntimeSkinRoot() const
