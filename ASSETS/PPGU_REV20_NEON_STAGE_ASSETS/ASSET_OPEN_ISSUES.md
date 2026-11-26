@@ -330,3 +330,17 @@ The UI, main-screen 1:1 parity and complete release asset pack remain **IN PROGR
 The preceding experimental commit briefly moved the FX chain into the center panel. That change is **reverted**: it conflicted with the approved master prompt's explicit three-zone composition and RIGHT ZONE — AMP & TONE / FX CHAIN. The accepted layout remains LEFT preset browser / CENTER Playing Core / RIGHT Amp & Tone + seven FX switches. The actual defect visible in the 1024×700 and 1600×1100 snapshots was not the zone placement but the FX buttons being stretched to the full rack height and becoming unreadable. The current correction keeps the approved right zone and constrains each of the seven existing FX switches to its own compact full-width row (38–52 px), with 4 px spacing. No APVTS bindings, parameter IDs, DSP or click-to-open behavior changed.
 
 The green placeholder in `assets/hero.png` remains a separate blocking art defect; the screenshot set is not accepted as 1:1.
+
+
+## 2026-11-26 — current-head CI status refresh
+
+Checked source head: `37704475e8a2418278264ae91dd50ae2bd2ec493` on `feature/neon-stage-gui-polish`.
+
+All four current-head automated gates completed successfully:
+- Windows x64 VST3 validation #829 / run `45858901193`.
+- NEON STAGE native integration #569 / run `45858901190`.
+- SVG atlas render/export #147 / run `45858901188`; artifact `15137421779` (87,923,186 bytes).
+- SKIN-1 control-state runtime #540 / run `45858901185`.
+- Standalone panel-frame export #93 / run `45858901170`.
+
+This refresh supersedes earlier pending-build notes for the same head. It does not close any visual acceptance gap above: source-reference fidelity, content-rich panel compositions, FX EDIT-specific layers/scales, complete LED/focus/keyboard state matrix, full-editor JUCE screenshot overlays/difference review, and manual FL Studio 20 acceptance remain open. Successful panel-frame export is not evidence of finished panels. Status remains PARTIAL / 1:1 VISUAL PARITY NOT ACCEPTED / FULL ASSET PACK NOT COMPLETE.
