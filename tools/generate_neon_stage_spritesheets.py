@@ -12,7 +12,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
 
-from rotary_master_layers import draw_rotary_master_layer_pillow
+from rotary_master_layers import draw_rotary_master_layer_pillow, load_rotary_master_layers
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "SKIN" / "Skin_053" / "assets" / "spritesheets"
@@ -495,6 +495,11 @@ MAIN_KNOB_PARAMETERS = (
 )
 MAIN_KNOB_LAYERS = ("BASE", "RIM", "FACE", "POINTER", "SCALE", "GLOW")
 MAIN_KNOB_CELL = 128
+# Parse and structurally validate all six source layers from the canonical SVG
+# master before using its portable Pillow raster counterpart on Windows.
+MAIN_KNOB_SOURCE_LAYERS = load_rotary_master_layers(ROOT)
+if tuple(MAIN_KNOB_SOURCE_LAYERS) != MAIN_KNOB_LAYERS:
+    raise RuntimeError("Canonical rotary SVG layer order does not match the runtime manifest")
 main_knob_atlas = Image.new(
     "RGBA",
     (MAIN_KNOB_CELL * len(MAIN_KNOB_PARAMETERS),
@@ -502,9 +507,11 @@ main_knob_atlas = Image.new(
     (0, 0, 0, 0)
 )
 
-# All six layer surfaces are extracted verbatim from the canonical 512x512
-# rotary SVG master. The generator does not redraw or reinterpret its geometry.
+# SVG geometry is validated against the master above; Pillow mirrors that
+# explicit six-layer geometry to produce platform-independent PNG atlases.
 def draw_main_knob_layer(layer_name):
+    if layer_name not in MAIN_KNOB_SOURCE_LAYERS:
+        raise ValueError("Unknown layer in canonical rotary SVG master: " + str(layer_name))
     layer = draw_rotary_master_layer_pillow(layer_name, MAIN_KNOB_CELL)
     if layer.size != (MAIN_KNOB_CELL, MAIN_KNOB_CELL):
         raise RuntimeError(f"{layer_name}: canonical layer has unexpected dimensions {layer.size}")
