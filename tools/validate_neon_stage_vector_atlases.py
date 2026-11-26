@@ -193,8 +193,8 @@ def main() -> int:
             fail("icon atlas: each tile must contain exactly one glyph group")
         glyph_bodies.append(ET.tostring(nested[0], encoding="unicode"))
     if len(icon_groups) != 41 or set(labels) != ICON_NAMES or len(labels) != 41:
-        fail(f"icon atlas: expected all 35 named icon tiles, found {len(icon_groups)}")
-    if len(set(glyph_bodies)) != 35:
+        fail(f"icon atlas: expected all 41 named icon tiles, found {len(icon_groups)}")
+    if len(set(glyph_bodies)) != 41:
         fail("icon atlas: duplicate glyph body detected")
 
     print("PASS: 5 SVG masters parse; dimensions/viewBoxes and transparent canvases match.")
