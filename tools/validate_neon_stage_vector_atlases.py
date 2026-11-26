@@ -22,12 +22,13 @@ SHEETS = {
     "05_ppgu_atlas_icons_hardware.svg": (1920, 1020),
 }
 ICON_NAMES = {
-    "IMPORT", "GUITAR_PICK", "SFZ", "WAVEFORM", "FOLDER", "SEARCH",
-    "MUSIC_NOTE", "GRID", "HAND", "GEAR", "STAR", "MINUS", "STOP",
-    "CLOSE", "EYE", "CHECK", "POWER", "PULSE", "BARS", "WAVEFORM_2",
-    "SHUFFLE", "CLOCK", "SETTINGS_2", "ARROW_LEFT", "CHEVRON_UP",
-    "CHEVRON_DOWN", "CHEVRON_RIGHT", "CUBE", "MIDI_PLUG", "SPEAKER",
-    "USERS", "WARNING", "ERROR", "SUCCESS", "INFO",
+    "IMPORT", "GUITAR", "SFZ", "WAV", "PRESET", "SEARCH", "MELODY",
+    "PATTERN", "AUTOCHORDS", "SETTINGS", "SKIN", "FAVORITE", "PREVIEW",
+    "APPLY", "CANCEL", "POWER", "COMPRESSOR", "EQ", "DISTORTION",
+    "CHORUS", "FLANGER", "DELAY", "REVERB", "CABINET", "KEYBOARD",
+    "MIDI", "HARMONY", "NOTES", "LIBRARY", "WARNING", "ERROR", "SUCCESS",
+    "INFO", "CLOSE", "MINIMIZE", "MAXIMIZE", "ARROW_DOWN", "ARROW_LEFT",
+    "ARROW_RIGHT", "CHEVRON", "STAR",
 }
 BUTTON_FAMILIES = {
     "PILL", "SLAB", "TAB", "ICON", "TOGGLE", "LABEL", "FAVORITE",
@@ -191,7 +192,7 @@ def main() -> int:
         if len(nested) != 1:
             fail("icon atlas: each tile must contain exactly one glyph group")
         glyph_bodies.append(ET.tostring(nested[0], encoding="unicode"))
-    if len(icon_groups) != 35 or set(labels) != ICON_NAMES or len(labels) != 35:
+    if len(icon_groups) != 41 or set(labels) != ICON_NAMES or len(labels) != 41:
         fail(f"icon atlas: expected all 35 named icon tiles, found {len(icon_groups)}")
     if len(set(glyph_bodies)) != 35:
         fail("icon atlas: duplicate glyph body detected")
@@ -202,7 +203,7 @@ def main() -> int:
     print("PASS: 3 rotary strips × 61 frames; 128px pitch; 210°–390° in 3° steps; materials differ.")
     print("PASS: 49-key keyboard contains 29 white keys, 20 black keys and C/E/G active overlays.")
     print("PASS: display atlas includes a 12-segment meter sample.")
-    print("PASS: 35 icon tiles have 35 distinct glyph bodies and all declared labels.")
+    print("PASS: 41 icon tiles have 41 distinct glyph bodies and all declared labels.")
     print("NOTE: This validator does not render images or replace pixel-level visual QA.")
     return 0
 
