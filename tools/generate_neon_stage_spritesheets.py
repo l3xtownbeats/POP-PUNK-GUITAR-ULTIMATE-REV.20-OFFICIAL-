@@ -9,21 +9,24 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
+
 from PIL import Image, ImageDraw, ImageFilter
+
+from rotary_master_layers import draw_rotary_master_layer_pillow, load_rotary_master_layers
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "SKIN" / "Skin_053" / "assets" / "spritesheets"
 OUT.mkdir(parents=True, exist_ok=True)
 SIZE = (1024, 1024)
 P = {
-    "background": "#05070E",
-    "metal_border": "#00D2FF",
-    "glow_cyan": "#00E5FF",
+    "background": "#080B14",
+    "metal_border": "#31506F",
+    "glow_cyan": "#00D9FF",
     "glow_blue": "#6B8CFF",
     "accent_warning": "#FFB454",
-    "metal": "#101622",
-    "metal_light": "#1B2A3B",
-    "dim": "#7A8C9E",
+    "metal": "#101827",
+    "metal_light": "#17243A",
+    "dim": "#71829D",
 }
 def rgba(value, alpha=255):
     value = value.lstrip("#")
@@ -40,7 +43,7 @@ def save(im, name):
 manifest = {
   "schemaVersion":"1.1.0",
   "textPolicy":"No baked labels, captions, parameter values, channel names, state names, or live status text. Render all text in JUCE.",
-  "project":"NEON_STAGE_MANAGER_3_0",
+  "project":"POP_PUNK_GUITAR_ULTIMATE_REV_20",
   "theme":"NEON_STAGE_DEFAULT_SKIN_1",
   "canvas":[1024,1024],
   "base_palette":{
@@ -165,6 +168,76 @@ def draw_premium_rotary(angle_deg):
     d.arc(box((23, 18, 233, 228)), 195, 300, fill=rgba("#FFFFFF", 100), width=2)
     return tile.resize((120, 120), Image.Resampling.LANCZOS)
 
+def draw_premium_rotary_variant(angle_deg, style):
+    """Render a 210°–390° 61-frame FX EDIT rotary style at 128px cells."""
+    scale = 2
+    tile = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+    if style == "black_disc":
+        halo_colour, rim_colour = "#8FA2B4", "#A9BBCB"
+        face_colour, accent_colour, pointer_colour = "#05080C", "#9AAFC2", "#EDF6FC"
+        tick_colour = "#DCE8F0"
+    elif style == "knurled_steel":
+        halo_colour, rim_colour = P["glow_blue"], "#B7C9DA"
+        face_colour, accent_colour, pointer_colour = "#0B1725", P["glow_blue"], "#EAF3FC"
+        tick_colour = "#C5D3E0"
+    else:
+        raise ValueError("unknown rotary material: " + str(style))
+    def box(values):
+        return tuple(int(round(value * scale)) for value in values)
+    halo = Image.new("RGBA", tile.size, (0, 0, 0, 0))
+    hd = ImageDraw.Draw(halo)
+    hd.ellipse(box((17, 17, 239, 239)), outline=rgba(halo_colour, 160), width=8)
+    tile = Image.alpha_composite(tile, halo.filter(ImageFilter.GaussianBlur(12)))
+    d = ImageDraw.Draw(tile)
+    d.ellipse(box((15, 19, 241, 245)), fill=rgba("#02050A"), outline=rgba("#000000"), width=5)
+    d.ellipse(box((19, 14, 237, 232)), fill=rgba("#172330" if style == "black_disc" else "#253747"), outline=rgba(rim_colour, 220), width=4)
+    d.ellipse(box((27, 22, 229, 224)), fill=rgba(face_colour), outline=rgba("#43566A" if style == "black_disc" else "#536A7E"), width=5)
+    d.ellipse(box((35, 30, 221, 216)), fill=rgba("#03070D" if style == "black_disc" else "#0B1522"), outline=rgba(accent_colour, 190), width=3)
+    d.ellipse(box((43, 38, 213, 208)), fill=rgba("#0B1018" if style == "black_disc" else "#101D2B"), outline=rgba(rim_colour, 150), width=2)
+    for tick in range(210, 391, 15):
+        a = math.radians(tick - 90)
+        major = (tick % 45 == 30)
+        r1, r2 = (79, 91) if major else (82, 88)
+        p1 = (128 + r1 * math.cos(a), 128 + r1 * math.sin(a))
+        p2 = (128 + r2 * math.cos(a), 128 + r2 * math.sin(a))
+        d.line((*box(p1), *box(p2)), fill=rgba(tick_colour, 230 if major else 145), width=3 if major else 2)
+    d.arc(box((29, 24, 227, 222)), 210, 390, fill=rgba(accent_colour, 180), width=3)
+    if style == "knurled_steel":
+        for tick in range(0, 360, 6):
+            a = math.radians(tick)
+            p1 = (128 + 110 * math.cos(a), 128 + 110 * math.sin(a))
+            p2 = (128 + 119 * math.cos(a), 128 + 119 * math.sin(a))
+            d.line((*box(p1), *box(p2)), fill=rgba("#D0DCE6", 205), width=3)
+    a = math.radians(angle_deg - 90)
+    tip = (128 + 66 * math.cos(a), 128 + 66 * math.sin(a))
+    d.line((*box((128, 128)), *box(tip)), fill=rgba(pointer_colour), width=9)
+    d.line((*box((128, 128)), *box((128 + 62 * math.cos(a), 128 + 62 * math.sin(a)))),
+           fill=rgba(accent_colour), width=3)
+    d.ellipse(box((116, 116, 140, 140)), fill=rgba("#344B5D"), outline=rgba("#E8FAFF"), width=4)
+    d.ellipse(box((121, 121, 135, 135)), fill=rgba("#06121E"), outline=rgba(accent_colour), width=3)
+    d.ellipse(box((125, 125, 131, 131)), fill=rgba("#EAFBFF"))
+    d.arc(box((23, 18, 233, 228)), 210, 390, fill=rgba("#FFFFFF", 100), width=2)
+    return tile.resize((120, 120), Image.Resampling.LANCZOS)
+
+def build_rotary_variant(style, filename):
+    sheet = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
+    frames = []
+    for frame in range(61):
+        angle = 210.0 + frame * 3.0
+        tile = draw_premium_rotary_variant(angle, style)
+        col, row = frame % 8, frame // 8
+        x, y = col * 128, row * 128
+        sheet.alpha_composite(tile, (x + 4, y + 4))
+        frames.append({"frame": frame, "angle_deg": angle, "bbox": [x, y, x + 128, y + 128]})
+    save(sheet, filename)
+    manifest["sheets"][filename] = {
+        "resolution": [1024, 1024], "cell_size": [128, 128], "grid": [8, 8],
+        "frame_count": 61, "style": style, "angle_range_deg": [210, 390],
+        "angle_step_deg": 3.0, "frames": frames
+    }
+
+build_rotary_variant("black_disc", "neon_stage_rotary_black_disc_61frame_atlas.png")
+build_rotary_variant("knurled_steel", "neon_stage_rotary_knurled_steel_61frame_atlas.png")
 for frame in range(61):
     angle = -135.0 + frame * 4.5
     tile = draw_premium_rotary(angle)
@@ -410,8 +483,76 @@ manifest["sheets"]["neon_stage_icons_sheet.png"]={
  "elements":{"fx_icons":fx,"nav_icons":nav,"icons":icon_records,"cell_size":[144,144]}
 }
 
+
+# ---------------------------------------------------------------------------
+# 5. Nine parameter-specific main rotary stacks, each as independent layers.
+#    Layout: columns = REV.20 controls, rows = BASE/RIM/FACE/POINTER/SCALE/GLOW.
+#    The FX EDIT panels continue to use their dedicated 61-frame material atlases.
+# ---------------------------------------------------------------------------
+MAIN_KNOB_PARAMETERS = (
+    "GAIN", "TREBLE", "MID", "BASS", "VELOCITY",
+    "DYNAMICS", "SWING", "HUMANIZE", "ACCENT",
+)
+MAIN_KNOB_LAYERS = ("BASE", "RIM", "FACE", "POINTER", "SCALE", "GLOW")
+MAIN_KNOB_CELL = 128
+# Parse and structurally validate all six source layers from the canonical SVG
+# master before using its portable Pillow raster counterpart on Windows.
+MAIN_KNOB_SOURCE_LAYERS = load_rotary_master_layers(ROOT)
+if tuple(MAIN_KNOB_SOURCE_LAYERS) != MAIN_KNOB_LAYERS:
+    raise RuntimeError("Canonical rotary SVG layer order does not match the runtime manifest")
+main_knob_atlas = Image.new(
+    "RGBA",
+    (MAIN_KNOB_CELL * len(MAIN_KNOB_PARAMETERS),
+     MAIN_KNOB_CELL * len(MAIN_KNOB_LAYERS)),
+    (0, 0, 0, 0)
+)
+
+# SVG geometry is validated against the master above; Pillow mirrors that
+# explicit six-layer geometry to produce platform-independent PNG atlases.
+def draw_main_knob_layer(layer_name):
+    if layer_name not in MAIN_KNOB_SOURCE_LAYERS:
+        raise ValueError("Unknown layer in canonical rotary SVG master: " + str(layer_name))
+    layer = draw_rotary_master_layer_pillow(layer_name, MAIN_KNOB_CELL)
+    if layer.size != (MAIN_KNOB_CELL, MAIN_KNOB_CELL):
+        raise RuntimeError(f"{layer_name}: canonical layer has unexpected dimensions {layer.size}")
+    if layer.getchannel("A").getbbox() is None:
+        raise RuntimeError(f"{layer_name}: canonical layer rendered fully transparent")
+    return layer
+
+main_knob_frame_manifest = []
+for parameter_index, parameter_name in enumerate(MAIN_KNOB_PARAMETERS):
+    for layer_index, layer_name in enumerate(MAIN_KNOB_LAYERS):
+        tile = draw_main_knob_layer(layer_name)
+        x = parameter_index * MAIN_KNOB_CELL
+        y = layer_index * MAIN_KNOB_CELL
+        main_knob_atlas.alpha_composite(tile, (x, y))
+        main_knob_frame_manifest.append({
+            "parameter": parameter_name,
+            "control_id": f"knob{parameter_index + 1:02d}",
+            "layer": layer_name,
+            "bbox": [x, y, x + MAIN_KNOB_CELL, y + MAIN_KNOB_CELL],
+        })
+
+main_knob_atlas_name = "neon_stage_main_knob_layers_atlas.png"
+save(main_knob_atlas, main_knob_atlas_name)
+manifest["sheets"][main_knob_atlas_name] = {
+    "resolution": [
+        MAIN_KNOB_CELL * len(MAIN_KNOB_PARAMETERS),
+        MAIN_KNOB_CELL * len(MAIN_KNOB_LAYERS)
+    ],
+    "cell_size": [MAIN_KNOB_CELL, MAIN_KNOB_CELL],
+    "grid": [len(MAIN_KNOB_PARAMETERS), len(MAIN_KNOB_LAYERS)],
+    "parameter_order": list(MAIN_KNOB_PARAMETERS),
+    "layer_order": list(MAIN_KNOB_LAYERS),
+    "frames": main_knob_frame_manifest,
+    "source_reference": "SKIN/Skin_053/assets/vector/rotary_knob_master.svg",
+    "source_layers": "Original SVG elements are grouped without redrawing; the dynamic pointer is painted by JUCE from APVTS.",
+    "palette_reference": "SKIN/Skin_053/theme.json",
+    "runtime_policy": "MAIN_KNOBS_ONLY; FX_EDIT_CONTINUES_TO_USE_DEDICATED_61_FRAME_MATERIAL_ATLASES",
+}
+
 (OUT/"neon_stage_spritesheet_manifest.json").write_text(
     json.dumps(manifest,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
-print("Generated 4 NEON STAGE 1024x1024 RGBA sprite sheets and manifest:")
+print("Generated 8 NEON STAGE sprite sheets (including the 9x6 main-knob layer atlas) and manifest:")
 for path in sorted(OUT.glob("*")):
     print(f"{path.relative_to(ROOT)}\t{path.stat().st_size} bytes")

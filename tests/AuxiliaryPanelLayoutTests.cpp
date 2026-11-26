@@ -74,8 +74,9 @@ int main()
         auto layout = calculatePanelLayout(desktop, makePanels(count), 1.0f);
         CHECK(layout.panels.size() == static_cast<std::size_t>(count));
         CHECK(!layout.overflow && !layout.invalidInput);
-        CHECK(layout.columns == 2);
-        CHECK(layout.rows == (count + 1) / 2);
+        const int expectedColumns = count == 2 ? 2 : 3;
+        CHECK(layout.columns == expectedColumns);
+        CHECK(layout.rows == (count + expectedColumns - 1) / expectedColumns);
         for (const auto& p : layout.panels)
         {
             CHECK(p.bounds.width >= 280 && p.bounds.height >= 190);
@@ -151,7 +152,7 @@ int main()
     auto approvedLarge = calculatePanelLayout(largeEditorArea, approvedPanels, 1.0f, 12);
     CHECK(!approvedLarge.invalidInput && !approvedLarge.overflow);
     CHECK(approvedLarge.panels.size() == approvedPanels.size());
-    CHECK(approvedLarge.columns == 2 && approvedLarge.rows == 4);
+    CHECK(approvedLarge.columns == 3 && approvedLarge.rows == 3);
     for (std::size_t i = 0; i < approvedLarge.panels.size(); ++i)
     {
         CHECK(approvedLarge.panels[i].visible);

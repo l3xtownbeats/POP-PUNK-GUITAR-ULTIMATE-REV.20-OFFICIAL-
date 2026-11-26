@@ -64,8 +64,6 @@ public:
         closeButton.setColour(juce::TextButton::buttonOnColourId, border);
         closeButton.setColour(juce::TextButton::textColourOffId, text);
         closeButton.setColour(juce::TextButton::textColourOnId, text);
-        closeButton.setColour(juce::TextButton::buttonOnColourId, border);
-        closeButton.setColour(juce::TextButton::buttonColourId, panel.darker(0.2f));
         closeButton.onClick = [this] { owner.handleClose(panelId); };
         addAndMakeVisible(closeButton);
 

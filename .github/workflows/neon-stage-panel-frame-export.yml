@@ -1,0 +1,62 @@
+name: NEON STAGE standalone panel-frame export
+
+on:
+  push:
+    branches:
+      - "feature/**"
+    paths:
+      - "ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/panels/**/*.svg"
+      - "tools/export_neon_stage_panel_frames.py"
+      - ".github/workflows/neon-stage-panel-frame-export.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/panels/**/*.svg"
+      - "tools/export_neon_stage_panel_frames.py"
+      - ".github/workflows/neon-stage-panel-frame-export.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-stage-panel-frame-export-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  export:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned renderer
+        run: python -m pip install --disable-pip-version-check CairoSVG==2.7.1 Pillow==10.4.0
+
+      - name: Export standalone panel frames at 1x
+        run: python tools/export_neon_stage_panel_frames.py --scale 1.0 --output build/neon_stage_panel_frames_1x
+
+      - name: Export standalone panel frames at 2x
+        run: python tools/export_neon_stage_panel_frames.py --scale 2.0 --output build/neon_stage_panel_frames_2x
+
+      - name: Build verified standalone panel-frame ZIP package
+        run: python tools/package_neon_stage_panel_frames.py
+
+      - name: Upload panel PNGs, contact sheets, SHA-256 reports and ZIP package
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-NEON-STAGE-PANEL-FRAMES-1X-2X
+          path: |
+            build/neon_stage_panel_frames_1x/
+            build/neon_stage_panel_frames_2x/
+            build/PPGU-NEON-STAGE-PANEL-FRAMES-1X-2X.zip
+            build/PPGU-NEON-STAGE-PANEL-FRAMES-1X-2X/PANEL_FRAME_PACKAGE_MANIFEST.json
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,191 @@
+{
+  "schema": "ppgu.neon-stage.atlas-ci-report/1",
+  "project": "PPGU REV.20",
+  "skin": "skin-053",
+  "theme": "NEON STAGE DEFAULT",
+  "source_revision": "ddd671c8350af52290dc3b53c27d97333107db06",
+  "export_workflow_revision": "9b25bcc9adc2ac9fe9331bc9b0dfa27da2124999",
+  "workflow_run": {
+    "id": 45697271165,
+    "url": "https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/45697271165",
+    "conclusion": "success"
+  },
+  "artifact": {
+    "id": 15062120847,
+    "name": "PPGU-NEON-STAGE-SVG-ATLAS-EXPORT",
+    "size_bytes": 17491765,
+    "sha256": "d4f5ec747eb0b85df7a2d01a0cca474fe8a8b1bfcee7dffddb5f0466b1872995",
+    "expires_at": "2026-12-09T20:41:36Z"
+  },
+  "exports": {
+    "1x": {
+      "scale": 1,
+      "contact_sheet": {
+        "file": "NEON_STAGE_ATLAS_CONTACT_SHEET.jpg",
+        "width": 760,
+        "height": 5023
+      },
+      "atlases": [
+        {
+          "file": "01_ppgu_atlas_backgrounds_frames.png",
+          "width": 1920,
+          "height": 1000,
+          "bytes": 53381,
+          "sha256": "e0063b86082301b36c2fd473fd9554ef286444209828f3f70073687d30318f6c"
+        },
+        {
+          "file": "02_ppgu_atlas_buttons_switches.png",
+          "width": 1920,
+          "height": 1020,
+          "bytes": 97645,
+          "sha256": "396faad2a6b7ac15d603bac0032d4ae1c85a4c4da780febc1f9a641c5d4e2099"
+        },
+        {
+          "file": "03_ppgu_atlas_knob_strips.png",
+          "width": 1920,
+          "height": 8000,
+          "bytes": 2599775,
+          "sha256": "1804aa963c2b795506abcd7ec65622b9b95283cc66ca2bedc1f0cd35306aedd2"
+        },
+        {
+          "file": "04_ppgu_atlas_displays_keyboard.png",
+          "width": 1920,
+          "height": 1040,
+          "bytes": 53865,
+          "sha256": "6af5d62a7f352b0dec88bc1403a1a13bbc3c5d2c8a3104a7e17095f365dd5c07"
+        },
+        {
+          "file": "05_ppgu_atlas_icons_hardware.png",
+          "width": 1920,
+          "height": 1020,
+          "bytes": 103155,
+          "sha256": "8fe5dbf096f130f38464d9bb93f89ccd8408b15b91ab23e4e8088245a26db9a5"
+        }
+      ],
+      "rotary_strips": [
+        {
+          "file": "rotary_strip_1_61_frames.png",
+          "width": 128,
+          "height": 7808,
+          "frame_size": 128,
+          "frames": 61,
+          "bytes": 688497,
+          "sha256": "33e98eb901cbd24c6b914051e89fa2f5b778218fd0fa11a7888fc74eff73ff57"
+        },
+        {
+          "file": "rotary_strip_2_61_frames.png",
+          "width": 128,
+          "height": 7808,
+          "frame_size": 128,
+          "frames": 61,
+          "bytes": 747833,
+          "sha256": "cb8e6504eb4750bac2c6742e91372893d2b0682b166e5fb831760d956a5a79d5"
+        },
+        {
+          "file": "rotary_strip_3_61_frames.png",
+          "width": 128,
+          "height": 7808,
+          "frame_size": 128,
+          "frames": 61,
+          "bytes": 915005,
+          "sha256": "3ccff17425a29f9fb97e31c03ac935e4284a83a262e9f38c2fd2a8337654de7c"
+        }
+      ]
+    },
+    "2x": {
+      "scale": 2,
+      "contact_sheet": {
+        "file": "NEON_STAGE_ATLAS_CONTACT_SHEET.jpg",
+        "width": 760,
+        "height": 5023
+      },
+      "atlases": [
+        {
+          "file": "01_ppgu_atlas_backgrounds_frames.png",
+          "width": 3840,
+          "height": 2000,
+          "bytes": 118551,
+          "sha256": "3591046f4aacb30ef3935a7cc7a394b75c0ec8048980ed5cc4f29bd43e1e8a19"
+        },
+        {
+          "file": "02_ppgu_atlas_buttons_switches.png",
+          "width": 3840,
+          "height": 2040,
+          "bytes": 236137,
+          "sha256": "61b2e29f6f09441b79ad5bc107952b1e7415e50f082ead1651ddc8e98382b2a7"
+        },
+        {
+          "file": "03_ppgu_atlas_knob_strips.png",
+          "width": 3840,
+          "height": 16000,
+          "bytes": 6169309,
+          "sha256": "0bcec84f61aecd3ca5e815f7053b3b61cb845b5cbbcb0a5ee3df77abc5834b41"
+        },
+        {
+          "file": "04_ppgu_atlas_displays_keyboard.png",
+          "width": 3840,
+          "height": 2080,
+          "bytes": 126975,
+          "sha256": "35c466c861b10a3c060faf195dd1842a7b0fbe605c9d98445eabe3169f164139"
+        },
+        {
+          "file": "05_ppgu_atlas_icons_hardware.png",
+          "width": 3840,
+          "height": 2040,
+          "bytes": 228984,
+          "sha256": "815be7c026b367c576664b92893afd98dc24dcb3e361f2b767e5b4b7cd4b1ad1"
+        }
+      ],
+      "rotary_strips": [
+        {
+          "file": "rotary_strip_1_61_frames.png",
+          "width": 256,
+          "height": 15616,
+          "frame_size": 256,
+          "frames": 61,
+          "bytes": 1545323,
+          "sha256": "a2ea75c2696733eafb5ce0a55c744d6557743d8d78e8bc384e716fd0d6110399"
+        },
+        {
+          "file": "rotary_strip_2_61_frames.png",
+          "width": 256,
+          "height": 15616,
+          "frame_size": 256,
+          "frames": 61,
+          "bytes": 1664962,
+          "sha256": "73643ed353187bf0f8bd8e11d77aa8bfe9b0f4f11b04e1c9ea5ddcd37a21c562"
+        },
+        {
+          "file": "rotary_strip_3_61_frames.png",
+          "width": 256,
+          "height": 15616,
+          "frame_size": 256,
+          "frames": 61,
+          "bytes": 2211428,
+          "sha256": "f8a70efadc8b015e3bf697f40a46b37c213136c835bfea0034f6c09543aa9613"
+        }
+      ]
+    }
+  },
+  "checks": {
+    "structural_validator": "PASS",
+    "transparent_rgba": "PASS",
+    "svg_render": "PASS",
+    "manual_visual_review": "PARTIAL_PASS",
+    "notes": [
+      "Reviewed the 1x/2x contact sheets and full-size 1x atlases.",
+      "Carbon-weave lines remain inside their clipped swatch.",
+      "Conical chrome, black-disc and knurled-steel rotary strips are visually differentiated.",
+      "The misplaced green meter was replaced by a 12-segment cyan/blue sample.",
+      "The keyboard atlas shows 29 white and 20 black keys with C/E/G overlays.",
+      "Not every individual button state and every rotary frame was separately pixel-inspected."
+    ]
+  },
+  "not_completed": [
+    "Runtime JUCE registration/integration of these supplemental exports",
+    "Windows VST3 build and Pluginval acceptance for the current final head",
+    "FL Studio 20 host acceptance",
+    "Standalone per-state asset extraction and final ZIP release packaging",
+    "Final 1024x700 and 1600x1100 interface screenshots"
+  ]
+}

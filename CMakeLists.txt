@@ -232,6 +232,9 @@ target_link_libraries(ppgu_processor_pattern_tests PRIVATE
     juce::juce_recommended_warning_flags)
 juce_generate_juce_header(ppgu_processor_pattern_tests)
 add_test(NAME ppgu_processor_pattern_tests COMMAND ppgu_processor_pattern_tests)
+set_tests_properties(ppgu_processor_pattern_tests PROPERTIES
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    ENVIRONMENT "PPGU_UI_SNAPSHOT_DIR=${CMAKE_BINARY_DIR}/ui-snapshots")
 
 add_test(NAME ppgu_skin1_premium_artwork_package_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_skin1_premium_artwork_package.py)

@@ -235,12 +235,16 @@ def main() -> int:
         "neon_stage_frames_panels_sheet.png",
         "neon_stage_icons_sheet.png",
         "neon_stage_rotary_61frame_atlas.png",
+        "neon_stage_rotary_black_disc_61frame_atlas.png",
+        "neon_stage_rotary_knurled_steel_61frame_atlas.png",
+        "neon_stage_main_knob_layers_atlas.png",
     )
     for atlas_name in atlas_names:
         atlas_path = atlas_dir / atlas_name
         if not atlas_path.is_file():
             raise SystemExit(f"FAIL: missing NEON STAGE sprite atlas: {atlas_path}")
-        validate_png(atlas_path, (1024, 1024))
+        expected_size = (1152, 768) if atlas_name == "neon_stage_main_knob_layers_atlas.png" else (1024, 1024)
+        validate_png(atlas_path, expected_size)
     atlas_manifest_path = atlas_dir / "neon_stage_spritesheet_manifest.json"
     default_theme = json.loads((SKIN / "Skin_053" / "theme.json").read_text(encoding="utf-8"))
     if default_theme.get("assets", {}).get("spriteSheetManifest") != "assets/spritesheets/neon_stage_spritesheet_manifest.json":
@@ -249,20 +253,20 @@ def main() -> int:
         raise SystemExit("FAIL: missing NEON STAGE sprite atlas manifest")
     atlas_manifest = json.loads(atlas_manifest_path.read_text(encoding="utf-8"))
     expected_palette = {
-        "background": "#05070E",
-        "metal_border": "#00D2FF",
-        "glow_cyan": "#00E5FF",
+        "background": "#080B14",
+        "metal_border": "#31506F",
+        "glow_cyan": "#00D9FF",
         "glow_blue": "#6B8CFF",
         "semantic_warning": "#FFB454",
     }
-    if atlas_manifest.get("project") != "NEON_STAGE_MANAGER_3_0" \
+    if atlas_manifest.get("project") != "POP_PUNK_GUITAR_ULTIMATE_REV_20" \
             or atlas_manifest.get("theme") != "NEON_STAGE_DEFAULT_SKIN_1" \
             or atlas_manifest.get("canvas") != [1024, 1024] \
             or atlas_manifest.get("base_palette") != expected_palette:
         raise SystemExit("FAIL: NEON STAGE sprite atlas manifest identity/palette mismatch")
     sheets = atlas_manifest.get("sheets", {})
     if set(sheets) != set(atlas_names):
-        raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly five sheets")
+        raise SystemExit("FAIL: NEON STAGE sprite atlas manifest must define exactly eight sheets")
     if sheets.get("neon_stage_rotary_61frame_atlas.png", {}).get("resolution") != [1024, 1024] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("cell_size") != [128, 128] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("grid") != [8, 8] \
@@ -270,6 +274,60 @@ def main() -> int:
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("angle_range_deg") != [-135, 135] \
             or sheets["neon_stage_rotary_61frame_atlas.png"].get("angle_step_deg") != 4.5:
         raise SystemExit("FAIL: NEON STAGE 61-frame rotary atlas geometry mismatch")
+    main_layers = sheets.get("neon_stage_main_knob_layers_atlas.png", {})
+    expected_parameters = [
+        "GAIN", "TREBLE", "MID", "BASS", "VELOCITY",
+        "DYNAMICS", "SWING", "HUMANIZE", "ACCENT",
+    ]
+    expected_layers = ["BASE", "RIM", "FACE", "POINTER", "SCALE", "GLOW"]
+    if main_layers.get("resolution") != [1152, 768] \
+            or main_layers.get("cell_size") != [128, 128] \
+            or main_layers.get("grid") != [9, 6] \
+            or main_layers.get("parameter_order") != expected_parameters \
+            or main_layers.get("layer_order") != expected_layers:
+        raise SystemExit("FAIL: nine-control main-knob layer atlas contract mismatch")
+    main_frames = main_layers.get("frames", [])
+    if len(main_frames) != 54:
+        raise SystemExit("FAIL: main-knob layer atlas must declare 54 parameter/layer cells")
+    for parameter_index, parameter in enumerate(expected_parameters):
+        for layer_index, layer in enumerate(expected_layers):
+            frame_index = parameter_index * 6 + layer_index
+            frame = main_frames[frame_index]
+            x, y = parameter_index * 128, layer_index * 128
+            if frame.get("parameter") != parameter \
+                    or frame.get("control_id") != f"knob{parameter_index + 1:02d}" \
+                    or frame.get("layer") != layer \
+                    or frame.get("bbox") != [x, y, x + 128, y + 128]:
+                raise SystemExit(
+                    f"FAIL: main-knob layer atlas cell mismatch: {parameter}/{layer}"
+                )
+    default_sheets = default_theme.get("assets", {}).get("spriteSheets", {})
+    if default_sheets.get("main_knob_layers") != \
+            "assets/spritesheets/neon_stage_main_knob_layers_atlas.png":
+        raise SystemExit("FAIL: NEON STAGE theme does not register its main-knob layer atlas")
+
+    for variant_name in ("neon_stage_rotary_black_disc_61frame_atlas.png",
+                         "neon_stage_rotary_knurled_steel_61frame_atlas.png"):
+        variant = sheets.get(variant_name, {})
+        if variant.get("resolution") != [1024, 1024] \
+                or variant.get("cell_size") != [128, 128] \
+                or variant.get("grid") != [8, 8] \
+                or variant.get("frame_count") != 61 \
+                or variant.get("angle_range_deg") != [210, 390] \
+                or variant.get("angle_step_deg") != 3.0:
+            raise SystemExit(f"FAIL: {variant_name} geometry mismatch")
+        frames = variant.get("frames", [])
+        if len(frames) != 61:
+            raise SystemExit(f"FAIL: {variant_name} must declare 61 frames")
+        for frame_index, frame in enumerate(frames):
+            expected_angle = 210.0 + frame_index * 3.0
+            expected_x = (frame_index % 8) * 128
+            expected_y = (frame_index // 8) * 128
+            if frame.get("frame") != frame_index \
+                    or frame.get("angle_deg") != expected_angle \
+                    or frame.get("bbox") != [expected_x, expected_y, expected_x + 128, expected_y + 128]:
+                raise SystemExit(f"FAIL: {variant_name} frame {frame_index} geometry mismatch")
+
     controls = sheets["neon_stage_controls_spritesheet.png"]["elements"]
     if controls.get("knobs", {}).get("frames") != 8 \
             or controls.get("knobs", {}).get("angle_step_deg") != 45 \
@@ -352,10 +410,16 @@ def main() -> int:
             or icons.get("nav_icons") != ["crown", "power", "settings", "info", "folder", "search", "guitar", "antenna", "palette", "play"]:
         raise SystemExit("FAIL: NEON STAGE icon names/order mismatch")
 
-    expected_ready = [item[2] for item in EXPECTED]
+    # STILLWATER is intentionally host-acceptance-gated. Its embedded six-layer
+    # artwork package, preview/hero PNGs and all required SVGs are validated above,
+    # but it must not be advertised as runtime-ready until FL Studio 20 acceptance.
+    expected_ready = [item[2] for item in EXPECTED if item[2] != "skin-111"]
     if ready != expected_ready:
-        raise SystemExit(f"FAIL: all 16 approved themes must be runtime-ready after exact-SHA SVG decode/package validation; got {ready}")
-    print(f"PASS: exactly 16 runtime-ready themes; all theme artwork/SVGs; {verified_asset_count} NEON STAGE assets match byte counts, SHA-256, CRC32 and PNG dimensions; five 1024x1024 sprite atlases and exact atlas geometry; no extra theme directories.")
+        raise SystemExit(f"FAIL: expected the 15 host-ready themes and a separately gated STILLWATER slot; got {ready}")
+    stillwater = next(entry for entry in entries if entry.get("id") == "skin-111")
+    if stillwater.get("runtimeReady") is not False or "FL_STUDIO_20_HOST_ACCEPTANCE_PENDING" not in stillwater.get("status", ""):
+        raise SystemExit("FAIL: STILLWATER must remain explicitly gated until FL Studio 20 host acceptance")
+    print(f"PASS: exactly 16 approved theme slots; 15 runtime-ready themes plus host-acceptance-gated STILLWATER; all theme artwork/SVGs; {verified_asset_count} NEON STAGE assets match byte counts, SHA-256, CRC32 and PNG dimensions; five 1024x1024 sprite atlases and exact atlas geometry; no extra theme directories.")
     return 0
 
 if __name__ == "__main__":

@@ -330,3 +330,227 @@ The user explicitly approved, confirmed and asked to fix this direction as a bin
 - Added `LibraryManager/test_pattern_clip_registry.py` with 11 regression cases and registered it as `ppgu_pattern_clip_registry_contract` in CTest. Added the empty template `LibraryManager/pattern_clips.example.json` and technical contract `docs/PATTERN_CLIP_PIPELINE_RU.md`.
 - Scope boundary: this is a LibraryManager/offline validation foundation only. It is NOT yet connected to the C++ processor, does not create real clips, does not approve any source license, and does not implement audio-thread playback. Chord-driven PATTERN INSTRUMENT phrase mapping remains a separate future content/engine track.
 - Next content gate: access the original local source WAV files, reconcile their bytes against the saved SHA-256 inventories, establish redistribution rights, listen and review the musical material, then create sample-accurate staged clips and explicit per-key mappings. Only then implement the C++ immutable registry handoff and bounded real-time clip voice playback.
+
+
+## 2026-11-25 — пользовательские визуальные эталоны PPGU загружены и проверены
+
+Получены и просмотрены два изображения 1536×1024:
+- `Неоновый интерфейс гитарного плагина PPGU.png` — SHA-256 `83964d6e8316c0c3deef7dd7217492b396e36ed3ae448e1b6659ba1904207a26`.
+- `Неоновый атлас UI‑ассетов PPGU.png` — SHA-256 `0ad003b6cfb4d7d8d0f219ca12ef9a49627f5f221a07d46999b0578772e71e99`.
+
+Новый интерфейсный эталон охватывает верхний бренд/action bar, каталог и поиск пресетов, гитарный banner, MELODY/PATTERN, девять подписанных регуляторов (GAIN, TREBLE, MID, BASS, VELOCITY, DYNAMICS, SWING, HUMANIZE, ACCENT), AMP & TONE, семь FX-модулей, LIVE HARMONY, MIDI-клавиатуру, статус библиотеки и три вспомогательные области: FX EDIT, AutoChords/Harmony Setup, Licensed Guitar Library/Import Guitar.
+
+Новый атлас содержит 12 визуальных семейств: материалы/фоны, 9-slice frames, состояния кнопок, FX switches, rotary layers, FX EDIT rotaries, toggles/power/LED, display elements, MIDI keyboard, icons, hardware details и sprite-sheet examples. Наличие изображения в атласе само по себе не подтверждает подключение каждого кадра к runtime renderer.
+
+**Найдено расхождение для решения:** новый главный референс показывает девять регуляторов горизонтальной полосой; текущий REV.20 implementation baseline и `PluginEditor.cpp::resized()` размещают те же девять APVTS-контролов сеткой 3×3. До явного решения не менять геометрию и не менять APVTS IDs/порядок/поведение. Продолжить аудит визуальных ассетов и вспомогательных окон.
+
+Сохранить архитектурное ограничение: AutoChords, FX EDIT и Import Guitar — вспомогательные окна/workspace, а не новые главные режимы. Setup-only / not connected состояния на макете не представлять как готовую генерацию, preview или playback.
+
+Статус: изображения получены и изучены; полное визуальное соответствие ещё не подтверждено. Требуются поэлементная сверка runtime, responsive проверки, exact-SHA Windows build/CTest, pluginval и FL Studio 20 host acceptance.
+
+
+## 2026-11-25 — подтверждена горизонтальная компоновка девяти регуляторов
+
+Пользователь явно подтвердил замену прежней сетки 3×3 на одну горизонтальную строку согласно новому главному референсу. В `Source/PluginEditor.cpp::resized()` девять APVTS-регуляторов теперь располагаются равномерно в одной строке, подписи — под ними; диаметр адаптируется к доступной ширине. APVTS IDs, порядок, attachments, диапазоны, значения, DSP и MIDI не менялись.
+
+Commit: `9c1b214b8a2dcec06cb68fdcf3b1f04039dfaae1`. Проверки сборки, CTest, масштабирования и FL Studio 20 ещё ожидают выполнения.
+
+
+## 2026-11-25 — главный экран: отдельная гитарная stage-зона и горизонтальная FX-цепочка
+
+В `PluginEditor.cpp` выделена отдельная верхняя stage/banner-зона для существующего `heroArtwork`; девять APVTS-регуляторов остаются в одной горизонтальной строке ниже. Семь существующих FX bypass-кнопок теперь расположены горизонтальной цепочкой. Paint/resized stage geometry синхронизирована. Ни APVTS IDs/attachments, ни DSP/MIDI не менялись.
+
+AMP & TONE пока не имеет подтверждённого набора реальных amp-контролов/изображения в runtime; фиктивные элементы не добавлялись. LIVE HARMONY/CHORD/SCALE-KEY/NOTES HELD остаётся существующим read-only Performance Display. AutoChords generation не заявляется.
+
+Commits: `954c1d9cf9970c4a0bf524d3c4dfd8c09c00bc1a`, `bd7ecb2bdb5c150e85d54df894f8ca9ec2f25089`. Сборка, тесты, responsive screenshots и FL Studio 20 acceptance ожидают проверки.
+
+
+## 2026-11-25 — компоновка вспомогательных окон по референсу
+
+В новом главном референсе три нижние вспомогательные области показаны рядом: FX EDIT, AutoChords / Harmony Setup и Licensed Guitar Library / Import Guitar. В чистом геометрическом модуле `AuxiliaryPanelLayout` расширен перебор компоновок с максимум двух до максимум трёх колонок. Это позволяет трём открытым вспомогательным окнам размещаться в одной строке на достаточно широком рабочем поле; для большего числа окон алгоритм по-прежнему выбирает компоновку по доступной геометрии и минимальным размерам.
+
+Обновлены контрактные тесты `tests/AuxiliaryPanelLayoutTests.cpp` и README workspace. Runtime ownership, APVTS, DSP, MIDI и содержимое панелей не менялись. Коммиты: `3817616` (layout), `e7574d6` (tests), `a00130b` (README). Проверка сборкой/CTest после изменения ещё не подтверждена; PR #20 остаётся Draft.
+
+
+## 2026-11-25 — ревизия оболочки вспомогательных окон
+
+Проведена проверка `PPGUMultiWindowWorkspace::Window`: подтверждено использование theme palette, texture/bezel artwork и 9-slice frames/panels atlas, отдельные заголовки, кнопки закрытия/разворачивания, resize grip и content bounds. Удалены повторные назначения одинаковых цветов кнопки закрытия в конструкторе; поведение и геометрия не менялись.
+
+Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest после изменений ещё не выполнены/не подтверждены. Следующий этап — проверка реальных panel content-компонентов и соответствия их внутренней графики атласу, без создания фиктивных функций.
+
+
+## 2026-11-25 — FX EDIT telemetry clarity pass
+- FX EDIT response display now labels its data contract as read-only DSP response telemetry and explicitly reports when the processor does not expose that feed. No synthetic response curve or fabricated measurements are drawn.
+- Selected-effect status now includes the real number of APVTS controls in that group, alongside its existing ACTIVE/BYPASSED state. APVTS attachments, parameter IDs, DSP and audio-thread behavior are unchanged.
+- Source commit: 65404c7dd2fdb73804774dd3c56975ea607136a1. Build, CTest, Pluginval, Windows VST3 and FL Studio 20 acceptance remain pending for the current PR head.
+
+
+## 2026-11-25 — AutoChords voicing honesty guard
+- Removed the misleading hard-coded A-major fingering from the default chord diagram. Until a verified guitar-voicing database supplies a shape, the panel displays an explicit unavailable state instead of implying that a sample shape matches the selected key/chord.
+- The existing diagram renderer still accepts and draws a supplied voicing through setVoicing; that method now marks the shape as present. No chord-generation, APVTS, MIDI or DSP behavior changed.
+- Source commit: 5162addc50ba34956a7e7c5a74c01a02afd4f316. Verified voicing database and tests for its musical correctness remain open.
+
+
+## 2026-11-25 — Import Guitar: detailed SFZ load report
+- The asynchronous SFZ completion now presents the selected SFZ filename, actual loaded region count, actual loaded WAV sample count, and warning/error totals.
+- The Import Guitar panel lists up to three real warning and error messages, with a remainder count when longer. The summary explicitly describes one selected SFZ definition; it does not infer an instrument count from regions.
+- The loader contract is unchanged. No progress is simulated, no WAVs are counted by filesystem guessing, and no sampler/DSP/MIDI behavior was modified.
+- Source commit: 28d54921cc119d1126076f03847162958c055ec3. UI layout/build and runtime validation remain pending.
+
+
+- Follow-up source fix: the asynchronous completion explicitly captures the selected SFZ file by value, so the filename remains valid after the file-chooser callback returns. Commit: 0642e82c860ccc7e9165f8c62a9b37e9fbe31dce.
+
+
+## 2026-11-25 — Settings / Performance NEON STAGE polish
+- Performance Display now reports the live number of held MIDI notes in its MIDI input heading. The count is derived from the processor's existing lock-free held-note snapshot and updates with the same 20 Hz UI refresh; no MIDI state is written and no audio-thread work is added.
+- Workspace Settings now uses theme-aware elevated cards and accent framing around its existing scale, spacing, restore and gallery controls. Existing settings ranges, callbacks and UI-only scope are unchanged.
+- Source commit: 63fd1f2c762221416150082d4beab786dceb2abc (follow-up cleanup included). Build, CTest, Pluginval, Windows VST3 and FL Studio 20 acceptance remain pending for the current PR head.
+
+
+## 2026-11-25 — NEON STAGE authored VU meter atlas integration
+- Connected the Skin-1 meters/sliders atlas VU artwork to the live stereo output meter. The renderer selects one of eight authored states using the actual post-output peak level; the zero state and non-Skin-1 themes retain the existing semantic vector meter fallback.
+- Source rectangles follow the atlas manifest: 82×286 px crops at x=43+117*n, y=34, with eight authored active-segment states. Artwork is resampled at JUCE high quality and rendered only in the UI component.
+- The meter still reads the processor's existing lock-free output peak snapshots; audio/DSP and peak acquisition are unchanged. Visual verification in a built plugin remains pending.
+- Source commit: 331f3d7799f7c245ca83c6204e4d50c65b364967.
+
+
+## 2026-11-26 — SFZ import status LED atlas integration
+- Connected the round status LED states from the Skin-1 meters/sliders atlas to the real asynchronous SFZ import state: OFF=standby, blue=loading, cyan=ready, warning=error. The label continues to show the corresponding textual state.
+- Uses the manifest-defined 40×40 round LED cells in row y=810 (x=50/160/270/380). The existing palette-driven vector LED remains the fallback for all other skins or when the atlas is unavailable.
+- State continues to be derived from the actual loader button/status text; no simulated progress, loader, DSP, or audio-thread behavior added.
+- Source commit: 0d8167611809d4394c791f1de530a559cab84b50.
+
+
+## 2026-11-26 — truthful 16-theme CI gate for STILLWATER
+- Investigated the failing Windows validation run: all 26 CTest cases passed, then the 16-theme validator failed solely because STILLWATER (skin-111) is deliberately marked runtimeReady=false pending FL Studio 20 host acceptance. Its six embedded base SVG layers and preview/hero package are still validated; this gate must not be bypassed by falsely setting runtimeReady=true.
+- Updated the validator to require exactly 15 runtime-ready themes plus the single explicitly gated STILLWATER slot, while continuing to validate all 16 manifests, all required theme SVGs, artwork, the 135-record NEON STAGE package, five atlases and exact atlas geometry.
+- Updated the registry status to distinguish completed embedded artwork-package validation from the still-pending FL Studio 20 host acceptance. STILLWATER remains runtimeReady=false until that acceptance is performed.
+- Validator commit: 000666776aacdfb5d51a31403cc541b765400a31; registry commit: edffdbce062b42c24340191de3002896859c01c6.
+
+
+## 2026-11-26 — NEON STAGE: подключение atlas folder/power icons
+- Сверены реальные координаты иконок со `neon_stage_spritesheet_manifest.json` (144×144): `power` [360,360,504,504] и `folder` [852,360,996,504]. Эти два ранее неиспользованных кадра подключены к существующим кнопкам FX EDIT POWER и LOAD SFZ в окне Licensed Guitar Library.
+- Для кнопок заданы стабильные component IDs `FX_Edit_Power` и `Import_Guitar_Load`; отрисовка остаётся внутри существующих bounds и не меняет hit targets, callbacks, APVTS, DSP, MIDI или загрузчик SFZ.
+- Также расширена таблица runtime-координат атласа оставшимися документированными кадрами `search` и `play`; новые функции/кнопки не добавлялись, пока для них нет соответствующих подтверждённых действий в текущем интерфейсе.
+- Проверка сборкой/CTest и визуальный снимок после запуска ещё не выполнены для нового commit. FL Studio 20 host acceptance остаётся отдельным gate.
+
+
+## 2026-11-26 — NEON STAGE: иконка поиска в каталоге пресетов
+- Подключён кадр `search` из утверждённого `neon_stage_icons_sheet.png` по координатам manifest [32,645,176,789] (144×144) к существующему полю `SEARCH PRESETS...`.
+- Рендер выполняется в `fillTextEditorBackground()` только для стабильного component ID `Preset_Search`; левый текстовый отступ 28 px резервирует место для значка, не перекрывая текст, каретку и ввод. При отсутствии atlas используется штатный вид поля без ошибки.
+- Не добавлялись новые компоненты/действия; фильтрация, поиск, callbacks и данные каталога не менялись. Визуальная проверка нового поля после запуска и CI для нового commit ещё ожидаются.
+
+
+## 2026-11-26 — NEON STAGE: единый поиск в Skin Gallery
+- Тот же manifest-backed кадр `search` подключён к поисковому полю галереи тем `SEARCH SKINS...`, а не только к каталогу пресетов. Компонент получил ID `Skin_Gallery_Search` и такой же 28 px левый отступ.
+- Иконка рисуется в фоне TextEditor; фильтрация тем, избранное, preview/apply/cancel и логика выбора скина не менялись. Если sprite atlas недоступен, поле продолжает работать в штатном виде.
+- Сборка/CTest для этой последней правки ещё ожидаются.
+
+
+## 2026-11-26 — точное требование 1:1 для NEON STAGE UI
+
+**Статус:** VISUAL PARITY NOT ACCEPTED / ASSET PACK IN PROGRESS.  
+Пользователь повторно зафиксировал обязательное требование: интерфейс и все визуальные группы должны быть точной 1:1 копией применимых макетов/атласов, а не стилистически похожей темой. Источники: Неоновый атлас UI-ассетов PPGU / ppgu_atlas, Неоновый интерфейс PPGU — поп-панк гитара, Неоновый интерфейс гитарного плагина PPGU, 02_ppgu_atlas_buttons_switches.png, 03_ppgu_atlas_knob_strips.png.
+
+Владелец исключил только repository-root 01 INTERFACE  NEON STAGE DEFAULT .png; этот файл не является обязательным референсом и не должен запрашиваться.
+
+Текущий проверенный результат на HEAD 86b4eae7983806193ad7b1ea8843039858e1d1c7:
+- atlas export CI 45824703792 — SUCCESS; пакет содержит пять SVG-master-derived PNG-атласов в 1x/2x, включая файлы 02_ppgu_atlas_buttons_switches.png и 03_ppgu_atlas_knob_strips.png, три 61-frame rotary strips и contact sheets;
+- panel export CI 45824703759 — SUCCESS; пакет содержит 16 SVG-derived PNG panel frames в 1x/2x и SHA-256 manifest;
+- native integration CI 45824703793 — SUCCESS на этом HEAD;
+- Windows x64 VST3 и SKIN-1 runtime CI на момент записи ещё выполняются.
+
+Ручной просмотр экспортов выявил важный разрыв: текущий button atlas содержит упрощённые прямоугольные state swatches; rotary atlas — упрощённые круглые элементы; 16 панелей в основном являются пустыми shell frames. Это НЕ 1:1 с детализированными макетами и исходными glossy/neon asset references. Успешная растеризация, размеры и SHA-256 подтверждают экспорт/целостность, но не визуальное соответствие.
+
+Следующий обязательный этап: составить component-to-reference map с crop bounds; переработать кнопки/переключатели/кнобы/LED/метры/дисплеи/иконки/клавиатуру/материалы/аппаратные детали по исходным референсам; затем закончить индивидуальные экспорты, панели и full-interface composition; провести JUCE screenshot overlay/difference review на 900×640, 1024×700 и 1600×1100. REV.20 parameter/DSP/runtime contracts остаются авторитетными при конфликтах с устаревшими REV.18 надписями/поведением.
+
+Не объявлять 100% готовность до закрытия полного asset inventory, runtime integration, visual comparison и отдельной FL Studio 20 host acceptance. Подробная ведомость разрывов и критерии находятся в ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/ASSET_OPEN_ISSUES.md.
+
+
+## 2026-11-26 — verified expanded NEON STAGE standalone component export
+
+**Status:** COMPONENT EXPORT VERIFIED AT 1x/2x; VISUAL PARITY / FULL ASSET PACK / HOST ACCEPTANCE IN PROGRESS.
+
+GitHub Actions atlas export run `45831652470` succeeded on commit `ecdd536898035111837452325994acabf05d0de5`. Artifact `15122163495`, `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`, size 63,866,570 bytes, SHA-256 `03f5bd283bbb33c58b339363819ea0cf27496d715a8b4b0e2d48dc06d6b8fe4d`.
+
+Downloaded archive independently verified: 1,018 entries; 984 PNG, 30 contact-sheet JPG, 4 JSON. Each scale manifest declares exactly 484 individual components. All 968 individual PNG paths exist in the archive; all recorded byte counts and SHA-256 hashes match (0 missing files, 0 mismatches).
+
+Per-scale inventory: 5 background/material samples; 7 panel frame motifs; 135 button states; 14 FX OFF/ON switch components; 10 LED samples; 183 rotary frames; 35 icons; 10 display components; 12 meter segments; 29 white keys; 20 black keys; 3 C/E/G active overlays; 8 pitch/mod fader parts; 13 hardware parts. The exporter is manifest-driven and package-relative.
+
+Visual review of the exported contact sheets exposed two additional corrections after that successful run: the white-key crops included adjacent black-key overdraw, and the cyan hardware light bar referred to an undefined gradient. Follow-up commits `a5d93c9` and `8ccbd5e` add a dedicated light gradient and draw independent neutral white key faces with transparent C/E/G overlays. A fresh atlas export/visual review for those follow-up corrections is running; do not describe those post-run changes as verified until that run succeeds.
+
+The new verified export is still not the final 1:1 library. Remaining items include layered BASE/RIM/FACE/POINTER/SCALE/GLOW files for each of the nine main rotary controls, FX-specific scale overlays and layers, the master prompt's 41 named SVG icons at 16/24/32/48 px, all requested button/FX/LED focus and status variants, independent keyboard hover/pressed states, complete content-rich panel artwork, 1024×700 and 1600×1100 full-interface previews, and the JUCE rendered screenshot/overlay comparison. Windows build/CTest/Pluginval and FL Studio 20 host acceptance remain separate gates.
+
+The complete itemized gap list is maintained in `ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/ASSET_OPEN_ISSUES.md`; `Info.txt` remains the single canonical development journal.
+
+
+## 2026-11-26 — source-reference component extraction pipeline
+
+**Status:** EXTRACTOR + CI STEP ADDED; CURRENT CI RUN IN PROGRESS; VISUAL/ RUNTIME ACCEPTANCE OPEN.
+
+Added `tools/extract_neon_stage_reference_components.py` and `ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/REFERENCE_COMPONENT_MAP.md`. The pipeline cuts 70 traceable review crops from the detailed button/switch and knob/meter reference sheets in `Assets/3D/References/`; exports source-native 1x and LANCZOS-resampled 2x versions (140 PNG files); and records source hashes, crop coordinates, dimensions, baked-label flags, file sizes and SHA-256 values in a JSON manifest. The export includes a contact sheet and ZIP package.
+
+The atlas workflow was updated to run this extraction after the SVG atlas/component/icon exports and include the new directory in the standard atlas artifact. Workflow run `45834122870` on PR source commit `be68e1d284040e073f87852195a8d4e684e69971` passed setup and SVG source validation; the 1x atlas rasterization was still running at the time of this journal entry, so the reference-crop step and package are not yet CI-verified.
+
+The 70 crops cover five FX-card states; Major/Minor/Custom and Strum/Arp/Latch states; MELODY/PATTERN plus reference-only Punk Group pair; ON/OFF toggles; two action buttons; four status LEDs; five large rotary poses; four mini amp knobs; five horizontal sliders; five thumb variants; two vertical meters; five horizontal progress/meter treatments; one multicolor segment strip and twelve individual meter segments.
+
+Important limits: the 2x files are resampled, not native 2x; some crops preserve baked labels/scales; the reference artwork is not automatically runtime approved; dynamic values and real meter telemetry remain live JUCE layers. No claim of 1:1 UI acceptance or completed asset library is made from this export alone.
+
+
+## 2026-11-26 — 41 icons, 70 source crops and nine six-layer main knobs verified
+
+**Status:** EXTENDED ARTWORK EXPORT VERIFIED; FULL 1:1 UI PARITY AND JUCE RUNTIME INTEGRATION REMAIN IN PROGRESS.
+
+GitHub Actions atlas export run 45834419111 succeeded on source commit f0c1807c6a89f735bec71461456f9b51f3fec0e5. Artifact 15124661281, PPGU-NEON-STAGE-SVG-ATLAS-EXPORT, is 88,485,111 bytes with SHA-256 7577b9c1550dff7e872209850164914ee07d084f6d23d1ae3e1eb3687cf91ede. The branch subsequently advanced to 1ceca6e5124e1308364c97087c9d06e93b7276a2 with a documentation-only correction to the accepted baseline.
+
+Independently verified archive inventory:
+- 490 standalone components at 1x and the same 490 at 2x;
+- 41 standalone SVG icons plus 164 RGBA PNG variants at 16/24/32/48 px;
+- 70 source-faithful reference crops at both 1x/2x (140 files; 2x is resampled, not native source detail);
+- 54 SVG layers for the nine REV.20 main rotary controls (BASE/RIM/FACE/POINTER/SCALE/GLOW) plus 108 RGBA PNG renders at 192/384 px.
+The 1,545-entry ZIP contains 1,410 PNG, 95 SVG, 31 JPG, 7 JSON, 1 TXT and 1 nested ZIP. Every record in the five export manifests was checked: zero missing paths and zero size/SHA-256 mismatches. The icon and knob contact sheets and the source-reference crop contact sheet were visually reviewed.
+
+Remaining gaps: runtime registration/use of the new layers; separate FX EDIT knob layers and parameter-specific scales; complete LED/button/keyboard states; finished content-rich panels (the 16 SVG frames remain shells); full editor previews and JUCE screenshot overlay/difference review at 900×640, 1024×700 and 1600×1100; current-head Windows x64 VST3/CTest/Pluginval validation; and separate FL Studio 20 manual host acceptance. The exact 1:1 UI and full asset pack are **not** declared complete. The single itemized gap list remains ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/ASSET_OPEN_ISSUES.md.
+
+
+## 2026-11-26 — canonical NEON STAGE atlas export re-verified on REV.20 source
+
+**Status:** ATLAS / COMPONENT EXPORT VERIFIED; JUCE BUILD AND HOST/VISUAL ACCEPTANCE STILL IN PROGRESS.
+
+The latest successful atlas workflow at source commit `432db3c5d398b7ad86f57120ed87e3c4a60a09bf` is run `45838805335`. Artifact `15126143428`, `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`, is 87,923,180 bytes; SHA-256 `4d59b08cb1c06bbf316c3583239623721ffc679f42edbd48f757a7ace82a9e17`. The full archive is independently inspectable at `/mnt/data/PPGU-NEON-STAGE-REV20-ATLAS-COMPONENTS-AND-REFERENCE-CROPS.zip` in this work session.
+
+The archive contains 1,545 entries. The five export manifests were independently re-checked against the ZIP: **zero missing files and zero byte-count/SHA-256 mismatches** across all 490 standalone components at 1x, 490 at 2x, 205 icon files (41 SVG + 164 PNG at 16/24/32/48), 162 main-knob layer files (54 SVG + 108 PNG at 192/384), and 140 source-reference crops (70 at 1x + 70 at 2x). The source-reference 2x files are LANCZOS enlargements, not native 2x artwork. The source crop manifest records source sheet SHA-256 and exact crop coordinates; it flags baked labels/scales. The main knob SVG layers are split from `SKIN/Skin_053/assets/vector/rotary_knob_master.svg`; the Pillow PNG renderer is a portable raster counterpart, not pixel-identical to the original SVG/CairoSVG raster.
+
+Visual review of the latest contact sheets confirms: the main-knob pack uses one consistent physical hardware design for the nine real parameters; the detailed source-reference crops preserve the high-gloss button, rotary, slider and meter examples from the two stored Meshy sheets; and the 27×5 button atlas is now a coherent five-state set rather than plain empty rectangles. These are still separate asset/reference deliveries, not proof that every crop exactly matches the full approved interface, and no JUCE screenshot overlay comparison has been accepted.
+
+Current runtime implementation changes on this branch:
+- the six-layer 9×6 main knob atlas is registered through `theme.json` / `ThemeManager` and assembled in `PPGUPremiumLookAndFeel::drawRotarySlider`;
+- static POINTER art is not overlaid on the live control: JUCE draws pointer and value arc from the continuous APVTS slider value;
+- the SKIN-1 main rotary sweep is now `-135°..+135°`, matching the main rotary master; the `210°..390°` sweep remains reserved for FX EDIT material variants;
+- a new ThemeManager regression test verifies that all 54 atlas cells contain visible alpha pixels;
+- the main editor geometry remains the accepted horizontal row of nine controls, with APVTS IDs, order and DSP unchanged.
+
+CI on the current source head:
+- atlas export run `45838805335`: SUCCESS (all render, component, icon, reference crop and six-layer export steps passed);
+- panel frame export run `45838805563`: SUCCESS (export only; panel frames are not full content-rich panel implementations);
+- SKIN-1 runtime CI run `45838807152`: Windows configure passed; VST3/contract-test build was still running at last check;
+- NEON STAGE native CI run `45838805325`: Windows configure passed; C++ build was still running at last check;
+- Windows x64 validation run `45838805387`: Windows configure passed; VST3 build was still running at last check, with CTest, skin registry and Pluginval still pending.
+
+The exact 1:1 full-interface comparison remains open. In particular, the main panel SVGs are largely shell frames; several auxiliary SVGs include static guide/placeholder content, but are not connected to live JUCE data. Still outstanding: complete production background/material pack; separate FX EDIT rotary scales/layers; all required LED and focus/disabled states; independent keyboard hover/pressed states; completed main panel artwork/composition; JUCE render previews and overlay/difference review at 900×640, 1024×700 and 1600×1100; plus manual FL Studio 20 host acceptance. Do not declare the full UI or release complete until these gates close.
+
+
+## 2026-11-26 — current-head CI recheck after approved mockup confirmation
+
+**Source head checked:** `37704475e8a2418278264ae91dd50ae2bd2ec493` on `feature/neon-stage-gui-polish`.
+
+The owner supplied the two controlling visual references in the active conversation: (1) the 12-section SKIN-053 asset production board and (2) the complete REV.20 main editor composition. Treat the first as the asset-family/state/material reference and the second as the main-window geometry/composition reference. Preserve the actual REV.20 runtime control contract where older artwork labels differ. The repository-root image previously excluded remains excluded.
+
+Latest GitHub Actions results on this exact source head:
+- Windows x64 VST3 validation run `45858901193` (#829): SUCCESS; job `windows-x64-vst3` completed successfully.
+- NEON STAGE native integration run `45858901190` (#569): SUCCESS; job `windows-x64` completed successfully.
+- NEON STAGE SVG atlas render/export run `45858901188` (#147): SUCCESS; job `validate-and-export` completed successfully. Artifact `15137421779`, `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`, 87,923,186 bytes.
+- SKIN-1 control-state runtime run `45858901185` (#540): SUCCESS; job `windows-x64` completed successfully.
+- Standalone panel-frame export run `45858901170` (#93): SUCCESS; job `export` completed successfully. This verifies frame export only, not complete content-rich panels.
+
+These CI results verify the current-head automated build/validation and export workflows only. They do not prove 1:1 screenshot parity, complete standalone production artwork, FL Studio 20 host acceptance, or release completion. The remaining visual gaps and acceptance gates listed below remain open. Do not mark the UI or asset pack COMPLETE.

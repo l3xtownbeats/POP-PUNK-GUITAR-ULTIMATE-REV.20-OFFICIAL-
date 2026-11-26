@@ -1,9 +1,9 @@
 # NEON STAGE — production control artwork source
 
 ## Canonical visual reference
-- Main approved composition: `/01 INTERFACE  NEON STAGE DEFAULT .png` (repository root; do not replace or reinterpret).
+- Visual authority: the owner-designated PPGU mockups and atlases stored in Library/GitHub. The repository-root `01 INTERFACE  NEON STAGE DEFAULT .png` is explicitly excluded by the owner and is not a required dependency.
 - Skin: `SKIN/Skin_053` / `skin-053`.
-- Palette anchor: graphite `#05070E`, metal border `#00D2FF`, cyan glow `#00E5FF`, blue glow `#0048FF`; warning amber only for warning/error.
+- Palette authority: `SKIN/Skin_053/theme.json`. Use `window_bg #080B14`, `panel #101827`, `panel_elevated #17243A`, `control_border #31506F`, `accent #00D9FF`, `accent_glow #6B8CFF`, `danger #FF665E`, `warning #FFB454`, and the remaining exact theme tokens. Do not substitute the NEON STAGE Manager 3.0 palette.
 - This vector master is a reusable rotary-control face source, not a new skin or a replacement mockup.
 
 ## Rotary master
@@ -32,3 +32,13 @@
 - Inspect the current 61-frame renderer and artwork lookup before wiring new images. Do not overlay a static pointer on top of an atlas frame that already contains one.
 - Do not replace approved files until image comparison against the canonical mockup, PNG dimensions, alpha bounds, CRC/SHA-256, manifest and package tests are updated.
 - Never add baked labels, fake LEDs, decorative relays or controls that do not correspond to real JUCE/APVTS behavior.
+
+
+## REV.20 layer extraction / runtime mapping — 2026-11-26
+
+- The six semantic layers are `BASE`, `RIM`, `FACE`, `POINTER`, `SCALE`, `GLOW`.
+- `tools/rotary_master_layers.py` splits the canonical SVG source elements into independently addressable SVG groups. It validates the expected source geometry before extraction so a changed SVG structure stops the export rather than silently creating a different knob.
+- The Ubuntu atlas/export pipeline rasterizes those exact separated SVG groups with pinned CairoSVG. The Windows runtime build uses a portable Pillow renderer whose radii, paths, colors, ticks and layer roles mirror the same 512×512 master; this avoids requiring a native Cairo DLL on the Windows VST3 runner. The Pillow output is a raster counterpart, not a claim of vector-identical Cairo pixels.
+- The runtime atlas is 9 columns × 6 rows at 128×128 per cell. The nine columns keep the fixed REV.20 parameter order; physical hardware is shared, while labels and values remain JUCE text. The live pointer is drawn by JUCE from the continuous APVTS value; no static pointer is layered over it.
+- The FX EDIT controls remain on their separate 61-frame material-family atlases. No FX EDIT rotary was replaced by the main control design.
+- Atlas project identity and palette are `POP_PUNK_GUITAR_ULTIMATE_REV_20` and the exact `SKIN/Skin_053/theme.json` tokens.

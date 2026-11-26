@@ -123,7 +123,7 @@
       "index": 111,
       "path": "Skin_111/theme.json",
       "runtimeReady": false,
-      "status": "STILLWATER_VECTOR_ARTWORK_FOUNDATION_EXPANDED; REV20_EXACT_SHA_REVALIDATION_PENDING; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
+      "status": "STILLWATER_EMBEDDED_ARTWORK_PACKAGE_VALIDATED; FL_STUDIO_20_HOST_ACCEPTANCE_PENDING",
       "preview": "Skin_111/assets/preview.png",
       "hero": "Skin_111/assets/hero.png"
     },

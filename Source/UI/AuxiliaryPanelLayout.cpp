@@ -79,7 +79,9 @@ PanelLayout calculatePanelLayout(PanelRect area,
 
     const int scaledGap = gap <= 0 ? 0 : scaled(gap, scale);
     const int count = static_cast<int>(requests.size());
-    const int maximumColumns = std::min(count, 2);
+    // Three columns allow the approved FX EDIT / AutoChords / Import Guitar
+    // companion-panel composition when exactly three windows are open.
+    const int maximumColumns = std::min(count, 3);
 
     struct Candidate
     {

@@ -1,0 +1,100 @@
+name: NEON STAGE SVG atlas validation and PNG export
+
+on:
+  push:
+    branches:
+      - "feature/**"
+    paths:
+      - "ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/*.svg"
+      - "ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/NEON_STAGE_ATLAS_MANIFEST.json"
+      - "tools/validate_neon_stage_vector_atlases.py"
+      - "tools/export_neon_stage_vector_atlases.py"
+      - "tools/export_neon_stage_components.py"
+      - "tools/export_neon_stage_icons.py"
+      - "tools/export_neon_stage_knob_layers.py"
+      - "tools/extract_neon_stage_reference_components.py"
+      - "Assets/3D/References/Meshy_AI_neon_stage_buttons_and_switches.png"
+      - "Assets/3D/References/Meshy_AI_neon_stage_knobs_and_meters (1).png"
+      - ".github/workflows/neon-stage-svg-atlas-export.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/*.svg"
+      - "ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/NEON_STAGE_ATLAS_MANIFEST.json"
+      - "tools/validate_neon_stage_vector_atlases.py"
+      - "tools/export_neon_stage_vector_atlases.py"
+      - "tools/export_neon_stage_components.py"
+      - "tools/export_neon_stage_icons.py"
+      - "tools/export_neon_stage_knob_layers.py"
+      - "tools/extract_neon_stage_reference_components.py"
+      - "Assets/3D/References/Meshy_AI_neon_stage_buttons_and_switches.png"
+      - "Assets/3D/References/Meshy_AI_neon_stage_knobs_and_meters (1).png"
+      - ".github/workflows/neon-stage-svg-atlas-export.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-stage-svg-atlas-export-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-export:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout PR source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned SVG rasterizer
+        run: python -m pip install --disable-pip-version-check CairoSVG==2.7.1 Pillow==10.4.0
+
+      - name: Validate SVG source contracts
+        run: python tools/validate_neon_stage_vector_atlases.py
+
+      - name: Render transparent PNG atlases at 1x runtime dimensions
+        run: python tools/export_neon_stage_vector_atlases.py --scale 1.0 --output build/neon_stage_vector_atlases_1x
+
+      - name: Render high-resolution transparent PNG atlases at 2x
+        run: python tools/export_neon_stage_vector_atlases.py --scale 2.0 --output build/neon_stage_vector_atlases_2x
+
+      - name: Export 490 standalone components at 1x
+        run: python tools/export_neon_stage_components.py --scale 1 --input-dir build/neon_stage_vector_atlases_1x --output build/neon_stage_components_1x
+
+      - name: Export 490 standalone components at 2x
+        run: python tools/export_neon_stage_components.py --scale 2 --input-dir build/neon_stage_vector_atlases_2x --output build/neon_stage_components_2x
+
+      - name: Export 41 standalone SVG icons and 16/24/32/48 PNG variants
+        run: python tools/export_neon_stage_icons.py --output build/neon_stage_icons
+
+      - name: Extract 70 source-faithful reference components at 1x and 2x
+        run: >-
+          python tools/extract_neon_stage_reference_components.py
+          --buttons "Assets/3D/References/Meshy_AI_neon_stage_buttons_and_switches.png"
+          --knobs "Assets/3D/References/Meshy_AI_neon_stage_knobs_and_meters (1).png"
+          --output build/neon_stage_reference_components
+
+      - name: Export nine main knobs as six independent visual layers
+        run: python tools/export_neon_stage_knob_layers.py --output build/neon_stage_knob_layers
+
+      - name: Upload 1x and 2x PNG exports, rotary strips, contact sheets and SHA-256 reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-NEON-STAGE-SVG-ATLAS-EXPORT
+          path: |
+            build/neon_stage_vector_atlases_1x/
+            build/neon_stage_vector_atlases_2x/
+            build/neon_stage_components_1x/
+            build/neon_stage_components_2x/
+            build/neon_stage_icons/
+            build/neon_stage_knob_layers/
+            build/neon_stage_reference_components/
+          if-no-files-found: error
+          retention-days: 14

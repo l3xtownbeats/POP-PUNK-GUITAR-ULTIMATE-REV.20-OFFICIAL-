@@ -19,6 +19,8 @@ RUNTIME_ASSETS = {
     "assets/fx_layers/edge_highlight.png": (800, 450),
     "assets/fx_layers/specular.png": (800, 450),
     "assets/fx_layers/shadow.png": (800, 450),
+    "assets/spritesheets/neon_stage_rotary_black_disc_61frame_atlas.png": (1024, 1024),
+    "assets/spritesheets/neon_stage_rotary_knurled_steel_61frame_atlas.png": (1024, 1024),
 }
 
 

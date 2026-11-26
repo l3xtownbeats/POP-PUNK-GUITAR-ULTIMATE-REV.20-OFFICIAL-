@@ -340,7 +340,10 @@
       "meters_sliders": "assets/spritesheets/neon_stage_meters_sliders_sheet.png",
       "frames_panels": "assets/spritesheets/neon_stage_frames_panels_sheet.png",
       "icons": "assets/spritesheets/neon_stage_icons_sheet.png",
-      "rotary": "assets/spritesheets/neon_stage_rotary_61frame_atlas.png"
+      "rotary": "assets/spritesheets/neon_stage_rotary_61frame_atlas.png",
+      "rotary_black_disc": "assets/spritesheets/neon_stage_rotary_black_disc_61frame_atlas.png",
+      "rotary_knurled_steel": "assets/spritesheets/neon_stage_rotary_knurled_steel_61frame_atlas.png",
+      "main_knob_layers": "assets/spritesheets/neon_stage_main_knob_layers_atlas.png"
     },
     "spriteSheetManifest": "assets/spritesheets/neon_stage_spritesheet_manifest.json"
   },

@@ -196,6 +196,8 @@ public:
         addAndMakeVisible(subtitle);
 
         search.setTextToShowWhenEmpty("SEARCH SKINS...", palette.token("text_secondary"));
+        search.setComponentID("Skin_Gallery_Search");
+        search.setIndents(28, 0);
         search.setColour(juce::TextEditor::backgroundColourId, palette.token("control_bg"));
         search.setColour(juce::TextEditor::textColourId, palette.token("text_primary"));
         search.setColour(juce::TextEditor::outlineColourId, palette.token("control_border"));
@@ -579,8 +581,27 @@ public:
 
     void paint(juce::Graphics& g) override
     {
+        auto bounds = getLocalBounds();
         g.fillAll(palette.token("window_bg"));
-        drawThemeArtworkLayers(g, getLocalBounds(), palette, 0.12f, 0.34f, 0.04f);
+        drawThemeArtworkLayers(g, bounds, palette, 0.12f, 0.34f, 0.04f);
+
+        const auto drawSettingCard = [&g, this](juce::Rectangle<int> card, bool highlighted)
+        {
+            if (card.isEmpty())
+                return;
+            auto area = card.toFloat();
+            g.setColour(palette.token("panel_elevated").withAlpha(0.82f));
+            g.fillRoundedRectangle(area, 7.0f);
+            g.setColour((highlighted ? palette.token("accent") : palette.token("control_border"))
+                            .withAlpha(highlighted ? 0.42f : 0.72f));
+            g.drawRoundedRectangle(area.reduced(0.5f), 7.0f, 1.0f);
+        };
+        drawSettingCard(scaleSlider.getBounds().expanded(5, 4), false);
+        drawSettingCard(gapSlider.getBounds().expanded(5, 4), false);
+        drawSettingCard(restoreButton.getBounds().expanded(4, 3), false);
+        drawSettingCard(galleryButton.getBounds().expanded(4, 3), true);
+
+
     }
 
     void resized() override
@@ -639,8 +660,8 @@ public:
         heading.setFont(makeThemeFont(palette, 18.0f, false, true));
         heading.setJustificationType(juce::Justification::centredLeft);
         addAndMakeVisible(heading);
-        description.setText("Load an SFZ guitar instrument and its referenced WAV samples. "
-                            "The existing background loader validates and registers the bank.",
+        description.setText("Load one SFZ definition and its referenced WAV samples. "
+                            "The report below lists actual regions, samples, warnings and errors.",
                             juce::dontSendNotification);
         description.setJustificationType(juce::Justification::topLeft);
         description.setColour(juce::Label::textColourId, palette.token("text_secondary"));
@@ -651,6 +672,7 @@ public:
         status.setColour(juce::Label::textColourId, palette.token("lcd_text"));
         addAndMakeVisible(status);
         loadButton.setButtonText("LOAD SFZ");
+        loadButton.setComponentID("Import_Guitar_Load");
         loadButton.onClick = [this] { if (loadAction) loadAction(&status, &loadButton); };
         addAndMakeVisible(loadButton);
         startTimerHz(8);
@@ -683,30 +705,50 @@ public:
             10.0f, 10.0f);
         juce::Colour led = palette.token("led_off");
         juce::String stateText = "STANDBY";
+        int atlasLedX = 50; // authored round OFF state
         if (loadState == LoadState::loading)
         {
             led = palette.token("accent");
             stateText = "LOADING";
+            atlasLedX = 270; // authored blue state
         }
         else if (loadState == LoadState::ready)
         {
             led = palette.token("success");
             stateText = "READY";
+            atlasLedX = 160; // authored cyan state
         }
         else if (loadState == LoadState::error)
         {
             led = palette.token("danger");
             stateText = "ERROR";
+            atlasLedX = 380; // authored warning state
         }
-        if (loadState != LoadState::standby)
+
+        const bool hasAuthoredLed = palette.id == "skin-053"
+            && palette.metersSlidersSpriteSheet.isValid();
+        if (hasAuthoredLed)
         {
-            g.setColour(led.withAlpha(0.25f));
-            g.fillEllipse(ledBounds.expanded(4.0f));
+            // Round status LED cells are 40x40 at y=810 in the approved atlas.
+            // The selected state follows the actual asynchronous SFZ loader state.
+            g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
+            g.drawImage(palette.metersSlidersSpriteSheet,
+                        static_cast<int>(ledBounds.getX()), static_cast<int>(ledBounds.getY()),
+                        static_cast<int>(ledBounds.getWidth()), static_cast<int>(ledBounds.getHeight()),
+                        atlasLedX, 810, 40, 40);
         }
-        g.setColour(led);
-        g.fillEllipse(ledBounds);
-        g.setColour(palette.token("control_border"));
-        g.drawEllipse(ledBounds, 1.0f);
+        else
+        {
+            if (loadState != LoadState::standby)
+            {
+                g.setColour(led.withAlpha(0.25f));
+                g.fillEllipse(ledBounds.expanded(4.0f));
+            }
+            g.setColour(led);
+            g.fillEllipse(ledBounds);
+            g.setColour(palette.token("control_border"));
+            g.drawEllipse(ledBounds, 1.0f);
+        }
         g.setColour(palette.token("text_secondary"));
         g.setFont(makeThemeFont(palette, 9.0f, false, true));
         g.drawText(stateText, loadButton.getRight() + 34, loadButton.getY(),
@@ -723,7 +765,7 @@ public:
         area.removeFromTop(18);
         loadButton.setBounds(area.removeFromTop(42).removeFromLeft(180));
         area.removeFromTop(16);
-        status.setBounds(area.removeFromTop(90));
+        status.setBounds(area.removeFromTop(juce::jmax(120, area.getHeight())));
     }
 private:
     enum class LoadState { standby, loading, ready, error };
@@ -816,7 +858,7 @@ public:
         g.setColour(palette.tokens.textSecondary);
         g.setFont(makeThemeFont(palette, 8.5f, false, true));
         auto notesHeading = area.removeFromTop(13);
-        g.drawText("NOTES HELD", notesHeading, juce::Justification::left);
+        g.drawText("MIDI INPUT  /  " + juce::String(heldNoteCount) + " NOTES HELD", notesHeading, juce::Justification::left);
         const float midiLedX = static_cast<float>(notesHeading.getRight() - 9);
         const float midiLedY = static_cast<float>(notesHeading.getCentreY());
         const auto midiLedColour = midiActive ? palette.token("accent") : palette.token("led_off");
@@ -960,13 +1002,16 @@ private:
                          : mode == 2 ? pitchName(root) + " MINOR"
                                      : juce::String("CHROMATIC");
 
+        const int newHeldNoteCount = static_cast<int>(held.size());
         if (newChord != chordText || newNotes != notesText
-            || newKey != keyText || newMidiActive != midiActive)
+            || newKey != keyText || newMidiActive != midiActive
+            || newHeldNoteCount != heldNoteCount)
         {
             chordText = newChord;
             notesText = newNotes;
             keyText = newKey;
             midiActive = newMidiActive;
+            heldNoteCount = newHeldNoteCount;
             repaint();
         }
     }
@@ -980,6 +1025,7 @@ private:
     juce::String notesText { "Waiting for MIDI input" };
     juce::String keyText { "CHROMATIC" };
     bool midiActive = false;
+    int heldNoteCount = 0;
 };
 
 
@@ -1001,11 +1047,36 @@ public:
 
     void paint(juce::Graphics& g) override
     {
-        constexpr int segments = 20;
-        constexpr float gap = 2.0f;
         auto area = getLocalBounds().toFloat().reduced(2.0f);
         if (area.isEmpty())
             return;
+
+        // Skin-1 provides eight authored VU states (1..8 active segments) in
+        // the meters/sliders atlas. Select the closest authored state for the
+        // live peak level; keep the semantic vector meter for all other skins
+        // and for the true zero state, which has no active atlas frame.
+        if (palette.id == "skin-053" && palette.metersSlidersSpriteSheet.isValid())
+        {
+            const int activeSegments = juce::jlimit(0, 8, juce::roundToInt(level * 8.0f));
+            if (activeSegments > 0)
+            {
+                constexpr int sourceX = 43;
+                constexpr int sourceY = 34;
+                constexpr int frameStride = 117;
+                constexpr int sourceWidth = 82;
+                constexpr int sourceHeight = 286;
+                const int frameX = sourceX + (activeSegments - 1) * frameStride;
+                g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
+                g.drawImage(palette.metersSlidersSpriteSheet,
+                            getLocalBounds().getX(), getLocalBounds().getY(),
+                            getLocalBounds().getWidth(), getLocalBounds().getHeight(),
+                            frameX, sourceY, sourceWidth, sourceHeight);
+                return;
+            }
+        }
+
+        constexpr int segments = 20;
+        constexpr float gap = 2.0f;
         const float segmentHeight = juce::jmax(1.0f,
             (area.getHeight() - gap * static_cast<float>(segments - 1)) / static_cast<float>(segments));
         const int activeCount = juce::roundToInt(level * static_cast<float>(segments));
@@ -1145,9 +1216,10 @@ public:
         addAndMakeVisible(effectSelector);
 
         powerButton.setButtonText("POWER");
+        powerButton.setComponentID("FX_Edit_Power");
         powerButton.setClickingTogglesState(true);
         addAndMakeVisible(powerButton);
-        graphCaption.setText("RESPONSE DISPLAY  /  LIVE DATA NOT CONNECTED", juce::dontSendNotification);
+        graphCaption.setText("DSP RESPONSE  /  READ-ONLY TELEMETRY", juce::dontSendNotification);
         graphCaption.setColour(juce::Label::textColourId, palette.token("text_secondary"));
         addAndMakeVisible(graphCaption);
         status.setText("Controls are attached to the existing APVTS parameters.", juce::dontSendNotification);
@@ -1167,6 +1239,10 @@ public:
 
                 auto slider = std::make_unique<juce::Slider>();
                 slider->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+                slider->setComponentID("FXEdit_" + juce::String(static_cast<int>(groupIndex)) + "_" + item.second);
+                if (groupIndex == 0 || groupIndex == 1)
+                    slider->setRotaryParameters(210.0f * juce::MathConstants<float>::pi / 180.0f,
+                                                390.0f * juce::MathConstants<float>::pi / 180.0f, true);
                 slider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 70, 18);
                 slider->setColour(juce::Slider::rotarySliderFillColourId, palette.token("accent"));
                 slider->setColour(juce::Slider::rotarySliderOutlineColourId, palette.token("control_border"));
@@ -1203,6 +1279,9 @@ public:
         powerButton.setColour(juce::TextButton::textColourOnId, palette.token("window_bg"));
         for (auto& control : controls)
         {
+            if (control.group == 0 || control.group == 1)
+                control.slider->setRotaryParameters(210.0f * juce::MathConstants<float>::pi / 180.0f,
+                                                    390.0f * juce::MathConstants<float>::pi / 180.0f, true);
             control.label->setColour(juce::Label::textColourId, palette.token("text_secondary"));
             control.slider->setColour(juce::Slider::rotarySliderFillColourId, palette.token("accent"));
             control.slider->setColour(juce::Slider::rotarySliderOutlineColourId, palette.token("control_border"));
@@ -1258,13 +1337,13 @@ public:
                 g.drawHorizontalLine(graphArea.getY() + graphArea.getHeight() * i / 5, graphArea.getX(), graphArea.getRight());
             for (int i = 1; i < 9; ++i)
                 g.drawVerticalLine(graphArea.getX() + graphArea.getWidth() * i / 9, graphArea.getY(), graphArea.getBottom());
-            // Do not draw a fabricated response curve: no live DSP response
-            // telemetry is currently exposed to this visual workspace.
-            g.setColour(palette.token("text_secondary").withAlpha(0.82f));
+            // Keep this display explicitly telemetry-gated. No response curve is
+            // rendered until the processor exposes measured DSP response data.
+            auto notice = graphArea.reduced(10, 4);
+            g.setColour(palette.token("accent").withAlpha(0.72f));
             g.setFont(makeThemeFont(palette, 9.0f, false, true));
-            g.drawFittedText("LIVE RESPONSE DATA NOT AVAILABLE",
-                             graphArea.reduced(10, 4),
-                             juce::Justification::centred, 1);
+            g.drawFittedText("DSP RESPONSE TELEMETRY NOT EXPOSED",
+                             notice, juce::Justification::centred, 1);
         }
     }
 
@@ -1355,8 +1434,10 @@ private:
 
             // Keep the textual state correct on first open and after changing groups,
             // even when the newly selected effect happens to be bypassed (false).
+            const auto controlCount = static_cast<int>(group.parameters.size());
             const auto expectedStatus = group.name
-                + (enabled ? "  /  ACTIVE" : "  /  BYPASSED");
+                + (enabled ? "  /  ACTIVE" : "  /  BYPASSED")
+                + "  /  " + juce::String(controlCount) + " CONTROLS";
             if (status.getText() != expectedStatus)
                 status.setText(expectedStatus, juce::dontSendNotification);
             if (stateChanged)
@@ -1865,6 +1946,7 @@ public:
     void setVoicing(const juce::String& name, const std::array<int, 6>& positions)
     {
         chordName = name.isNotEmpty() ? name : "UNNAMED";
+        hasVoicing = true;
         for (size_t i = 0; i < frets.size(); ++i)
             frets[i] = juce::jlimit(-1, 4, positions[i]);
         repaint();
@@ -1889,6 +1971,17 @@ public:
         const auto grid = getLocalBounds().reduced(20, 42);
         if (grid.getWidth() < 40 || grid.getHeight() < 35)
             return;
+
+        // The fingering database is not connected yet. Never present the old
+        // hard-coded A-major sample shape as if it matched the selected harmony.
+        if (!hasVoicing)
+        {
+            g.setColour(palette.token("text_secondary"));
+            g.setFont(makeThemeFont(palette, 9.0f, false, true));
+            g.drawFittedText("NO VERIFIED GUITAR VOICING DATA",
+                             grid.reduced(4), juce::Justification::centred, 2);
+            return;
+        }
 
         constexpr int stringCount = 6;
         constexpr int fretCount = 4;
@@ -1943,8 +2036,9 @@ public:
 
 private:
     PPGUThemeManager::Palette palette;
-    juce::String chordName { "A MAJ  /  REFERENCE" };
-    std::array<int, 6> frets {{ 0, 0, 2, 2, 2, 0 }};
+    juce::String chordName { "VOICING DATA PENDING" };
+    std::array<int, 6> frets {{ -1, -1, -1, -1, -1, -1 }};
+    bool hasVoicing = false;
 };
 
 class PPGUAutoChordsPanel final : public juce::Component, public PPGUThemeAwarePanel,
@@ -2119,7 +2213,123 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     // interpolation work to the audio thread, or alter the APVTS value.
     g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
     const auto controlId = slider.getComponentID();
-    if (palette.rotarySpriteSheet.isValid())
+
+    // The nine REV.20 main controls use the independently authored 6-layer
+    // stack. FX EDIT remains on its own 61-frame material atlases below.
+    // Only paint is changed here: Slider/APVTS range, value, attachments,
+    // parameter IDs, automation and hit regions remain untouched.
+    if (controlId.startsWith("knob") && palette.mainKnobLayerSpriteSheet.isValid())
+    {
+        const int parameterIndex = controlId.substring(4).getIntValue() - 1;
+        if (parameterIndex >= 0 && parameterIndex < 9)
+        {
+            constexpr int cellSize = 128;
+            const int diameter = juce::jmax(1, juce::jmin(w, h) - 2);
+            const int destinationX = x + (w - diameter) / 2;
+            const int destinationY = y + (h - diameter) / 2;
+            const int sourceX = parameterIndex * cellSize;
+
+            const auto drawLayer = [&](int layerIndex)
+            {
+                const int sourceY = layerIndex * cellSize;
+                g.drawImage(palette.mainKnobLayerSpriteSheet,
+                            destinationX, destinationY, diameter, diameter,
+                            sourceX, sourceY, cellSize, cellSize);
+            };
+
+            // Atlas rows are declared in the canonical manifest:
+            // 0 BASE, 1 RIM, 2 FACE, 3 POINTER, 4 SCALE, 5 GLOW.
+            drawLayer(0); // BASE
+            drawLayer(5); // GLOW
+            drawLayer(1); // RIM
+            drawLayer(2); // FACE
+            drawLayer(4); // SCALE
+
+            const auto stateName = ppguSliderArtworkState(slider);
+            if (const auto* stateArtwork = palette.findControlArtwork(controlId, stateName))
+            {
+                if (stateArtwork->isValid() && stateName != "default")
+                {
+                    g.saveState();
+                    g.setOpacity(stateName == "disabled" ? 0.42f
+                                  : (stateName == "pressed" || stateName == "dragged" ? 0.16f : 0.10f));
+                    g.drawImageWithin(*stateArtwork, destinationX, destinationY,
+                                      diameter, diameter, juce::RectanglePlacement::centred);
+                    g.restoreState();
+                }
+            }
+
+            const bool enabled = slider.isEnabled();
+            const bool hovered = enabled && slider.isMouseOverOrDragging();
+            const bool focused = enabled && slider.hasKeyboardFocus(true);
+            const float centreX = static_cast<float>(destinationX) + diameter * 0.5f;
+            const float centreY = static_cast<float>(destinationY) + diameter * 0.5f;
+            const float arcRadius = static_cast<float>(diameter) * 0.455f;
+            const float pointerRadius = static_cast<float>(diameter) * 0.315f;
+            const float angle = start + pos * (end - start);
+
+            // Dynamic POINTER is painted live from the continuous parameter
+            // value rather than selecting a quantised pointer bitmap.
+            juce::Path arcTrack;
+            arcTrack.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                                   0.0f, start, end, true);
+            g.setColour(enabled ? palette.token("control_border").withAlpha(0.82f)
+                                : palette.token("text_disabled").withAlpha(0.40f));
+            g.strokePath(arcTrack, juce::PathStrokeType(2.8f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+            if (enabled && pos > 0.0001f)
+            {
+                juce::Path valueArc;
+                valueArc.addCentredArc(centreX, centreY, arcRadius, arcRadius,
+                                       0.0f, start, angle, true);
+                const auto accent = focused ? palette.token("highlight")
+                    : (hovered ? palette.token("accent") : palette.token("accent_glow"));
+                g.setColour(accent.withAlpha(hovered ? 0.52f : 0.34f));
+                g.strokePath(valueArc, juce::PathStrokeType(hovered ? 7.0f : 5.5f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+                g.setColour(accent.withAlpha(0.98f));
+                g.strokePath(valueArc, juce::PathStrokeType(hovered ? 2.8f : 2.3f,
+                    juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            }
+
+            juce::Path pointer;
+            pointer.startNewSubPath(centreX, centreY);
+            pointer.lineTo(centreX + std::sin(angle) * pointerRadius,
+                           centreY - std::cos(angle) * pointerRadius);
+            const auto pointerColour = !enabled ? palette.token("text_disabled")
+                : (focused ? palette.token("highlight") : palette.token("text_primary"));
+            g.setColour(pointerColour.withAlpha(enabled ? 0.98f : 0.52f));
+            g.strokePath(pointer, juce::PathStrokeType(2.6f,
+                juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            g.setColour(enabled ? palette.token("accent") : palette.token("text_disabled"));
+            g.fillEllipse(centreX - 3.0f, centreY - 3.0f, 6.0f, 6.0f);
+
+            if (!enabled)
+            {
+                g.setColour(palette.token("window_bg").withAlpha(0.30f));
+                g.fillEllipse(static_cast<float>(destinationX), static_cast<float>(destinationY),
+                              static_cast<float>(diameter), static_cast<float>(diameter));
+            }
+            else if (hovered || focused)
+            {
+                const auto ringColour = hovered ? palette.token("accent") : palette.token("highlight");
+                g.setColour(ringColour.withAlpha(hovered ? 0.72f : 0.52f));
+                g.drawEllipse(static_cast<float>(destinationX) + 1.5f,
+                              static_cast<float>(destinationY) + 1.5f,
+                              static_cast<float>(diameter) - 3.0f,
+                              static_cast<float>(diameter) - 3.0f, 1.5f);
+            }
+            return;
+        }
+    }
+
+    const juce::Image* rotaryAtlas = &palette.rotarySpriteSheet;
+    if (controlId.startsWith("FXEdit_0_") && palette.rotaryBlackDiscSpriteSheet.isValid())
+        rotaryAtlas = &palette.rotaryBlackDiscSpriteSheet;
+    else if (controlId.startsWith("FXEdit_1_") && palette.rotaryKnurledSteelSpriteSheet.isValid())
+        rotaryAtlas = &palette.rotaryKnurledSteelSpriteSheet;
+    if (rotaryAtlas->isValid())
     {
         // Canonical NEON STAGE rotary atlas: 61 authored positions in an 8x8
         // grid of 128px cells. Frame selection follows the live normalized
@@ -2131,7 +2341,7 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
         const int diameter = juce::jmax(1, juce::jmin(w, h) - 2);
         const int destinationX = x + (w - diameter) / 2;
         const int destinationY = y + (h - diameter) / 2;
-        g.drawImage(palette.rotarySpriteSheet, destinationX, destinationY,
+        g.drawImage(*rotaryAtlas, destinationX, destinationY,
                     diameter, diameter, sourceX, sourceY, cellSize, cellSize);
 
         // Premium value ring: its position is the real APVTS value, while
@@ -2370,6 +2580,30 @@ void PPGUPremiumLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     g.drawEllipse(cx - r + 4.0f, cy - r + 4.0f, d - 8.0f, d - 8.0f,
                   focused ? 2.0f : 1.2f);
 
+    // Machined-metal face treatment for themes without authored rotary PNGs.
+    // These highlights are paint-only: no bounds, hit-testing or parameter changes.
+    const auto faceBounds = juce::Rectangle<float>(cx - r + 6.0f, cy - r + 6.0f,
+                                                    d - 12.0f, d - 12.0f);
+    juce::Path upperBevel;
+    upperBevel.addCentredArc(cx, cy, r - 7.0f, r - 7.0f, 0.0f,
+                             juce::MathConstants<float>::pi * 1.12f,
+                             juce::MathConstants<float>::pi * 1.88f, true);
+    g.setColour(palette.token("highlight").withAlpha(enabled ? 0.20f : 0.06f));
+    g.strokePath(upperBevel, juce::PathStrokeType(1.15f,
+        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+    juce::Path lowerBevel;
+    lowerBevel.addCentredArc(cx, cy, r - 7.0f, r - 7.0f, 0.0f,
+                             juce::MathConstants<float>::pi * 0.12f,
+                             juce::MathConstants<float>::pi * 0.88f, true);
+    g.setColour(palette.token("shadow").withAlpha(enabled ? 0.30f : 0.12f));
+    g.strokePath(lowerBevel, juce::PathStrokeType(1.0f,
+        juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+    g.setColour(palette.token("highlight").withAlpha(enabled ? 0.045f : 0.015f));
+    g.fillEllipse(faceBounds.reduced(faceBounds.getWidth() * 0.16f,
+                                     faceBounds.getHeight() * 0.16f));
+
     juce::Path pointer;
     pointer.startNewSubPath(cx, cy);
     pointer.lineTo(cx + std::sin(angle) * r * 0.56f,
@@ -2526,6 +2760,8 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
         else if (controlId == "About") icon = "info";
         else if (controlId == "SKIN_button") icon = "palette";
         else if (controlId == "Import_Guitar") icon = "guitar";
+        else if (controlId == "Import_Guitar_Load") icon = "folder";
+        else if (controlId == "FX_Edit_Power") icon = "power";
         else if (controlId == "Auto_Discover") icon = "antenna";
         else if (controlId == "Curator") icon = "crown";
         if (icon.isEmpty()) return;
@@ -2535,9 +2771,11 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
             { "distortion", {360,75,144,144} }, { "chorus", {524,75,144,144} },
             { "delay", {688,75,144,144} }, { "reverb", {852,75,144,144} },
             { "cabinet", {32,360,144,144} }, { "crown", {196,360,144,144} },
-            { "settings", {524,360,144,144} }, { "info", {688,360,144,144} },
-            { "guitar", {196,645,144,144} }, { "antenna", {360,645,144,144} },
-            { "palette", {524,645,144,144} }
+            { "power", {360,360,144,144} }, { "settings", {524,360,144,144} },
+            { "info", {688,360,144,144} }, { "folder", {852,360,144,144} },
+            { "search", {32,645,144,144} }, { "guitar", {196,645,144,144} },
+            { "antenna", {360,645,144,144} }, { "palette", {524,645,144,144} },
+            { "play", {688,645,144,144} }
         };
         const auto found = iconBounds.find(icon.toStdString());
         if (found == iconBounds.end()) return;
@@ -2550,6 +2788,7 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
                     source.getX(), source.getY(), source.getWidth(), source.getHeight());
     };
     if (controlId.startsWith("fx_switch") || controlId == "Import_Guitar"
+        || controlId == "Import_Guitar_Load" || controlId == "FX_Edit_Power"
         || controlId == "Auto_Discover" || controlId == "Curator"
         || controlId == "Settings" || controlId == "About"
         || controlId == "SKIN_button")
@@ -2619,6 +2858,19 @@ void PPGUPremiumLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Butto
 
     g.setColour(focused ? palette.focus : (enabled ? palette.border : palette.token("lowlight")));
     g.drawRoundedRectangle(bounds, 7.0f, focused ? 2.0f : 1.0f);
+
+    // Subtle machined top/bottom edge for the non-atlas button fallback.
+    // Keep this strictly inside the existing paint bounds; no layout or hit-test changes.
+    if (enabled)
+    {
+        const auto edge = bounds.reduced(1.5f);
+        g.setColour(palette.token("highlight").withAlpha(hovered ? 0.34f : 0.20f));
+        g.drawLine(edge.getX() + 6.0f, edge.getY() + 0.8f,
+                   edge.getRight() - 6.0f, edge.getY() + 0.8f, 0.8f);
+        g.setColour(palette.token("lowlight").withAlpha(down ? 0.52f : 0.30f));
+        g.drawLine(edge.getX() + 6.0f, edge.getBottom() - 0.8f,
+                   edge.getRight() - 6.0f, edge.getBottom() - 0.8f, 0.8f);
+    }
 
     if (button.getToggleState() && enabled)
     {
@@ -2736,6 +2988,17 @@ void PPGUPremiumLookAndFeel::drawToggleButton(juce::Graphics& g,
     g.setColour(trackColour);
     g.fillRoundedRectangle(switchBounds, switchHeight * 0.5f);
 
+    // Fine metallic rim; active state remains bound to the real ToggleButton state.
+    const auto trackInset = switchBounds.reduced(1.0f * scale);
+    g.setColour(palette.token("highlight").withAlpha(enabled ? 0.22f : 0.06f));
+    g.drawLine(trackInset.getX() + 4.0f * scale, trackInset.getY() + 0.6f * scale,
+               trackInset.getRight() - 4.0f * scale, trackInset.getY() + 0.6f * scale,
+               0.75f * scale);
+    g.setColour(palette.token("lowlight").withAlpha(enabled ? 0.46f : 0.24f));
+    g.drawLine(trackInset.getX() + 4.0f * scale, trackInset.getBottom() - 0.6f * scale,
+               trackInset.getRight() - 4.0f * scale, trackInset.getBottom() - 0.6f * scale,
+               0.75f * scale);
+
     g.setColour(focused ? palette.token("highlight")
                         : palette.token("control_border").withAlpha(enabled ? 0.95f : 0.42f));
     g.drawRoundedRectangle(switchBounds, switchHeight * 0.5f,
@@ -2750,6 +3013,11 @@ void PPGUPremiumLookAndFeel::drawToggleButton(juce::Graphics& g,
                                                      knobDiameter, knobDiameter);
     g.setColour(enabled ? palette.token("highlight") : palette.token("text_disabled"));
     g.fillEllipse(knobBounds);
+    const auto knobHighlight = knobBounds.reduced(2.0f * scale);
+    g.setColour(palette.token("text_primary").withAlpha(enabled ? 0.28f : 0.08f));
+    g.drawLine(knobHighlight.getX() + 1.0f * scale, knobHighlight.getY() + 1.0f * scale,
+               knobHighlight.getRight() - 1.0f * scale, knobHighlight.getY() + 1.0f * scale,
+               0.7f * scale);
     g.setColour(palette.token("shadow").withAlpha(0.35f));
     g.drawEllipse(knobBounds, 0.8f);
 
@@ -2780,6 +3048,19 @@ void PPGUPremiumLookAndFeel::fillTextEditorBackground(juce::Graphics& g, int wid
     g.setColour(surface);
     g.fillRoundedRectangle(0.5f, 0.5f, static_cast<float>(width) - 1.0f,
                            static_cast<float>(height) - 1.0f, 6.0f);
+
+    // The preset search uses the authored NEON STAGE search glyph. TextEditor
+    // indents reserve this leading slot, so the live text/caret never overlap it.
+    const auto searchId = editor.getComponentID();
+    if ((searchId == "Preset_Search" || searchId == "Skin_Gallery_Search")
+        && palette.iconsSpriteSheet.isValid())
+    {
+        g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
+        constexpr int iconSize = 16;
+        const int iconY = (height - iconSize) / 2;
+        g.drawImage(palette.iconsSpriteSheet, 7, iconY, iconSize, iconSize,
+                    32, 645, 144, 144);
+    }
 }
 
 void PPGUPremiumLookAndFeel::drawTextEditorOutline(juce::Graphics& g, int width, int height,
@@ -2832,6 +3113,8 @@ PopPunkGuitarUltimateAudioProcessorEditor::PopPunkGuitarUltimateAudioProcessorEd
     categoryBox.setColour(juce::ComboBox::textColourId, themeManager.getPalette().token("text_primary"));
     addAndMakeVisible(categoryBox);
     presetSearch.setTextToShowWhenEmpty("SEARCH PRESETS...", themeManager.getPalette().token("text_secondary"));
+    presetSearch.setComponentID("Preset_Search");
+    presetSearch.setIndents(28, 0);
     presetSearch.setColour(juce::TextEditor::backgroundColourId, themeManager.getPalette().token("control_bg"));
     presetSearch.setColour(juce::TextEditor::textColourId, themeManager.getPalette().token("text_primary"));
     presetSearch.setColour(juce::TextEditor::outlineColourId, themeManager.getPalette().token("accent").withAlpha(0.4f));
@@ -3189,15 +3472,24 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
     drawPanel(g, area, "PLAYING CORE");
     if (p.heroArtwork.isValid())
     {
-        // Keep the approved 3x3 control geometry fully visible; the hero is a
-        // restrained backdrop beneath child controls, not a replacement layout.
+        // The approved main-screen reference gives the guitar artwork its own
+        // stage/banner above the nine-control strip, not a watermark behind knobs.
+        auto stage = area.reduced(8, 6);
+        stage.removeFromTop(38);
+        const int stageHeight = juce::jlimit(72, 150, juce::jmax(1, area.getHeight() - 45) / 3);
+        stage = stage.removeFromTop(juce::jmin(stageHeight, stage.getHeight()));
         g.saveState();
-        g.setOpacity(0.10f);
-        g.drawImageWithin(p.heroArtwork, area.getX() + 8, area.getY() + 36,
-                          juce::jmax(1, area.getWidth() - 16),
-                          juce::jmax(1, area.getHeight() - 44),
+        g.reduceClipRegion(stage);
+        g.setOpacity(0.96f);
+        g.drawImageWithin(p.heroArtwork, stage.getX(), stage.getY(),
+                          juce::jmax(1, stage.getWidth()),
+                          juce::jmax(1, stage.getHeight()),
                           juce::RectanglePlacement::centred);
+        g.setColour(p.token("window_bg").withAlpha(0.16f));
+        g.fillRect(stage);
         g.restoreState();
+        g.setColour(p.token("control_border").withAlpha(0.8f));
+        g.drawRoundedRectangle(stage.toFloat(), 7.0f, 1.0f);
     }
     drawPanel(g, right, "AMP & TONE");
 }
@@ -3261,7 +3553,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
         chordDiagram->setBounds(left.reduced(4, 2));
     }
 
-    // CENTER: the nine real APVTS controls in the approved 3x3 Playing Core grid.
+    // CENTER: approved reference layout — all nine real APVTS controls in one horizontal row.
     auto modeRow = centre.removeFromTop(38);
     melodyTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
     patternTab.setBounds(modeRow.removeFromLeft(92).reduced(2, 3));
@@ -3269,39 +3561,52 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     startModeBox.setBounds(modeRow.reduced(2, 3));
     centre.removeFromTop(7);
 
-    constexpr int knobColumns = 3;
-    constexpr int knobRows = 3;
-    const int knobCellWidth = centre.getWidth() / knobColumns;
-    const int knobCellHeight = centre.getHeight() / knobRows;
+    // Dedicated guitar stage/banner above the controls, matching the approved
+    // main-screen reference. Artwork is decorative only; no control hit target
+    // or processor parameter is placed over this region.
+    const int stageHeight = juce::jlimit(72, 150, centre.getHeight() / 3);
+    centre.removeFromTop(juce::jmin(stageHeight, centre.getHeight()));
+    centre.removeFromTop(6);
+
+    // Keep the nine controls in a single evenly-spaced row at every supported
+    // editor size. The APVTS attachments, IDs, ordering and DSP are unchanged.
+    const int knobCellWidth = centre.getWidth() / static_cast<int>(knobs.size());
+    const int knobDiameter = juce::jmax(32,
+        juce::jmin(92, juce::jmin(knobCellWidth - 8, centre.getHeight() - 26)));
+    const int labelHeight = 20;
+    const int rowHeight = knobDiameter + labelHeight;
+    const int rowY = centre.getY() + juce::jmax(0, (centre.getHeight() - rowHeight) / 2);
     for (size_t i = 0; i < knobs.size(); ++i)
     {
-        const int column = static_cast<int>(i) % knobColumns;
-        const int row = static_cast<int>(i) / knobColumns;
-        auto cell = juce::Rectangle<int>(
-            centre.getX() + column * knobCellWidth,
-            centre.getY() + row * knobCellHeight,
-            column == knobColumns - 1 ? centre.getRight() - (centre.getX() + column * knobCellWidth) : knobCellWidth,
-            row == knobRows - 1 ? centre.getBottom() - (centre.getY() + row * knobCellHeight) : knobCellHeight
-        ).reduced(3, 2);
-        knobLabels[i].setBounds(cell.removeFromTop(17));
-        knobs[i].setBounds(cell.reduced(2, 1));
+        const int x = centre.getX() + static_cast<int>(i) * knobCellWidth;
+        const int cellWidth = (i + 1 == knobs.size())
+            ? centre.getRight() - x : knobCellWidth;
+        const int diameter = juce::jmin(knobDiameter, cellWidth - 6);
+        const int knobX = x + (cellWidth - diameter) / 2;
+        knobs[i].setBounds(knobX, rowY, diameter, diameter);
+        knobLabels[i].setBounds(x + 1, rowY + knobDiameter + 2,
+                                juce::jmax(1, cellWidth - 2), labelHeight);
     }
 
     // RIGHT: AMP & TONE rack with exactly seven real APVTS FX switches.
     right.removeFromTop(34);
-    ampTitle.setBounds(right.removeFromTop(23).reduced(5, 1));
+    const int ampHeaderHeight = juce::jlimit(30, 42, right.getHeight() / 4);
+    ampTitle.setBounds(right.removeFromTop(ampHeaderHeight).reduced(5, 1));
     fxTitle.setVisible(true);
     fxTitle.setBounds(right.removeFromTop(24).reduced(5, 1));
     right.removeFromTop(3);
-    const int rackGap = 4;
-    const int rackButtonHeight = juce::jlimit(36, 46,
-        (right.getHeight() - rackGap * static_cast<int>(fxButtons.size() - 1))
-            / static_cast<int>(fxButtons.size()));
+
+    // Seven real FX bypass controls remain in the RIGHT AMP & TONE / FX CHAIN zone.
+    // Give each control a compact full-width row; never stretch a button to the
+    // entire rack height. Existing APVTS IDs and click-to-open FX EDIT behavior stay intact.
+    const int fxRowHeight = juce::jlimit(38, 52, right.getHeight() / 8);
+    const int fxRowGap = 4;
     for (size_t i = 0; i < fxButtons.size(); ++i)
     {
-        fxButtons[i].setBounds(right.removeFromTop(rackButtonHeight).reduced(4, 2));
-        if (i + 1 < fxButtons.size())
-            right.removeFromTop(rackGap);
+        const int y = right.getY() + 2 + static_cast<int>(i) * (fxRowHeight + fxRowGap);
+        fxButtons[i].setBounds(right.getX() + 5, y,
+                               juce::jmax(1, right.getWidth() - 10),
+                               juce::jmax(1, fxRowHeight));
     }
     if (mainFxEdit != nullptr)
         mainFxEdit->setVisible(false);
@@ -3622,7 +3927,20 @@ void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette()
  for (auto* unavailable : { &autoSoundHunterButton, &curatorButton }) { unavailable->setColour(juce::TextButton::buttonColourId,p.token("lowlight")); unavailable->setColour(juce::TextButton::textColourOffId,p.token("text_disabled")); unavailable->setEnabled(false); }
  aboutButton.setEnabled(true); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));
  for(auto* b:{&melodyTab,&patternTab}){b->setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b->setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b->setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b->setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
- for(auto& s:knobs){s.setColour(juce::Slider::rotarySliderFillColourId,p.token("accent"));s.setColour(juce::Slider::rotarySliderOutlineColourId,p.token("control_border"));s.setColour(juce::Slider::thumbColourId,p.token("text_primary"));s.setColour(juce::Slider::textBoxTextColourId,p.token("text_primary"));}
+ for(auto& s:knobs){
+     // The main 61-frame atlas and rotary SVG master use a 270° sweep:
+     // -135°..+135°. The 210°..390° sweep belongs to FX EDIT material variants.
+     if (p.id == "skin-053")
+         s.setRotaryParameters(-135.0f * juce::MathConstants<float>::pi / 180.0f,
+                                135.0f * juce::MathConstants<float>::pi / 180.0f, true);
+     else
+         s.setRotaryParameters(1.2f * juce::MathConstants<float>::pi,
+                               2.8f * juce::MathConstants<float>::pi, true);
+     s.setColour(juce::Slider::rotarySliderFillColourId,p.token("accent"));
+     s.setColour(juce::Slider::rotarySliderOutlineColourId,p.token("control_border"));
+     s.setColour(juce::Slider::thumbColourId,p.token("text_primary"));
+     s.setColour(juce::Slider::textBoxTextColourId,p.token("text_primary"));
+ }
  for(auto& l:knobLabels){l.setFont(makeThemeFont(p,9.5f,false,true));l.setColour(juce::Label::textColourId,p.token("text_secondary"));}
  for(auto& b:fxButtons){b.setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b.setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b.setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
  if(keyboard){keyboard->setColour(juce::MidiKeyboardComponent::whiteNoteColourId,p.token("highlight"));keyboard->setColour(juce::MidiKeyboardComponent::blackNoteColourId,p.token("control_bg"));keyboard->setColour(juce::MidiKeyboardComponent::keySeparatorLineColourId,p.token("control_border"));keyboard->setColour(juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId,p.token("accent_glow").withAlpha(.3f));keyboard->setColour(juce::MidiKeyboardComponent::keyDownOverlayColourId,p.token("accent").withAlpha(.88f));}
@@ -3827,28 +4145,47 @@ void PopPunkGuitarUltimateAudioProcessorEditor::chooseSfzFile(juce::Label* panel
         safeThis->statusLabel.setText("LOADING SFZ IN BACKGROUND...", juce::dontSendNotification);
         if (safePanelStatus != nullptr)
             safePanelStatus->setText("Loading SFZ in background...", juce::dontSendNotification);
-        safeThis->processor.loadSfzFileAsync(selected, [safeThis, safePanelStatus, safePanelLoadButton](ppgu::sampler::LoadReport report)
+        safeThis->processor.loadSfzFileAsync(selected, [safeThis, safePanelStatus, safePanelLoadButton, selected](ppgu::sampler::LoadReport report)
         {
             if (safeThis == nullptr)
                 return;
             safeThis->loadButton.setEnabled(true);
             if (safePanelLoadButton != nullptr)
                 safePanelLoadButton->setEnabled(true);
-            if (report.success)
+            const auto warningCount = static_cast<int>(report.warnings.size());
+            const auto errorCount = static_cast<int>(report.errors.size());
+            const auto fileName = selected.getFileName();
+            const auto summary = juce::String(report.success ? "READY" : "LOAD FAILED")
+                + "  /  " + fileName
+                + "  /  " + juce::String(static_cast<int>(report.loadedRegions)) + " REGIONS"
+                + "  /  " + juce::String(static_cast<int>(report.loadedSamples)) + " WAV SAMPLES"
+                + "  /  " + juce::String(warningCount) + " WARNINGS"
+                + "  /  " + juce::String(errorCount) + " ERRORS";
+            safeThis->statusLabel.setText(summary, juce::dontSendNotification);
+
+            if (safePanelStatus != nullptr)
             {
-                const auto readyText = "READY  /  " + juce::String(static_cast<int>(report.loadedRegions))
-                    + " REGIONS  /  " + juce::String(static_cast<int>(report.loadedSamples)) + " WAV SAMPLES";
-                safeThis->statusLabel.setText(readyText, juce::dontSendNotification);
-                if (safePanelStatus != nullptr)
-                    safePanelStatus->setText(readyText, juce::dontSendNotification);
-            }
-            else
-            {
-                const auto errorText = report.errors.empty()
-                    ? juce::String("SFZ LOAD FAILED") : juce::String(report.errors.front());
-                safeThis->statusLabel.setText(errorText, juce::dontSendNotification);
-                if (safePanelStatus != nullptr)
-                    safePanelStatus->setText(errorText, juce::dontSendNotification);
+                juce::String details = summary;
+                details += "\nSFZ DEFINITION: 1 selected file";
+                if (!report.warnings.empty())
+                {
+                    details += "\n\nWARNINGS:";
+                    const auto shown = juce::jmin(3, warningCount);
+                    for (int i = 0; i < shown; ++i)
+                        details += "\n• " + juce::String(report.warnings[static_cast<size_t>(i)]);
+                    if (warningCount > shown)
+                        details += "\n• ... +" + juce::String(warningCount - shown) + " more";
+                }
+                if (!report.errors.empty())
+                {
+                    details += "\n\nERRORS:";
+                    const auto shown = juce::jmin(3, errorCount);
+                    for (int i = 0; i < shown; ++i)
+                        details += "\n• " + juce::String(report.errors[static_cast<size_t>(i)]);
+                    if (errorCount > shown)
+                        details += "\n• ... +" + juce::String(errorCount - shown) + " more";
+                }
+                safePanelStatus->setText(details, juce::dontSendNotification);
             }
         });
     });

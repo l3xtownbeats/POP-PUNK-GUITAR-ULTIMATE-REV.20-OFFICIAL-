@@ -88,6 +88,43 @@ int main()
                            "NEON STAGE frames/panels atlas decoded");
                     expect(artworkCandidate.getPalette().iconsSpriteSheet.isValid(),
                            "NEON STAGE icon atlas decoded");
+                    expect(artworkCandidate.getPalette().mainKnobLayerSpriteSheet.isValid()
+                               && artworkCandidate.getPalette().mainKnobLayerSpriteSheet.getWidth() == 1152
+                               && artworkCandidate.getPalette().mainKnobLayerSpriteSheet.getHeight() == 768,
+                           "NEON STAGE nine-control six-layer rotary atlas decoded at 1152x768");
+
+                    const auto& mainKnobAtlas = artworkCandidate.getPalette().mainKnobLayerSpriteSheet;
+                    bool allMainKnobCellsContainArtwork = true;
+                    for (int parameter = 0; parameter < 9; ++parameter)
+                    {
+                        for (int layer = 0; layer < 6; ++layer)
+                        {
+                            bool cellHasVisiblePixel = false;
+                            for (int py = layer * 128; py < (layer + 1) * 128 && !cellHasVisiblePixel; ++py)
+                            {
+                                for (int px = parameter * 128; px < (parameter + 1) * 128; ++px)
+                                {
+                                    if (mainKnobAtlas.getPixelAt(px, py).getAlpha() != 0)
+                                    {
+                                        cellHasVisiblePixel = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            allMainKnobCellsContainArtwork = allMainKnobCellsContainArtwork
+                                && cellHasVisiblePixel;
+                        }
+                    }
+                    expect(allMainKnobCellsContainArtwork,
+                           "All 54 main-knob parameter/layer atlas cells contain visible artwork");
+                    expect(artworkCandidate.getPalette().rotaryBlackDiscSpriteSheet.isValid()
+                               && artworkCandidate.getPalette().rotaryBlackDiscSpriteSheet.getWidth() == 1024
+                               && artworkCandidate.getPalette().rotaryBlackDiscSpriteSheet.getHeight() == 1024,
+                           "NEON STAGE black-disc rotary atlas decoded at 1024x1024");
+                    expect(artworkCandidate.getPalette().rotaryKnurledSteelSpriteSheet.isValid()
+                               && artworkCandidate.getPalette().rotaryKnurledSteelSpriteSheet.getWidth() == 1024
+                               && artworkCandidate.getPalette().rotaryKnurledSteelSpriteSheet.getHeight() == 1024,
+                           "NEON STAGE knurled-steel rotary atlas decoded at 1024x1024");
                     const auto& skinOne = artworkCandidate.getPalette();
                     expect(skinOne.backgroundArtwork.isValid()
                                && skinOne.backgroundArtwork.getWidth() == 2560
