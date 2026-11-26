@@ -12,7 +12,7 @@ Use the stored mockups and the development journal as the visual/design evidence
 The canonical Skin-053 manifest contains 307 records. These include hero/preview, 2560×1440 background, material texture, four FX overlay layers, 135 master and 135 runtime control-state records, six topbar icon families/atlases, and three SVG shell layers. This is not the complete separate export inventory requested by the master prompt.
 
 Completed in this increment:
-- 16 separate scalable SVG panel frames: header, preset browser, playing core, amp/FX rack, performance strip, MIDI keyboard bay, status footer, guitar import, FX edit, pattern routing, AUTOCHORDS, workspace settings, skin gallery, and three dialog frames.
+- 16 separate scalable SVG panel sources: seven main-console frames (header, preset browser, playing core, amp/FX rack, performance strip, MIDI keyboard bay, status footer); six auxiliary layouts with static guide text/control placeholders (guitar import, FX EDIT, pattern routing, AUTOCHORDS, workspace settings, skin gallery); and three dialog frames. The main-console and dialog files are primarily structural shells. Auxiliary guides are not finished interactive windows and do not replace live JUCE controls.
 
 Outstanding deliverables:
 - PPGU_SKIN053_BG_MAIN_1024x700.png
@@ -38,12 +38,11 @@ Outstanding deliverables:
 - PPGU_SKIN053_PANEL_DIALOG_WARNING.png
 - PPGU_SKIN053_PANEL_DIALOG_ERROR.png
 - FX EDIT rotary component layers and parameter-specific scale overlays
-- standalone per-state export for all required buttons and seven FX switches
+- remaining button/switch state work: current CI exports 27 button families × 5 states and seven dedicated FX OFF/ON pairs; the additional focus semantics, per-control source crop mapping and final runtime visual review are still open
 - standalone LED state assets (OFF/ON/GLOW/WARNING/ERROR/SUCCESS/DISABLED)
-- separate display frame assets (LCD empty/active/warning/error, numeric, harmony, notes-held, scale/key)
-- individual white/black keyboard key states, separator, active-note overlay, and 49-key preview
-- individual SVG icon family (41 icons × 16/24/32/48 sizes)
-- hardware details as separate PNG/SVG assets
+- full display-state set (10 separate display/frame samples are exported; verify exact LCD empty/active/warning/error, numeric, harmony, notes-held and scale/key mapping and JUCE runtime states)
+- keyboard hover/pressed states plus the final composed 49-key preview (neutral white/black keys and three separate active C/E/G overlays are already exported)
+- additional hardware details beyond the current 13 exported 1x/2x component parts, with exact source-to-runtime mapping and visual approval
 - button, FX toggle, LED, keyboard, meter and icon sprite atlases with extracted frames
 - main interface previews 1024x700 and 1600x1100 and five contact sheets
 - ZIP archive of the complete export package
@@ -288,3 +287,39 @@ The prior generated six-layer main-knob atlas used a separate Pillow-drawn silho
 - The SVG icon atlas contained two malformed, duplicated fragment strings (duplicate CANCEL/NOTES labels). Those two stray fragments have been removed; the sheet now declares 41 transform groups and 41 unique icon labels.
 
 Verification is running on the current branch head. Do not mark the update build-verified until atlas generation, Windows configure/build, CTest, asset validation, Pluginval and visual review complete successfully. The 1:1 full-interface comparison and FL Studio 20 host acceptance remain open.
+
+
+## 2026-11-26 — latest verified asset export and updated gap classification
+
+### Verified intermediate deliverable
+
+Atlas workflow `45838805335` succeeded on source commit `432db3c5d398b7ad86f57120ed87e3c4a60a09bf`. Artifact `15126143428` (`PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`) is 87,923,180 bytes; SHA-256 `4d59b08cb1c06bbf316c3583239623721ffc679f42edbd48f757a7ace82a9e17`.
+
+Independent ZIP inspection found 1,545 entries. Manifest-based integrity verification across both standalone component manifests, the icon manifest, the six-layer knob manifest and the source-reference crop manifest reported **0 missing files and 0 byte-size/SHA-256 mismatches**:
+- 490 individual components at 1x and 490 at 2x;
+- 41 SVG icons plus 164 transparent PNG variants (16/24/32/48 px);
+- 54 standalone main-knob SVG layers and 108 corresponding PNG renders (192/384 px), 9 parameters × 6 layers;
+- 70 source-sheet crops at source-native 1x and 70 review enlargements at 2x.
+
+The 2x source-reference crops are LANCZOS enlargements and do not add source detail. Crops with labels/scales baked in are flagged in their manifest and are review-only until mapped around dynamic JUCE text. The main-knob SVG files are extracted from the canonical 512×512 rotary SVG master; the Pillow PNG counterpart is a portable raster approximation with the same source geometry/colors, not pixel-identical to an SVG/CairoSVG render.
+
+### Runtime and build status at source commit 432db3c
+
+- The nine-control 9×6 main-knob atlas is registered in the Skin-1 theme and rendered by JUCE. The live pointer and value arc are painted from the actual continuous APVTS value; the static POINTER row is retained in the atlas for full component separability but is not drawn over the live pointer.
+- The SKIN-1 main rotary sweep is `-135°..+135°`; the `210°..390°` sweep is reserved for FX EDIT material variants.
+- A regression test now checks that all 54 layer cells have at least one non-transparent pixel.
+- Windows configure passed in SKIN-1 runtime CI `45838807152`, native integration CI `45838805325` and Windows x64 VST3 validation `45838805387`; VST3/C++ builds were still running at the time of this audit. CTest, 16-skin validation, VST3 packaging and Pluginval remained pending.
+- Atlas export and panel-frame export completed successfully. Successful panel-frame export only verifies rasterized shell/guide files, not that the panels are visually complete or integrated as live JUCE windows.
+
+### Remaining acceptance gaps
+
+1. Complete the production background/material family (main 1024×700 background; graphite, brushed/anodized metal, LCD and recessed-control textures) from the approved samples, not generic substitutes.
+2. Replace/finish the seven main-console shell panels with the reference-faithful panel composition and spacing. The six auxiliary SVGs have useful static layout guides/placeholders, but they still require live JUCE controls, real status/data, final scaling and overlay review. Dialog frames remain structural.
+3. Build separate FX EDIT knob layers and parameter-specific scales/markings against the exact effect-panel reference crops; keep the existing FX parameter IDs/APVTS attachments.
+4. Complete the LED state matrix (OFF/ON/GLOW/WARNING/ERROR/SUCCESS/DISABLED), explicit focus states where required, and the per-control mapping of the current 27×5 state art and seven FX OFF/ON pairs.
+5. Finish independent keyboard hover/pressed states and the 49-key composition preview; keep live note/pressed states driven by MIDI.
+6. Map the 41 icons to the correct REV.20 actions/states and verify their visual match; the 41 SVG/164 PNG exports themselves are present and hash-verified.
+7. Produce full-editor previews and registered JUCE screenshot overlays/difference images at 900×640, 1024×700 and 1600×1100. No pixel-level 1:1 acceptance has yet been recorded.
+8. Finish current-head Windows x64 build, CTest, 16-skin validation, Pluginval, VST3 packaging and separate manual FL Studio 20 host acceptance.
+
+The UI, main-screen 1:1 parity and complete release asset pack remain **IN PROGRESS**. Do not call the work complete until the visual comparison and host gates pass.
