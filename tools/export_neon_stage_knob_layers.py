@@ -7,10 +7,9 @@ import hashlib
 import json
 from pathlib import Path
 
-import cairosvg
 from PIL import Image, ImageDraw
 
-from rotary_master_layers import load_rotary_master_layers
+from rotary_master_layers import load_rotary_master_layers, draw_rotary_master_layer_pillow
 
 ROOT = Path(__file__).resolve().parents[1]
 PARAMETERS = (
@@ -67,14 +66,12 @@ def main() -> int:
             for size in SIZES:
                 png_path = out / "png" / str(size) / parameter.lower() / f"{layer.lower()}.png"
                 png_path.parent.mkdir(parents=True, exist_ok=True)
-                cairosvg.svg2png(url=str(svg_path), write_to=str(png_path),
-                                 output_width=size, output_height=size)
-                with Image.open(png_path) as rendered:
-                    rendered.load()
-                    if rendered.size != (size, size) or rendered.mode != "RGBA":
-                        raise SystemExit(f"{parameter}/{layer}/{size}: expected RGBA {size}x{size}")
-                    if rendered.getchannel("A").getbbox() is None:
-                        raise SystemExit(f"{parameter}/{layer}/{size}: transparent output")
+                rendered = draw_rotary_master_layer_pillow(layer, size=size)
+                if rendered.size != (size, size) or rendered.mode != "RGBA":
+                    raise SystemExit(f"{parameter}/{layer}/{size}: expected RGBA {size}x{size}")
+                if rendered.getchannel("A").getbbox() is None:
+                    raise SystemExit(f"{parameter}/{layer}/{size}: transparent output")
+                rendered.save(png_path, format="PNG", optimize=True)
                 records.append({
                     "parameter": parameter, "layer": layer, "format": "PNG",
                     "size": size, "file": png_path.relative_to(out).as_posix(),
@@ -85,10 +82,8 @@ def main() -> int:
         # Compose the six separate source layers for a visual QA tile.
         composite = Image.new("RGBA", (192, 192), (0, 0, 0, 0))
         for layer in ("BASE", "GLOW", "RIM", "FACE", "SCALE", "POINTER"):
-            rendered = cairosvg.svg2png(url=str(layer_svgs[layer]))
-            from io import BytesIO
-            with Image.open(BytesIO(rendered)) as image:
-                composite = Image.alpha_composite(composite, image.convert("RGBA"))
+            image = draw_rotary_master_layer_pillow(layer, size=192)
+            composite = Image.alpha_composite(composite, image)
         composite_tiles.append((parameter, composite))
 
     cols, cell = 3, 224
