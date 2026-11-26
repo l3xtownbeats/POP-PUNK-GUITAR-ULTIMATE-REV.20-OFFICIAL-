@@ -323,3 +323,10 @@ The 2x source-reference crops are LANCZOS enlargements and do not add source det
 8. Finish current-head Windows x64 build, CTest, 16-skin validation, Pluginval, VST3 packaging and separate manual FL Studio 20 host acceptance.
 
 The UI, main-screen 1:1 parity and complete release asset pack remain **IN PROGRESS**. Do not call the work complete until the visual comparison and host gates pass.
+
+
+## 2026-11-26 — main-screen composition corrected from rendered JUCE snapshots
+
+The exact-source Windows build produced 900×640, 1024×700 and 1600×1100 JUCE snapshots. Review showed the previous three-column implementation stretched the seven FX buttons into tall vertical bars and left the main screen visually unlike the supplied PPGU mockup. The main editor was changed to the reference-led arrangement: left preset browser; central Playing Core with mode selector, dedicated guitar/banner region, nine APVTS knobs in one horizontal row, and seven APVTS FX switches in a horizontal chain below the knobs. The decorative right-side FX rack was removed; no duplicate/fake AMP controls were introduced. The first four actual main controls (GAIN/TREBLE/MID/BASS) remain the amp/tone controls.
+
+**New visual QA finding — still blocking 1:1 acceptance:** the currently packaged `assets/hero.png` is a green placeholder graphic, not the guitar/stage artwork shown in the stored PPGU mockup. The generated JUCE snapshots therefore cannot be accepted as visually faithful yet. Replace the hero with the correct source-derived guitar artwork and rerender all three sizes before visual acceptance. Also perform a pixel-level comparison of all panels, FX states, typography, keyboard and stage materials. No claim of 100% parity is made.
