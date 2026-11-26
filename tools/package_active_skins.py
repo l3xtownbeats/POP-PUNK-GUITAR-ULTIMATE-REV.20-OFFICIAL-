@@ -121,10 +121,10 @@ def main() -> int:
             sprite_sheets = assets.get("spriteSheets", {})
             expected_sheets = {
                 "controls", "meters_sliders", "frames_panels", "icons", "rotary",
-                "rotary_black_disc", "rotary_knurled_steel"
+                "rotary_black_disc", "rotary_knurled_steel", "main_knob_layers"
             }
             if not isinstance(sprite_sheets, dict) or set(sprite_sheets) != expected_sheets:
-                raise SystemExit("NEON STAGE DEFAULT: spriteSheets must define exactly seven atlas paths")
+                raise SystemExit("NEON STAGE DEFAULT: spriteSheets must define exactly eight atlas paths")
             for key in sorted(expected_sheets):
                 relative = sprite_sheets.get(key)
                 if not isinstance(relative, str) or not relative:
