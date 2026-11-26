@@ -226,7 +226,7 @@ def main() -> int:
         "buttons": save_contact_sheet(records, "button:", 5, out, (76, 48)),
         "fx_switches": save_contact_sheet(records, "fx_switch:", 2, out, (108, 62)),
         "leds": save_contact_sheet(records, "led:", 2, out, (52, 52)),
-        "knobs": save_contact_sheet(records, "knob:", 8, out, (64, 64)),
+        "knobs": {style: save_contact_sheet(records, f"knob:{style}:", 16, out, (48, 48)) for style in rotary_styles},
         "icons": save_contact_sheet(records, "icon:", 7, out, (68, 68)),
     }
 
