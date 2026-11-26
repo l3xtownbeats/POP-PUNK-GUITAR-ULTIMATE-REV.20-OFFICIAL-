@@ -96,3 +96,27 @@ Initial export CI run `45696342834`, artifact `15061271846`, predates these corr
 The corrected source passed the structural validator and both 1x and 2x CairoSVG raster exports. GitHub Actions run `45697271165` completed successfully and uploaded artifact `15062120847` (17,491,765 bytes; SHA-256 `d4f5ec747eb0b85df7a2d01a0cca474fe8a8b1bfcee7dffddb5f0466b1872995`). The artifact contains five transparent RGBA PNG atlases at native dimensions and at 2x, three separate rotary strips at both scales, two contact sheets and two SHA-256 export reports. Manual review of contact sheets and full-size 1x images confirmed the carbon-weave clipping, distinct rotary materials, corrected meter placement and full 49-key keyboard. This is a partial visual pass, not exhaustive per-pixel review of all 135 button states and 183 rotary frames.
 
 See `NEON_STAGE_ATLAS_EXPORT_CI_REPORT.json` for dimensions, hashes and remaining gates. Runtime JUCE integration, VST3/Pluginval validation on the current final head and FL Studio 20 acceptance remain open.
+
+### Runtime integration and current validation — 2026-11-26
+
+The earlier status above is historical. The following work has since completed on PR #20 head `adb1e26a2dad4d0bc96fb075202f35c4fc8c0489`:
+
+- The corrected SVG atlas export was verified in GitHub Actions run `45697271165`; downloadable 1x/2x outputs are recorded above.
+- The three rotary families are now represented in the generated runtime artwork: the original conical-chrome family plus dedicated 61-frame black-disc and knurled-steel atlases for FX EDIT. The two FX EDIT atlases are 1024×1024, 8×8 cells, 128×128 per cell, with 61 valid frames covering 210°–390° in 3° steps.
+- `ThemeManager` loads the two FX EDIT atlases; the editor selects black-disc for compressor group 0 and knurled-steel for EQ group 1. The package stage includes the generated sheets in Skin_053. Existing APVTS parameter ranges and IDs remain unchanged.
+- Automated validation was extended to check the additional runtime sheets and their geometry.
+
+Current CI evidence on head `adb1e26a2dad4d0bc96fb075202f35c4fc8c0489`:
+- NEON STAGE native integration CI run `45698878074`: generator, CMake configure, build, full CTest, registry/skin validation and package stages passed.
+- SKIN-1 control-state runtime CI run `45698877634`: passed.
+- Windows x64 VST3 validation run `45698878057`: build, tests, package and Pluginval strictness 5 passed.
+- A Windows x64 VST3 package was produced as artifact `15062258237`.
+
+These results supersede the earlier statements that the raster export and current-head Windows build/Pluginval had not yet been verified. They do **not** close the following acceptance gates:
+
+1. The canonical repository reference `01 INTERFACE  NEON STAGE DEFAULT .png` has not yet been visually decoded in this session. Exact pixel geometry and parity therefore remain unverified.
+2. The full standalone component export inventory listed above remains incomplete; the successful atlas export is a partial deliverable, not a complete asset pack.
+3. The SVG supplemental atlas work has only partial visual review. The 135 button-state records and all 183 rotary frames have not each received exhaustive 100%/200% review.
+4. FL Studio 20 manual host acceptance, including clean install, project save/reopen, automation, sustained playback and performance measurements, remains NOT RUN / NOT CONFIRMED.
+
+Do not mark the asset pack or REV.20 release as COMPLETE until these gates are closed. The canonical visual reference is still required before any claim of pixel-perfect matching or geometry changes based solely on visual inference.
