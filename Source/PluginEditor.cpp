@@ -3419,6 +3419,10 @@ juce::String PopPunkGuitarUltimateAudioProcessorEditor::getSkinRuntimeDiagnostic
     return "skin_id=" + palette.id
         + ";fallback=" + juce::String(palette.usedFallback ? "true" : "false")
         + ";root=" + runtimeSkinRoot.getFullPathName()
+        + ";skin_count=" + juce::String(getSkinCount())
+        + ";skin53_ordinal=" + juce::String(getSkinOrdinalForId("skin-053"))
+        + ";skin53_manifest=" + juce::String(
+              getSkinManifest(getSkinOrdinalForId("skin-053")).existsAsFile() ? "true" : "false")
         + ";hero=" + dimensions(palette.heroArtwork)
         + ";background=" + dimensions(palette.backgroundArtwork)
         + ";controls_atlas=" + dimensions(palette.controlsSpriteSheet)
@@ -3808,8 +3812,13 @@ int PopPunkGuitarUltimateAudioProcessorEditor::getSkinCount() const
             || !path.startsWith("Skin_") || !path.endsWith("/theme.json")) return 0;
         const auto ordinal = o.toString().getLargeIntValue();
         const auto index = ix.toString().getLargeIntValue();
+        // Stable IDs retain three-digit indices (skin-053, skin-103...).
+        // Without zero-padding, the first approved theme is incorrectly
+        // rejected as "skin-53", making the entire 16-skin registry invalid.
+        const auto expectedStableId = juce::String("skin-")
+            + juce::String(index).paddedLeft('0', 3);
         if (ordinal < 1 || ordinal > total || index < 52
-            || id != (juce::String("skin-") + juce::String(index))
+            || id != expectedStableId
             || !ordinals.insert(static_cast<int>(ordinal)).second
             || !stableIndices.insert(static_cast<int>(index)).second
             || !ids.insert(id.toStdString()).second) return 0;
