@@ -38,7 +38,6 @@ Outstanding deliverables:
 - PPGU_SKIN053_PANEL_DIALOG_WARNING.png
 - PPGU_SKIN053_PANEL_DIALOG_ERROR.png
 - FX EDIT rotary component layers and parameter-specific scale overlays
-- FX EDIT rotary component layers and parameter-specific scale overlays
 - standalone per-state export for all required buttons and seven FX switches
 - standalone LED state assets (OFF/ON/GLOW/WARNING/ERROR/SUCCESS/DISABLED)
 - separate display frame assets (LCD empty/active/warning/error, numeric, harmony, notes-held, scale/key)
