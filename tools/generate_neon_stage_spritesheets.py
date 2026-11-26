@@ -8,13 +8,11 @@ sampler, MIDI, preset data, control geometry, or the audio callback.
 from __future__ import annotations
 import json
 import math
-from io import BytesIO
 from pathlib import Path
 
-import cairosvg
 from PIL import Image, ImageDraw, ImageFilter
 
-from rotary_master_layers import load_rotary_master_layers
+from rotary_master_layers import draw_rotary_master_layer_pillow
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "SKIN" / "Skin_053" / "assets" / "spritesheets"
@@ -506,24 +504,12 @@ main_knob_atlas = Image.new(
 
 # All six layer surfaces are extracted verbatim from the canonical 512x512
 # rotary SVG master. The generator does not redraw or reinterpret its geometry.
-MAIN_KNOB_LAYER_SVGS = load_rotary_master_layers(ROOT)
-
-
 def draw_main_knob_layer(layer_name):
-    if layer_name not in MAIN_KNOB_LAYER_SVGS:
-        raise ValueError("unknown canonical main-knob layer: " + str(layer_name))
-    rendered = cairosvg.svg2png(
-        bytestring=MAIN_KNOB_LAYER_SVGS[layer_name].encode("utf-8"),
-        output_width=MAIN_KNOB_CELL,
-        output_height=MAIN_KNOB_CELL,
-    )
-    with Image.open(BytesIO(rendered)) as source:
-        source.load()
-        layer = source.convert("RGBA")
+    layer = draw_rotary_master_layer_pillow(layer_name, MAIN_KNOB_CELL)
     if layer.size != (MAIN_KNOB_CELL, MAIN_KNOB_CELL):
         raise RuntimeError(f"{layer_name}: canonical layer has unexpected dimensions {layer.size}")
     if layer.getchannel("A").getbbox() is None:
-        raise RuntimeError(f"{layer_name}: canonical SVG layer rendered fully transparent")
+        raise RuntimeError(f"{layer_name}: canonical layer rendered fully transparent")
     return layer
 
 main_knob_frame_manifest = []
