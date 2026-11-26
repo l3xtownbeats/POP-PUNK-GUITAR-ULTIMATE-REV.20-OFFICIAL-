@@ -141,7 +141,7 @@ def _gradient_disc(size: int, centre: tuple[float, float], radius: float,
     top = max(0, int(cy - radius - 1))
     bottom = min(size, int(cy + radius + 2))
     dx, dy = direction
-    denominator = max(1e-9, radius * (abs(dx) + abs(dy)))
+    denominator = max(1e-9, 2.0 * radius * (abs(dx) + abs(dy)))
     for y in range(top, bottom):
         for x in range(left, right):
             rx, ry = x - cx, y - cy
@@ -158,7 +158,7 @@ def _gradient_disc(size: int, centre: tuple[float, float], radius: float,
 
 def draw_rotary_master_layer_pillow(layer_name: str, size: int = 128):
     """Rasterize the canonical SVG-master design using portable Pillow primitives."""
-    from PIL import Image, ImageDraw, ImageFilter
+    from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
     if layer_name not in LAYER_ORDER:
         raise ValueError(f"Unknown rotary layer: {layer_name}")
