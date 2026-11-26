@@ -3927,11 +3927,11 @@ void PopPunkGuitarUltimateAudioProcessorEditor::applyPalette()
  aboutButton.setEnabled(true); aboutButton.setColour(juce::TextButton::buttonColourId,p.token("panel_elevated")); aboutButton.setColour(juce::TextButton::textColourOffId,p.token("text_primary"));
  for(auto* b:{&melodyTab,&patternTab}){b->setColour(juce::TextButton::buttonColourId,p.token("control_bg"));b->setColour(juce::TextButton::buttonOnColourId,p.token("accent"));b->setColour(juce::TextButton::textColourOffId,p.token("text_primary"));b->setColour(juce::TextButton::textColourOnId,p.token("window_bg"));}
  for(auto& s:knobs){
-     // Skin-1's authored six-layer scale spans 210°..390°. Other themes keep
-     // JUCE's previous 1.2π..2.8π rotary sweep.
+     // The main 61-frame atlas and rotary SVG master use a 270° sweep:
+     // -135°..+135°. The 210°..390° sweep belongs to FX EDIT material variants.
      if (p.id == "skin-053")
-         s.setRotaryParameters(210.0f * juce::MathConstants<float>::pi / 180.0f,
-                               390.0f * juce::MathConstants<float>::pi / 180.0f, true);
+         s.setRotaryParameters(-135.0f * juce::MathConstants<float>::pi / 180.0f,
+                                135.0f * juce::MathConstants<float>::pi / 180.0f, true);
      else
          s.setRotaryParameters(1.2f * juce::MathConstants<float>::pi,
                                2.8f * juce::MathConstants<float>::pi, true);
