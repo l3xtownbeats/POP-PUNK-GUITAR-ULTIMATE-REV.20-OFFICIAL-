@@ -3384,6 +3384,47 @@ void PopPunkGuitarUltimateAudioProcessorEditor::timerCallback()
     }
 }
 
+bool PopPunkGuitarUltimateAudioProcessorEditor::hasApprovedNeonStageRuntimeArtwork() const noexcept
+{
+    const auto& palette = themeManager.getPalette();
+    return palette.id == "skin-053"
+        && !palette.usedFallback
+        && palette.heroArtwork.isValid()
+        && palette.heroArtwork.getWidth() == 1600
+        && palette.heroArtwork.getHeight() == 900
+        && palette.backgroundArtwork.isValid()
+        && palette.controlsSpriteSheet.isValid()
+        && palette.framesPanelsSpriteSheet.isValid()
+        && palette.iconsSpriteSheet.isValid()
+        && palette.rotarySpriteSheet.isValid()
+        && palette.mainKnobLayerSpriteSheet.isValid()
+        && palette.controlStateArtwork.size() == 135;
+}
+
+juce::String PopPunkGuitarUltimateAudioProcessorEditor::getSkinRuntimeDiagnostics() const
+{
+    const auto& palette = themeManager.getPalette();
+    const auto dimensions = [](const juce::Image& image)
+    {
+        return image.isValid()
+            ? juce::String(image.getWidth()) + "x" + juce::String(image.getHeight())
+            : juce::String("missing");
+    };
+
+    return "skin_id=" + palette.id
+        + ";fallback=" + juce::String(palette.usedFallback ? "true" : "false")
+        + ";root=" + runtimeSkinRoot.getFullPathName()
+        + ";hero=" + dimensions(palette.heroArtwork)
+        + ";background=" + dimensions(palette.backgroundArtwork)
+        + ";controls_atlas=" + dimensions(palette.controlsSpriteSheet)
+        + ";frames_atlas=" + dimensions(palette.framesPanelsSpriteSheet)
+        + ";icons_atlas=" + dimensions(palette.iconsSpriteSheet)
+        + ";rotary_atlas=" + dimensions(palette.rotarySpriteSheet)
+        + ";main_knob_atlas=" + dimensions(palette.mainKnobLayerSpriteSheet)
+        + ";control_states=" + juce::String(static_cast<int>(palette.controlStateArtwork.size()))
+        + ";last_error=" + themeManager.getLastError();
+}
+
 void PopPunkGuitarUltimateAudioProcessorEditor::configureKnob(juce::Slider& s, juce::Label& l, const juce::String& name)
 {
     s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);

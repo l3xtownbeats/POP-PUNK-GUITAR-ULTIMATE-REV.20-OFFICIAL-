@@ -32,6 +32,8 @@ public:
     void paint(juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
+    bool hasApprovedNeonStageRuntimeArtwork() const noexcept;
+    juce::String getSkinRuntimeDiagnostics() const;
 
 private:
     void chooseSfzFile(juce::Label* panelStatus = nullptr, juce::Button* panelLoadButton = nullptr);

@@ -6,7 +6,7 @@
 // (MIDI -> held chord -> PatternScheduler -> SamplerEngine -> streamed WAV).
 // It uses only temporary synthetic fixtures; no production sample assets or
 // licensed third-party content are copied into the test.
-#include "PluginProcessor.h"
+#include "PluginEditor.h"
 #include <PPGUTestData.h>
 
 #include <juce_audio_formats/juce_audio_formats.h>
@@ -114,6 +114,20 @@ bool renderNeonStageUiSnapshots()
     if (editor == nullptr)
     {
         std::cerr << "The REV.20 processor did not create its UI editor.\n";
+        return false;
+    }
+
+    auto* neonStageEditor = dynamic_cast<PopPunkGuitarUltimateAudioProcessorEditor*>(editor.get());
+    if (neonStageEditor == nullptr)
+    {
+        std::cerr << "The processor did not create the expected REV.20 editor type.\\n";
+        return false;
+    }
+    const auto skinDiagnostics = neonStageEditor->getSkinRuntimeDiagnostics();
+    std::cout << "NEON STAGE runtime artwork: " << skinDiagnostics << "\\n";
+    if (!neonStageEditor->hasApprovedNeonStageRuntimeArtwork())
+    {
+        std::cerr << "NEON STAGE runtime artwork contract failed; refusing to publish a blank/fallback UI snapshot.\\n";
         return false;
     }
 
