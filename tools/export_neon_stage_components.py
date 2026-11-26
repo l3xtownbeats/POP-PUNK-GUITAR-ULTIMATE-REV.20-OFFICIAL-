@@ -56,6 +56,25 @@ def save_crop(image: Image.Image, box: tuple[int, int, int, int],
 
 
 
+
+def save_generated_overlay(target: Path, width: int, height: int, scale: int,
+                           fill: str, opacity: float, label: str,
+                           records: list[dict], output_root: Path) -> None:
+    rgb = tuple(int(fill[index:index + 2], 16) for index in (1, 3, 5))
+    alpha = max(0, min(255, round(255 * opacity)))
+    layer = Image.new("RGBA", (width * scale, height * scale), (*rgb, alpha))
+    target.parent.mkdir(parents=True, exist_ok=True)
+    layer.save(target, format="PNG", optimize=True)
+    records.append({
+        "asset": label,
+        "file": target.relative_to(output_root).as_posix(),
+        "width": layer.width,
+        "height": layer.height,
+        "mode": layer.mode,
+        "bytes": target.stat().st_size,
+        "sha256": digest(target),
+    })
+
 def save_contact_sheet(records: list[dict], prefix: str, columns: int,
                        output: Path, thumb_size: tuple[int, int]) -> dict | None:
     selected = [item for item in records if item["asset"].startswith(prefix)]
@@ -257,14 +276,34 @@ def main() -> int:
             save_crop(sheet, box, target, f"meter_segment:{index + 1:02d}", records, out)
             counts["meter_segments"] += 1
 
-        # Individual 29 white keys and 20 black keys, plus C/E/G overlays.
+        # Individual white keys are exported in their neutral state; active tints
+        # are generated as transparent overlays so JUCE can composite them live.
         white = keyboard_group["white_key_layout"]
+        active_overlays = keyboard_group["active_key_overlays"]
+        normal_rgb = tuple(int(white["normal_fill"][i:i + 2], 16) for i in (1, 3, 5))
         for index in range(int(white["count"])):
             x = int(white["x0"]) + index * int(white["step_x"])
             y, width, height = (int(white[k]) for k in ("y", "width", "height"))
             box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
             target = out / "keyboard" / "white" / f"white_{index + 1:02d}.png"
             save_crop(sheet, box, target, f"key:white:{index + 1:02d}", records, out)
+            # Restore the neutral key face beneath any flattened cyan preview.
+            with Image.open(target) as source:
+                key_image = source.convert("RGBA")
+            draw = ImageDraw.Draw(key_image)
+            for overlay in active_overlays:
+                ox, oy, ow, oh = (int(overlay[k]) for k in ("x", "y", "width", "height"))
+                if x <= ox and ox + ow <= x + width and y <= oy and oy + oh <= y + height:
+                    local_box = (
+                        (ox - x) * scale,
+                        (oy - y) * scale,
+                        (ox - x + ow) * scale - 1,
+                        (oy - y + oh) * scale - 1,
+                    )
+                    draw.rectangle(local_box, fill=(*normal_rgb, 255))
+            key_image.save(target, format="PNG", optimize=True)
+            records[-1]["bytes"] = target.stat().st_size
+            records[-1]["sha256"] = digest(target)
             counts["white_keys"] += 1
 
         black = keyboard_group["black_key_layout"]
@@ -276,12 +315,16 @@ def main() -> int:
             save_crop(sheet, box, target, f"key:black:{index + 1:02d}", records, out)
             counts["black_keys"] += 1
 
-        for overlay in keyboard_group["active_key_overlays"]:
+        overlay_style = keyboard_group["active_overlay_style"]
+        for overlay in active_overlays:
             name = overlay["name"]
-            x, y, width, height = (int(overlay[k]) for k in ("x", "y", "width", "height"))
-            box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
+            _, _, width, height = (int(overlay[k]) for k in ("x", "y", "width", "height"))
             target = out / "keyboard" / "active_overlays" / f"{name}.png"
-            save_crop(sheet, box, target, f"key:active:{name}", records, out)
+            save_generated_overlay(
+                target, width, height, scale,
+                overlay_style["fill"], float(overlay_style["opacity"]),
+                f"key:active:{name}", records, out
+            )
             counts["active_key_overlays"] += 1
 
         # Pitch and modulation rails and their three distinct positions.
