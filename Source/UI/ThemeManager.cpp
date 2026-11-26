@@ -895,10 +895,17 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
         return false;
     }
 
-    // Every approved Skin Studio theme supplies an 800x450 hero image.
-    // Decode it once on the UI thread; the audio processor never accesses artwork.
-    if (!loadSafePngArtwork(themeRoot, assets.getProperty("hero", "").toString(),
-                           800, 450, candidate.heroArtwork, error))
+    // NEON STAGE ships a 1600x900 master hero render as well as the legacy
+    // 800x450 preview-sized runtime image. Prefer the master so the central
+    // guitar stage remains crisp at large editor sizes; retain the legacy file
+    // as a compatibility fallback for older theme packages. Decode on the UI
+    // thread only — the audio processor never accesses artwork.
+    const bool masterHeroLoaded = id == "skin-053"
+        && loadSafePngArtwork(themeRoot, "assets/master/hero/hero.png",
+                              1600, 900, candidate.heroArtwork, error);
+    if (!masterHeroLoaded
+        && !loadSafePngArtwork(themeRoot, assets.getProperty("hero", "").toString(),
+                               800, 450, candidate.heroArtwork, error))
     {
         lastError = error.isNotEmpty() ? error : "Theme hero artwork loading failed";
         resetToDefault();

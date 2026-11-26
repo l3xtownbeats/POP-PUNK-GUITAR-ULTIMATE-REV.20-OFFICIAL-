@@ -223,6 +223,10 @@ int main()
         expect(manager.getPalette().name == "NEON STAGE DEFAULT", "NEON STAGE name is canonical");
         expect(manager.getPalette().tokens.windowBg == juce::Colour(0xff080b14),
                "NEON STAGE palette is canonical");
+        expect(manager.getPalette().heroArtwork.isValid()
+                   && manager.getPalette().heroArtwork.getWidth() == 1600
+                   && manager.getPalette().heroArtwork.getHeight() == 900,
+               "NEON STAGE loads the 1600x900 master-resolution guitar hero artwork");
     }
     const auto invalid = neon.loadFileAsString().replace("\"index\": 53", "\"index\": 54");
     expect(!manager.loadFromJson(invalid), "stable ID/index mismatch is rejected");
