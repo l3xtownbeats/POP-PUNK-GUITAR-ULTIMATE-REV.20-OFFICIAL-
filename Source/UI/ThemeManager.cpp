@@ -916,6 +916,24 @@ bool PPGUThemeManager::loadFromFile(const juce::File& manifestFile)
     // Atlases are decoded only on the UI/control thread and never touched by audio code.
     if (id == "skin-053")
     {
+        juce::var panels;
+        if (!hasObject(assets, "panels", panels)
+            || !loadSafePngArtwork(themeRoot, panels.getProperty("header", "").toString(),
+                                   1024, 72, candidate.headerPanelArtwork, error)
+            || !loadSafePngArtwork(themeRoot, panels.getProperty("preset_browser", "").toString(),
+                                   224, 470, candidate.presetBrowserPanelArtwork, error)
+            || !loadSafePngArtwork(themeRoot, panels.getProperty("playing_core", "").toString(),
+                                   520, 470, candidate.playingCorePanelArtwork, error)
+            || !loadSafePngArtwork(themeRoot, panels.getProperty("midi_keyboard_bay", "").toString(),
+                                   1024, 96, candidate.midiKeyboardBayPanelArtwork, error)
+            || !loadSafePngArtwork(themeRoot, panels.getProperty("status_footer", "").toString(),
+                                   1024, 28, candidate.statusFooterPanelArtwork, error))
+        {
+            lastError = error.isNotEmpty() ? error : "NEON STAGE shell panel artwork manifest is incomplete";
+            resetToDefault();
+            return false;
+        }
+
         juce::var spriteSheets;
         if (!hasObject(assets, "spriteSheets", spriteSheets)
             || !loadSafePngArtwork(themeRoot, spriteSheets.getProperty("controls", "").toString(),
