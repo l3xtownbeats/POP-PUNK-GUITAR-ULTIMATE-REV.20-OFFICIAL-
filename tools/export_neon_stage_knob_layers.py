@@ -129,8 +129,8 @@ def layer_svg(layer: str) -> str:
             major = (i % 5 == 0)
             inner = 65 if major else 67.5
             outer = 72
-            x1, y1 = pt(inner, angle)
-            x2, y2 = pt(outer, angle)
+            x1, y1 = pt(inner, angle - 90)
+            x2, y2 = pt(outer, angle - 90)
             color = "#B7CBD9" if major else "#7990A5"
             opacity = ".92" if major else ".64"
             width = 1.5 if major else .85
@@ -141,11 +141,11 @@ def layer_svg(layer: str) -> str:
         body = f"""
 <circle cx="96" cy="96" r="68" fill="none" stroke="#8AA1B5" stroke-opacity=".28" stroke-width="1"/>
 <g fill="none" stroke-linecap="round">{''.join(ticks)}</g>
-<path d="M{f(pt(72,210)[0])} {f(pt(72,210)[1])}A72 72 0 0 1 {f(pt(72,390)[0])} {f(pt(72,390)[1])}"
+<path d="M{f(pt(72,120)[0])} {f(pt(72,120)[1])}A72 72 0 0 1 {f(pt(72,300)[0])} {f(pt(72,300)[1])}"
       fill="none" stroke="url(#cyanScale)" stroke-width="2.1" stroke-opacity=".86"/>"""
     elif layer == "GLOW":
-        x1, y1 = pt(86, 210)
-        x2, y2 = pt(86, 390)
+        x1, y1 = pt(86, 120)
+        x2, y2 = pt(86, 300)
         body = f"""
 <circle cx="96" cy="96" r="87" fill="none" stroke="#6B8CFF" stroke-width="4.5" stroke-opacity=".26" filter="url(#wideGlow)"/>
 <path d="M{f(x1)} {f(y1)}A86 86 0 0 1 {f(x2)} {f(y2)}"
