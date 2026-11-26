@@ -74,6 +74,8 @@ public:
         juce::Image rotarySpriteSheet;
         juce::Image rotaryBlackDiscSpriteSheet;
         juce::Image rotaryKnurledSteelSpriteSheet;
+        // Main REV.20 knobs: parameter column × physical layer row (9 × 6 cells).
+        juce::Image mainKnobLayerSpriteSheet;
         // Skin-1 authored state images are decoded on the UI thread and cached
         // at 128px to keep the editor's resident artwork footprint bounded.
         std::map<std::string, juce::Image> controlStateArtwork;
