@@ -57,6 +57,48 @@ def save_crop(image: Image.Image, box: tuple[int, int, int, int],
 
 
 
+
+def save_white_key(target: Path, width: int, height: int, scale: int,
+                   records: list[dict], output_root: Path, label: str) -> None:
+    pixel_width, pixel_height = width * scale, height * scale
+    image = Image.new("RGBA", (pixel_width, pixel_height), (0, 0, 0, 0))
+    # Slightly cool porcelain-to-anodized gradient, matching the keyboard's
+    # white-key face while remaining a fully independent transparent asset.
+    top = (246, 250, 254)
+    bottom = (202, 216, 229)
+    gradient = Image.new("RGB", (1, pixel_height))
+    for y in range(pixel_height):
+        t = y / max(1, pixel_height - 1)
+        rgb = tuple(round(top[i] * (1.0 - t) + bottom[i] * t) for i in range(3))
+        gradient.putpixel((0, y), rgb)
+    face = gradient.resize((max(1, pixel_width - 2 * scale), max(1, pixel_height - 2 * scale)))
+    image.paste(face, (scale, scale))
+    draw = ImageDraw.Draw(image)
+    outline = (108, 130, 151, 255)
+    draw.rounded_rectangle(
+        (0, 0, pixel_width - 1, pixel_height - 1),
+        radius=2 * scale, outline=outline, width=max(1, 2 * scale)
+    )
+    draw.line((3 * scale, 4 * scale, 3 * scale, pixel_height - 5 * scale),
+              fill=(255, 255, 255, 190), width=max(1, scale))
+    draw.line((pixel_width - 4 * scale, 4 * scale,
+               pixel_width - 4 * scale, pixel_height - 5 * scale),
+              fill=(92, 116, 139, 150), width=max(1, scale))
+    draw.line((3 * scale, pixel_height - 4 * scale,
+               pixel_width - 4 * scale, pixel_height - 4 * scale),
+              fill=(104, 126, 147, 175), width=max(1, scale))
+    target.parent.mkdir(parents=True, exist_ok=True)
+    image.save(target, format="PNG", optimize=True)
+    records.append({
+        "asset": label,
+        "file": target.relative_to(output_root).as_posix(),
+        "width": image.width,
+        "height": image.height,
+        "mode": image.mode,
+        "bytes": target.stat().st_size,
+        "sha256": digest(target),
+    })
+
 def save_generated_overlay(target: Path, width: int, height: int, scale: int,
                            fill: str, opacity: float, label: str,
                            records: list[dict], output_root: Path) -> None:
@@ -284,26 +326,11 @@ def main() -> int:
         for index in range(int(white["count"])):
             x = int(white["x0"]) + index * int(white["step_x"])
             y, width, height = (int(white[k]) for k in ("y", "width", "height"))
-            box = (x * scale, y * scale, (x + width) * scale, (y + height) * scale)
             target = out / "keyboard" / "white" / f"white_{index + 1:02d}.png"
-            save_crop(sheet, box, target, f"key:white:{index + 1:02d}", records, out)
-            # Restore the neutral key face beneath any flattened cyan preview.
-            with Image.open(target) as source:
-                key_image = source.convert("RGBA")
-            draw = ImageDraw.Draw(key_image)
-            for overlay in active_overlays:
-                ox, oy, ow, oh = (int(overlay[k]) for k in ("x", "y", "width", "height"))
-                if x <= ox and ox + ow <= x + width and y <= oy and oy + oh <= y + height:
-                    local_box = (
-                        (ox - x) * scale,
-                        (oy - y) * scale,
-                        (ox - x + ow) * scale - 1,
-                        (oy - y + oh) * scale - 1,
-                    )
-                    draw.rectangle(local_box, fill=(*normal_rgb, 255))
-            key_image.save(target, format="PNG", optimize=True)
-            records[-1]["bytes"] = target.stat().st_size
-            records[-1]["sha256"] = digest(target)
+            save_white_key(
+                target, width, height, scale, records, out,
+                f"key:white:{index + 1:02d}"
+            )
             counts["white_keys"] += 1
 
         black = keyboard_group["black_key_layout"]
