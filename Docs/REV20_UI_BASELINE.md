@@ -63,7 +63,33 @@ The current `Source/PluginProcessor.cpp` defines the following relevant IDs (thi
 - Amp/tone compatibility parameters currently present in the processor: `ampGain`, `tone`.
 - FX on/off parameters include `compressorOn`, `eqOn`, `distortionOn`, `chorusOn`, `flangerOn`, `delayOn`, `reverbOn`, `cabinetOn`, and `doubleTrackOn`.
 
-The exact nine rotary-to-parameter mapping and the seven visible FX switch mapping must be confirmed from the live editor attachments and DSP routing before implementation is declared complete. This document deliberately does not guess those assignments.
+The live editor header `Source/PluginEditor.h` defines the exact nine rotary labels and APVTS IDs, and `Source/PluginEditor.cpp` attaches each index directly to `processor.parameters`:
+
+| Faceplate label | APVTS ID | Processor parameter label |
+|---|---|---|
+| GAIN | `ampGain` | Amp Gain |
+| TREBLE | `eqHigh` | EQ High |
+| MID | `eqMid` | EQ Mid |
+| BASS | `eqLow` | EQ Low |
+| VELOCITY | `velocity` | Velocity Response |
+| DYNAMICS | `dynamics` | Velocity Dynamics |
+| SWING | `swing` | Swing |
+| HUMANIZE | `humanize` | Humanize |
+| ACCENT | `accent` | Accent |
+
+The seven visible FX buttons and their APVTS toggle IDs are also verified in `PluginEditor.h` and attached in `PluginEditor.cpp`:
+
+| Visible FX switch | APVTS ID |
+|---|---|
+| COMPRESSOR | `compressorOn` |
+| EQ | `eqOn` |
+| DISTORTION | `distortionOn` |
+| CHORUS | `chorusOn` |
+| DELAY | `delayOn` |
+| REVERB | `reverbOn` |
+| CABINET IR | `cabinetOn` |
+
+The processor parameter layout defines all nine IDs and all seven boolean toggles. The visible seven-effect chain intentionally does not expose FLANGER as an eighth switch. The detailed editor currently maps the seven switches to detail groups `0, 1, 2, 3, 5, 6, 7`; verify this index mapping against the FX editor's group definitions before changing it. This confirms APVTS attachments, not by itself complete DSP correctness or pixel-level visual acceptance.
 
 ## 7. Definition of done
 
