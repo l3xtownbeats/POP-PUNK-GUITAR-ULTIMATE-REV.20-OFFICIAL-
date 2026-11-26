@@ -538,3 +538,19 @@ CI on the current source head:
 - Windows x64 validation run `45838805387`: Windows configure passed; VST3 build was still running at last check, with CTest, skin registry and Pluginval still pending.
 
 The exact 1:1 full-interface comparison remains open. In particular, the main panel SVGs are largely shell frames; several auxiliary SVGs include static guide/placeholder content, but are not connected to live JUCE data. Still outstanding: complete production background/material pack; separate FX EDIT rotary scales/layers; all required LED and focus/disabled states; independent keyboard hover/pressed states; completed main panel artwork/composition; JUCE render previews and overlay/difference review at 900×640, 1024×700 and 1600×1100; plus manual FL Studio 20 host acceptance. Do not declare the full UI or release complete until these gates close.
+
+
+## 2026-11-26 — current-head CI recheck after approved mockup confirmation
+
+**Source head checked:** `37704475e8a2418278264ae91dd50ae2bd2ec493` on `feature/neon-stage-gui-polish`.
+
+The owner supplied the two controlling visual references in the active conversation: (1) the 12-section SKIN-053 asset production board and (2) the complete REV.20 main editor composition. Treat the first as the asset-family/state/material reference and the second as the main-window geometry/composition reference. Preserve the actual REV.20 runtime control contract where older artwork labels differ. The repository-root image previously excluded remains excluded.
+
+Latest GitHub Actions results on this exact source head:
+- Windows x64 VST3 validation run `45858901193` (#829): SUCCESS; job `windows-x64-vst3` completed successfully.
+- NEON STAGE native integration run `45858901190` (#569): SUCCESS; job `windows-x64` completed successfully.
+- NEON STAGE SVG atlas render/export run `45858901188` (#147): SUCCESS; job `validate-and-export` completed successfully. Artifact `15137421779`, `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`, 87,923,186 bytes.
+- SKIN-1 control-state runtime run `45858901185` (#540): SUCCESS; job `windows-x64` completed successfully.
+- Standalone panel-frame export run `45858901170` (#93): SUCCESS; job `export` completed successfully. This verifies frame export only, not complete content-rich panels.
+
+These CI results verify the current-head automated build/validation and export workflows only. They do not prove 1:1 screenshot parity, complete standalone production artwork, FL Studio 20 host acceptance, or release completion. The remaining visual gaps and acceptance gates listed below remain open. Do not mark the UI or asset pack COMPLETE.
