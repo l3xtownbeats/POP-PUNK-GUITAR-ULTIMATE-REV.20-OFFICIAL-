@@ -119,9 +119,42 @@ Current CI evidence on head `adb1e26a2dad4d0bc96fb075202f35c4fc8c0489`:
 
 These results supersede the earlier statements that the raster export and current-head Windows build/Pluginval had not yet been verified. They do **not** close the following acceptance gates:
 
-1. The canonical repository reference `01 INTERFACE  NEON STAGE DEFAULT .png` has not yet been visually decoded in this session. Exact pixel geometry and parity therefore remain unverified.
+1. The repository-root image `01 INTERFACE  NEON STAGE DEFAULT .png` was explicitly excluded by the owner on 2026-11-26. It is not a required reference, must not be requested, and is not a blocker. Visual acceptance uses the stored PPGU mockups/atlases named by the owner, the applicable REV.20 source contract and rendered JUCE comparison.
 2. The full standalone component export inventory listed above remains incomplete; the successful atlas export is a partial deliverable, not a complete asset pack.
 3. The SVG supplemental atlas work has only partial visual review. The 135 button-state records and all 183 rotary frames have not each received exhaustive 100%/200% review.
 4. FL Studio 20 manual host acceptance, including clean install, project save/reopen, automation, sustained playback and performance measurements, remains NOT RUN / NOT CONFIRMED.
 
 Do not mark the asset pack or REV.20 release as COMPLETE until these gates are closed. The canonical visual reference is still required before any claim of pixel-perfect matching or geometry changes based solely on visual inference.
+
+
+## 2026-11-26 — owner requirement: exact 1:1 visual parity
+
+The owner explicitly restated that the deliverable is a **1:1 visual copy of the applicable PPGU mockups**, not a merely similar neon skin. The required visual source set includes the stored items:
+- `Неоновый атлас UI-ассетов PPGU` / `ppgu_atlas`;
+- `Неоновый интерфейс PPGU — поп-панк гитара`;
+- `Неоновый интерфейс гитарного плагина PPGU`;
+- `02_ppgu_atlas_buttons_switches.png`;
+- `03_ppgu_atlas_knob_strips.png`.
+
+The owner additionally excluded only the repository-root `01 INTERFACE  NEON STAGE DEFAULT .png`; do not reintroduce it as a dependency.
+
+### Visual audit of the current generated exports — NOT ACCEPTED AS 1:1
+
+The successful 1x/2x atlas workflow produced files with the requested `02_ppgu_atlas_buttons_switches.png` and `03_ppgu_atlas_knob_strips.png` names. However, direct inspection of the rendered PNGs shows that they are **supplemental simplified vector drafts**, not yet faithful reproductions of the detailed stored asset references:
+- the 27×5 button-state atlas currently renders mostly generic rectangular state swatches rather than the detailed glossy, beveled, icon-bearing controls shown in the button reference;
+- the rotary atlas currently renders simplified small circular controls and does not yet match the reference's detailed metallic faces, knurled rims, segmented cyan arcs, slider thumbs and meter styling at equivalent fidelity;
+- the 16 standalone panel-frame exports are predominantly empty panel shells. They do not yet reproduce the complete content-rich panels/composition shown in the PPGU interface mockups;
+- the 1x/2x export and SHA-256 checks prove deterministic file generation/integrity only. They do not prove visual parity, correct cropping of every master asset, or runtime pixel match.
+
+Therefore the current status remains **PARTIAL EXPORT / VISUAL PARITY NOT ACCEPTED / FULL ASSET PACK NOT COMPLETE**. Do not describe the current atlas or panel package as the 1:1 final UI.
+
+### Mandatory completion sequence
+
+1. Treat the stored PPGU UI mockups and source asset atlas as visual ground truth; build a component-by-component reference map with exact crop bounds, proportions, edge treatments, materials, lighting, typography and state variants.
+2. Rework the button/switch, rotary, LED, meter, display, icon, keyboard, texture and hardware masters to match the supplied references—not generic substitutes. Preserve all declared state/frame counts and the real REV.20 runtime parameter contracts.
+3. Export every individual asset and every required 1x/2x atlas with transparent alpha where appropriate; include exact dimensions, frame indexing, state naming, SHA-256 and source-to-export mapping.
+4. Rebuild the standalone panels and complete main interface composition from the actual reference visual language. A panel frame alone is not a finished panel; live JUCE controls/text/telemetry must align with the reference without fake behavior or hit-region obstruction.
+5. Render the JUCE plugin at 900×640, 1024×700 and 1600×1100; compare against the applicable mockup with registered overlays/difference images and review all critical crops at 100% and 200%.
+6. Close each mismatch in the issue list before visual acceptance. Keep Windows x64 build, CTest, Pluginval and FL Studio 20 host acceptance as separate engineering gates.
+
+No claim of 100% completion is allowed until the full asset inventory, runtime integration, visual comparison and host acceptance have evidence recorded here.
