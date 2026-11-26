@@ -465,3 +465,20 @@ Commit: `aa75ce2814f77bcdf38b06499ba98d3ccaa7be91`. Сборка и CTest пос
 Следующий обязательный этап: составить component-to-reference map с crop bounds; переработать кнопки/переключатели/кнобы/LED/метры/дисплеи/иконки/клавиатуру/материалы/аппаратные детали по исходным референсам; затем закончить индивидуальные экспорты, панели и full-interface composition; провести JUCE screenshot overlay/difference review на 900×640, 1024×700 и 1600×1100. REV.20 parameter/DSP/runtime contracts остаются авторитетными при конфликтах с устаревшими REV.18 надписями/поведением.
 
 Не объявлять 100% готовность до закрытия полного asset inventory, runtime integration, visual comparison и отдельной FL Studio 20 host acceptance. Подробная ведомость разрывов и критерии находятся в ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/ASSET_OPEN_ISSUES.md.
+
+
+## 2026-11-26 — verified expanded NEON STAGE standalone component export
+
+**Status:** COMPONENT EXPORT VERIFIED AT 1x/2x; VISUAL PARITY / FULL ASSET PACK / HOST ACCEPTANCE IN PROGRESS.
+
+GitHub Actions atlas export run `45831652470` succeeded on commit `ecdd536898035111837452325994acabf05d0de5`. Artifact `15122163495`, `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`, size 63,866,570 bytes, SHA-256 `03f5bd283bbb33c58b339363819ea0cf27496d715a8b4b0e2d48dc06d6b8fe4d`.
+
+Downloaded archive independently verified: 1,018 entries; 984 PNG, 30 contact-sheet JPG, 4 JSON. Each scale manifest declares exactly 484 individual components. All 968 individual PNG paths exist in the archive; all recorded byte counts and SHA-256 hashes match (0 missing files, 0 mismatches).
+
+Per-scale inventory: 5 background/material samples; 7 panel frame motifs; 135 button states; 14 FX OFF/ON switch components; 10 LED samples; 183 rotary frames; 35 icons; 10 display components; 12 meter segments; 29 white keys; 20 black keys; 3 C/E/G active overlays; 8 pitch/mod fader parts; 13 hardware parts. The exporter is manifest-driven and package-relative.
+
+Visual review of the exported contact sheets exposed two additional corrections after that successful run: the white-key crops included adjacent black-key overdraw, and the cyan hardware light bar referred to an undefined gradient. Follow-up commits `a5d93c9` and `8ccbd5e` add a dedicated light gradient and draw independent neutral white key faces with transparent C/E/G overlays. A fresh atlas export/visual review for those follow-up corrections is running; do not describe those post-run changes as verified until that run succeeds.
+
+The new verified export is still not the final 1:1 library. Remaining items include layered BASE/RIM/FACE/POINTER/SCALE/GLOW files for each of the nine main rotary controls, FX-specific scale overlays and layers, the master prompt's 41 named SVG icons at 16/24/32/48 px, all requested button/FX/LED focus and status variants, independent keyboard hover/pressed states, complete content-rich panel artwork, 1024×700 and 1600×1100 full-interface previews, and the JUCE rendered screenshot/overlay comparison. Windows build/CTest/Pluginval and FL Studio 20 host acceptance remain separate gates.
+
+The complete itemized gap list is maintained in `ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/ASSET_OPEN_ISSUES.md`; `Info.txt` remains the single canonical development journal.
