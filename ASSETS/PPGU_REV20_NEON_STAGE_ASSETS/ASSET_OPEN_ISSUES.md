@@ -158,3 +158,48 @@ Therefore the current status remains **PARTIAL EXPORT / VISUAL PARITY NOT ACCEPT
 6. Close each mismatch in the issue list before visual acceptance. Keep Windows x64 build, CTest, Pluginval and FL Studio 20 host acceptance as separate engineering gates.
 
 No claim of 100% completion is allowed until the full asset inventory, runtime integration, visual comparison and host acceptance have evidence recorded here.
+
+
+## 2026-11-26 — expanded 1x/2x standalone component export verified
+
+**Status:** 484 COMPONENT FILES PER SCALE EXPORTED / HASH-VERIFIED; VISUAL PARITY AND JUCE INTEGRATION STILL OPEN.
+
+GitHub Actions run `45831652470` completed successfully on commit `ecdd536898035111837452325994acabf05d0de5`. Artifact `15122163495` (`PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`) was downloaded and inspected: 63,866,570 bytes; artifact SHA-256 `03f5bd283bbb33c58b339363819ea0cf27496d715a8b4b0e2d48dc06d6b8fe4d`.
+
+The package contains **484 individual RGBA PNG components at 1x and the same 484 at 2x**:
+- 5 background/material samples;
+- 7 bezel/frame elements;
+- 135 button state components (27 families × 5 declared atlas states);
+- 14 dedicated main FX switch states (7 × OFF/ON);
+- 10 LED samples (5 colour families × DIM/LIT);
+- 183 rotary animation frames (3 styles × 61);
+- 35 individual icon tiles;
+- 10 display/frame components;
+- 12 meter sample segments;
+- 29 white keys, 20 black keys and 3 independent C/E/G active overlays;
+- 8 pitch/mod fader parts;
+- 13 hardware parts (3 bracket forms, vent grille, cyan rail and 8 fasteners).
+
+Archive verification found 1,018 ZIP entries: 984 PNG, 30 contact-sheet JPG and 4 JSON reports/manifests. Both per-scale component manifests report 484 records. Every record path exists inside the ZIP; all 968 component PNG byte counts and SHA-256 hashes match their manifests (0 missing paths, 0 hash/size mismatches). The exported contact sheets for backgrounds, panels, displays, keyboard, faders, hardware, LEDs, switches, buttons, icons, meters and each rotary style were inspected.
+
+### Corrections from visual inspection after this successful run
+
+The contact-sheet review exposed two export/source details not detectable by count/hash validation:
+1. White-key crops from the composite atlas contained adjacent black-key overdraw. The exporter is now changed to draw clean standalone white-key faces, while C/E/G active overlays remain independent transparent layers.
+2. The hardware light bar referenced a non-existent cyan gradient. The atlas now defines a dedicated `cyanLight` gradient.
+
+These two changes were committed after the successful artifact run (`a5d93c9`, `8ccbd5e`) and are **awaiting a fresh CI render and visual re-review**. Do not attribute them to artifact `15122163495`.
+
+### Remaining 1:1 and runtime gaps
+
+- Main rotary: per-parameter independent BASE/RIM/FACE/POINTER/SCALE/GLOW layers for all nine real parameters are still not separately exported. The 183 filmstrip frames are a separate deliverable and do not satisfy that layered-file requirement by themselves.
+- FX EDIT rotary: parameter-specific scale/marking overlays and individually extracted layers remain incomplete.
+- Button and FX-switch state inventory: the current 27×5 atlas and seven OFF/ON pairs do not yet cover every master-prompt FOCUS / hover / pressed / disabled variant for every required button/switch family. Preserve the distinct REV.20 five-state runtime contract; record and map any additional artwork-only states instead of silently changing the runtime contract.
+- LEDs: full OFF/ON/GLOW/WARNING/ERROR/SUCCESS/DISABLED variants are not all exported as separate assets.
+- Icons: 35 distinct icon tiles are present; the master prompt calls for 41 named icons in SVG plus 16/24/32/48 px outputs. Six items and the complete size matrix remain outstanding.
+- Keyboard: the 49-key contact proof and neutral/active keys exist, but separate per-key HOVER and PRESSED states and a final 49-key composition preview remain outstanding.
+- The 16 panel SVGs are currently scalable frame shells, not complete content-rich reproductions of the reference panels. Standalone 1x/2x renders of these frames are not equivalent to finished panels.
+- Full interface previews at 1024×700 and 1600×1100, and rendered JUCE reference overlays/difference review at 900×640, 1024×700 and 1600×1100, remain outstanding.
+- Runtime use of every new standalone asset, Windows x64 build/CTest/Pluginval on the final visual branch head, and FL Studio 20 manual host acceptance are separate gates.
+
+The 484-component export is a verified intermediate asset package, **not** final 1:1 visual acceptance and **not** a complete release asset library.
