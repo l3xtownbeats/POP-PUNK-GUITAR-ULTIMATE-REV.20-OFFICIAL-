@@ -432,7 +432,8 @@
             "width": 63,
             "height": 230,
             "count": 29,
-            "padding": 0
+            "padding": 0,
+            "normal_fill": "#D8E5EF"
           },
           "black_key_layout": {
             "x_positions": [
@@ -460,7 +461,19 @@
             "y": 390,
             "width": 38,
             "height": 135,
-            "padding": 0
+            "padding": 0,
+            "visual": {
+              "gradient": [
+                "#52677D",
+                "#1A2D43",
+                "#050B14",
+                "#18283A",
+                "#6C8296"
+              ],
+              "border": "#91A9BF",
+              "border_width": 2,
+              "highlight": "#C8E3F3"
+            }
           },
           "active_key_overlays": [
             {
@@ -484,7 +497,11 @@
               "width": 55,
               "height": 58
             }
-          ]
+          ],
+          "active_overlay_style": {
+            "fill": "#00D9FF",
+            "opacity": 0.34
+          }
         },
         {
           "id": "pitch_mod_faders",
