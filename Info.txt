@@ -482,3 +482,16 @@ Visual review of the exported contact sheets exposed two additional corrections 
 The new verified export is still not the final 1:1 library. Remaining items include layered BASE/RIM/FACE/POINTER/SCALE/GLOW files for each of the nine main rotary controls, FX-specific scale overlays and layers, the master prompt's 41 named SVG icons at 16/24/32/48 px, all requested button/FX/LED focus and status variants, independent keyboard hover/pressed states, complete content-rich panel artwork, 1024×700 and 1600×1100 full-interface previews, and the JUCE rendered screenshot/overlay comparison. Windows build/CTest/Pluginval and FL Studio 20 host acceptance remain separate gates.
 
 The complete itemized gap list is maintained in `ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/ASSET_OPEN_ISSUES.md`; `Info.txt` remains the single canonical development journal.
+
+
+## 2026-11-26 — source-reference component extraction pipeline
+
+**Status:** EXTRACTOR + CI STEP ADDED; CURRENT CI RUN IN PROGRESS; VISUAL/ RUNTIME ACCEPTANCE OPEN.
+
+Added `tools/extract_neon_stage_reference_components.py` and `ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/REFERENCE_COMPONENT_MAP.md`. The pipeline cuts 70 traceable review crops from the detailed button/switch and knob/meter reference sheets in `Assets/3D/References/`; exports source-native 1x and LANCZOS-resampled 2x versions (140 PNG files); and records source hashes, crop coordinates, dimensions, baked-label flags, file sizes and SHA-256 values in a JSON manifest. The export includes a contact sheet and ZIP package.
+
+The atlas workflow was updated to run this extraction after the SVG atlas/component/icon exports and include the new directory in the standard atlas artifact. Workflow run `45834122870` on PR source commit `be68e1d284040e073f87852195a8d4e684e69971` passed setup and SVG source validation; the 1x atlas rasterization was still running at the time of this journal entry, so the reference-crop step and package are not yet CI-verified.
+
+The 70 crops cover five FX-card states; Major/Minor/Custom and Strum/Arp/Latch states; MELODY/PATTERN plus reference-only Punk Group pair; ON/OFF toggles; two action buttons; four status LEDs; five large rotary poses; four mini amp knobs; five horizontal sliders; five thumb variants; two vertical meters; five horizontal progress/meter treatments; one multicolor segment strip and twelve individual meter segments.
+
+Important limits: the 2x files are resampled, not native 2x; some crops preserve baked labels/scales; the reference artwork is not automatically runtime approved; dynamic values and real meter telemetry remain live JUCE layers. No claim of 1:1 UI acceptance or completed asset library is made from this export alone.
