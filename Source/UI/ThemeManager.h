@@ -63,6 +63,12 @@ public:
         juce::Image shadowArtwork;
         // Per-skin hero artwork, decoded on the UI thread and used as a subtle Playing Core backdrop.
         juce::Image heroArtwork;
+        // Separate approved SKIN-053 shell panels; live JUCE controls remain above these plates.
+        juce::Image headerPanelArtwork;
+        juce::Image presetBrowserPanelArtwork;
+        juce::Image playingCorePanelArtwork;
+        juce::Image midiKeyboardBayPanelArtwork;
+        juce::Image statusFooterPanelArtwork;
         // Optional NEON STAGE sprite atlases. Only SKIN-1 supplies these;
         // other approved themes continue using the shared vector fallback.
         juce::Image controlsSpriteSheet;
