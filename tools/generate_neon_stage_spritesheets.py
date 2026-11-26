@@ -480,8 +480,152 @@ manifest["sheets"]["neon_stage_icons_sheet.png"]={
  "elements":{"fx_icons":fx,"nav_icons":nav,"icons":icon_records,"cell_size":[144,144]}
 }
 
+
+# ---------------------------------------------------------------------------
+# 5. Nine parameter-specific main rotary stacks, each as independent layers.
+#    Layout: columns = REV.20 controls, rows = BASE/RIM/FACE/POINTER/SCALE/GLOW.
+#    The FX EDIT panels continue to use their dedicated 61-frame material atlases.
+# ---------------------------------------------------------------------------
+MAIN_KNOB_PARAMETERS = (
+    "GAIN", "TREBLE", "MID", "BASS", "VELOCITY",
+    "DYNAMICS", "SWING", "HUMANIZE", "ACCENT",
+)
+MAIN_KNOB_LAYERS = ("BASE", "RIM", "FACE", "POINTER", "SCALE", "GLOW")
+MAIN_KNOB_CELL = 128
+main_knob_atlas = Image.new(
+    "RGBA",
+    (MAIN_KNOB_CELL * len(MAIN_KNOB_PARAMETERS),
+     MAIN_KNOB_CELL * len(MAIN_KNOB_LAYERS)),
+    (0, 0, 0, 0)
+)
+
+def draw_main_knob_layer(layer_name):
+    """Build one alpha-separated physical-knob layer using only Pillow."""
+    size = 192
+    centre = (size // 2, size // 2)
+    cx, cy = centre
+    tile = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+
+    if layer_name == "BASE":
+        shadow = Image.new("RGBA", tile.size, (0, 0, 0, 0))
+        sd = ImageDraw.Draw(shadow)
+        sd.ellipse((13, 18, 179, 184), fill=rgba("#02060B", 205))
+        tile = Image.alpha_composite(tile, shadow.filter(ImageFilter.GaussianBlur(5)))
+        d = ImageDraw.Draw(tile)
+        d.ellipse((11, 11, 181, 181), fill=rgba("#111F30"),
+                  outline=rgba("#435B72"), width=3)
+        d.ellipse((20, 20, 172, 172), fill=rgba("#07121F"),
+                  outline=rgba("#233B52"), width=3)
+        d.ellipse((29, 29, 163, 163), fill=rgba("#0A1625"),
+                  outline=rgba("#32495F"), width=2)
+
+    elif layer_name == "RIM":
+        d = ImageDraw.Draw(tile)
+        d.ellipse((11, 11, 181, 181), fill=rgba("#AABBC9"),
+                  outline=rgba("#E6F2FA"), width=2)
+        d.ellipse((20, 20, 172, 172), fill=(0, 0, 0, 0),
+                  outline=rgba("#536A80"), width=3)
+        for tick in range(72):
+            angle = math.radians(tick * 5.0)
+            r1 = 78
+            r2 = 85 if tick % 3 == 0 else 82
+            p1 = (cx + r1 * math.cos(angle), cy + r1 * math.sin(angle))
+            p2 = (cx + r2 * math.cos(angle), cy + r2 * math.sin(angle))
+            colour = "#EDF7FD" if tick % 3 == 0 else "#8197AA"
+            d.line((p1, p2), fill=rgba(colour, 225 if tick % 3 == 0 else 150),
+                   width=2 if tick % 3 == 0 else 1)
+        d.ellipse((27, 27, 165, 165), outline=rgba("#D6E4EF", 135), width=2)
+
+    elif layer_name == "FACE":
+        d = ImageDraw.Draw(tile)
+        d.ellipse((27, 27, 165, 165), fill=rgba("#253A50"),
+                  outline=rgba("#B7C9D8"), width=2)
+        d.ellipse((34, 34, 158, 158), fill=rgba("#0D1A29"),
+                  outline=rgba("#5D7489"), width=2)
+        for tick in range(48):
+            angle = math.radians(tick * 7.5)
+            p1 = (cx + 25 * math.cos(angle), cy + 25 * math.sin(angle))
+            p2 = (cx + 58 * math.cos(angle), cy + 58 * math.sin(angle))
+            d.line((p1, p2), fill=rgba("#E8F4FC", 25), width=1)
+        d.ellipse((42, 42, 150, 150), outline=rgba("#D9E8F3", 38), width=1)
+        d.ellipse((49, 49, 143, 143), outline=rgba("#020811", 145), width=2)
+        d.ellipse((48, 44, 101, 67), fill=rgba("#FFFFFF", 24))
+
+    elif layer_name == "POINTER":
+        d = ImageDraw.Draw(tile)
+        d.polygon([(cx - 5, cy + 17), (cx - 4, cy - 56),
+                   (cx, cy - 73), (cx + 4, cy - 56),
+                   (cx + 5, cy + 17)],
+                  fill=rgba("#DDEAF3"), outline=rgba("#FFFFFF", 220))
+        d.line((cx, cy - 63, cx, cy - 77),
+               fill=rgba(P["glow_cyan"]), width=4)
+        d.ellipse((cx - 12, cy - 12, cx + 12, cy + 12),
+                  fill=rgba("#71889B"), outline=rgba("#F2FAFF"), width=2)
+        d.ellipse((cx - 7, cy - 7, cx + 7, cy + 7),
+                  fill=rgba("#12243A"), outline=rgba(P["glow_cyan"]), width=2)
+
+    elif layer_name == "SCALE":
+        d = ImageDraw.Draw(tile)
+        for step in range(61):
+            angle_deg = 210 + step * 3
+            angle = math.radians(angle_deg)
+            major = (step % 5 == 0)
+            r1, r2 = (66, 76) if major else (69, 75)
+            p1 = (cx + r1 * math.cos(angle), cy + r1 * math.sin(angle))
+            p2 = (cx + r2 * math.cos(angle), cy + r2 * math.sin(angle))
+            d.line((p1, p2),
+                   fill=rgba("#D8EAF5", 225 if major else 150),
+                   width=2 if major else 1)
+        d.arc((17, 17, 175, 175), 210, 390,
+              fill=rgba(P["glow_cyan"], 185), width=3)
+        d.ellipse((28, 28, 164, 164), outline=rgba("#8BA5BA", 55), width=1)
+
+    elif layer_name == "GLOW":
+        glow = Image.new("RGBA", tile.size, (0, 0, 0, 0))
+        gd = ImageDraw.Draw(glow)
+        gd.ellipse((8, 8, 184, 184), outline=rgba(P["glow_blue"], 180), width=5)
+        gd.arc((10, 10, 182, 182), 210, 390,
+               fill=rgba(P["glow_cyan"], 215), width=5)
+        tile = Image.alpha_composite(tile, glow.filter(ImageFilter.GaussianBlur(7)))
+        d = ImageDraw.Draw(tile)
+        d.arc((12, 12, 180, 180), 210, 390,
+              fill=rgba(P["glow_cyan"], 105), width=2)
+    else:
+        raise ValueError("unknown main knob layer: " + str(layer_name))
+
+    return tile.resize((MAIN_KNOB_CELL, MAIN_KNOB_CELL), Image.Resampling.LANCZOS)
+
+main_knob_frame_manifest = []
+for parameter_index, parameter_name in enumerate(MAIN_KNOB_PARAMETERS):
+    for layer_index, layer_name in enumerate(MAIN_KNOB_LAYERS):
+        tile = draw_main_knob_layer(layer_name)
+        x = parameter_index * MAIN_KNOB_CELL
+        y = layer_index * MAIN_KNOB_CELL
+        main_knob_atlas.alpha_composite(tile, (x, y))
+        main_knob_frame_manifest.append({
+            "parameter": parameter_name,
+            "control_id": f"knob{parameter_index + 1:02d}",
+            "layer": layer_name,
+            "bbox": [x, y, x + MAIN_KNOB_CELL, y + MAIN_KNOB_CELL],
+        })
+
+main_knob_atlas_name = "neon_stage_main_knob_layers_atlas.png"
+save(main_knob_atlas, main_knob_atlas_name)
+manifest["sheets"][main_knob_atlas_name] = {
+    "resolution": [
+        MAIN_KNOB_CELL * len(MAIN_KNOB_PARAMETERS),
+        MAIN_KNOB_CELL * len(MAIN_KNOB_LAYERS)
+    ],
+    "cell_size": [MAIN_KNOB_CELL, MAIN_KNOB_CELL],
+    "grid": [len(MAIN_KNOB_PARAMETERS), len(MAIN_KNOB_LAYERS)],
+    "parameter_order": list(MAIN_KNOB_PARAMETERS),
+    "layer_order": list(MAIN_KNOB_LAYERS),
+    "frames": main_knob_frame_manifest,
+    "runtime_policy": "MAIN_KNOBS_ONLY; FX_EDIT_CONTINUES_TO_USE_DEDICATED_61_FRAME_MATERIAL_ATLASES",
+}
+
 (OUT/"neon_stage_spritesheet_manifest.json").write_text(
     json.dumps(manifest,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
-print("Generated 7 NEON STAGE 1024x1024 RGBA sprite sheets and manifest:")
+print("Generated 8 NEON STAGE sprite sheets (including the 9x6 main-knob layer atlas) and manifest:")
 for path in sorted(OUT.glob("*")):
     print(f"{path.relative_to(ROOT)}\t{path.stat().st_size} bytes")
