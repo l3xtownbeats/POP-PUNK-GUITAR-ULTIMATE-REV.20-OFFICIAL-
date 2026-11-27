@@ -79,3 +79,18 @@ The runtime loader rejects incorrect sheet dimensions. Keep paths and dimensions
 ## 6. Status discipline
 
 CI export success proves that source masters can be validated and rasterized. It does not prove that the newly exported PNGs are installed in Skin_053, loaded by ThemeManager, visually accepted, or verified in a DAW host. Mark each gate independently.
+
+
+## 7. Exact-head export and first visual QA — 2026-11-28
+
+- GitHub Actions run #177 completed successfully on branch head 8dbea7b3edbc199c765b2bcf28a5bd9eb817d890.
+- Artifact: PPGU-NEON-STAGE-SVG-ATLAS-EXPORT, artifact ID 15232889173, archive size 79,318,951 bytes; SHA-256 7f302e6c38721b2cbc9dc8ee0a65a766d57a87c8a98e5f3bde5ffb5716319738.
+- Confirmed fresh 1× and 2× raster outputs, 490 standalone components at each scale, 41 SVG icon families, 70 source-reference crops, nine six-layer main knobs and three 61-frame rotary strips. All workflow steps passed.
+- All three fresh rotary strips decode as RGBA, exactly 128×7808 (61 frames × 128 px).
+
+**Visual QA result: NOT ACCEPTED against the approved rotary reference yet.** The new raster does render, including its radial-brush reusable layer, but direct inspection against reference_components_1x/knobs/rotary_50_percent.png shows material differences:
+1. The reference has a prominent cyan segmented arc concentrated across roughly three quarters of the upper/left perimeter; the current export distributes small cyan segments around the full circumference.
+2. The reference's bright cyan position marker is near 12 o'clock at the 50% reference state; the current frame 30 marker is visibly left of top.
+3. The face/rim treatment is still a reconstruction and does not yet reproduce the reference's polished bright radial-metal face and stronger cyan arc.
+
+Therefore the export pipeline is PASS, but rotary visual acceptance and runtime integration remain BLOCKED. Do not pack or replace the three JUCE runtime rotary sheets from this iteration. Correct the LED arc geometry/progression and marker angle against the reference, rerun exact-head CI, then compare all 0/25/50/75/100% positions before packing. This finding supersedes any earlier implication that the rotary artwork was visually accepted.
