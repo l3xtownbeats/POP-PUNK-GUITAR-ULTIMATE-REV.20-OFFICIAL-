@@ -88,12 +88,24 @@ def main() -> int:
             })
 
         if filename.startswith("03_"):
-            # The 3×61 frame strips are stored at x=20/270/520, y=70, pitch=128.
+            # Keep crops aligned with the canonical atlas03 frame origins validated below:
+            # x=84/334/584, y=134, 61 frames, 128px pitch.
             with Image.open(target) as image:
-                for index, x in enumerate((20, 270, 520), start=1):
-                    crop = image.crop((round(x * args.scale), round(70 * args.scale),
-                                       round((x + 128) * args.scale),
-                                       round((70 + 61 * 128) * args.scale)))
+                for index, x in enumerate((84, 334, 584), start=1):
+                    bounds = (round(x * args.scale), round(134 * args.scale),
+                              round((x + 128) * args.scale),
+                              round((134 + 61 * 128) * args.scale))
+                    crop = image.crop(bounds)
+                    expected_crop = (round(128 * args.scale), round(61 * 128 * args.scale))
+                    if crop.size != expected_crop:
+                        raise SystemExit(
+                            f"{source.name}: rotary strip {index} crop is {crop.size}, "
+                            f"expected {expected_crop}; atlas geometry/exporter are out of sync"
+                        )
+                    if crop.mode != "RGBA" or crop.getchannel("A").getextrema()[0] != 0:
+                        raise SystemExit(
+                            f"{source.name}: rotary strip {index} must preserve RGBA transparency"
+                        )
                     strip_path = args.output / f"rotary_strip_{index}_61_frames.png"
                     crop.save(strip_path, optimize=True)
                     records.append({
