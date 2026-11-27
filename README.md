@@ -7,13 +7,16 @@
 
 <img src="assets/POP_PUNK_GUITAR_ULTIMATE_BANNER.svg" alt="L3XTOWN Audio Lab — POP PUNK GUITAR ULTIMATE" width="100%">
 
-<img src="01%20INTERFACE%20%20NEON%20STAGE%20DEFAULT%20.png" alt="Approved NEON STAGE DEFAULT / SKIN-1 main plugin mockup" width="100%">
+<img src="Неоновый%20интерфейс%20PPGU%20%E2%80%94%20поп-панк%20гитара.png" alt="Stored PPGU NEON STAGE interface mockup" width="100%">
 
-**APPROVED VISUAL BASELINE · NEON STAGE DEFAULT · SKIN-1 · skin-053**
+**VISUAL REFERENCES · NEON STAGE MOCKUP COLLECTION · SKIN-1 / skin-053**
 
 [Product baseline](docs/REV20_ACCEPTED_BASELINE_RU.md) ·
 [Single development journal](Info.txt) ·
 [UI implementation baseline](docs/NEON_STAGE_GUI_IMPLEMENTATION_BASELINE_RU.md) ·
+[Stored UI mockup](Неоновый%20интерфейс%20PPGU%20%E2%80%94%20поп-панк%20гитара.png) ·
+[Asset atlas](Неоновый%20атлас%20UI%E2%80%91ассетов%20PPGU.png) ·
+[Asset master prompt](Assets/3D/References/PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt) ·
 [Windows validation workflow](.github/workflows/rev20-windows-vst3-skin-validation.yml)
 
 </div>
@@ -36,7 +39,7 @@ The product has exactly two main playing modes:
 
 ## Approved visual identity
 
-The canonical visual system is **NEON STAGE DEFAULT / SKIN-1 / `skin-053`**. The product has exactly **16 approved logical skins**: SKIN-1 through SKIN-16. Stable asset IDs and registry indices are immutable and are not the logical skin numbers.
+The canonical visual system is **NEON STAGE DEFAULT / SKIN-1 / `skin-053`**. The applicable visual evidence is the stored mockup collection — [main PPGU interface mockup](Неоновый%20интерфейс%20PPGU%20%E2%80%94%20поп-панк%20гитара.png), [guitar-plugin interface mockup](Неоновый%20интерфейс%20гитарного%20плагина%20PPGU.png), [UI asset atlas](Неоновый%20атлас%20UI%E2%80%91ассетов%20PPGU.png) — together with [the complete asset master prompt](Assets/3D/References/PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt) and the single canonical journal. The separate repository-root image `01 INTERFACE  NEON STAGE DEFAULT .png` is explicitly excluded by the asset issue register and is not used as an approval reference. The product has exactly **16 approved logical skins**: SKIN-1 through SKIN-16. Stable asset IDs and registry indices are immutable and are not the logical skin numbers.
 
 The main console follows the approved reference and journal decisions:
 
