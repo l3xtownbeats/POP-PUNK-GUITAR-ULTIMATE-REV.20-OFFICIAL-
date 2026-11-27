@@ -147,3 +147,11 @@
 - README updated with the new toolchain contract. Existing plugin architecture, APVTS IDs, parameter behavior and VST3 format are intentionally unchanged.
 - Commit CMake: `dc3c54d34e90fe5cfa77077add1f7445165433af`; documentation: `4b65d50b67ea9142773a63b99347b60778752a56`.
 - **Build validation pending:** CI must provision JUCE 9.0.5 (not the former JUCE 7.0.12 checkout) and run Windows x64 VST3 build plus full CTest on this exact branch head. Do not mark the toolchain migration build-accepted until that run passes.
+
+
+### 2026-11-28 — validator repair for the three-layer rotary marker
+
+- Exact PR head `481348f5e9a454e6b6c52f248fa0c0b125705321` exposed a source-validator mismatch: it required all three marker circles to use `cy="-30"`, but the authored highlight layer intentionally sits at `cy="-32.2"` while the glow and core remain on the 30 px reference arc.
+- Updated `tools/validate_neon_stage_vector_atlases.py` to validate the actual three-layer construction: exactly three circles, two at `cy="-30"`, one specular highlight at `cy="-32.2"`. The artwork, marker trajectory and APVTS/runtime contract were not modified.
+- Commit: `5952d4caef49a2bccec970bb0de2632cece30810`.
+- Status: validator patch committed; exact-head CI re-run pending. This is not a visual acceptance. Re-export and compare 0/25/50/75/100% frames for all three materials against the approved crops before runtime packing.
