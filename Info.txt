@@ -554,3 +554,15 @@ Latest GitHub Actions results on this exact source head:
 - Standalone panel-frame export run `45858901170` (#93): SUCCESS; job `export` completed successfully. This verifies frame export only, not complete content-rich panels.
 
 These CI results verify the current-head automated build/validation and export workflows only. They do not prove 1:1 screenshot parity, complete standalone production artwork, FL Studio 20 host acceptance, or release completion. The remaining visual gaps and acceptance gates listed below remain open. Do not mark the UI or asset pack COMPLETE.
+
+
+## 2026-11-27 — PUBLIC REPOSITORY FRONT PAGE / VERIFIED DOWNLOADS
+- Prepared a public-facing README refresh on review branch `docs/rev20-public-repository-frontpage`; no direct write to protected `main`.
+- README now identifies the product, Windows x64 / VST3 target, MELODY/PATTERN/AUTOCHORDS boundaries, exactly 16 approved skins, current main toolchain and separate JUCE 9/C++23 migration proposal.
+- Corrected the hero reference to the stored PPGU mockup collection; added navigation to core product docs, build/test workflow, source archives, visual asset archives, and verified VST3/UI-snapshot artifacts.
+- Verified Actions run [45941370562](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/45941370562) on commit `781205287eac13d7a2392a85721463040a7ea217`: Windows x64 configure/build, complete CTest, UI snapshot generation, exact-16-skin validation, VST3 package staging and pluginval strictness 5 all SUCCESS. Current main `438d59ba07e9b92e9579e9893eac7887dfbe5d5e` is its direct child with added visual reference uploads.
+- Temporary artifact `PPGU-REV20-Windows-x64-VST3` ID `15173197005`, SHA-256 `8c6bbe8851d0d2a5341e0ea025cfa6b02d5d44722db3970c411e4fbee2bcf716`; UI snapshots artifact ID `15172667912`, SHA-256 `2cdd6db7cb0460d56baada01525754278d7b25d1adeb0ee6db5066e790edf7a7`. Both expire 2026-12-11 UTC. They are CI artifacts, not permanent Releases or an installer.
+- Public release/download guide added at `docs/REV20_PUBLIC_RELEASE_AND_DOWNLOADS_RU.md`. It distinguishes the temporary VST3 artifact from source archives and visual ZIP assets; records no published Releases, disabled Downloads, no installer, and the release gates.
+- GitHub About/social-preview copy guide added at `docs/REV20_GITHUB_ABOUT_METADATA_RU.md`. Repository description, topics, homepage and Social Preview image are still manual settings because the available GitHub connector does not expose repository-metadata write operations.
+- Explicitly recorded current main as JUCE 7.0.12 + C++20; JUCE 9.0.6 + C++23 remains separate draft PR #31, with C++26 experimental only. Do not describe the migration as merged production baseline.
+- No claim of final 500 playable presets, delivered 15 GB licensed BASIC audio, completed licensing, permanent release or FL Studio 20 host acceptance.
