@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   windows-x64:
-    runs-on: windows-2022
+    runs-on: windows-2025-vs2026
     timeout-minutes: 45
     steps:
       - name: Checkout pull request merge commit
