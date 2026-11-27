@@ -71,9 +71,89 @@ jobs:
 
       # Generated atlases stay inside this build workspace. The build must never
       # push back to main: that creates a second run and can cancel the release build.
-      - name: Checkout JUCE 7.0.12
+      - name: Checkout JUCE 9.0.5
         shell: pwsh
-        run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
+        run: git clone --depth 1 --branch 9.0.5 https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Verify C++23 and JUCE 9.0.5 toolchain
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $juceCmake = Get-Content JUCE/CMakeLists.txt -Raw
+          if ($juceCmake -notmatch 'project\\s*\\(\\s*JUCE\\s+VERSION\\s+9\\.0\\.5') {
+            throw 'The checked-out JUCE source is not exactly 9.0.5.'
+          }
+          if ((Select-String -Path CMakeLists.txt -Pattern '^set\\(CMAKE_CXX_STANDARD 23\\)
+
+      - name: Configure Windows x64
+        shell: pwsh
+        run: cmake -S . -B build -A x64
+
+      - name: Build VST3 and all C++ contract tests
+        shell: pwsh
+        run: cmake --build build --config Release --parallel
+
+      - name: Run full CTest suite
+        shell: pwsh
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Upload rendered NEON STAGE UI snapshots at reference sizes
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-NEON-STAGE-JUCE-UI-SNAPSHOTS
+          path: |
+            build/ui-snapshots/*.png
+            build/ui-snapshots/PPGU_NEON_STAGE_UI_SNAPSHOTS.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Validate exactly 16 named graphical skins and all artwork assets
+        shell: pwsh
+        run: python tools/validate_skin_registry_16.py
+
+      - name: Stage exactly 16 approved skin folders beside VST3
+        shell: pwsh
+        run: python tools/package_active_skins.py --root SKIN --output build/PPGU_artefacts/Release/VST3/Skins
+
+      - name: Locate VST3 bundle
+        id: vst3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $plugin = Get-ChildItem build -Directory -Recurse -Filter '*.vst3' | Select-Object -First 1
+          if (-not $plugin) { throw 'VST3 bundle not found after successful build.' }
+          "path=$($plugin.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Run pluginval strictness level 5
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'pluginval_Windows.zip'
+          $toolDir = Join-Path $env:RUNNER_TEMP 'pluginval'
+          Invoke-WebRequest -Uri 'https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_Windows.zip' -OutFile $archive -TimeoutSec 180
+          Expand-Archive -LiteralPath $archive -DestinationPath $toolDir -Force
+          $validator = Get-ChildItem -LiteralPath $toolDir -Recurse -File -Filter 'pluginval.exe' | Select-Object -First 1
+          if (-not $validator) { throw 'pluginval.exe was not found in the official Windows release archive.' }
+          $pluginPath = "${{ steps.vst3.outputs.path }}"
+          $arguments = @('--strictness-level', '5', ('"{0}"' -f $pluginPath))
+          $validationProcess = Start-Process -FilePath $validator.FullName -ArgumentList $arguments -NoNewWindow -Wait -PassThru
+          if ($validationProcess.ExitCode -ne 0) {
+            throw "pluginval strictness level 5 failed with exit code $($validationProcess.ExitCode)."
+          }
+
+      - name: Upload REV.20 Windows x64 VST3 and matching 16-skin pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: PPGU-REV20-Windows-x64-VST3
+          path: |
+            build/PPGU_artefacts/Release/VST3/*.vst3
+            build/PPGU_artefacts/Release/VST3/Skins/**
+          if-no-files-found: error
+          retention-days: 14
+) -eq $null) {
+            throw 'The project must compile as C++23.'
+          }
+          git -C JUCE describe --tags --exact-match
 
       - name: Configure Windows x64
         shell: pwsh
