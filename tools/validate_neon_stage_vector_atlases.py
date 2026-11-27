@@ -141,12 +141,18 @@ def main() -> int:
             angle_match = re.fullmatch(r"rotate\(([-\d.]+) 0 0\)", rotations[0])
             if not angle_match:
                 fail(f"rotary frame at x={x}, y={y}: malformed marker rotation")
-            marker_circles = [
-                child for child in children_named(marker_groups[0], "circle")
-                if child.attrib.get("cy") == "-30"
+            marker_circles = children_named(marker_groups[0], "circle")
+            marker_on_arc = [
+                child for child in marker_circles
+                if child.attrib.get("cy") in {"-30", "-32.2"}
             ]
-            if len(marker_circles) != 3:
-                fail(f"rotary frame at x={x}, y={y}: marker/glow must use the 30 px reference radius")
+            if (
+                len(marker_circles) != 3
+                or len(marker_on_arc) != 3
+                or sum(child.attrib.get("cy") == "-30" for child in marker_circles) != 2
+                or sum(child.attrib.get("cy") == "-32.2" for child in marker_circles) != 1
+            ):
+                fail(f"rotary frame at x={x}, y={y}: marker/glow must retain its 30 px reference arc and three-layer highlight")
             strip_groups[x].append((y, float(angle_match.group(1))))
     for x, frames in strip_groups.items():
         frames.sort()
