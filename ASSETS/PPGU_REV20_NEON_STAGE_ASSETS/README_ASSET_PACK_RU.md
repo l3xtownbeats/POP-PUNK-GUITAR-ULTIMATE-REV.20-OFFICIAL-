@@ -60,3 +60,7 @@ The first rendered contact sheet revealed carbon-weave overflow, duplicate-looki
 
 ### Runtime FX EDIT rotary variants
 The Skin-1 runtime pack now includes two additional 1024×1024 61-frame atlases: black-disc for the compressor FX EDIT group and knurled-steel for the EQ FX EDIT group. Their 128×128 cells cover 210°–390° in 3° steps. The corresponding controls use the matching 180° rotary interaction arc; APVTS parameter ranges remain unchanged. The generator creates these assets before build and the package stage copies them only into Skin_053.
+
+
+### Расширение атласа 04 — дисплеи, LED и измерители
+Атлас `04_ppgu_atlas_displays_keyboard.svg` расширен до **1920×1840**. Сохранены существующие 49 клавиш (29 белых + 20 чёрных), исходные дисплейные образцы и pitch/mod faders. Добавлена отдельная библиотека из шести LCD-состояний (ACTIVE, HARMONY, NOTES HELD, NUMERIC, WARNING, ERROR), семи состояний LED (OFF, ON, GLOW, WARNING, ERROR, SUCCESS, DISABLED) и трёх 12-сегментных стерео-meter примеров (idle, signal, peak). Все элементы остаются отдельной векторной графикой; динамические подписи, показания и фактические состояния должны рисоваться/обновляться JUCE runtime, а не быть запечены в PNG.
