@@ -18,7 +18,7 @@ SHEETS = {
     "01_ppgu_atlas_backgrounds_frames.svg": (1920, 1000),
     "02_ppgu_atlas_buttons_switches.svg": (1920, 1020),
     "03_ppgu_atlas_knob_strips.svg": (1920, 8000),
-    "04_ppgu_atlas_displays_keyboard.svg": (1920, 1840),
+    "04_ppgu_atlas_displays_keyboard.svg": (1920, 1880),
     "05_ppgu_atlas_icons_hardware.svg": (1920, 1020),
 }
 ICON_NAMES = {
@@ -165,7 +165,32 @@ def main() -> int:
     if len([node for node in keyboard_rects if node.attrib.get("x") == "1080" and node.attrib.get("width") == "42" and node.attrib.get("height") == "9"]) != 12:
         fail("display atlas: expected a 12-segment meter sample")
 
-    rotary_first_frames = {}
+    display_states = parsed["04_ppgu_atlas_displays_keyboard.svg"]
+    state_ids = {"ppgu-display-state-library", "ppgu-led-state-matrix", "ppgu-meter-state-library"}
+    present_ids = {node.attrib.get("id") for node in children_named(display_states, "g")}
+    if not state_ids.issubset(present_ids):
+        fail("display atlas: LCD, LED or meter state library group is missing")
+    display_labels = {(node.text or "").strip() for node in children_named(display_states, "text")}
+    expected_display_labels = {
+        "ACTIVE / PLAYING / MELODY", "HARMONY / CHORD ENGINE",
+        "NOTES HELD / LIVE NOTE TELEMETRY", "NUMERIC / PARAMETER READOUT",
+        "WARNING / INPUT WARNING", "ERROR / LOAD ERROR",
+    }
+    if not expected_display_labels.issubset(display_labels):
+        fail("display atlas: one or more of the six LCD state samples are missing")
+    led_labels = {"OFF", "ON", "GLOW", "WARNING", "ERROR", "SUCCESS", "DISABLED"}
+    if not led_labels.issubset(display_labels):
+        fail("display atlas: complete seven-state LED sample family is missing")
+    meter_groups = [
+        node for node in children_named(display_states, "g")
+        if node.attrib.get("transform") in {
+            "translate(760 1810)", "translate(1130 1810)", "translate(1500 1810)"
+        }
+    ]
+    if len(meter_groups) != 3:
+        fail("display atlas: expected three separated 12-segment stereo meter states")
+
+    rotary_first_frames = {
     for x in (334, 584):
         frame = next(node for node in children_named(rotary, "g") if node.attrib.get("transform") == f"translate({x} 134)")
         rotary_first_frames[x] = ET.tostring(frame, encoding="unicode")
@@ -202,7 +227,7 @@ def main() -> int:
     print("PASS: 27 button-family headings match the declared contract.")
     print("PASS: 3 rotary strips × 61 frames; 128px pitch; 210°–390° in 3° steps; materials differ.")
     print("PASS: 49-key keyboard contains 29 white keys, 20 black keys and C/E/G active overlays.")
-    print("PASS: display atlas includes a 12-segment meter sample.")
+    print("PASS: display atlas includes six LCD states, seven LED states and three stereo meter states.")
     print("PASS: 41 icon tiles have 41 distinct glyph bodies and all declared labels.")
     print("NOTE: This validator does not render images or replace pixel-level visual QA.")
     return 0
