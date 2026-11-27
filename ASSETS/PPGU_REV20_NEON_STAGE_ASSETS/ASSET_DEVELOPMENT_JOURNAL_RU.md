@@ -138,3 +138,12 @@
 - Structural validator теперь требует knurled bezel и machined highlight в каждом кадре всех трёх материалов.
 - Commit SVG: `ee329d0eef320b0cc10619902f18b8c967f86dd4`; validator: `9051c4059fd296a9e5f928265d61170730288eac`.
 - Статус: **SOURCE-PRESENT**. Художественная приёмка всё ещё **NOT ACCEPTED** до нового raster export и прямого сравнения 0/25/50/75/100% с эталонными crop. Не объявлять 1:1 до визуального подтверждения.
+
+
+### 2026-11-28 — toolchain baseline: C++23 / JUCE 9.0.5
+
+- CMake project upgraded from C++20 to **C++23**.
+- Declared **JUCE 9.0.5** as the exact required framework baseline; configuration now fails when the JUCE checkout reports a different version.
+- README updated with the new toolchain contract. Existing plugin architecture, APVTS IDs, parameter behavior and VST3 format are intentionally unchanged.
+- Commit CMake: `dc3c54d34e90fe5cfa77077add1f7445165433af`; documentation: `4b65d50b67ea9142773a63b99347b60778752a56`.
+- **Build validation pending:** CI must provision JUCE 9.0.5 (not the former JUCE 7.0.12 checkout) and run Windows x64 VST3 build plus full CTest on this exact branch head. Do not mark the toolchain migration build-accepted until that run passes.
