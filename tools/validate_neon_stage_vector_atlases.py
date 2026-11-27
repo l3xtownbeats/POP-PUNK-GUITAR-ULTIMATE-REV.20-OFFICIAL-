@@ -105,7 +105,7 @@ def main() -> int:
         fail("button atlas: family headings do not match the canonical 27-family contract")
 
     rotary = parsed["03_ppgu_atlas_knob_strips.svg"]
-    strip_groups: dict[int, list[tuple[int, int]]] = {84: [], 334: [], 584: []}
+    strip_groups: dict[int, list[tuple[int, float]]] = {84: [], 334: [], 584: []}
     for node in children_named(rotary, "g"):
         match = re.fullmatch(r"translate\((\d+) (\d+)\)", node.attrib.get("transform", ""))
         if not match:
@@ -122,7 +122,7 @@ def main() -> int:
             angle_match = re.fullmatch(r"rotate\(([-\d.]+) 0 0\)", rotations[0])
             if not angle_match:
                 fail(f"rotary frame at x={x}, y={y}: malformed rotation")
-            strip_groups[x].append((y, int(float(angle_match.group(1)))))
+            strip_groups[x].append((y, float(angle_match.group(1))))
     for x, frames in strip_groups.items():
         frames.sort()
         if len(frames) != 61:
