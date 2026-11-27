@@ -16,6 +16,7 @@
 
 - [ ] Завершить/проверить production backgrounds и materials по SKIN-1.
 - [ ] Довести семь основных panel compositions; shell SVG и guide placeholders не считать готовыми панелями.
+- [ ] Сверить восстановленные три rotary strips с утверждёнными knob mockups при 100%/200%; подтвердить точность металла, насечки, шкалы, бликов и указателя.
 - [ ] Завершить FX EDIT-specific rotary layers/scales, не менять APVTS bindings.
 - [ ] Довести недостающие button focus/disabled, LED, keyboard hover/pressed и per-control state mappings по каноническому manifest.
 - [ ] Проверить отдельные preset-browser assets и иконки на соответствие существующим действиям.
@@ -38,6 +39,7 @@
 
 ## Подтверждено на текущем head
 
+- [x] Atlas 03 восстановлен из пустого файла: 3 rotary strips × 61 frame; structural CI ожидается.
 - [x] Atlas 04 source расширен: 6 LCD, 7 LED, 3 stereo meter samples.
 - [x] Существующая 49-key keyboard (29 white + 20 black) и pitch/mod faders сохранены.
 - [x] SVG размер 1920×1880 и viewBox согласованы.
@@ -46,7 +48,7 @@
 
 ## Не является подтверждением
 
-CI export не означает pixel-perfect approval, полную самостоятельную PNG-библиотеку, JUCE runtime mapping, pluginval, FL Studio 20 acceptance или завершённость всего asset pack.
+Atlas 03 пока не прошёл CI на новом commit и ручную визуальную приёмку. CI export не означает pixel-perfect approval, полную самостоятельную PNG-библиотеку, JUCE runtime mapping, pluginval, FL Studio 20 acceptance или завершённость всего asset pack.
 
 ## Единственное известное дизайн-расхождение
 
