@@ -14,7 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # JUCE 9.0.6 is checked out by the Windows workflow into this directory.
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/CMakeLists.txt")
-    message(FATAL_ERROR "JUCE 7.0.12 checkout is missing. Run the configured workflow or provide JUCE/.")
+    message(FATAL_ERROR "JUCE 9.0.6 checkout is missing. Run the configured workflow or provide JUCE/.")
 endif()
 add_subdirectory(JUCE EXCLUDE_FROM_ALL)
 
