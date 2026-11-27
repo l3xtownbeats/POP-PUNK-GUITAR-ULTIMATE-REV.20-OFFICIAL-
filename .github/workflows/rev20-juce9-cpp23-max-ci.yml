@@ -1,0 +1,289 @@
+name: REV.20 JUCE 9.0.6 C++23 maximum CI
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "CMakeLists.txt"
+      - "Source/**"
+      - "tests/**"
+      - "SKIN/**"
+      - "presets/**"
+      - "assets/**"
+      - "LibraryManager/**"
+      - "SoundHunter/**"
+      - "tools/**"
+      - ".github/workflows/**"
+  push:
+    branches:
+      - main
+      - upgrade/juce-9.0.6-cpp23-cpp26-evaluation
+    paths:
+      - "CMakeLists.txt"
+      - "Source/**"
+      - "tests/**"
+      - "SKIN/**"
+      - "presets/**"
+      - "assets/**"
+      - "LibraryManager/**"
+      - "SoundHunter/**"
+      - "tools/**"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rev20-juce9-cpp23-max-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+env:
+  JUCE_VERSION: "9.0.6"
+  PPGU_CXX_STANDARD: "23"
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  windows-msvc:
+    name: Windows x64 / MSVC / C++23 / ${{ matrix.runner }} / ${{ matrix.configuration }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ windows-2025-vs2026, windows-2022 ]
+        configuration: [ Release, Debug ]
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install asset validation dependency
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Generate canonical NEON STAGE sprite atlases
+        shell: pwsh
+        run: python tools/generate_neon_stage_spritesheets.py
+
+      - name: Checkout pinned JUCE release
+        shell: pwsh
+        run: |
+          git clone --depth 1 --branch "${{ env.JUCE_VERSION }}" https://github.com/juce-framework/JUCE.git JUCE
+          if ($LASTEXITCODE -ne 0) { throw "JUCE checkout failed." }
+          $tag = git -C JUCE describe --tags --exact-match
+          if ($tag -ne "${{ env.JUCE_VERSION }}") { throw "Unexpected JUCE tag: $tag" }
+
+      - name: Configure C++23 Windows x64
+        shell: pwsh
+        run: cmake -S . -B build -A x64 -DPPGU_CXX_STANDARD=23
+
+      - name: Record compiler and CMake versions
+        shell: pwsh
+        run: |
+          cmake --version
+          cmake --build build --config ${{ matrix.configuration }} --target help
+          cl 2>&1 | Select-Object -First 4
+
+      - name: Build plugin and every C++ contract target
+        shell: pwsh
+        run: cmake --build build --config ${{ matrix.configuration }} --parallel
+
+      - name: Run complete CTest suite
+        shell: pwsh
+        run: ctest --test-dir build -C ${{ matrix.configuration }} --output-on-failure
+
+      - name: Validate exact 16-skin registry and artwork
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: python tools/validate_skin_registry_16.py
+
+      - name: Stage approved runtime skins
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: python tools/package_active_skins.py --root SKIN --output build/PPGU_artefacts/Release/VST3/Skins
+
+      - name: Upload test diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-diagnostics-${{ matrix.runner }}-${{ matrix.configuration }}
+          path: |
+            build/Testing/Temporary/LastTest.log
+            build/CMakeFiles/CMakeError.log
+            build/CMakeFiles/CMakeOutput.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+  linux-portability:
+    name: Linux x64 / ${{ matrix.compiler }} / C++23
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: GCC
+            cc: gcc
+            cxx: g++
+          - compiler: Clang
+            cc: clang
+            cxx: clang++
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install JUCE Linux and audio build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ninja-build pkg-config \
+            libasound2-dev libjack-jackd2-dev libfreetype-dev libfontconfig1-dev libgtk-3-dev \
+            libx11-dev libxinerama-dev libxrandr-dev libxcursor-dev libxcomposite-dev libxrender-dev \
+            libgl1-mesa-dev libglu1-mesa-dev libcurl4-openssl-dev
+
+      - name: Install CMake 3.31 and asset validation dependency
+        run: python -m pip install --disable-pip-version-check cmake==3.31.6 Pillow
+
+      - name: Generate canonical NEON STAGE sprite atlases
+        run: python tools/generate_neon_stage_spritesheets.py
+
+      - name: Checkout pinned JUCE release
+        run: git clone --depth 1 --branch "${{ env.JUCE_VERSION }}" https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure C++23 with Ninja
+        run: cmake -S . -B build -G Ninja -DPPGU_CXX_STANDARD=23 -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build VST3 and contract tests
+        run: cmake --build build --parallel 2
+
+      - name: Run complete CTest suite
+        run: ctest --test-dir build --output-on-failure
+
+  linux-sanitizers:
+    name: Linux x64 / Clang / C++23 / ASan + UBSan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install JUCE Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang ninja-build pkg-config \
+            libasound2-dev libjack-jackd2-dev libfreetype-dev libfontconfig1-dev libgtk-3-dev \
+            libx11-dev libxinerama-dev libxrandr-dev libxcursor-dev libxcomposite-dev libxrender-dev \
+            libgl1-mesa-dev libglu1-mesa-dev libcurl4-openssl-dev
+
+      - name: Install CMake 3.31 and asset validation dependency
+        run: python -m pip install --disable-pip-version-check cmake==3.31.6 Pillow
+
+      - name: Generate canonical NEON STAGE sprite atlases
+        run: python tools/generate_neon_stage_spritesheets.py
+
+      - name: Checkout pinned JUCE release
+        run: git clone --depth 1 --branch "${{ env.JUCE_VERSION }}" https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure ASan + UBSan build
+        env:
+          CC: clang
+          CXX: clang++
+        run: >
+          cmake -S . -B build-sanitized -G Ninja
+          -DPPGU_CXX_STANDARD=23
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+          -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined"
+
+      - name: Build sanitized targets
+        run: cmake --build build-sanitized --parallel 2
+
+      - name: Run CTest with sanitizers
+        env:
+          ASAN_OPTIONS: detect_leaks=0:strict_string_checks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ctest --test-dir build-sanitized --output-on-failure
+
+  windows-cpp26-experimental:
+    name: Windows x64 / MSVC / C++26 latest (experimental)
+    runs-on: windows-2025-vs2026
+    continue-on-error: true
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install asset validation dependency
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Generate canonical NEON STAGE sprite atlases
+        shell: pwsh
+        run: python tools/generate_neon_stage_spritesheets.py
+
+      - name: Checkout pinned JUCE release
+        shell: pwsh
+        run: git clone --depth 1 --branch "${{ env.JUCE_VERSION }}" https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure experimental C++26 mode
+        shell: pwsh
+        run: cmake -S . -B build-cpp26 -A x64 -DPPGU_CXX_STANDARD=26
+
+      - name: Build all targets with MSVC latest language mode
+        shell: pwsh
+        run: cmake --build build-cpp26 --config Release --parallel
+
+      - name: Run complete CTest suite with C++26
+        shell: pwsh
+        run: ctest --test-dir build-cpp26 -C Release --output-on-failure
+
+  static-contracts:
+    name: Python asset, library and packaging contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install validation dependencies
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Run all Python contract tests
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py' -v
+          python tests/TestSoundAssetRegistry.py
+          python tests/TestLibraryTierContract.py
+          python tests/TestSampleLibraryAuditPaths.py
+          python LibraryManager/test_pattern_clip_registry.py
+          python LibraryManager/test_pattern_package_builder.py
+
+      - name: Validate exactly 16 graphical skins
+        run: python tools/validate_skin_registry_16.py

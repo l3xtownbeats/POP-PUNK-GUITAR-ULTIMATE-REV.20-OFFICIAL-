@@ -554,3 +554,31 @@ Latest GitHub Actions results on this exact source head:
 - Standalone panel-frame export run `45858901170` (#93): SUCCESS; job `export` completed successfully. This verifies frame export only, not complete content-rich panels.
 
 These CI results verify the current-head automated build/validation and export workflows only. They do not prove 1:1 screenshot parity, complete standalone production artwork, FL Studio 20 host acceptance, or release completion. The remaining visual gaps and acceptance gates listed below remain open. Do not mark the UI or asset pack COMPLETE.
+
+
+## 2026-11-27 — JUCE 9.0.6 / C++23 MIGRATION STARTED
+- Создана отдельная ветка `upgrade/juce-9.0.6-cpp23-cpp26-evaluation` от main SHA `438d59ba07e9b92e9579e9893eac7887dfbe5d5e`; main не изменяется.
+- Целевая production-конфигурация: JUCE 9.0.6 + C++23.
+- C++26 добавлен только как отдельный экспериментальный Windows CI build/test, с `continue-on-error: true`; он не блокирует production C++23 gate и не объявляется поддерживаемым до фактической проверки.
+- CMake получает параметр `PPGU_CXX_STANDARD` (23 по умолчанию, 26 для эксперимента), строгую проверку значения и CMake minimum 3.30 для C++26 режима.
+- Основной Windows VST3 workflow закрепляет JUCE tag 9.0.6; production job выполняет прежние build/CTest/skin/package/pluginval проверки на C++23.
+- Документ миграции: `docs/REV20_JUCE9_CPP23_MIGRATION_RU.md`.
+- Статус: MIGRATION STARTED — NOT VERIFIED. На этой ветке ещё нет подтверждённого CI результата. FL Studio 20 host acceptance и JUCE licensing review остаются обязательными.
+
+- Первый JUCE 9 API аудит выявил удалённый `Drawable::createFromSVG(XmlElement)` в двух местах ThemeManager; оба заменены на `createFromSVGString`. Два ThreadPool addJob callable имеют void return. Compile/CTest confirmation pending.
+- JUCE pin обновлён также в `neon-stage-native-ci.yml` и `skin1-control-state-ci.yml`; все три Windows workflows теперь используют JUCE 9.0.6.
+
+- Для реального production C++23 CI переключён с Windows 2022/MSVC 14.44 на `windows-2025-vs2026` (Visual Studio 2026 / MSVC 14.52); C++23 production support подтверждена Microsoft для MSVC 14.52. Target OS продукта не меняется: Windows 10 x64.
+
+
+## 2026-11-27 — REV.20 REPOSITORY PRESENTATION / JUCE 9 / C++23-C++26 REVIEW UPDATE
+
+- PR #31 remains the isolated migration/review branch; `main` remains the canonical product line and was not directly modified.
+- Updated the repository README header and navigation: official product banner, approved NEON STAGE DEFAULT / SKIN-1 mockup, canonical journal, accepted product baseline, UI/skin standards, sound/library requirements, FL Studio 20 acceptance checklist, CMake and CI workflow links.
+- README now distinguishes product targets from delivered evidence: the 500 playable preset bank, BASIC audio payload, legal clearance, full 1:1 UI parity and FL Studio 20 host acceptance are not declared complete.
+- The JUCE 9.0.6 / C++23 migration record now links the controlling UI baseline and approved asset pack and records the actual C++26 configure failure from the first run.
+- C++26 MSVC configuration now uses CMake-supported C++23 for CMake's compiler probes and `/std:c++latest` for project C++ translation units. This is an experimental preview mode; the repeat exact-SHA job must determine whether the current compiler/library can build the full project.
+- Main UI source already contains the approved three-zone composition, dedicated center stage/banner, nine APVTS controls in one horizontal row, seven attached FX controls, left preset browser, right AMP & TONE bay, and lower live display / 49-key keyboard. No new geometry or fake controls were added in this documentation/toolchain pass; exact screenshot parity still requires current-head JUCE snapshots and manual visual review at 900×640, 1024×700 and 1600×1100.
+- Exact-SHA C++23 build, full CTest, pluginval strictness 5, C++26 repeat, FL Studio 20 host acceptance and JUCE licensing review remain gates. No release-ready status is assigned.
+
+- Визуальные ссылки уточнены по актуальному asset issue register: эталонный набор — сохранённые mockup-файлы `Неоновый интерфейс PPGU — поп-панк гитара.png`, `Неоновый интерфейс гитарного плагина PPGU.png`, `Неоновый атлас UI‑ассетов PPGU.png` и master prompt. Файл `01 INTERFACE  NEON STAGE DEFAULT .png` исключён владельцем и не должен использоваться как эталон; README и migration guide исправлены, чтобы не ссылаться на него как на approved artwork.

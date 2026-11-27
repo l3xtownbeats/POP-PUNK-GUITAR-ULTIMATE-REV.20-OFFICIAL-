@@ -184,3 +184,19 @@ The Windows VST3 workflow now runs official pluginval Windows 1.0.4 at strictnes
 - Artifact ID 14625308194, SHA-256 72e31eb39e36301c2f3dfa070e9ef277c6d5a360d2907db12f4e4a25e219e864.
 
 This is the strongest current automated engineering evidence. It still does not close manual FL Studio 20 host acceptance or the content-delivery gates for BASIC 15 GB / 500 playable factory presets.
+
+
+## JUCE 9.0.6 / C++23 migration — started 2026-11-27
+
+- Dedicated branch: `upgrade/juce-9.0.6-cpp23-cpp26-evaluation`, based on main SHA `438d59ba07e9b92e9579e9893eac7887dfbe5d5e`.
+- Production target: JUCE 9.0.6 + C++23. The CMake cache option `PPGU_CXX_STANDARD` defaults to 23 and allows 26 only for experimental compatibility checks.
+- Windows VST3 CI now checks out JUCE tag `9.0.6`; its primary release-gating job builds/tests C++23 and retains pluginval strictness 5.
+- A separate C++26 configure/build/CTest job is non-blocking (`continue-on-error: true`) and must be treated as a toolchain experiment, not a supported production target.
+- Project CMake minimum is 3.30 to support the experimental C++26 configuration.
+- Exact-SHA CI has not yet run on this migration branch. No JUCE 9 build, CTest, pluginval, or FL Studio 20 host acceptance is claimed.
+- Migration gates and licensing/host-compatibility cautions: `docs/REV20_JUCE9_CPP23_MIGRATION_RU.md`.
+
+- Initial source-level API audit found two removed JUCE 9 `Drawable::createFromSVG(XmlElement)` calls in ThemeManager; both are migrated to `createFromSVGString`. The two `ThreadPool::addJob` callables return void. This is not yet compile-verified.
+- JUCE 9.0.6 is pinned in the main VST3 workflow and the two auxiliary Windows UI workflows.
+
+- CI runner changed to `windows-2025-vs2026` (Visual Studio 2026 / MSVC 14.52), because Microsoft documents MSVC 14.52 as production-ready for C++23. Product deployment target remains Windows 10 x64; runner OS is not the product target.

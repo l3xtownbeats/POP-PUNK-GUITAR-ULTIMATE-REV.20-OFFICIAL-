@@ -1,13 +1,37 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.30)
 project(PPGU VERSION 4.0.0 LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+# C++23 is the production baseline. C++26 is an explicit experimental
+# compatibility mode and must not become the release default without review.
+set(PPGU_CXX_STANDARD "23" CACHE STRING "C++ standard for PPGU (23 production, 26 experimental)")
+set_property(CACHE PPGU_CXX_STANDARD PROPERTY STRINGS 23 26)
+if (NOT PPGU_CXX_STANDARD STREQUAL "23" AND NOT PPGU_CXX_STANDARD STREQUAL "26")
+    message(FATAL_ERROR "PPGU_CXX_STANDARD must be 23 (production) or 26 (experimental).")
+endif()
+
+if (PPGU_CXX_STANDARD STREQUAL "26")
+    # CMake does not yet expose a portable CXX26 dialect for all compilers.
+    # Keep its compiler-identification/try_compile checks on C++23, then ask
+    # MSVC for its newest preview mode. This lets JUCE's CMake probes configure
+    # while the actual project translation units are compiled in /std:c++latest.
+    if (MSVC)
+        set(CMAKE_CXX_STANDARD 23)
+        add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:/std:c++latest>")
+        add_compile_definitions(PPGU_EXPERIMENTAL_CXX26=1)
+    else()
+        set(CMAKE_CXX_STANDARD 26)
+        add_compile_definitions(PPGU_EXPERIMENTAL_CXX26=1)
+    endif()
+else()
+    set(CMAKE_CXX_STANDARD 23)
+endif()
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# JUCE 7.0.12 is checked out by the Windows workflow into this directory.
+# JUCE 9.0.6 is checked out by the Windows workflow into this directory.
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/CMakeLists.txt")
-    message(FATAL_ERROR "JUCE 7.0.12 checkout is missing. Run the configured workflow or provide JUCE/.")
+    message(FATAL_ERROR "JUCE 9.0.6 checkout is missing. Run the configured workflow or provide JUCE/.")
 endif()
 add_subdirectory(JUCE EXCLUDE_FROM_ALL)
 

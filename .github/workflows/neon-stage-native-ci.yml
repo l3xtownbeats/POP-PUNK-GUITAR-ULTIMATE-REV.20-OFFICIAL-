@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   windows-x64:
-    runs-on: windows-2022
+    runs-on: windows-2025-vs2026
     timeout-minutes: 45
     steps:
       - name: Checkout pull request merge commit
@@ -54,9 +54,9 @@ jobs:
         shell: pwsh
         run: python tools/generate_neon_stage_spritesheets.py
 
-      - name: Checkout JUCE 7.0.12
+      - name: Checkout JUCE 9.0.6
         shell: pwsh
-        run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
+        run: git clone --depth 1 --branch 9.0.6 https://github.com/juce-framework/JUCE.git JUCE
 
       - name: Configure Windows x64
         shell: pwsh
