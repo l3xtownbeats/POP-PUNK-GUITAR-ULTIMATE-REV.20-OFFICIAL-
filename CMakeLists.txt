@@ -13,8 +13,14 @@ if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/CMakeLists.txt")
 endif()
 add_subdirectory(JUCE EXCLUDE_FROM_ALL)
 
-if (DEFINED JUCE_VERSION AND NOT JUCE_VERSION VERSION_EQUAL PPGU_REQUIRED_JUCE_VERSION)
-    message(FATAL_ERROR "PPGU requires JUCE ${PPGU_REQUIRED_JUCE_VERSION}; found ${JUCE_VERSION}.")
+# project() inside add_subdirectory() scopes JUCE_VERSION to JUCE's
+# directory, so validate the source declaration directly in this directory.
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/CMakeLists.txt" PPGU_JUCE_PROJECT_DECLARATION
+    REGEX "^project\\(JUCE VERSION [0-9]+\\.[0-9]+\\.[0-9]+")
+if (NOT PPGU_JUCE_PROJECT_DECLARATION MATCHES
+    "^project\\(JUCE VERSION ${PPGU_REQUIRED_JUCE_VERSION}([ )]|$)")
+    message(FATAL_ERROR
+        "PPGU requires JUCE ${PPGU_REQUIRED_JUCE_VERSION}; found declaration: ${PPGU_JUCE_PROJECT_DECLARATION}")
 endif()
 if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC|Clang|GNU")
     message(FATAL_ERROR "PPGU C++23 toolchain is unsupported: ${CMAKE_CXX_COMPILER_ID}")
