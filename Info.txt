@@ -569,3 +569,14 @@ These CI results verify the current-head automated build/validation and export w
 - JUCE pin обновлён также в `neon-stage-native-ci.yml` и `skin1-control-state-ci.yml`; все три Windows workflows теперь используют JUCE 9.0.6.
 
 - Для реального production C++23 CI переключён с Windows 2022/MSVC 14.44 на `windows-2025-vs2026` (Visual Studio 2026 / MSVC 14.52); C++23 production support подтверждена Microsoft для MSVC 14.52. Target OS продукта не меняется: Windows 10 x64.
+
+
+## 2026-11-27 — REV.20 REPOSITORY PRESENTATION / JUCE 9 / C++23-C++26 REVIEW UPDATE
+
+- PR #31 remains the isolated migration/review branch; `main` remains the canonical product line and was not directly modified.
+- Updated the repository README header and navigation: official product banner, approved NEON STAGE DEFAULT / SKIN-1 mockup, canonical journal, accepted product baseline, UI/skin standards, sound/library requirements, FL Studio 20 acceptance checklist, CMake and CI workflow links.
+- README now distinguishes product targets from delivered evidence: the 500 playable preset bank, BASIC audio payload, legal clearance, full 1:1 UI parity and FL Studio 20 host acceptance are not declared complete.
+- The JUCE 9.0.6 / C++23 migration record now links the controlling UI baseline and approved asset pack and records the actual C++26 configure failure from the first run.
+- C++26 MSVC configuration now uses CMake-supported C++23 for CMake's compiler probes and `/std:c++latest` for project C++ translation units. This is an experimental preview mode; the repeat exact-SHA job must determine whether the current compiler/library can build the full project.
+- Main UI source already contains the approved three-zone composition, dedicated center stage/banner, nine APVTS controls in one horizontal row, seven attached FX controls, left preset browser, right AMP & TONE bay, and lower live display / 49-key keyboard. No new geometry or fake controls were added in this documentation/toolchain pass; exact screenshot parity still requires current-head JUCE snapshots and manual visual review at 900×640, 1024×700 and 1600×1100.
+- Exact-SHA C++23 build, full CTest, pluginval strictness 5, C++26 repeat, FL Studio 20 host acceptance and JUCE licensing review remain gates. No release-ready status is assigned.
