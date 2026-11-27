@@ -37,7 +37,7 @@ C++23 является обязательной производственной
 
 ## 4. NEON STAGE — обязательный визуальный контракт
 
-Главный источник визуального решения — `01 INTERFACE  NEON STAGE DEFAULT .png`, утверждённый журнал `Info.txt` и [NEON STAGE GUI implementation baseline](NEON_STAGE_GUI_IMPLEMENTATION_BASELINE_RU.md). Для визуальной реализации обязательны следующие решения:
+Визуальные источники — хранящаяся коллекция [основного макета PPGU](../Неоновый%20интерфейс%20PPGU%20%E2%80%94%20поп-панк%20гитара.png), [макета гитарного плагина](../Неоновый%20интерфейс%20гитарного%20плагина%20PPGU.png), [атласа UI-ассетов](../Неоновый%20атлас%20UI%E2%80%91ассетов%20PPGU.png), [полного asset master prompt](../Assets/3D/References/PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt), утверждённый журнал `Info.txt` и [NEON STAGE GUI implementation baseline](NEON_STAGE_GUI_IMPLEMENTATION_BASELINE_RU.md). Отдельный repository-root файл `01 INTERFACE  NEON STAGE DEFAULT .png` явно исключён реестром открытых asset issues и не используется как эталон. Для визуальной реализации обязательны следующие решения:
 
 - Ровно два главных режима: MELODY и PATTERN. AUTOCHORDS — только вспомогательное окно PATTERN.
 - Главная композиция: header / left preset browser / center Playing Core / right AMP & TONE / lower performance strip.
@@ -52,7 +52,7 @@ C++23 является обязательной производственной
 
 ## 5. Навигация и визуальные источники
 
-- [Главная страница проекта](../README.md)
+- [Главная страница проекта](../README.md)\n- [Основной сохранённый макет PPGU](../Неоновый%20интерфейс%20PPGU%20%E2%80%94%20поп-панк%20гитара.png)\n- [Атлас UI-ассетов](../Неоновый%20атлас%20UI%E2%80%91ассетов%20PPGU.png)\n- [Asset master prompt](../Assets/3D/References/PPGU_REV20_NEON_STAGE_DEFAULT_ULTIMATE_ASSET_MASTER_PROMPT_RU.txt)
 - [Единый журнал](../Info.txt)
 - [Утверждённая база продукта](REV20_ACCEPTED_BASELINE_RU.md)
 - [Хронология решений](REV20_DECISION_TIMELINE_RU.md)
