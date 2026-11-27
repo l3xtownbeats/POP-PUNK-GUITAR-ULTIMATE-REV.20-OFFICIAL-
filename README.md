@@ -2,7 +2,7 @@
 
 # POP PUNK GUITAR ULTIMATE — REV.20 OFFICIAL
 
-**L3XTOWN AUDIO LAB · Windows 10 x64 · VST3 · JUCE · C++20**
+**L3XTOWN AUDIO LAB · Windows 10 x64 · VST3 · JUCE 9.0.5 · C++23**
 
 **NEON STAGE DEFAULT · MELODY · PATTERN**
 
@@ -13,6 +13,11 @@
 </div>
 
 REV.20 is the single canonical home for continuing development. Approved decisions, preserved implementation, engineering work, tests, assets, sample inventories and validation evidence are maintained here.
+
+
+## Build toolchain
+
+The REV.20 plugin target is standardized on **C++23** and **JUCE 9.0.5**. CI must provision the exact JUCE 9.0.5 source tree in `JUCE/` before CMake configuration; building against JUCE 7 or a floating JUCE checkout is not supported. The Windows x64 VST3 build and full regression suite must be rerun on the exact toolchain before this migration is considered validated.
 
 ## Product
 
