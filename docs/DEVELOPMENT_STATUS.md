@@ -198,3 +198,5 @@ This is the strongest current automated engineering evidence. It still does not 
 
 - Initial source-level API audit found two removed JUCE 9 `Drawable::createFromSVG(XmlElement)` calls in ThemeManager; both are migrated to `createFromSVGString`. The two `ThreadPool::addJob` callables return void. This is not yet compile-verified.
 - JUCE 9.0.6 is pinned in the main VST3 workflow and the two auxiliary Windows UI workflows.
+
+- CI runner changed to `windows-2025-vs2026` (Visual Studio 2026 / MSVC 14.52), because Microsoft documents MSVC 14.52 as production-ready for C++23. Product deployment target remains Windows 10 x64; runner OS is not the product target.
