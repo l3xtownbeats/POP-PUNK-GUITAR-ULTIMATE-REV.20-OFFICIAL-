@@ -66,6 +66,14 @@
 - Structural validator подтверждает пять SVG masters, размеры/viewBox, прозрачные холсты, 27 button-family headings, rotary strips, 49-key keyboard, 6 LCD states, 7 LED states, 3 meter states и 41 уникальную иконку.
 - Это подтверждает source validation и CI export, но не ручную визуальную приёмку каждого кадра, JUCE mapping, Windows VST3/CTest на новом head, Pluginval или FL Studio 20.
 
+
+### 2026-11-27 — rotary atlas 03 восстановлен
+- При продолжении работ обнаружен дефект: `03_ppgu_atlas_knob_strips.svg` присутствовал в ветке как пустой файл (0 bytes), несмотря на то что structural validator уже требовал три полосы по 61 кадру.
+- Файл заполнен самостоятельным SVG-мастером 1920×8000: три визуальных варианта rotary (main, black-disc, knurled-steel), 61 кадр каждый, 128 px pitch, диапазон -135°…+135° с шагом 4.5°? Нет: контракт supplemental atlas validator задаёт 210°…390° с шагом 3°; кадры следуют именно этому контракту.
+- Для каждого кадра сохранены неподвижная шкала и отдельный вращаемый указатель; холст прозрачный, подписи и значения не запекаются.
+- Новый файл пока имеет статус SOURCE-PRESENT. Structural CI, PNG export, визуальное сравнение с утверждёнными rotary references и runtime mapping ещё не подтверждены.
+- Важно: это восстановленный supplemental vector atlas по существующему контракту, а не доказанная 1:1 копия всех предоставленных knob mockups. Для pixel-perfect статуса требуется отдельное визуальное сравнение и корректировки по исходным образцам.
+
 ## 5. Открытые задачи
 
 См. единственный актуальный список: `ASSET_OPEN_ISSUES.md`. Ключевые блокеры:
