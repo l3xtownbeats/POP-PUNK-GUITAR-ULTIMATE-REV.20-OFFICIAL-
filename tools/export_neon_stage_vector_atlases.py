@@ -106,6 +106,21 @@ def main() -> int:
                         raise SystemExit(
                             f"{source.name}: rotary strip {index} must preserve RGBA transparency"
                         )
+                    # A valid 128px frame must contain the complete 122px rotary,
+                    # not a clipped half-knob. Check all 61 frames independently.
+                    alpha = crop.getchannel("A")
+                    for frame_index in range(61):
+                        frame = alpha.crop((0, frame_index * round(128 * args.scale),
+                                            round(128 * args.scale),
+                                            (frame_index + 1) * round(128 * args.scale)))
+                        bbox = frame.getbbox()
+                        edge = round(10 * args.scale)
+                        limit = round(118 * args.scale)
+                        if bbox is None or bbox[0] > edge or bbox[1] > edge or bbox[2] < limit or bbox[3] < limit:
+                            raise SystemExit(
+                                f"{source.name}: rotary strip {index}, frame {frame_index} "
+                                f"does not contain a full knob; alpha bounds={bbox}"
+                            )
                     strip_path = args.output / f"rotary_strip_{index}_61_frames.png"
                     crop.save(strip_path, optimize=True)
                     records.append({
