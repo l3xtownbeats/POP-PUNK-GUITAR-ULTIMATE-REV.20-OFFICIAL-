@@ -1,3 +1,4 @@
+<!-- REV20 rotary marker arc: 249deg to 471deg per material strip; each material resets frame index 0-60. -->
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="8000" viewBox="0 0 1920 8000"><title>PPGU NEON STAGE rotary control atlas</title><desc>Three material variants with 61 discrete positions each. Face, radial brushed finish, segmented LED arc and rotating position marker are rendered as reusable vector layers.</desc><defs>
 <radialGradient id="shadow" cx="50%" cy="48%" r="52%"><stop offset=".68" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".72"/></radialGradient>
 <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e2edf4"/><stop offset=".16" stop-color="#526477"/><stop offset=".36" stop-color="#182431"/><stop offset=".58" stop-color="#8294a5"/><stop offset=".78" stop-color="#202e3d"/><stop offset="1" stop-color="#070d15"/></linearGradient>
