@@ -8,7 +8,24 @@ set_property(CACHE PPGU_CXX_STANDARD PROPERTY STRINGS 23 26)
 if (NOT PPGU_CXX_STANDARD STREQUAL "23" AND NOT PPGU_CXX_STANDARD STREQUAL "26")
     message(FATAL_ERROR "PPGU_CXX_STANDARD must be 23 (production) or 26 (experimental).")
 endif()
-set(CMAKE_CXX_STANDARD "${PPGU_CXX_STANDARD}")
+
+if (PPGU_CXX_STANDARD STREQUAL "26")
+    # CMake does not yet expose a portable CXX26 dialect for all compilers.
+    # Keep its compiler-identification/try_compile checks on C++23, then ask
+    # MSVC for its newest preview mode. This lets JUCE's CMake probes configure
+    # while the actual project translation units are compiled in /std:c++latest.
+    if (MSVC)
+        set(CMAKE_CXX_STANDARD 23)
+        add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:/std:c++latest>")
+        add_compile_definitions(PPGU_EXPERIMENTAL_CXX26=1)
+    else()
+        set(CMAKE_CXX_STANDARD 26)
+        add_compile_definitions(PPGU_EXPERIMENTAL_CXX26=1)
+    endif()
+else()
+    set(CMAKE_CXX_STANDARD 23)
+endif()
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
