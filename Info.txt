@@ -564,3 +564,6 @@ These CI results verify the current-head automated build/validation and export w
 - Основной Windows VST3 workflow закрепляет JUCE tag 9.0.6; production job выполняет прежние build/CTest/skin/package/pluginval проверки на C++23.
 - Документ миграции: `docs/REV20_JUCE9_CPP23_MIGRATION_RU.md`.
 - Статус: MIGRATION STARTED — NOT VERIFIED. На этой ветке ещё нет подтверждённого CI результата. FL Studio 20 host acceptance и JUCE licensing review остаются обязательными.
+
+- Первый JUCE 9 API аудит выявил удалённый `Drawable::createFromSVG(XmlElement)` в двух местах ThemeManager; оба заменены на `createFromSVGString`. Два ThreadPool addJob callable имеют void return. Compile/CTest confirmation pending.
+- JUCE pin обновлён также в `neon-stage-native-ci.yml` и `skin1-control-state-ci.yml`; все три Windows workflows теперь используют JUCE 9.0.6.
