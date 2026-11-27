@@ -36,6 +36,18 @@ int main()
     if (!writer->writeFromAudioSampleBuffer(audio, 0, audio.getNumSamples())) return 1;
     writer.reset();
 
+    // AIFF must enter the same streaming metadata/page-reader pipeline as WAV.
+    const juce::File aiff((root / "nested" / "fixture.aiff").string());
+    juce::AiffAudioFormat aiffFormat;
+    std::unique_ptr<juce::OutputStream> aiffStream(aiff.createOutputStream());
+    if (!aiffStream) return 1;
+    std::unique_ptr<juce::AudioFormatWriter> aiffWriter(
+        aiffFormat.createWriterFor(aiffStream.get(), 48000.0, 2, 24, {}, 0));
+    if (!aiffWriter) return 1;
+    aiffStream.release();
+    if (!aiffWriter->writeFromAudioSampleBuffer(audio, 0, audio.getNumSamples())) return 1;
+    aiffWriter.reset();
+
     // The metadata index must agree with the current cache/DSP channel
     // contract. A four-channel file must be skipped, never indexed for a
     // reader/cache path that can only represent mono or stereo.
@@ -54,9 +66,9 @@ int main()
 
     ppgu::sampler::SampleMetadataIndex index;
     const auto result = index.scanDirectory(juce::File(root.string()));
-    if (!result.success || result.samples.size() != 1)
+    if (!result.success || result.samples.size() != 2)
     {
-        std::cerr << "Metadata index failed to find nested WAV.\n";
+        std::cerr << "Metadata index failed to find nested WAV and AIFF.\n";
         for (const auto& error : result.errors) std::cerr << error << "\n";
         for (const auto& warning : result.warnings) std::cerr << warning << "\n";
         return 1;
@@ -64,21 +76,48 @@ int main()
 
     const auto hasChannelWarning = std::any_of(result.warnings.begin(), result.warnings.end(),
         [](const std::string& warning) { return warning.find("mono/stereo only") != std::string::npos; });
-    if (!hasChannelWarning || result.samples.size() != 1)
+    if (!hasChannelWarning || result.samples.size() != 2)
     {
         std::cerr << "Metadata index did not consistently reject multichannel WAV data.\\n";
         return 1;
     }
 
-    const auto& metadata = result.samples.front();
+    const auto wavMetadata = std::find_if(result.samples.begin(), result.samples.end(),
+        [](const auto& item) { return item.file.hasFileExtension(".wav"); });
+    if (wavMetadata == result.samples.end()) return 1;
+    const auto& metadata = *wavMetadata;
     if (metadata.frames != 1024 || metadata.channels != 2
         || std::abs(metadata.sampleRate - 48000.0) > 0.01
         || metadata.bitsPerSample != 24 || metadata.fileBytes == 0
-        || result.totalFileBytes != metadata.fileBytes)
+        || result.totalFileBytes < metadata.fileBytes)
     {
         std::cerr << "Metadata index returned incorrect WAV header information.\n";
         return 1;
     }
+
+    const auto aiffMetadata = std::find_if(result.samples.begin(), result.samples.end(), [](const auto& item) { return item.file.hasFileExtension(".aiff"); });
+    if (aiffMetadata == result.samples.end())
+    {
+        std::cerr << "Metadata index did not register AIFF.\\n";
+        return 1;
+    }
+    ppgu::sampler::WavPageReader aiffPageReader;
+    std::string aiffOpenError;
+    if (!aiffPageReader.open(*aiffMetadata, aiffOpenError))
+    {
+        std::cerr << "Generic page reader failed to open AIFF: " << aiffOpenError << "\\n";
+        return 1;
+    }
+    ppgu::sampler::SamplePage aiffPage;
+    const auto aiffRead = aiffPageReader.readPage(0, aiffPage, 300);
+    if (!aiffRead.success || aiffPage.descriptor.frameCount != 300
+        || aiffPage.audio.getNumChannels() != 2
+        || std::abs(aiffPage.audio.getSample(0, 100) - audio.getSample(0, 100)) > 0.0002f)
+    {
+        std::cerr << "Generic page reader failed AIFF decode.\\n";
+        return 1;
+    }
+    aiffPageReader.close();
 
     ppgu::sampler::WavPageReader pageReader;
     std::string openError;

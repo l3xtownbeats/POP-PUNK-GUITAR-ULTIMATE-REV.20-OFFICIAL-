@@ -18,7 +18,7 @@ bool WavPageReader::open(const SampleMetadata& metadata, std::string& error)
 
     if (metadata.channels == 0 || metadata.channels > 2)
     {
-        error = "WAV page reader supports mono/stereo files only.";
+        error = "Audio page reader supports mono/stereo files only.";
         return false;
     }
 
@@ -28,13 +28,13 @@ bool WavPageReader::open(const SampleMetadata& metadata, std::string& error)
         || metadata.sampleRate < 8000.0 || metadata.sampleRate > 384000.0
         || metadata.fileBytes == 0)
     {
-        error = "Indexed WAV metadata contains invalid frame, sample-rate, or file-size values.";
+        error = "Indexed audio metadata contains invalid frame, sample-rate, or file-size values.";
         return false;
     }
 
     if (!metadata.file.existsAsFile())
     {
-        error = "Indexed WAV file no longer exists: " + metadata.file.getFullPathName().toStdString();
+        error = "Indexed audio file no longer exists: " + metadata.file.getFullPathName().toStdString();
         return false;
     }
 
@@ -43,7 +43,7 @@ bool WavPageReader::open(const SampleMetadata& metadata, std::string& error)
     if (currentBytes < 0 || static_cast<std::uint64_t>(currentBytes) != metadata.fileBytes
         || currentModificationTime != metadata.modificationTimeMs)
     {
-        error = "WAV file changed since it was indexed: " + metadata.file.getFullPathName().toStdString();
+        error = "Audio file changed since it was indexed: " + metadata.file.getFullPathName().toStdString();
         return false;
     }
 
@@ -53,7 +53,7 @@ bool WavPageReader::open(const SampleMetadata& metadata, std::string& error)
         formats.createReaderFor(metadata.file));
     if (candidate == nullptr)
     {
-        error = "Could not open indexed WAV file: " + metadata.file.getFullPathName().toStdString();
+        error = "Could not open indexed audio file: " + metadata.file.getFullPathName().toStdString();
         return false;
     }
 
@@ -64,7 +64,7 @@ bool WavPageReader::open(const SampleMetadata& metadata, std::string& error)
         || candidate->sampleRate < 8000.0 || candidate->sampleRate > 384000.0
         || std::abs(candidate->sampleRate - metadata.sampleRate) > 0.01)
     {
-        error = "WAV header no longer matches indexed metadata: " + metadata.file.getFullPathName().toStdString();
+        error = "Audio header no longer matches indexed metadata: " + metadata.file.getFullPathName().toStdString();
         return false;
     }
 
@@ -87,14 +87,14 @@ PageReadReport WavPageReader::readPageInto(std::uint64_t pageIndex,
     framesWritten = 0;
     if (reader == nullptr)
     {
-        report.error = "WAV page reader is not open.";
+        report.error = "Audio page reader is not open.";
         return report;
     }
     if (pageFrames == 0 || destinationOffset < 0
         || destinationChannels == nullptr
         || destinationChannelCount != static_cast<int>(channels))
     {
-        report.error = "Invalid preallocated WAV page destination.";
+        report.error = "Invalid preallocated Audio page destination.";
         return report;
     }
     for (int channel = 0; channel < destinationChannelCount; ++channel)
@@ -109,7 +109,7 @@ PageReadReport WavPageReader::readPageInto(std::uint64_t pageIndex,
     const auto pageCount = getPageCount(pageFrames);
     if (pageIndex >= pageCount)
     {
-        report.error = "Requested WAV page is outside the indexed file.";
+        report.error = "Requested Audio page is outside the indexed file.";
         return report;
     }
 
@@ -121,7 +121,7 @@ PageReadReport WavPageReader::readPageInto(std::uint64_t pageIndex,
             std::numeric_limits<juce::int64>::max())
         || frames > static_cast<std::uint32_t>(std::numeric_limits<int>::max() - destinationOffset))
     {
-        report.error = "Requested WAV page has invalid destination or source bounds.";
+        report.error = "Requested Audio page has invalid destination or source bounds.";
         return report;
     }
 
@@ -135,7 +135,7 @@ PageReadReport WavPageReader::readPageInto(std::uint64_t pageIndex,
     if (!reader->read(adjustedDestinations.data(), destinationChannelCount,
                       static_cast<juce::int64>(firstFrame), static_cast<int>(frames)))
     {
-        report.error = "WAV page decode failed at page " + std::to_string(pageIndex) + ".";
+        report.error = "Audio page decode failed at page " + std::to_string(pageIndex) + ".";
         return report;
     }
 
@@ -151,7 +151,7 @@ PageReadReport WavPageReader::readPage(std::uint64_t pageIndex,
     PageReadReport report;
     if (reader == nullptr)
     {
-        report.error = "WAV page reader is not open.";
+        report.error = "Audio page reader is not open.";
         return report;
     }
     if (pageFrames == 0)
@@ -163,7 +163,7 @@ PageReadReport WavPageReader::readPage(std::uint64_t pageIndex,
     const auto pageCount = getPageCount(pageFrames);
     if (pageIndex >= pageCount)
     {
-        report.error = "Requested WAV page is outside the indexed file.";
+        report.error = "Requested Audio page is outside the indexed file.";
         return report;
     }
 
@@ -174,7 +174,7 @@ PageReadReport WavPageReader::readPage(std::uint64_t pageIndex,
     if (frames == 0 || firstFrame > static_cast<std::uint64_t>(
             std::numeric_limits<juce::int64>::max()))
     {
-        report.error = "Requested WAV page has invalid frame bounds.";
+        report.error = "Requested Audio page has invalid frame bounds.";
         return report;
     }
 
@@ -186,7 +186,7 @@ PageReadReport WavPageReader::readPage(std::uint64_t pageIndex,
                       static_cast<juce::int64>(firstFrame), true, channels > 1))
     {
         destination.audio.setSize(0, 0);
-        report.error = "WAV page decode failed at page " + std::to_string(pageIndex) + ".";
+        report.error = "Audio page decode failed at page " + std::to_string(pageIndex) + ".";
         return report;
     }
 
