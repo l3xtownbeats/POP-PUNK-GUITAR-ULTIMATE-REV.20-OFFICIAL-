@@ -112,19 +112,41 @@ def main() -> int:
             continue
         x, y = map(int, match.groups())
         if x in strip_groups:
-            premium_bezel = [
-                child for child in children_named(node, "circle")
-                if child.attrib.get("r") == "51"
-                and child.attrib.get("fill") == "url(#knurl)"
-            ]
-            if len(premium_bezel) != 1:
-                fail(f"rotary frame at x={x}, y={y}: precision knurled bezel is missing")
-            if not any(
-                child.attrib.get("r") == "52.8"
-                and child.attrib.get("stroke") == "#e5f4ff"
-                for child in children_named(node, "circle")
-            ):
-                fail(f"rotary frame at x={x}, y={y}: machined outer highlight is missing")
+            frame_circles = children_named(node, "circle")
+            if x == 84:
+                premium_bezel = [
+                    child for child in frame_circles
+                    if child.attrib.get("r") == "51"
+                    and child.attrib.get("fill") == "url(#knurl)"
+                ]
+                if len(premium_bezel) != 1:
+                    fail(f"standard rotary frame at y={y}: precision knurled bezel is missing")
+                if not any(
+                    child.attrib.get("r") == "52.8"
+                    and child.attrib.get("stroke") == "#e5f4ff"
+                    for child in frame_circles
+                ):
+                    fail(f"standard rotary frame at y={y}: machined outer highlight is missing")
+            elif x == 334:
+                black_disc = [
+                    child for child in frame_circles
+                    if child.attrib.get("r") == "48"
+                    and child.attrib.get("fill") == "#02060b"
+                ]
+                if len(black_disc) != 1 or any(
+                    child.attrib.get("fill") == "url(#knurl)"
+                    for child in frame_circles
+                ):
+                    fail(f"black-disc rotary frame at y={y}: dark smooth bezel treatment is missing")
+            elif x == 584:
+                steel_knurl = [
+                    child for child in frame_circles
+                    if child.attrib.get("r") == "52"
+                    and child.attrib.get("fill") == "url(#knurl)"
+                    and child.attrib.get("opacity") == ".55"
+                ]
+                if len(steel_knurl) != 1:
+                    fail(f"knurled-steel rotary frame at y={y}: cross-knurled bezel is missing")
             marker_groups = [
                 child for child in children_named(node, "g")
                 if child.attrib.get("transform") == "translate(64 84)"
