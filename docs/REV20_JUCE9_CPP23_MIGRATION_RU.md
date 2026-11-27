@@ -42,3 +42,10 @@
 ## Текущий статус
 
 **MIGRATION STARTED — NOT VERIFIED.** Изменения внесены в отдельную feature-ветку. CI ещё не запускался на её HEAD; сборка, CTest, pluginval и FL Studio 20 acceptance не заявляются как пройденные.
+
+## Первый source-level API аудит
+
+- В двух местах `Source/UI/ThemeManager.cpp` обнаружен удалённый в JUCE 9 API `Drawable::createFromSVG(const XmlElement&)`. Оба вызова заменены на `Drawable::createFromSVGString(svgText)`; предварительная проверка XML root и существующая SVG sanitization остаются перед декодированием.
+- Два вызова `ThreadPool::addJob` в `Source/PluginProcessor.cpp` используют void-returning lambdas, что соответствует ограничению JUCE 9.0.2+ (callable должен возвращать ровно `void` или `ThreadPoolJob::JobStatus`).
+- Поиск по основным processor/editor/theme/workspace/Pattern файлам и ключевым JUCE breaking API не выявил использования `createFocusTraverser`, `audioProcessorChanged` override, `NativeMessageBox::show`, `addToDesktop` override, `createNewPeer` override, `getMidiInputSelectorListBox` или `setImageCacheSize`. Это точечный аудит, не замена полной компиляции и проверки всего JUCE changelog.
+- Окончательное подтверждение — CI C++23/C++26 на точном SHA.
