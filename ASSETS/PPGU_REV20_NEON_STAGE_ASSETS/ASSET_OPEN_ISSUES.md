@@ -344,3 +344,7 @@ All four current-head automated gates completed successfully:
 - Standalone panel-frame export #93 / run `45858901170`.
 
 This refresh supersedes earlier pending-build notes for the same head. It does not close any visual acceptance gap above: source-reference fidelity, content-rich panel compositions, FX EDIT-specific layers/scales, complete LED/focus/keyboard state matrix, full-editor JUCE screenshot overlays/difference review, and manual FL Studio 20 acceptance remain open. Successful panel-frame export is not evidence of finished panels. Status remains PARTIAL / 1:1 VISUAL PARITY NOT ACCEPTED / FULL ASSET PACK NOT COMPLETE.
+
+
+## 2026-11-27 — atlas 04 state-family expansion
+The fourth atlas master has been expanded with six LCD state modules, the complete seven-state LED sample family and three 12-segment stereo meter examples. Existing 49-key keyboard artwork and pitch/mod fader samples are retained. The export/structural validator dimensions are updated to 1920×1840. This closes the *source-art coverage* gap for the displayed state families only; it does not certify per-pixel artwork, independent PNG extraction, runtime mapping, or JUCE/host acceptance. Dynamic text and live meter/LED states must remain runtime-driven.
