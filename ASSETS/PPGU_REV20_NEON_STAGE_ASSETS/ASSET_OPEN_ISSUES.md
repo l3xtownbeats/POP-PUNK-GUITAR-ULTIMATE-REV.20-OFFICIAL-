@@ -1,6 +1,6 @@
 # NEON STAGE DEFAULT — АКТУАЛЬНЫЕ ОТКРЫТЫЕ ЗАДАЧИ
 
-**Дата сверки:** 2026-11-27  
+**Дата сверки:** 2026-11-28  
 **Ветка:** `assets/ppgu-rev20-atlas04-display-led-meter-states`  
 **Тема:** SKIN-1 / NEON STAGE DEFAULT / `skin-053`  
 **Общий статус:** PARTIAL — source atlas CI passed; full visual/runtime/host acceptance is open.
@@ -58,6 +58,13 @@ Atlas 03 и экспортный конвейер прошли exact-head source
 
 ## Новая находка — rotary strip export
 
-- [ ] Повторно выполнить CI export после исправления crop координат atlas 03; старый artifact `15218795470` имеет обрезанные standalone rotary strips и не является пригодным для визуальной приёмки этих PNG.
-- [ ] Проверить, что все 183 кадра в трёх standalone полосах полностью содержат knob artwork, размер кадра 128×128 (1×) / 256×256 (2×), прозрачность сохранена.
-- [ ] Просмотреть исправленные полосы и отдельные кадры при 100%/200%; только затем продолжить pixel-level сверку с утверждёнными rotary references.
+- [x] Повторный CI export после исправления crop координат atlas 03 выполнен: run `46056184780` (#164), exact head `627e751b3130486ad7c598427fce4df0c5c6979d`, SUCCESS. Новый artifact `15227070722`.
+- [x] Проверены все 183 кадра в трёх standalone полосах на 1× и 2×: размеры полос 128×7808 / 256×15616, каждый кадр имеет полный alpha-bounds knob и RGBA transparency.
+- [ ] Выполнить художественную проверку исправленных полос и отдельных кадров при 100%/200% относительно утверждённых rotary references; автоматическая проверка геометрии не подтверждает pixel-level сходство.
+
+## Проверка rotary crop — 2026-11-28
+
+- Старый artifact `15218795470` остаётся отклонённым для standalone rotary strips из-за неверных crop origins.
+- Новый artifact `15227070722`, размер 62,326,595 bytes, SHA-256 `e27af7693f843ea050d69a1b99a419cd567e0bedcf14c62abc1739891634cc45`.
+- Run `46056184780` (#164) успешно прошёл source validation, raster export 1×/2×, 490 standalone components в каждом масштабе, 41 icon family, 70 reference components и девять rotary controls × шесть слоёв.
+- Ручная оценка художественного соответствия, pixel-level comparison и runtime/host acceptance остаются открытыми.
