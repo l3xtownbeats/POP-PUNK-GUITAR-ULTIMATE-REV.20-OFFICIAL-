@@ -567,3 +567,5 @@ These CI results verify the current-head automated build/validation and export w
 
 - Первый JUCE 9 API аудит выявил удалённый `Drawable::createFromSVG(XmlElement)` в двух местах ThemeManager; оба заменены на `createFromSVGString`. Два ThreadPool addJob callable имеют void return. Compile/CTest confirmation pending.
 - JUCE pin обновлён также в `neon-stage-native-ci.yml` и `skin1-control-state-ci.yml`; все три Windows workflows теперь используют JUCE 9.0.6.
+
+- Для реального production C++23 CI переключён с Windows 2022/MSVC 14.44 на `windows-2025-vs2026` (Visual Studio 2026 / MSVC 14.52); C++23 production support подтверждена Microsoft для MSVC 14.52. Target OS продукта не меняется: Windows 10 x64.
