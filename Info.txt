@@ -561,3 +561,14 @@ These CI results verify the current-head automated build/validation and export w
 - Replaced the asset-pack README with a concise navigation/contract document and reduced `ASSET_OPEN_ISSUES.md` to current actionable gaps. Historical decisions are preserved in this unified journal; no approved runtime/source assets were deleted.
 - Atlas 04 is 1920×1880. Exact-head run `45944877122` on `5fac4ae532e70e26600ef12764cb008d850df3e7` passed structural validation/export. Artifact `15174501574` (88,281,866 bytes).
 - Status remains PARTIAL: visual frame review, standalone manifest/hash reconciliation, JUCE runtime mapping, exact-head Windows VST3/CTest, Pluginval and FL Studio 20 acceptance remain open. CI export is not visual or host acceptance.
+
+
+## 2026-11-28 — NEON STAGE exact-match gate: rotary validator repair
+
+**Статус:** VALIDATOR PATCH COMMITTED; EXACT-HEAD RE-RUN PENDING; VISUAL ACCEPTANCE NOT ACCEPTED.
+
+- Проверен актуальный PR #29 head `481348f5e9a454e6b6c52f248fa0c0b125705321`. SVG atlas workflow #194 завершился FAIL на шаге `Validate SVG source contracts`; точная ошибка: validator ожидал три окружности маркера с `cy="-30"`, тогда как утверждённая трёхслойная подсветка содержит две окружности на `cy="-30"` и отдельный specular highlight на `cy="-32.2"`.
+- Исправлен структурный контракт validator: он теперь проверяет три круга маркера, два на базовой дуге 30 px и один смещённый блик; сама SVG-графика и геометрия вращения не изменялись.
+- Commit: `5952d4caef49a2bccec970bb0de2632cece30810`.
+- Это исправление ложного отрицательного результата проверки, а не визуальное улучшение и не доказательство pixel-perfect. Следующий gate — повторный exact-head CI export, затем просмотр 0/25/50/75/100% кадров каждого материала против сохранённых reference crops.
+- Полная 1:1 приёмка интерфейса остаётся BLOCKED до сопоставления главного REV.20 master layout, всех ассетов/состояний и JUCE screenshots. Никакой runtime atlas не заменять до этой проверки.
