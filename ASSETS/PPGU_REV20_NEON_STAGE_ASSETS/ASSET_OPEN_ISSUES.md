@@ -7,7 +7,7 @@
 
 ## P0 — визуальная приёмка
 
-- [ ] Просмотреть свежий CI-export atlas 04 целиком и покадрово при 100%/200%.
+- [ ] Просмотреть свежий CI-export всех атласов и standalone exports целиком и покадрово при 100%/200%.
 - [ ] Проверить LCD/LED/meter образцы: clipping, alignment, labels, contrast, state differentiation.
 - [ ] Подтвердить прозрачность PNG и корректные размеры после raster export.
 - [ ] Зафиксировать screenshot/contact sheet review; не объявлять pixel-perfect без сравнения с утверждёнными PPGU references.
@@ -39,16 +39,17 @@
 
 ## Подтверждено на текущем head
 
-- [x] Atlas 03 восстановлен из пустого файла: 3 rotary strips × 61 frame; structural CI ожидается.
+- [x] Atlas 03 восстановлен из пустого файла: 3 rotary strips × 61 frame; source-contract validation и export прошли на exact head.
 - [x] Atlas 04 source расширен: 6 LCD, 7 LED, 3 stereo meter samples.
 - [x] Существующая 49-key keyboard (29 white + 20 black) и pitch/mod faders сохранены.
 - [x] SVG размер 1920×1880 и viewBox согласованы.
-- [x] GitHub Actions run `45944877122` на SHA `5fac4ae532e70e26600ef12764cb008d850df3e7`: SUCCESS.
-- [x] Artifact `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`, ID `15174501574`, 88,281,866 bytes.
+- [x] GitHub Actions run `46036878566` (run #159) на exact head SHA `a8a39ddd930e11a956899c2ac772745c652a1ceb`: SUCCESS.
+- [x] Экспорт 490 standalone components в 1×/2×, 41 SVG icon и PNG-вариантов 16/24/32/48, 70 source-faithful reference components в 1×/2×, девяти rotary controls × шесть независимых слоёв.
+- [x] Artifact `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`, ID `15218795470`, 52,259,439 bytes; SHA-256 `ba6ba0076baf32e366208149fcb11821104c388fd7c362c91ad18a05d9f30691`.
 
 ## Не является подтверждением
 
-Atlas 03 пока не прошёл CI на новом commit и ручную визуальную приёмку. CI export не означает pixel-perfect approval, полную самостоятельную PNG-библиотеку, JUCE runtime mapping, pluginval, FL Studio 20 acceptance или завершённость всего asset pack.
+Atlas 03 и экспортный конвейер прошли exact-head source-contract validation и PNG export. Ручная визуальная приёмка всё ещё не выполнена. CI export не означает pixel-perfect approval, JUCE runtime mapping, pluginval, FL Studio 20 acceptance или завершённость всего asset pack.
 
 ## Единственное известное дизайн-расхождение
 
