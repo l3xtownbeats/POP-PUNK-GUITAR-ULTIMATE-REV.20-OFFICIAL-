@@ -2,58 +2,149 @@
 
 # POP PUNK GUITAR ULTIMATE — REV.20 OFFICIAL
 
-**L3XTOWN AUDIO LAB · Windows 10 x64 · VST3 · JUCE 9.0.6 · C++23**
+**L3XTOWN AUDIO LAB**  
+**JUCE 9.0.6 · C++23 Production · C++26 Experimental · Windows 10 x64 · VST3**
 
-**NEON STAGE DEFAULT · MELODY · PATTERN**
+<img src="assets/POP_PUNK_GUITAR_ULTIMATE_BANNER.svg" alt="L3XTOWN Audio Lab — POP PUNK GUITAR ULTIMATE" width="100%">
 
-<img src="01%20INTERFACE%20%20NEON%20STAGE%20DEFAULT%20.png" alt="POP PUNK GUITAR ULTIMATE — NEON STAGE DEFAULT main plugin interface" width="100%">
+<img src="01%20INTERFACE%20%20NEON%20STAGE%20DEFAULT%20.png" alt="Approved NEON STAGE DEFAULT / SKIN-1 main plugin mockup" width="100%">
 
-<sub>APPROVED MAIN INTERFACE · NEON STAGE DEFAULT · SKIN-1</sub>
+**APPROVED VISUAL BASELINE · NEON STAGE DEFAULT · SKIN-1 · skin-053**
+
+[Product baseline](docs/REV20_ACCEPTED_BASELINE_RU.md) ·
+[Single development journal](Info.txt) ·
+[UI implementation baseline](docs/NEON_STAGE_GUI_IMPLEMENTATION_BASELINE_RU.md) ·
+[Windows validation workflow](.github/workflows/rev20-windows-vst3-skin-validation.yml)
 
 </div>
 
-REV.20 is the single canonical home for continuing development. Approved decisions, preserved implementation, engineering work, tests, assets, sample inventories and validation evidence are maintained here.
+> **Current engineering line:** [JUCE 9.0.6 / C++23 migration PR #31](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/pull/31)  
+> C++23 is the production standard. C++26 is evaluated separately using the newest compiler language mode available; it is not a release gate until the toolchain and host compatibility are proven.
 
-The current migration branch targets JUCE 9.0.6 and C++23 for production builds. C++26 is available only as a non-blocking experimental CI configuration; it is not a release requirement until compiler, standard-library and host compatibility are demonstrated.
+---
 
 ## Product
 
-A sample-based pop-punk guitar VST3 instrument for Windows 10 x64, with FL Studio 20 x64 as the required host acceptance target. The product has exactly two main playing modes: **MELODY** and **PATTERN**. **AUTOCHORDS** is an auxiliary window within PATTERN, never a third main mode.
+POP PUNK GUITAR ULTIMATE is a sample-based pop-punk guitar instrument for **Windows 10 x64**, distributed as **VST3 x64**. **FL Studio 20 x64** is the required host-acceptance target.
 
-Both modes follow the approved one-key/one-note-event rule: each ordinary MIDI key triggers one mapped note/event clip, not a complete parent loop or phrase.
+The product has exactly two main playing modes:
 
-## Visual identity
+- **MELODY** — one ordinary MIDI key triggers one mapped note or performance segment.
+- **PATTERN** — one ordinary MIDI key triggers one mapped note/event clip, never an entire parent loop or phrase.
 
-The complete approved set is exactly 16 premium graphical shells: **SKIN-1 / NEON STAGE DEFAULT** plus SKIN-2…SKIN-16. All 16 are runtime-ready in the REV.20 gallery. Exact target SHA `974c5877d1a0375100539d2513329a38feb84871` passed Windows x64 VST3 build, full CTest (15/15), the all-16 theme validator and the 16-only package stage. The main Playing Core hero-PNG display and full pixel/layout parity against mockup 01 are still open UI tasks; the package containing hero assets is not by itself proof of the hero being rendered in the main console. No legacy skin batches or additional themes are part of the product.
+**AUTOCHORDS** is an auxiliary setup/workspace inside PATTERN, not a third main mode. Whole-take and phrase previews are separate browser actions.
+
+## Approved visual identity
+
+The canonical visual system is **NEON STAGE DEFAULT / SKIN-1 / `skin-053`**. The product has exactly **16 approved logical skins**: SKIN-1 through SKIN-16. Stable asset IDs and registry indices are immutable and are not the logical skin numbers.
+
+The main console follows the approved reference and journal decisions:
+
+- Header / brand and product actions.
+- Left-side Factory Preset Browser.
+- Center Playing Core with the dedicated guitar stage/banner.
+- Nine real APVTS controls in one horizontal row, in the approved order: GAIN, TREBLE, MID, BASS, VELOCITY, DYNAMICS, SWING, HUMANIZE, ACCENT.
+- Right-side AMP & TONE bay and the approved seven FX controls: COMPRESSOR, EQ, DISTORTION, CHORUS, DELAY, REVERB, CABINET IR.
+- Lower live-performance display, 49-key MIDI keyboard (MIDI 36–84) and library status.
+- Auxiliary workspaces for Import Guitar, FX EDIT, Pattern / Song Section Routing, AutoChords / Harmony Setup, Workspace Settings and Skin Gallery.
+
+The visual layer must never invent functionality: AUTO SOUND HUNTER, CURATOR and ABOUT remain disabled until their real backends exist; FLANGER belongs in FX EDIT, not the seven-button main FX chain; no fake CPU/RAM meters, fake audio spectrum or false preset counts.
+
+**Visual approval is not the same as runtime acceptance.** The main hero artwork, responsive geometry, DPI behavior, rendered snapshots and FL Studio 20 host acceptance remain subject to the exact-SHA verification gates in the journal and UI baseline.
+
+## Audio and library contract
+
+- One shared sample engine for MELODY and PATTERN.
+- SFZ instrument mapping and sample streaming through worker-backed readers and bounded page-cache/queue infrastructure.
+- File scanning, hashing, SFZ parsing and asset analysis must stay off the real-time audio callback.
+- Supported sample content must have verified provenance and explicit redistribution rights.
+- The target factory bank is **500 playable presets: 250 MELODY + 250 PATTERN**, all usable from the included BASIC LIBRARY.
+- BASIC LIBRARY target: at least 15 GB. EXPANDED is an optional additive tier with an initial +15 GB target.
+- The current 300-entry JSON catalog is a partial authored definition set, **not** a finished 500-preset playable bank. The 15 GB audio payload and full legal/playback evidence are not yet declared delivered.
+
+## Engineering configuration
+
+| Area | Production | Experimental |
+|---|---|---|
+| Framework | JUCE **9.0.6**, pinned release tag | Same pinned JUCE |
+| Language | **C++23** | **C++26 latest/draft compiler mode** |
+| Build | CMake 3.30+ / Windows x64 | CMake 3.30+ / compiler-dependent |
+| Plugin | VST3 x64 | VST3 x64 compatibility evaluation |
+| Target OS | Windows 10 x64 | Windows 10 x64 |
+| Host acceptance | FL Studio 20 x64 | Same manual host test required |
+
+### Build locally
+
+JUCE is checked out as `JUCE/` at the pinned `9.0.6` tag by the CI workflows.
+
+```powershell
+cmake -S . -B build -A x64 -DPPGU_CXX_STANDARD=23
+cmake --build build --config Release --parallel
+ctest --test-dir build -C Release --output-on-failure
+```
+
+Experimental C++26 mode:
+
+```powershell
+cmake -S . -B build-cpp26 -A x64 -DPPGU_CXX_STANDARD=26
+cmake --build build-cpp26 --config Release --parallel
+ctest --test-dir build-cpp26 -C Release --output-on-failure
+```
+
+On MSVC, the experimental configuration uses `/std:c++latest` while CMake retains a supported baseline dialect for its own compiler checks. This is a compiler preview mode, not a claim that MSVC implements every finalized C++26 feature.
 
 ## Repository map
 
-- `Info.txt` — single canonical journal of decisions, transfers, tests and remaining gates.
-- `docs/REV20_ACCEPTED_BASELINE_RU.md` — locked product baseline and all 16 skin names.
-- `docs/REV20_DECISION_TIMELINE_RU.md` — chronological decision/source history.
-- `docs/REV20_ENGINEERING_WORKSTREAM_REGISTER_RU.md` — M1–M13 source PR audit and selective integration order.
-- `docs/REV20_FUNCTIONAL_GAP_AUDIT_RU.md` — actual code-level UI, preset, Engine and Import Sounds gaps.
-- `docs/REV20_SOUND_HUNTER_REAL_GUITAR_BASELINE_RU.md` — real-recorded guitar acquisition, licensing, SHA-256 and preset-binding baseline.
-- `docs/REV20_FL20_ACCEPTANCE_CHECKLIST_RU.md` — manual Windows 10 / FL Studio 20 host acceptance.
-- `docs/REV20_LIBRARY_TIERS_RU.md` and `assets/library/library_tiers.json` — BASIC/EXPANDED specification.
-- `docs/REV20_LIBRARY_MANAGER_APPROVED_REQUIREMENTS.md` — complete approved Library Manager workflow and acceptance requirements.
-- `SoundHunter/` and `.github/workflows/rev20-sound-hunter-import.yml` — pinned, checksum-verified CC0 real-guitar acquisition workflow; payload size/quality gate remains separate.
-- `docs/REV20_SKIN_APPROVAL_STANDARD_RU.md` — premium visual-quality rules for all 16 shells.
-- `docs/REV20_MIGRATION_MANIFEST.md` — selected transfers and excluded legacy material.
-- `docs/DEVELOPMENT_STATUS.md` — evidence-based implementation/readiness matrix.
-- `Source/`, `tests/`, `tools/` — plugin source, tests and validators.
-- `SKIN/` — exactly 16 logical themes and runtime art resources.
-- `presets/` — current partial 300-definition catalog, not the final 500 playable bank.
-- `LibraryManager/` and L3XTOWN inventories — pre-existing non-destructive library intake work.
+### Canonical product decisions and journal
+- [`Info.txt`](Info.txt) — single chronological development journal and decision record.
+- [Accepted product baseline](docs/REV20_ACCEPTED_BASELINE_RU.md) — locked modes, skins, audio and product constraints.
+- [Decision timeline](docs/REV20_DECISION_TIMELINE_RU.md) — decision provenance and ordering.
+- [Engineering workstream register](docs/REV20_ENGINEERING_WORKSTREAM_REGISTER_RU.md) — source audits and integration order.
+- [Functional gap audit](docs/REV20_FUNCTIONAL_GAP_AUDIT_RU.md) — verified implementation gaps.
+- [Development status](docs/DEVELOPMENT_STATUS.md) — evidence-based readiness matrix.
+- [Migration manifest](docs/REV20_MIGRATION_MANIFEST.md) — accepted transfers and exclusions.
 
-## Sound library and presets
+### UI, skin and visual assets
+- [NEON STAGE GUI implementation baseline](docs/NEON_STAGE_GUI_IMPLEMENTATION_BASELINE_RU.md).
+- [UI baseline](Docs/REV20_UI_BASELINE.md).
+- [Skin approval standard](docs/REV20_SKIN_APPROVAL_STANDARD_RU.md).
+- [Skin registry and runtime assets](SKIN/README.md).
+- [NEON STAGE asset pack](ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/README_ASSET_PACK_RU.md).
+- [Asset map](ASSETS/NEON_STAGE_DEFAULT/ASSET_MAP.md).
+- [Open asset issues](ASSETS/ASSET_OPEN_ISSUES.md).
 
-The core target is **500 playable factory presets: 250 MELODY + 250 PATTERN**. All must be usable from the included BASIC LIBRARY, minimum 15 GB. The optional EXPANDED tier adds an initial 15 GB (30 GB combined initially) and may grow without a product-imposed ceiling. The 250 PATTERN presets must be organized across PATTERN windows, sections and functions, not dumped into one flat list. The current 300-entry catalog is partial 150+150 definitions, not 500 finished/playable presets. The 15 GB audio payload, full legal clearance and all 500 playable presets are not yet delivered.
+### Audio, presets and library
+- [Sound Hunter real-guitar baseline](docs/REV20_SOUND_HUNTER_REAL_GUITAR_BASELINE_RU.md).
+- [Library tiers](docs/REV20_LIBRARY_TIERS_RU.md).
+- [Approved Library Manager requirements](docs/REV20_LIBRARY_MANAGER_APPROVED_REQUIREMENTS.md).
+- [Sample sourcing and licensing policy](docs/SAMPLE_LIBRARY_SOURCING_AND_LICENSE_POLICY.md).
+- [Factory preset plan](docs/FACTORY_PRESET_PLAN.md).
+- [Pattern clip pipeline](docs/PATTERN_CLIP_PIPELINE_RU.md).
 
-## Latest Windows validation
+### Build, validation and host acceptance
+- [JUCE 9 / C++23 / C++26 migration record](docs/REV20_JUCE9_CPP23_MIGRATION_RU.md).
+- [Windows x64 VST3 + CTest + skin + pluginval workflow](.github/workflows/rev20-windows-vst3-skin-validation.yml).
+- [FL Studio 20 acceptance checklist](docs/REV20_FL20_ACCEPTANCE_CHECKLIST_RU.md).
+- [CMake project](CMakeLists.txt).
+- [Tests](tests/).
 
-Workflow [44719521911](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/actions/runs/44719521911) passed on exact SHA `974c5877d1a0375100539d2513329a38feb84871`: Windows x64 configure/build, VST3, CTest 15/15, 16-skin validator, 16-only package stage and upload. Artifact ID `14620284899`, SHA-256 `59b87d1caaa6aaf3b72b89edce6fd2311c23d673960b0c5459658e1a1aab0f30`.
+## Validation policy
 
-A subsequent DSP patch for live AMP TONE, EQ crossover frequencies and compressor amount is being added with its own regression test; its target exact-SHA run must pass separately. Pluginval strictness 5 is now part of the Windows workflow but its first run on the new SHA is pending. Manual FL Studio 20 host acceptance, DPI/performance, full preset service and actual licensed audio delivery remain open. No release package is declared approved.
+A source change is not a passing build. A build is not a host-acceptance result. Every status must refer to the exact tested commit SHA.
 
-**All future project work belongs only in this repository, on `main`.**
+Release readiness requires, at minimum:
+
+1. JUCE 9.0.6 / C++23 Windows x64 VST3 configure and build.
+2. Full CTest suite.
+3. Exact 16-skin asset/registry validation and package staging.
+4. pluginval strictness level 5.
+5. Manual FL Studio 20 x64 acceptance on Windows 10 x64, including MIDI, preset/state persistence, UI resize/DPI and audio behavior.
+6. Audio-library provenance, redistribution clearance and playable preset verification.
+7. JUCE licence-model review for the intended distribution.
+
+No release-ready status is implied by the existence of this README, the migration branch or a staged artifact.
+
+---
+
+**Canonical repository:** [l3xtownbeats / POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-)  
+**Current migration review:** [PR #31](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/pull/31)
