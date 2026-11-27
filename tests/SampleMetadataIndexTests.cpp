@@ -82,7 +82,10 @@ int main()
         return 1;
     }
 
-    const auto wavMetadata = std::find_if(result.samples.begin(), result.samples.end(), [](const auto& item) { return item.file.hasFileExtension(".wav"); });\n    if (wavMetadata == result.samples.end()) return 1;\n    const auto& metadata = *wavMetadata;
+    const auto wavMetadata = std::find_if(result.samples.begin(), result.samples.end(),
+        [](const auto& item) { return item.file.hasFileExtension(".wav"); });
+    if (wavMetadata == result.samples.end()) return 1;
+    const auto& metadata = *wavMetadata;
     if (metadata.frames != 1024 || metadata.channels != 2
         || std::abs(metadata.sampleRate - 48000.0) > 0.01
         || metadata.bitsPerSample != 24 || metadata.fileBytes == 0
