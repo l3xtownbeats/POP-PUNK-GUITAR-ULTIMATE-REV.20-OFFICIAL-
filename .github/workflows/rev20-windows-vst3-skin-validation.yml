@@ -80,11 +80,14 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $juceCmake = Get-Content JUCE/CMakeLists.txt -Raw
-          if ($juceCmake -notmatch 'project\\s*\\(\\s*JUCE\\s+VERSION\\s+9\\.0\\.5') {
+          if (-not $juceCmake.Contains('VERSION 9.0.5')) {
             throw 'The checked-out JUCE source is not exactly 9.0.5.'
           }
-          if ((Select-String -Path CMakeLists.txt -Pattern '^set\\(CMAKE_CXX_STANDARD 23\\)
-
+          $standard = Select-String -Path CMakeLists.txt -SimpleMatch 'set(CMAKE_CXX_STANDARD 23)'
+          if (-not $standard) {
+            throw 'The project must compile as C++23.'
+          }
+          git -C JUCE describe --tags --exact-match
       - name: Configure Windows x64
         shell: pwsh
         run: cmake -S . -B build -A x64
