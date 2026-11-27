@@ -121,3 +121,11 @@
 - Updated the source validator to retain fractional angles and verify all 183 marker positions within 0.02°.
 - Commits: SVG 999932e0881d6be94e9b3f5c590ef0d7ff374503; validator 17d0cc131dc8cd29981a0a6ab09f1445537b9988, fractional-angle parser 886449d7cd3d6690fa4c964ecf733a404a22fa23.
 - NOT YET ACCEPTED: no fresh raster export or visual review of the revised five positions has been completed. The LED arc distribution and metallic face treatment remain open. Do not pack the updated strips into JUCE runtime until fresh CI export and review pass.
+
+
+### 2026-11-28 — исправление индексации угла между материалами
+
+- CI run #182 обнаружил ошибку в новом rotary source: угол маркера продолжался сквозь три полосы вместо сброса на каждом материале (вторая полоса начиналась с 474.7° вместо 249°).
+- Исправлено: индекс кадра теперь рассчитывается независимо для каждой полосы, 61 кадр на материал; все 183 значения соответствуют диапазону 249°–471°.
+- Исправление: commit 446acb3ec21c2769de2fc3138be76a2fea236ba5.
+- Run #182 завершился ошибкой на source validation; raster export не выполнялся. Новый CI запущен изменением source и должен подтвердить исправление. Визуальная приёмка по-прежнему ожидает свежий PNG export.
