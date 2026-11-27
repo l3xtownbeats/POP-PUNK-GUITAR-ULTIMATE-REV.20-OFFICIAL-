@@ -1,15 +1,24 @@
 cmake_minimum_required(VERSION 3.22)
 project(PPGU VERSION 4.0.0 LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# JUCE 7.0.12 is checked out by the Windows workflow into this directory.
+# JUCE 9.0.5 is provisioned by CI into this directory; never silently build
+# against a different major/minor toolchain.
+set(PPGU_REQUIRED_JUCE_VERSION "9.0.5")
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/CMakeLists.txt")
-    message(FATAL_ERROR "JUCE 7.0.12 checkout is missing. Run the configured workflow or provide JUCE/.")
+    message(FATAL_ERROR "JUCE 9.0.5 checkout is missing. Provision JUCE/ before configuring PPGU.")
 endif()
 add_subdirectory(JUCE EXCLUDE_FROM_ALL)
+
+if (DEFINED JUCE_VERSION AND NOT JUCE_VERSION VERSION_EQUAL PPGU_REQUIRED_JUCE_VERSION)
+    message(FATAL_ERROR "PPGU requires JUCE ${PPGU_REQUIRED_JUCE_VERSION}; found ${JUCE_VERSION}.")
+endif()
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC|Clang|GNU")
+    message(FATAL_ERROR "PPGU C++23 toolchain is unsupported: ${CMAKE_CXX_COMPILER_ID}")
+endif()
 
 # Binary-data targets must be declared before every target that includes their
 # generated headers. These are the canonical files present in REV.17.
