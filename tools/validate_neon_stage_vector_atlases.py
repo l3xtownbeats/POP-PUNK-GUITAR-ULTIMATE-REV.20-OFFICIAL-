@@ -112,16 +112,28 @@ def main() -> int:
             continue
         x, y = map(int, match.groups())
         if x in strip_groups:
+            marker_groups = [
+                child for child in children_named(node, "g")
+                if child.attrib.get("transform") == "translate(64 84)"
+            ]
+            if len(marker_groups) != 1:
+                fail(f"rotary frame at x={x}, y={y}: expected one marker on the reference arc")
             rotations = [
                 child.attrib.get("transform", "")
-                for child in children_named(node, "g")
+                for child in children_named(marker_groups[0], "g")
                 if child.attrib.get("transform", "").startswith("rotate(")
             ]
             if len(rotations) != 1:
-                fail(f"rotary frame at x={x}, y={y}: expected one needle rotation")
+                fail(f"rotary frame at x={x}, y={y}: expected one marker rotation")
             angle_match = re.fullmatch(r"rotate\(([-\d.]+) 0 0\)", rotations[0])
             if not angle_match:
-                fail(f"rotary frame at x={x}, y={y}: malformed rotation")
+                fail(f"rotary frame at x={x}, y={y}: malformed marker rotation")
+            marker_circles = [
+                child for child in children_named(marker_groups[0], "circle")
+                if child.attrib.get("cy") == "-30"
+            ]
+            if len(marker_circles) != 3:
+                fail(f"rotary frame at x={x}, y={y}: marker/glow must use the 30 px reference radius")
             strip_groups[x].append((y, float(angle_match.group(1))))
     for x, frames in strip_groups.items():
         frames.sort()
