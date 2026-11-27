@@ -29,7 +29,7 @@ struct PageReadReport
     std::string error;
 };
 
-// Worker-thread-only WAV reader. The caller owns the reader on a non-audio
+// Worker-thread-only audio-file reader (WAV, AIFF and MP3). The caller owns the reader on a non-audio
 // thread and must never invoke open/readPage/close from processBlock().
 class WavPageReader final
 {
