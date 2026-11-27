@@ -104,3 +104,10 @@ Atlas 03 и экспортный конвейер прошли exact-head source
 - Replaced the simple thin cyan arc with 20 discrete LED segments distributed across a 270° sweep; active segment count follows the 61-frame position index. Segment geometry is shared through reusable SVG definitions to keep the source atlas below 1 MB.
 - Structural verification on the committed SVG: 183 brushed faces, 183 radial-brush uses, 183 rotating marker groups, 3,660 segment instances (3,050 on / 610 off across the three strips). This is source-structure QA only; a fresh raster export and visual comparison are still required.
 - **Visual acceptance remains open.** The 50% source crop is available, but the complete source design is not supplied as editable layers. The rebuilt metal/LED treatment is a reconstruction, not a proven pixel-perfect reproduction. Do not mark rotary art accepted or wire it as final runtime art until raster comparison at 0/25/50/75/100% is reviewed.
+
+
+### LED progression correction — 2026-11-28
+
+- Исправлена независимая шкала LED для каждого из трёх материалов: индекс кадра сбрасывается на 0 в начале каждой 61-кадровой полосы. Все три полосы теперь проходят полный диапазон 0–100%, а не оставляют вторую и третью полосы постоянно на максимуме.
+- Повторная структурная проверка текущего SVG (933,111 bytes): 183 face instances, 183 brush uses, 183 rotating marker groups, 1,830 active и 1,830 inactive LED segment instances суммарно по трём полосам. На одну полосу приходится полный набор из 61 кадров.
+- Рендер и визуальная проверка ещё не выполнены: для них нужен новый exact-head CI export. Предыдущий успешный run #164 относится к более раннему SHA и не подтверждает текущие изменения.
