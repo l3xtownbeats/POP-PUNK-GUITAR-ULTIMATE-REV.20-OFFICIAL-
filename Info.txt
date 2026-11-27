@@ -566,3 +566,12 @@ These CI results verify the current-head automated build/validation and export w
 - GitHub About/social-preview copy guide added at `docs/REV20_GITHUB_ABOUT_METADATA_RU.md`. Repository description, topics, homepage and Social Preview image are still manual settings because the available GitHub connector does not expose repository-metadata write operations.
 - Explicitly recorded current main as JUCE 7.0.12 + C++20; JUCE 9.0.6 + C++23 remains separate draft PR #31, with C++26 experimental only. Do not describe the migration as merged production baseline.
 - No claim of final 500 playable presets, delivered 15 GB licensed BASIC audio, completed licensing, permanent release or FL Studio 20 host acceptance.
+
+
+## 2026-11-27 — PUBLIC METADATA / RELEASE CHANNEL / CLEANUP AUDIT
+- Consolidated the GitHub About copy into one short, evidence-based description; Homepage target is the repository's Releases page; ten relevant topics are documented; the existing approved NEON STAGE mockup is the Social Preview candidate.
+- Clarified that GitHub Releases are the permanent release channel. Legacy Downloads is a separate, deprecated-style downloads area and should not be used as a parallel duplicate channel.
+- Verified live repository metadata via GitHub read API: description is null, homepage is null, topics are empty, `has_downloads=false`, and releases collection is empty. These live settings were not changed: the available GitHub integration has no repository-settings write, social-preview upload, Release creation or branch deletion action.
+- No empty or misleading Release was created. Current JUCE 9.0.6/C++23 migration is still in PR #31; previous validated artifact is from the older JUCE 7/C++20 source SHA. FL Studio 20 host acceptance, complete licensed audio payload and final release package gates remain open.
+- Cleanup policy: preserve open PR branches and canonical source/reference material; do not delete by age alone. Remove only branches/files proven unreferenced after checking PRs, manifests, Info.txt and runtime paths. Do not duplicate binaries across Actions artifacts, Releases and legacy Downloads.
+- This metadata/download cleanup guidance is included in PR #32 review branch. No direct main-branch changes.
