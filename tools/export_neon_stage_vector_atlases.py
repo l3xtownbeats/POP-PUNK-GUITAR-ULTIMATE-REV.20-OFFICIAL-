@@ -19,7 +19,7 @@ SHEETS = [
     ("01_ppgu_atlas_backgrounds_frames.svg", (1920, 1000)),
     ("02_ppgu_atlas_buttons_switches.svg", (1920, 1020)),
     ("03_ppgu_atlas_knob_strips.svg", (1920, 8000)),
-    ("04_ppgu_atlas_displays_keyboard.svg", (1920, 1040)),
+    ("04_ppgu_atlas_displays_keyboard.svg", (1920, 1840)),
     ("05_ppgu_atlas_icons_hardware.svg", (1920, 1020)),
 ]
 
