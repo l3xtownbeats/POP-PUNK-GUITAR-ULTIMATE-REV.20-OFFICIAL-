@@ -69,9 +69,19 @@ def main() -> int:
             fail(f"{filename}: expected {expected_size}, got {(width, height)}")
         if view_box != ["0", "0", str(width), str(height)]:
             fail(f"{filename}: viewBox does not match declared dimensions")
+        ids = {
+            element.attrib["id"]
+            for element in root.iter()
+            if "id" in element.attrib
+        }
         for element in root.iter():
-            if any(key.endswith("href") for key in element.attrib):
-                fail(f"{filename}: external/embedded href found; keep masters self-contained")
+            for key, value in element.attrib.items():
+                if key.endswith("href"):
+                    if not value.startswith("#"):
+                        fail(f"{filename}: external/embedded href found; use local SVG fragment references only")
+                    target_id = value[1:]
+                    if not target_id or target_id not in ids:
+                        fail(f"{filename}: unresolved local SVG reference {value!r}")
             if local_name(element.tag) == "rect":
                 rw = float(element.attrib.get("width", "0"))
                 rh = float(element.attrib.get("height", "0"))
