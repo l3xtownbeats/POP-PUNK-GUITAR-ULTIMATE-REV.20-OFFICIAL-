@@ -111,3 +111,13 @@
 - Дополнительная проверка каждого кадра требует, чтобы alpha bounding box охватывал почти всю ячейку; частично обрезанные кадры должны останавливать экспорт.
 - Важно: artifact `15218795470` создан до этого исправления и содержит дефектные rotary-strip crops. Его не использовать как визуально принятый результат для отдельных полос. Повторный export после коммитов `74f9d78a1862b4cfe8b5d94c5e8367c96ff4ba5d` и `58e7a55d4a18c2e11701a6155b194077d01a022b` обязателен; CI для нового head и просмотр исправленных PNG пока ожидаются.
 - Полноразмерный SVG atlas 03 в исходном artifact сохраняет отдельные кадры; найденная ошибка относится к standalone crop-экспортам, а не к доказанной pixel-perfect точности artwork.
+
+
+### 2026-11-28 — rotary marker path corrected against five reference positions
+
+- Inspected the five source crops at 0%, 25%, 50%, 75% and 100% from the exported reference component pack.
+- The reference marker does not rotate around the knob's central axis. It follows an upper arc whose fitted path is centered at approximately (64,84) in the 128×128 frame, with a 30 px radius.
+- Updated all 183 marker instances (three material variants × 61 frames) to follow 249°–471° across the five observed positions. The 50% marker now resolves to the top-center position; 0/25/75/100% positions follow the reference's lower-left / upper-left / upper-right / lower-right progression.
+- Updated the source validator to retain fractional angles and verify all 183 marker positions within 0.02°.
+- Commits: SVG 999932e0881d6be94e9b3f5c590ef0d7ff374503; validator 17d0cc131dc8cd29981a0a6ab09f1445537b9988, fractional-angle parser 886449d7cd3d6690fa4c964ecf733a404a22fa23.
+- NOT YET ACCEPTED: no fresh raster export or visual review of the revised five positions has been completed. The LED arc distribution and metallic face treatment remain open. Do not pack the updated strips into JUCE runtime until fresh CI export and review pass.
