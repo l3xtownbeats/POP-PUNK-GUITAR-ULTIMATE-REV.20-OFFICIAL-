@@ -21,9 +21,13 @@ bool isWithinRoot(const std::filesystem::path& root,
     return true;
 }
 
-bool isWav(const std::filesystem::path& path)
+bool isSupportedAudioFile(const std::filesystem::path& path)
 {
-    return juce::String(path.extension().string()).equalsIgnoreCase(".wav");
+    const auto extension = juce::String(path.extension().string()).toLowerCase();
+    // The sampler's page reader is format-agnostic: JUCE decodes the source
+    // format into float PCM on the streaming worker thread.
+    return extension == ".wav" || extension == ".aif" || extension == ".aiff"
+        || extension == ".mp3";
 }
 }
 
@@ -78,7 +82,7 @@ SampleIndexReport SampleMetadataIndex::scanDirectory(const juce::File& directory
             continue;
         }
 
-        if (!std::filesystem::is_regular_file(symlinkStatus) || !isWav(entryPath))
+        if (!std::filesystem::is_regular_file(symlinkStatus) || !isSupportedAudioFile(entryPath))
             continue;
 
         const auto canonical = std::filesystem::canonical(entryPath, ec);
@@ -101,7 +105,7 @@ SampleIndexReport SampleMetadataIndex::scanDirectory(const juce::File& directory
             formats.createReaderFor(juce::File(canonical.string())));
         if (reader == nullptr)
         {
-            report.warnings.emplace_back("Unreadable WAV header: " + canonical.string());
+            report.warnings.emplace_back("Unreadable audio-file header: " + canonical.string());
             continue;
         }
 
@@ -109,7 +113,7 @@ SampleIndexReport SampleMetadataIndex::scanDirectory(const juce::File& directory
             || reader->sampleRate > 384000.0 || reader->lengthInSamples <= 0
             || reader->numChannels == 0 || reader->numChannels > 2)
         {
-            report.warnings.emplace_back("Invalid WAV metadata (sampler currently supports mono/stereo only): " + canonical.string());
+            report.warnings.emplace_back("Invalid audio metadata (sampler currently supports mono/stereo only): " + canonical.string());
             continue;
         }
 
@@ -126,7 +130,7 @@ SampleIndexReport SampleMetadataIndex::scanDirectory(const juce::File& directory
         if (bytes > std::numeric_limits<std::uint64_t>::max() - report.totalFileBytes
             || metadata.frames > std::numeric_limits<std::uint64_t>::max() - report.totalFrames)
         {
-            report.warnings.emplace_back("Skipped WAV because aggregate library metadata would overflow 64-bit counters: "
+            report.warnings.emplace_back("Skipped audio file because aggregate library metadata would overflow 64-bit counters: "
                                          + canonical.string());
             continue;
         }
@@ -144,7 +148,7 @@ SampleIndexReport SampleMetadataIndex::scanDirectory(const juce::File& directory
 
     report.success = !report.samples.empty() && report.errors.empty();
     if (report.samples.empty())
-        report.warnings.emplace_back("No readable WAV samples were found in this directory.");
+        report.warnings.emplace_back("No readable WAV, AIFF or MP3 samples were found in this directory.");
     return report;
 }
 }
