@@ -130,8 +130,9 @@ def main() -> int:
         for index, (y, angle) in enumerate(frames):
             if y != 134 + index * 128:
                 fail(f"rotary strip x={x}: frame {index} has unexpected y={y}")
-            if angle != 210 + index * 3:
-                fail(f"rotary strip x={x}: frame {index} has unexpected angle={angle}")
+            expected_angle = 249.0 + (222.0 * index / 60.0)
+            if abs(angle - expected_angle) > 0.02:
+                fail(f"rotary strip x={x}: frame {index} has unexpected angle={angle}; expected {expected_angle:.2f}")
 
     keyboard = parsed["04_ppgu_atlas_displays_keyboard.svg"]
     keyboard_rects = children_named(keyboard, "rect")
@@ -235,7 +236,7 @@ def main() -> int:
     print("PASS: 5 SVG masters parse; dimensions/viewBoxes and transparent canvases match.")
     print("PASS: carbon-weave material is clipped to its swatch.")
     print("PASS: 27 button-family headings match the declared contract.")
-    print("PASS: 3 rotary strips × 61 frames; 128px pitch; 210°–390° in 3° steps; materials differ.")
+    print("PASS: 3 rotary strips × 61 frames; 128px pitch; 249°–471° on the source-reference marker arc (222° total); materials differ.")
     print("PASS: 49-key keyboard contains 29 white keys, 20 black keys and C/E/G active overlays.")
     print("PASS: display atlas includes six LCD states, seven LED states and three stereo meter states.")
     print("PASS: 41 icon tiles have 41 distinct glyph bodies and all declared labels.")
