@@ -572,3 +572,13 @@ These CI results verify the current-head automated build/validation and export w
 - Commit: `5952d4caef49a2bccec970bb0de2632cece30810`.
 - Это исправление ложного отрицательного результата проверки, а не визуальное улучшение и не доказательство pixel-perfect. Следующий gate — повторный exact-head CI export, затем просмотр 0/25/50/75/100% кадров каждого материала против сохранённых reference crops.
 - Полная 1:1 приёмка интерфейса остаётся BLOCKED до сопоставления главного REV.20 master layout, всех ассетов/состояний и JUCE screenshots. Никакой runtime atlas не заменять до этой проверки.
+
+
+## 2026-11-28 — Windows VST3 workflow syntax repair
+
+**Статус:** WORKFLOW SOURCE REPAIRED; EXACT-HEAD WINDOWS BUILD PENDING.
+
+- Проверка PR #29 выявила, что workflow `.github/workflows/rev20-windows-vst3-skin-validation.yml` содержал после последнего шага загрузки артефакта повреждённый повторный фрагмент PowerShell и дублированную часть job. Из-за этого GitHub создал failed run без jobs; это не является результатом C++ compile/test.
+- Удалён только повреждённый хвост после корректного завершающего шага Upload REV.20 Windows x64 VST3. Сохранены C++23, exact JUCE 9.0.5 checkout, проверки toolchain, configure/build/CTest/pluginval и artifact upload steps.
+- Commit: `85136690a4ea6b94470b68cab92edcf2f5ff15a5`.
+- Новый run должен подтвердить корректный разбор workflow и пройти полный Windows x64 VST3 pipeline. До его завершения BUILD/CTest/pluginval PASS не присваивать.
