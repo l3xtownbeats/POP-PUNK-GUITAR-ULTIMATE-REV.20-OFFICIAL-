@@ -3480,7 +3480,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
         // stage/banner above the nine-control strip, not a watermark behind knobs.
         auto stage = area.reduced(8, 6);
         stage.removeFromTop(38);
-        const int stageHeight = juce::jlimit(72, 150, juce::jmax(1, area.getHeight() - 45) / 3);
+        const int stageHeight = juce::jlimit(110, 210, juce::jmax(1, area.getHeight() - 45) / 3);
         stage = stage.removeFromTop(juce::jmin(stageHeight, stage.getHeight()));
         g.saveState();
         g.reduceClipRegion(stage);
@@ -3488,9 +3488,7 @@ void PopPunkGuitarUltimateAudioProcessorEditor::paint(juce::Graphics& g)
         g.drawImageWithin(p.heroArtwork, stage.getX(), stage.getY(),
                           juce::jmax(1, stage.getWidth()),
                           juce::jmax(1, stage.getHeight()),
-                          juce::RectanglePlacement::centred);
-        g.setColour(p.token("window_bg").withAlpha(0.16f));
-        g.fillRect(stage);
+                          juce::RectanglePlacement::fillDestination);
         g.restoreState();
         g.setColour(p.token("control_border").withAlpha(0.8f));
         g.drawRoundedRectangle(stage.toFloat(), 7.0f, 1.0f);
@@ -3570,12 +3568,30 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
     // Dedicated guitar stage/banner above the controls, matching the approved
     // main-screen reference. Artwork is decorative only; no control hit target
     // or processor parameter is placed over this region.
-    const int stageHeight = juce::jlimit(72, 150, centre.getHeight() / 3);
+    const int stageHeight = juce::jlimit(110, 210, centre.getHeight() / 3);
     centre.removeFromTop(juce::jmin(stageHeight, centre.getHeight()));
     centre.removeFromTop(6);
 
-    // Keep the nine controls in a single evenly-spaced row at every supported
-    // editor size. The APVTS attachments, IDs, ordering and DSP are unchanged.
+    // The approved console places the seven FX modules in a horizontal chain
+    // below the nine primary controls (not as a vertical stack in the amp bay).
+    // Keep the existing APVTS ButtonAttachments and their hit targets intact.
+    auto fxArea = centre.removeFromBottom(juce::jlimit(76, 104, centre.getHeight() / 3));
+    fxTitle.setVisible(true);
+    fxTitle.setBounds(fxArea.removeFromTop(22).reduced(5, 0));
+    const int fxGap = 5;
+    const int fxCellWidth = (fxArea.getWidth() - fxGap * 6) / static_cast<int>(fxButtons.size());
+    const int fxButtonHeight = juce::jlimit(34, 46, fxArea.getHeight() - 4);
+    for (size_t i = 0; i < fxButtons.size(); ++i)
+    {
+        const int x = fxArea.getX() + static_cast<int>(i) * (fxCellWidth + fxGap);
+        const int width = (i + 1 == fxButtons.size())
+            ? fxArea.getRight() - x : fxCellWidth;
+        fxButtons[i].setBounds(x, fxArea.getY() + (fxArea.getHeight() - fxButtonHeight) / 2,
+                               juce::jmax(1, width), fxButtonHeight);
+    }
+
+    // Keep the nine real APVTS controls in one evenly-spaced horizontal row.
+    // Only their layout changes; parameter IDs, ranges, attachments and DSP do not.
     const int knobCellWidth = centre.getWidth() / static_cast<int>(knobs.size());
     const int knobDiameter = juce::jmax(32,
         juce::jmin(92, juce::jmin(knobCellWidth - 8, centre.getHeight() - 26)));
@@ -3594,26 +3610,11 @@ void PopPunkGuitarUltimateAudioProcessorEditor::resized()
                                 juce::jmax(1, cellWidth - 2), labelHeight);
     }
 
-    // RIGHT: AMP & TONE rack with exactly seven real APVTS FX switches.
+    // RIGHT: dedicated AMP & TONE bay. FX CHAIN lives in the center console.
     right.removeFromTop(34);
     const int ampHeaderHeight = juce::jlimit(30, 42, right.getHeight() / 4);
     ampTitle.setBounds(right.removeFromTop(ampHeaderHeight).reduced(5, 1));
     fxTitle.setVisible(true);
-    fxTitle.setBounds(right.removeFromTop(24).reduced(5, 1));
-    right.removeFromTop(3);
-
-    // Seven real FX bypass controls remain in the RIGHT AMP & TONE / FX CHAIN zone.
-    // Give each control a compact full-width row; never stretch a button to the
-    // entire rack height. Existing APVTS IDs and click-to-open FX EDIT behavior stay intact.
-    const int fxRowHeight = juce::jlimit(38, 52, right.getHeight() / 8);
-    const int fxRowGap = 4;
-    for (size_t i = 0; i < fxButtons.size(); ++i)
-    {
-        const int y = right.getY() + 2 + static_cast<int>(i) * (fxRowHeight + fxRowGap);
-        fxButtons[i].setBounds(right.getX() + 5, y,
-                               juce::jmax(1, right.getWidth() - 10),
-                               juce::jmax(1, fxRowHeight));
-    }
     if (mainFxEdit != nullptr)
         mainFxEdit->setVisible(false);
     playbackTitle.setVisible(false);
