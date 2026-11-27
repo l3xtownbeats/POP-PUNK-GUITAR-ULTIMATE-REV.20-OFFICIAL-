@@ -96,3 +96,10 @@
 - **COMPLETE** — закрыты все применимые gates.
 
 Не повышать статус автоматически. Успешный экспорт не равен визуальной или host-приёмке.
+
+
+### 2026-11-27 — exact-head CI/export подтверждён
+- GitHub Actions run `46036878566` (run #159) завершился SUCCESS на точном head SHA `a8a39ddd930e11a956899c2ac772745c652a1ceb`.
+- Job `validate-and-export`: все шаги завершены успешно, включая source-contract validation, PNG raster export в 1× и 2×, 490 standalone components в каждом масштабе, 41 SVG icon с PNG-вариантами 16/24/32/48, 70 source-faithful reference components в 1×/2× и девять основных rotary controls по шесть независимых визуальных слоёв.
+- Artifact `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT`, ID `15218795470`, размер 52,259,439 bytes, SHA-256 `ba6ba0076baf32e366208149fcb11821104c388fd7c362c91ad18a05d9f30691`, срок хранения до 2026-12-11.
+- Это CI-VERIFIED для source contracts и экспортного конвейера на указанном SHA. Это не заменяет просмотр PNG/contact sheets, сравнение с утверждёнными mockups, проверку каждого alpha edge, runtime mapping, JUCE build, Pluginval или FL Studio 20.
