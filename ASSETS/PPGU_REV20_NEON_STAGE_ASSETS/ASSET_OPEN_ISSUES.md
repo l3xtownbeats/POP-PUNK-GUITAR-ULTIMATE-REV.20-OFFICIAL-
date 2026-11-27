@@ -95,3 +95,12 @@ Atlas 03 и экспортный конвейер прошли exact-head source
 - [x] Добавлена сегментная cyan LED-дуга из 20 отдельных сегментов; количество активных сегментов изменяется синхронно с индексом кадра (0–100%).
 - [ ] Проверить свежий CI export и визуально сопоставить 0/25/50/75/100% кадры с source crops. Это промежуточная реконструкция: она ещё не подтверждена как pixel-perfect и не заменяет ручную приёмку.
 - [ ] Отдельно проверить соответствие положения светового маркера/указателя исходному эталону; при необходимости заменить текущую стрелку на marker geometry из утверждённого knob artwork.
+
+
+### Rotary reconstruction — compacted revision (2026-11-28)
+
+- Reworked the 183 face instances (3 strips × 61 frames) with a shared radial-metal gradient and a reusable radial-brush highlight group. The shared definition avoids duplicating the 72 highlight paths in every frame.
+- Replaced the previous triangular pointer with a separate luminous cyan position dot at the end of the rotating transform, matching the visible indicator language in the 50% source crop more closely.
+- Replaced the simple thin cyan arc with 20 discrete LED segments distributed across a 270° sweep; active segment count follows the 61-frame position index. Segment geometry is shared through reusable SVG definitions to keep the source atlas below 1 MB.
+- Structural verification on the committed SVG: 183 brushed faces, 183 radial-brush uses, 183 rotating marker groups, 3,660 segment instances (3,050 on / 610 off across the three strips). This is source-structure QA only; a fresh raster export and visual comparison are still required.
+- **Visual acceptance remains open.** The 50% source crop is available, but the complete source design is not supplied as editable layers. The rebuilt metal/LED treatment is a reconstruction, not a proven pixel-perfect reproduction. Do not mark rotary art accepted or wire it as final runtime art until raster comparison at 0/25/50/75/100% is reviewed.
