@@ -155,3 +155,11 @@
 - Updated `tools/validate_neon_stage_vector_atlases.py` to validate the actual three-layer construction: exactly three circles, two at `cy="-30"`, one specular highlight at `cy="-32.2"`. The artwork, marker trajectory and APVTS/runtime contract were not modified.
 - Commit: `5952d4caef49a2bccec970bb0de2632cece30810`.
 - Status: validator patch committed; exact-head CI re-run pending. This is not a visual acceptance. Re-export and compare 0/25/50/75/100% frames for all three materials against the approved crops before runtime packing.
+
+
+### 2026-11-28 — Windows toolchain workflow syntax repair
+
+- Exact PR head inspection found a malformed duplicated PowerShell fragment appended after the final artifact-upload step in `.github/workflows/rev20-windows-vst3-skin-validation.yml`. GitHub reported a failed workflow run with zero jobs; this was a workflow-definition failure, not a C++ build or test result.
+- Removed only the stray duplicated tail. Preserved the C++23/JUCE 9.0.5 toolchain verification and the configure, VST3 build, CTest, skin validation, Pluginval strictness 5 and artifact upload stages.
+- Commit: `85136690a4ea6b94470b68cab92edcf2f5ff15a5`.
+- Exact-head Windows CI must now execute; no build/test acceptance is claimed until it finishes.
