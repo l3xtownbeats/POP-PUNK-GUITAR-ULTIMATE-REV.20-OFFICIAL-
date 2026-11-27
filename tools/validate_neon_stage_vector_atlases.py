@@ -190,7 +190,7 @@ def main() -> int:
     if len(meter_groups) != 3:
         fail("display atlas: expected three separated 12-segment stereo meter states")
 
-    rotary_first_frames = {
+    rotary_first_frames = {}
     for x in (334, 584):
         frame = next(node for node in children_named(rotary, "g") if node.attrib.get("transform") == f"translate({x} 134)")
         rotary_first_frames[x] = ET.tostring(frame, encoding="unicode")
