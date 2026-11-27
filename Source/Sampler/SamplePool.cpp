@@ -131,12 +131,12 @@ LoadReport SamplePool::loadSfz(const juce::File& sfzFile,
         {
             report.errors.insert(report.errors.end(), indexed.errors.begin(), indexed.errors.end());
             if (report.errors.empty())
-                report.errors.emplace_back("No supported WAV files were found in the SFZ library directory.");
+                report.errors.emplace_back("No supported WAV, AIFF or MP3 files were found in the SFZ library directory.");
             return report;
         }
         if (indexed.samples.size() > static_cast<std::size_t>(std::numeric_limits<std::uint32_t>::max()))
         {
-            report.errors.emplace_back("The sample library contains more WAV files than the streaming index can address.");
+            report.errors.emplace_back("The sample library contains more audio files than the streaming index can address.");
             return report;
         }
 
@@ -248,7 +248,7 @@ LoadReport SamplePool::loadSfz(const juce::File& sfzFile,
         const auto indexedSample = library->sampleIds.find(key);
         if (indexedSample == library->sampleIds.end())
         {
-            report.errors.push_back("WAV sample is not present in the streaming metadata index: " + canonicalSample.string());
+            report.errors.push_back("Audio sample is not present in the streaming metadata index: " + canonicalSample.string());
             continue;
         }
 
@@ -258,7 +258,7 @@ LoadReport SamplePool::loadSfz(const juce::File& sfzFile,
             || metadata.sampleRate < 8000.0 || metadata.sampleRate > 384000.0
             || metadata.frames > static_cast<std::uint64_t>(std::numeric_limits<juce::int64>::max()))
         {
-            report.errors.push_back("WAV sample has invalid or unsupported 64-bit streaming metadata: " + canonicalSample.string());
+            report.errors.push_back("Audio sample has invalid or unsupported 64-bit streaming metadata: " + canonicalSample.string());
             continue;
         }
 
@@ -363,7 +363,7 @@ LoadReport SamplePool::loadSfz(const juce::File& sfzFile,
     {
         if (!pendingLibrary->service->start())
         {
-            report.errors.emplace_back("Could not start the background WAV streaming worker.");
+            report.errors.emplace_back("Could not start the background audio streaming worker.");
             return report;
         }
         // Keep ownership local until the final cancellation check so a
