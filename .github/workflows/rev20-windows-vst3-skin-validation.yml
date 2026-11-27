@@ -50,7 +50,7 @@ permissions:
 
 jobs:
   windows-x64-vst3:
-    runs-on: windows-2022
+    runs-on: windows-2025-vs2026
     timeout-minutes: 45
     steps:
       - name: Checkout exact REV.20 main commit
@@ -146,7 +146,7 @@ jobs:
   windows-x64-cpp26-compatibility:
     name: Windows x64 C++26 experimental compatibility
     continue-on-error: true
-    runs-on: windows-2022
+    runs-on: windows-2025-vs2026
     timeout-minutes: 45
     steps:
       - name: Checkout exact PR commit
