@@ -1,11 +1,18 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.30)
 project(PPGU VERSION 4.0.0 LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+# C++23 is the production baseline. C++26 is an explicit experimental
+# compatibility mode and must not become the release default without review.
+set(PPGU_CXX_STANDARD "23" CACHE STRING "C++ standard for PPGU (23 production, 26 experimental)")
+set_property(CACHE PPGU_CXX_STANDARD PROPERTY STRINGS 23 26)
+if (NOT PPGU_CXX_STANDARD STREQUAL "23" AND NOT PPGU_CXX_STANDARD STREQUAL "26")
+    message(FATAL_ERROR "PPGU_CXX_STANDARD must be 23 (production) or 26 (experimental).")
+endif()
+set(CMAKE_CXX_STANDARD "${PPGU_CXX_STANDARD}")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# JUCE 7.0.12 is checked out by the Windows workflow into this directory.
+# JUCE 9.0.6 is checked out by the Windows workflow into this directory.
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/CMakeLists.txt")
     message(FATAL_ERROR "JUCE 7.0.12 checkout is missing. Run the configured workflow or provide JUCE/.")
 endif()
