@@ -1,52 +1,82 @@
-# Миграция PPGU REV.20 на JUCE 9.0.6 и C++23
+# Миграция REV.20 на JUCE 9.0.6, C++23 и экспериментальный C++26
 
-Дата начала: 2026-11-27  
-Рабочая ветка: `upgrade/juce-9.0.6-cpp23-cpp26-evaluation`  
-База: `main` на SHA `438d59ba07e9b92e9579e9893eac7887dfbe5d5e`
+**Дата обновления:** 2026-11-27  
+**Канонический репозиторий:** `l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-`  
+**Каноническая база:** `main`  
+**Рабочая review-ветка:** `upgrade/juce-9.0.6-cpp23-cpp26-evaluation`  
+**Pull request:** [#31 — JUCE 9.0.6 / C++23 production / C++26 evaluation](https://github.com/l3xtownbeats/POP-PUNK-GUITAR-ULTIMATE-REV.20-OFFICIAL-/pull/31)
 
-## Целевая конфигурация
+## 1. Целевая конфигурация
 
-- JUCE: **9.0.6**, закреплённый Git tag `9.0.6`.
-- Основной стандарт проекта: **C++23**.
-- C++26: только экспериментальная конфигурация проверки совместимости; не является release gate.
-- CMake: минимум **3.30** — для корректной работы C++26 experimental configuration.
-- CI toolchain: **Windows Server 2025 + Visual Studio 2026 / MSVC 14.52**; runner label закреплён как `windows-2025-vs2026`. В опубликованном образе также установлен CMake 4.4.5. Это build host; продукт по-прежнему обязан работать на Windows 10 x64.
-- Целевая платформа остаётся Windows 10 x64, VST3 x64; обязательный ручной host acceptance — FL Studio 20 x64.
+| Слой | Основная конфигурация | Эксперимент |
+|---|---|---|
+| Framework | JUCE **9.0.6**, pinned tag `9.0.6` | тот же JUCE |
+| Язык | **C++23** — production baseline | **C++26 latest/draft mode** |
+| CMake | 3.30+ | 3.30+ |
+| Compiler CI | Visual Studio 2026 / MSVC 14.52 | тот же toolchain, `/std:c++latest` |
+| Target | Windows 10 x64 / VST3 x64 | Windows x64 / VST3 compatibility |
+| Host acceptance | FL Studio 20 x64 | требуется та же ручная проверка |
 
-## Что уже изменено в этой ветке
+C++23 является обязательной производственной конфигурацией. C++26 не подменяет C++23 и не объявляется полностью реализованным стандартом: экспериментальный режим использует наиболее свежий language mode компилятора.
 
-1. `CMakeLists.txt`: введён параметр `PPGU_CXX_STANDARD`, по умолчанию 23; разрешены только 23 и 26; выбранный стандарт обязателен, без автоматического отката на более старый.
-2. Windows VST3 workflow: JUCE checkout закреплён на tag `9.0.6`.
-3. Основная Windows job остаётся production gate: C++23, VST3, полный CTest, 16 skins, package staging и pluginval strictness 5.
-4. Добавлена отдельная Windows job для C++26: полный configure/build/CTest, но `continue-on-error: true`, пока поддержка компилятора и стандартной библиотеки экспериментальна.
-5. README отражает целевую production-конфигурацию.
+## 2. Реализованные изменения в ветке
 
-## Основания и ограничения
+1. JUCE закреплён на официальном релизном теге **9.0.6** в Windows build workflows.
+2. CMake использует **C++23** по умолчанию и принимает только явно выбранные режимы 23 или 26.
+3. Для MSVC в режиме 26 CMake оставляет собственные compiler-identification / `try_compile` проверки на поддерживаемом диалекте C++23, а реальные C++ translation units получают `/std:c++latest`. Это устраняет ранний отказ JUCE CMake probe на неизвестном CXX26 dialect. Для других компиляторов используется нативный CMake CXX26 mode.
+4. C++26 остаётся отдельной non-blocking compatibility job; C++23 остаётся production gate.
+5. Мигрированы два вызова удалённого JUCE 7 API `Drawable::createFromSVG(XmlElement)` на JUCE 9 `Drawable::createFromSVGString`, с сохранением предварительной проверки и SVG sanitization.
+6. README, навигация и верхний блок репозитория приведены к REV.20: pinned JUCE, стандарты C++, approved NEON STAGE reference, канонический журнал и ссылки на требования/проверки.
+7. В журнал добавляется запись о ветке и о статусе C++26 probe; main не изменяется напрямую.
 
-- JUCE 9.0.6 официально поддерживает Windows 10 (версия 1607 и новее); README JUCE указывает C++17 как минимум для сборки, поэтому C++23 — стандарт проекта, а не требование самого JUCE.
-- JUCE 9.0.6 требует CMake 3.22 или новее; минимум 3.30 выбран проектом из-за C++26 экспериментального режима.
-- В JUCE 9 есть изменения API и поведения относительно JUCE 7. До объявления миграции завершённой необходимы сборка всех targets и исправление всех ошибок/предупреждений, а также ревизия `BREAKING_CHANGES.md`.
-- JUCE 9.0.5 содержит защиту от некорректных WAV/AIFF и ряда других повреждённых входных файлов; это полезно для sampler, но само по себе не доказывает безопасность или корректность нашего декодирования.
-- Совместимость VST3 с FL Studio 20 нельзя подтвердить только компиляцией или pluginval. Нужен отдельный ручной host acceptance на Windows 10/11.
-- До коммерческого релиза требуется отдельная проверка JUCE licensing: коммерческая лицензия либо выполнение применимых условий AGPLv3. Не делать вывод о лицензировании только по факту успешной сборки.
+## 3. Проверка C++26 и исправление
 
-## Обязательные критерии завершения
+Первый экспериментальный запуск на SHA `e5166695b0543478a8c5b7e57ea131bf8411b5b7` завершился на этапе CMake configure. Лог показал, что JUCE architecture probe запрашивал dialect `CXX26`, который CMake/MSVC 19.52 не распознавал. Это был отказ конфигурации, а не ошибка исходного C++ кода.
 
-- [ ] CI C++23: Windows x64 configure/build, VST3, полный CTest, 16-skin validation, package stage и pluginval strictness 5 — PASS на точном SHA.
-- [ ] C++26 compatibility job: зафиксирован реальный результат; если не проходит, перечислены точные ограничения toolchain/API, C++23 остаётся production.
-- [ ] Проверены API изменения JUCE 8/9 и устранены найденные несовместимости.
+В текущем обновлении `CMakeLists.txt` изменён на MSVC-specific latest mode (`/std:c++latest`) с сохранением CMake configure checks на C++23. Повторная exact-SHA CI проверка обязательна; успешный результат пока не заявляется.
+
+## 4. NEON STAGE — обязательный визуальный контракт
+
+Главный источник визуального решения — `01 INTERFACE  NEON STAGE DEFAULT .png`, утверждённый журнал `Info.txt` и [NEON STAGE GUI implementation baseline](NEON_STAGE_GUI_IMPLEMENTATION_BASELINE_RU.md). Для визуальной реализации обязательны следующие решения:
+
+- Ровно два главных режима: MELODY и PATTERN. AUTOCHORDS — только вспомогательное окно PATTERN.
+- Главная композиция: header / left preset browser / center Playing Core / right AMP & TONE / lower performance strip.
+- Девять реальных APVTS-регуляторов — **одна горизонтальная строка**, порядок: GAIN, TREBLE, MID, BASS, VELOCITY, DYNAMICS, SWING, HUMANIZE, ACCENT. Решение от 2026-11-25 заменило прежнюю сетку 3×3.
+- Семь основных FX-переключателей: COMPRESSOR, EQ, DISTORTION, CHORUS, DELAY, REVERB, CABINET IR. FLANGER — только внутри FX EDIT.
+- Нижняя зона: live performance display, MIDI keyboard 49 keys (MIDI 36–84), реальный library status.
+- AUTO SOUND HUNTER, CURATOR и ABOUT визуально disabled до появления настоящих backend-функций.
+- Не добавлять фальшивые CPU/RAM метры, псевдо-анализатор, вымышленные preset counts или декоративные неработающие контролы.
+- Сохранить все 27 утверждённых user-facing control IDs, семь FX bypass APVTS IDs, значения параметров и hit targets.
+
+Текущий `PluginEditor.cpp::resized()` уже размещает девять APVTS-регуляторов горизонтально, выделяет stage/banner, сохраняет семь FX attachments и три зоны. В рамках этой документационной/технологической синхронизации геометрия не переписывалась заново, чтобы не нарушить принятый layout. Pixel parity по мастер-макету всё ещё требует проверки реальных UI snapshots и ручной оценки.
+
+## 5. Навигация и визуальные источники
+
+- [Главная страница проекта](../README.md)
+- [Единый журнал](../Info.txt)
+- [Утверждённая база продукта](REV20_ACCEPTED_BASELINE_RU.md)
+- [Хронология решений](REV20_DECISION_TIMELINE_RU.md)
+- [NEON STAGE GUI baseline](NEON_STAGE_GUI_IMPLEMENTATION_BASELINE_RU.md)
+- [UI baseline](../Docs/REV20_UI_BASELINE.md)
+- [Skin approval standard](REV20_SKIN_APPROVAL_STANDARD_RU.md)
+- [NEON STAGE asset pack](../ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/README_ASSET_PACK_RU.md)
+- [FL Studio 20 host checklist](REV20_FL20_ACCEPTANCE_CHECKLIST_RU.md)
+- [Windows VST3 validation workflow](../.github/workflows/rev20-windows-vst3-skin-validation.yml)
+- [CMake configuration](../CMakeLists.txt)
+
+## 6. Обязательные gates завершения
+
+- [ ] C++23 exact-SHA Windows x64 configure/build — PASS.
+- [ ] Полный CTest — PASS.
+- [ ] Все 16 skin registry/assets validation — PASS.
+- [ ] VST3 package staging — PASS.
+- [ ] pluginval strictness 5 — PASS.
+- [ ] C++26 latest-mode configure/build/CTest — результат зафиксирован; если не поддерживается — точное ограничение описано, C++23 остаётся production.
 - [ ] Проверены WAV, AIFF, MP3 и SFZ decode/streaming на реальных fixtures.
-- [ ] Проверены сохранение/загрузка состояния, MIDI, PATTERN, AutoChords, UI, DPI и окна.
+- [ ] Проверены MIDI, PATTERN, AutoChords, state persistence, UI snapshots и 100/125/150% DPI.
 - [ ] FL Studio 20 x64 host acceptance на Windows 10 x64 — PASS.
-- [ ] Проверена JUCE licensing model для планируемой дистрибуции.
+- [ ] Проверена модель лицензирования JUCE для планируемой дистрибуции.
 
-## Текущий статус
+## 7. Текущий статус
 
-**MIGRATION STARTED — NOT VERIFIED.** Изменения внесены в отдельную feature-ветку. CI ещё не запускался на её HEAD; сборка, CTest, pluginval и FL Studio 20 acceptance не заявляются как пройденные.
-
-## Первый source-level API аудит
-
-- В двух местах `Source/UI/ThemeManager.cpp` обнаружен удалённый в JUCE 9 API `Drawable::createFromSVG(const XmlElement&)`. Оба вызова заменены на `Drawable::createFromSVGString(svgText)`; предварительная проверка XML root и существующая SVG sanitization остаются перед декодированием.
-- Два вызова `ThreadPool::addJob` в `Source/PluginProcessor.cpp` используют void-returning lambdas, что соответствует ограничению JUCE 9.0.2+ (callable должен возвращать ровно `void` или `ThreadPoolJob::JobStatus`).
-- Поиск по основным processor/editor/theme/workspace/Pattern файлам и ключевым JUCE breaking API не выявил использования `createFocusTraverser`, `audioProcessorChanged` override, `NativeMessageBox::show`, `addToDesktop` override, `createNewPeer` override, `getMidiInputSelectorListBox` или `setImageCacheSize`. Это точечный аудит, не замена полной компиляции и проверки всего JUCE changelog.
-- Окончательное подтверждение — CI C++23/C++26 на точном SHA.
+**MIGRATION ACTIVE — NOT VERIFIED.** JUCE 9.0.6 и C++23 внесены в review-ветку. Исправление C++26 CMake probe внесено, но его повторный exact-SHA запуск ещё не прошёл. До завершения CI, pluginval и FL Studio 20 host acceptance миграция не считается завершённой. Release-ready статус не заявляется.
