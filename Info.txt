@@ -554,3 +554,13 @@ Latest GitHub Actions results on this exact source head:
 - Standalone panel-frame export run `45858901170` (#93): SUCCESS; job `export` completed successfully. This verifies frame export only, not complete content-rich panels.
 
 These CI results verify the current-head automated build/validation and export workflows only. They do not prove 1:1 screenshot parity, complete standalone production artwork, FL Studio 20 host acceptance, or release completion. The remaining visual gaps and acceptance gates listed below remain open. Do not mark the UI or asset pack COMPLETE.
+
+
+## 2026-11-27 — JUCE 9.0.6 / C++23 MIGRATION STARTED
+- Создана отдельная ветка `upgrade/juce-9.0.6-cpp23-cpp26-evaluation` от main SHA `438d59ba07e9b92e9579e9893eac7887dfbe5d5e`; main не изменяется.
+- Целевая production-конфигурация: JUCE 9.0.6 + C++23.
+- C++26 добавлен только как отдельный экспериментальный Windows CI build/test, с `continue-on-error: true`; он не блокирует production C++23 gate и не объявляется поддерживаемым до фактической проверки.
+- CMake получает параметр `PPGU_CXX_STANDARD` (23 по умолчанию, 26 для эксперимента), строгую проверку значения и CMake minimum 3.30 для C++26 режима.
+- Основной Windows VST3 workflow закрепляет JUCE tag 9.0.6; production job выполняет прежние build/CTest/skin/package/pluginval проверки на C++23.
+- Документ миграции: `docs/REV20_JUCE9_CPP23_MIGRATION_RU.md`.
+- Статус: MIGRATION STARTED — NOT VERIFIED. На этой ветке ещё нет подтверждённого CI результата. FL Studio 20 host acceptance и JUCE licensing review остаются обязательными.
