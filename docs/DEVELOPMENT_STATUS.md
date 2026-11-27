@@ -195,3 +195,6 @@ This is the strongest current automated engineering evidence. It still does not 
 - Project CMake minimum is 3.30 to support the experimental C++26 configuration.
 - Exact-SHA CI has not yet run on this migration branch. No JUCE 9 build, CTest, pluginval, or FL Studio 20 host acceptance is claimed.
 - Migration gates and licensing/host-compatibility cautions: `docs/REV20_JUCE9_CPP23_MIGRATION_RU.md`.
+
+- Initial source-level API audit found two removed JUCE 9 `Drawable::createFromSVG(XmlElement)` calls in ThemeManager; both are migrated to `createFromSVGString`. The two `ThreadPool::addJob` callables return void. This is not yet compile-verified.
+- JUCE 9.0.6 is pinned in the main VST3 workflow and the two auxiliary Windows UI workflows.
