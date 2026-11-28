@@ -18,7 +18,7 @@ SHEETS = {
     "01_ppgu_atlas_backgrounds_frames.svg": (1920, 1000),
     "02_ppgu_atlas_buttons_switches.svg": (1920, 1020),
     "03_ppgu_atlas_knob_strips.svg": (1920, 8000),
-    "04_ppgu_atlas_displays_keyboard.svg": (1920, 1040),
+    "04_ppgu_atlas_displays_keyboard.svg": (1920, 1880),
     "05_ppgu_atlas_icons_hardware.svg": (1920, 1020),
 }
 ICON_NAMES = {
@@ -69,9 +69,19 @@ def main() -> int:
             fail(f"{filename}: expected {expected_size}, got {(width, height)}")
         if view_box != ["0", "0", str(width), str(height)]:
             fail(f"{filename}: viewBox does not match declared dimensions")
+        ids = {
+            element.attrib["id"]
+            for element in root.iter()
+            if "id" in element.attrib
+        }
         for element in root.iter():
-            if any(key.endswith("href") for key in element.attrib):
-                fail(f"{filename}: external/embedded href found; keep masters self-contained")
+            for key, value in element.attrib.items():
+                if key.endswith("href"):
+                    if not value.startswith("#"):
+                        fail(f"{filename}: external/embedded href found; use local SVG fragment references only")
+                    target_id = value[1:]
+                    if not target_id or target_id not in ids:
+                        fail(f"{filename}: unresolved local SVG reference {value!r}")
             if local_name(element.tag) == "rect":
                 rw = float(element.attrib.get("width", "0"))
                 rh = float(element.attrib.get("height", "0"))
@@ -95,24 +105,77 @@ def main() -> int:
         fail("button atlas: family headings do not match the canonical 27-family contract")
 
     rotary = parsed["03_ppgu_atlas_knob_strips.svg"]
-    strip_groups: dict[int, list[tuple[int, int]]] = {84: [], 334: [], 584: []}
+    strip_groups: dict[int, list[tuple[int, float]]] = {84: [], 334: [], 584: []}
     for node in children_named(rotary, "g"):
         match = re.fullmatch(r"translate\((\d+) (\d+)\)", node.attrib.get("transform", ""))
         if not match:
             continue
         x, y = map(int, match.groups())
         if x in strip_groups:
+            frame_circles = children_named(node, "circle")
+            if x == 84:
+                premium_bezel = [
+                    child for child in frame_circles
+                    if child.attrib.get("r") == "51"
+                    and child.attrib.get("fill") == "url(#knurl)"
+                ]
+                if len(premium_bezel) != 1:
+                    fail(f"standard rotary frame at y={y}: precision knurled bezel is missing")
+                if not any(
+                    child.attrib.get("r") == "52.8"
+                    and child.attrib.get("stroke") == "#e5f4ff"
+                    for child in frame_circles
+                ):
+                    fail(f"standard rotary frame at y={y}: machined outer highlight is missing")
+            elif x == 334:
+                black_disc = [
+                    child for child in frame_circles
+                    if child.attrib.get("r") == "48"
+                    and child.attrib.get("fill") == "#02060b"
+                ]
+                if len(black_disc) != 1 or any(
+                    child.attrib.get("fill") == "url(#knurl)"
+                    for child in frame_circles
+                ):
+                    fail(f"black-disc rotary frame at y={y}: dark smooth bezel treatment is missing")
+            elif x == 584:
+                steel_knurl = [
+                    child for child in frame_circles
+                    if child.attrib.get("r") == "52"
+                    and child.attrib.get("fill") == "url(#knurl)"
+                    and child.attrib.get("opacity") == ".55"
+                ]
+                if len(steel_knurl) != 1:
+                    fail(f"knurled-steel rotary frame at y={y}: cross-knurled bezel is missing")
+            marker_groups = [
+                child for child in children_named(node, "g")
+                if child.attrib.get("transform") == "translate(64 84)"
+            ]
+            if len(marker_groups) != 1:
+                fail(f"rotary frame at x={x}, y={y}: expected one marker on the reference arc")
             rotations = [
                 child.attrib.get("transform", "")
-                for child in children_named(node, "g")
+                for child in children_named(marker_groups[0], "g")
                 if child.attrib.get("transform", "").startswith("rotate(")
             ]
             if len(rotations) != 1:
-                fail(f"rotary frame at x={x}, y={y}: expected one needle rotation")
+                fail(f"rotary frame at x={x}, y={y}: expected one marker rotation")
             angle_match = re.fullmatch(r"rotate\(([-\d.]+) 0 0\)", rotations[0])
             if not angle_match:
-                fail(f"rotary frame at x={x}, y={y}: malformed rotation")
-            strip_groups[x].append((y, int(float(angle_match.group(1)))))
+                fail(f"rotary frame at x={x}, y={y}: malformed marker rotation")
+            marker_circles = children_named(marker_groups[0], "circle")
+            marker_on_arc = [
+                child for child in marker_circles
+                if child.attrib.get("cy") in {"-30", "-32.2"}
+            ]
+            if (
+                len(marker_circles) != 3
+                or len(marker_on_arc) != 3
+                or sum(child.attrib.get("cy") == "-30" for child in marker_circles) != 2
+                or sum(child.attrib.get("cy") == "-32.2" for child in marker_circles) != 1
+            ):
+                fail(f"rotary frame at x={x}, y={y}: marker/glow must retain its 30 px reference arc and three-layer highlight")
+            strip_groups[x].append((y, float(angle_match.group(1))))
     for x, frames in strip_groups.items():
         frames.sort()
         if len(frames) != 61:
@@ -120,8 +183,9 @@ def main() -> int:
         for index, (y, angle) in enumerate(frames):
             if y != 134 + index * 128:
                 fail(f"rotary strip x={x}: frame {index} has unexpected y={y}")
-            if angle != 210 + index * 3:
-                fail(f"rotary strip x={x}: frame {index} has unexpected angle={angle}")
+            expected_angle = 249.0 + (222.0 * index / 60.0)
+            if abs(angle - expected_angle) > 0.02:
+                fail(f"rotary strip x={x}: frame {index} has unexpected angle={angle}; expected {expected_angle:.2f}")
 
     keyboard = parsed["04_ppgu_atlas_displays_keyboard.svg"]
     keyboard_rects = children_named(keyboard, "rect")
@@ -165,6 +229,31 @@ def main() -> int:
     if len([node for node in keyboard_rects if node.attrib.get("x") == "1080" and node.attrib.get("width") == "42" and node.attrib.get("height") == "9"]) != 12:
         fail("display atlas: expected a 12-segment meter sample")
 
+    display_states = parsed["04_ppgu_atlas_displays_keyboard.svg"]
+    state_ids = {"ppgu-display-state-library", "ppgu-led-state-matrix", "ppgu-meter-state-library"}
+    present_ids = {node.attrib.get("id") for node in children_named(display_states, "g")}
+    if not state_ids.issubset(present_ids):
+        fail("display atlas: LCD, LED or meter state library group is missing")
+    display_labels = {(node.text or "").strip() for node in children_named(display_states, "text")}
+    expected_display_labels = {
+        "ACTIVE / PLAYING / MELODY", "HARMONY / CHORD ENGINE",
+        "NOTES HELD / LIVE NOTE TELEMETRY", "NUMERIC / PARAMETER READOUT",
+        "WARNING / INPUT WARNING", "ERROR / LOAD ERROR",
+    }
+    if not expected_display_labels.issubset(display_labels):
+        fail("display atlas: one or more of the six LCD state samples are missing")
+    led_labels = {"OFF", "ON", "GLOW", "WARNING", "ERROR", "SUCCESS", "DISABLED"}
+    if not led_labels.issubset(display_labels):
+        fail("display atlas: complete seven-state LED sample family is missing")
+    meter_groups = [
+        node for node in children_named(display_states, "g")
+        if node.attrib.get("transform") in {
+            "translate(760 1810)", "translate(1130 1810)", "translate(1500 1810)"
+        }
+    ]
+    if len(meter_groups) != 3:
+        fail("display atlas: expected three separated 12-segment stereo meter states")
+
     rotary_first_frames = {}
     for x in (334, 584):
         frame = next(node for node in children_named(rotary, "g") if node.attrib.get("transform") == f"translate({x} 134)")
@@ -200,9 +289,9 @@ def main() -> int:
     print("PASS: 5 SVG masters parse; dimensions/viewBoxes and transparent canvases match.")
     print("PASS: carbon-weave material is clipped to its swatch.")
     print("PASS: 27 button-family headings match the declared contract.")
-    print("PASS: 3 rotary strips × 61 frames; 128px pitch; 210°–390° in 3° steps; materials differ.")
+    print("PASS: 3 rotary strips × 61 frames; 128px pitch; 249°–471° on the source-reference marker arc (222° total); materials differ.")
     print("PASS: 49-key keyboard contains 29 white keys, 20 black keys and C/E/G active overlays.")
-    print("PASS: display atlas includes a 12-segment meter sample.")
+    print("PASS: display atlas includes six LCD states, seven LED states and three stereo meter states.")
     print("PASS: 41 icon tiles have 41 distinct glyph bodies and all declared labels.")
     print("NOTE: This validator does not render images or replace pixel-level visual QA.")
     return 0

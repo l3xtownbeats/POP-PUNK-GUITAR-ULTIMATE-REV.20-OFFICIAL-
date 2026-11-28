@@ -19,7 +19,7 @@ SHEETS = [
     ("01_ppgu_atlas_backgrounds_frames.svg", (1920, 1000)),
     ("02_ppgu_atlas_buttons_switches.svg", (1920, 1020)),
     ("03_ppgu_atlas_knob_strips.svg", (1920, 8000)),
-    ("04_ppgu_atlas_displays_keyboard.svg", (1920, 1040)),
+    ("04_ppgu_atlas_displays_keyboard.svg", (1920, 1880)),
     ("05_ppgu_atlas_icons_hardware.svg", (1920, 1020)),
 ]
 
@@ -88,12 +88,39 @@ def main() -> int:
             })
 
         if filename.startswith("03_"):
-            # The 3×61 frame strips are stored at x=20/270/520, y=70, pitch=128.
+            # Keep crops aligned with the canonical atlas03 frame origins validated below:
+            # x=84/334/584, y=134, 61 frames, 128px pitch.
             with Image.open(target) as image:
-                for index, x in enumerate((20, 270, 520), start=1):
-                    crop = image.crop((round(x * args.scale), round(70 * args.scale),
-                                       round((x + 128) * args.scale),
-                                       round((70 + 61 * 128) * args.scale)))
+                for index, x in enumerate((84, 334, 584), start=1):
+                    bounds = (round(x * args.scale), round(134 * args.scale),
+                              round((x + 128) * args.scale),
+                              round((134 + 61 * 128) * args.scale))
+                    crop = image.crop(bounds)
+                    expected_crop = (round(128 * args.scale), round(61 * 128 * args.scale))
+                    if crop.size != expected_crop:
+                        raise SystemExit(
+                            f"{source.name}: rotary strip {index} crop is {crop.size}, "
+                            f"expected {expected_crop}; atlas geometry/exporter are out of sync"
+                        )
+                    if crop.mode != "RGBA" or crop.getchannel("A").getextrema()[0] != 0:
+                        raise SystemExit(
+                            f"{source.name}: rotary strip {index} must preserve RGBA transparency"
+                        )
+                    # A valid 128px frame must contain the complete 122px rotary,
+                    # not a clipped half-knob. Check all 61 frames independently.
+                    alpha = crop.getchannel("A")
+                    for frame_index in range(61):
+                        frame = alpha.crop((0, frame_index * round(128 * args.scale),
+                                            round(128 * args.scale),
+                                            (frame_index + 1) * round(128 * args.scale)))
+                        bbox = frame.getbbox()
+                        edge = round(10 * args.scale)
+                        limit = round(118 * args.scale)
+                        if bbox is None or bbox[0] > edge or bbox[1] > edge or bbox[2] < limit or bbox[3] < limit:
+                            raise SystemExit(
+                                f"{source.name}: rotary strip {index}, frame {frame_index} "
+                                f"does not contain a full knob; alpha bounds={bbox}"
+                            )
                     strip_path = args.output / f"rotary_strip_{index}_61_frames.png"
                     crop.save(strip_path, optimize=True)
                     records.append({

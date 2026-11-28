@@ -1,5 +1,18 @@
 #include "PPGUStageSpriteSheet.h"
 
+namespace
+{
+juce::Image copyRegionPreservingAlpha(const juce::Image& source,
+                                      int x, int y, int width, int height)
+{
+    juce::Image frame(source.getFormat(), width, height, true);
+    for (int row = 0; row < height; ++row)
+        for (int column = 0; column < width; ++column)
+            frame.setPixelAt(column, row, source.getPixelAt(x + column, y + row));
+    return frame;
+}
+}
+
 bool PPGUStageSpriteSheet::isValidRegion(const juce::Image& image, int x, int y,
                                          int width, int height) noexcept
 {
@@ -32,7 +45,8 @@ std::vector<juce::Image> PPGUStageSpriteSheet::sliceHorizontal(
             frames.clear();
             return frames;
         }
-        frames.push_back(image.getClippedImage({ x, yOffset, frameWidth, frameHeight }));
+        frames.push_back(copyRegionPreservingAlpha(image, x, yOffset,
+                                                   frameWidth, frameHeight));
     }
     return frames;
 }
@@ -63,7 +77,8 @@ std::vector<juce::Image> PPGUStageSpriteSheet::sliceGrid(
                 frames.clear();
                 return frames;
             }
-            frames.push_back(image.getClippedImage({ x, y, cellWidth, cellHeight }));
+            frames.push_back(copyRegionPreservingAlpha(image, x, y,
+                                                       cellWidth, cellHeight));
         }
     return frames;
 }

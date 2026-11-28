@@ -554,3 +554,42 @@ Latest GitHub Actions results on this exact source head:
 - Standalone panel-frame export run `45858901170` (#93): SUCCESS; job `export` completed successfully. This verifies frame export only, not complete content-rich panels.
 
 These CI results verify the current-head automated build/validation and export workflows only. They do not prove 1:1 screenshot parity, complete standalone production artwork, FL Studio 20 host acceptance, or release completion. The remaining visual gaps and acceptance gates listed below remain open. Do not mark the UI or asset pack COMPLETE.
+
+
+## 2026-11-27 — NEON STAGE ASSETS journal consolidation
+- Consolidated current approved ASSETS requirements, confirmed decisions, atlas 04 source status, exact-head CI evidence and remaining acceptance gates into `ASSETS/PPGU_REV20_NEON_STAGE_ASSETS/ASSET_DEVELOPMENT_JOURNAL_RU.md`.
+- Replaced the asset-pack README with a concise navigation/contract document and reduced `ASSET_OPEN_ISSUES.md` to current actionable gaps. Historical decisions are preserved in this unified journal; no approved runtime/source assets were deleted.
+- Atlas 04 is 1920×1880. Exact-head run `45944877122` on `5fac4ae532e70e26600ef12764cb008d850df3e7` passed structural validation/export. Artifact `15174501574` (88,281,866 bytes).
+- Status remains PARTIAL: visual frame review, standalone manifest/hash reconciliation, JUCE runtime mapping, exact-head Windows VST3/CTest, Pluginval and FL Studio 20 acceptance remain open. CI export is not visual or host acceptance.
+
+
+## 2026-11-28 — NEON STAGE exact-match gate: rotary validator repair
+
+**Статус:** VALIDATOR PATCH COMMITTED; EXACT-HEAD RE-RUN PENDING; VISUAL ACCEPTANCE NOT ACCEPTED.
+
+- Проверен актуальный PR #29 head `481348f5e9a454e6b6c52f248fa0c0b125705321`. SVG atlas workflow #194 завершился FAIL на шаге `Validate SVG source contracts`; точная ошибка: validator ожидал три окружности маркера с `cy="-30"`, тогда как утверждённая трёхслойная подсветка содержит две окружности на `cy="-30"` и отдельный specular highlight на `cy="-32.2"`.
+- Исправлен структурный контракт validator: он теперь проверяет три круга маркера, два на базовой дуге 30 px и один смещённый блик; сама SVG-графика и геометрия вращения не изменялись.
+- Commit: `5952d4caef49a2bccec970bb0de2632cece30810`.
+- Это исправление ложного отрицательного результата проверки, а не визуальное улучшение и не доказательство pixel-perfect. Следующий gate — повторный exact-head CI export, затем просмотр 0/25/50/75/100% кадров каждого материала против сохранённых reference crops.
+- Полная 1:1 приёмка интерфейса остаётся BLOCKED до сопоставления главного REV.20 master layout, всех ассетов/состояний и JUCE screenshots. Никакой runtime atlas не заменять до этой проверки.
+
+
+## 2026-11-28 — Windows VST3 workflow syntax repair
+
+**Статус:** WORKFLOW SOURCE REPAIRED; EXACT-HEAD WINDOWS BUILD PENDING.
+
+- Проверка PR #29 выявила, что workflow `.github/workflows/rev20-windows-vst3-skin-validation.yml` содержал после последнего шага загрузки артефакта повреждённый повторный фрагмент PowerShell и дублированную часть job. Из-за этого GitHub создал failed run без jobs; это не является результатом C++ compile/test.
+- Удалён только повреждённый хвост после корректного завершающего шага Upload REV.20 Windows x64 VST3. Сохранены C++23, exact JUCE 9.0.5 checkout, проверки toolchain, configure/build/CTest/pluginval и artifact upload steps.
+- Commit: `85136690a4ea6b94470b68cab92edcf2f5ff15a5`.
+- Новый run должен подтвердить корректный разбор workflow и пройти полный Windows x64 VST3 pipeline. До его завершения BUILD/CTest/pluginval PASS не присваивать.
+
+
+## 2026-11-28 — JUCE 9 SVG API migration after first full build
+
+**Статус:** SOURCE FIX COMMITTED; NEW WINDOWS BUILD NOT YET OBSERVED.
+
+- Полный SVG atlas pipeline на commit `160aa25bce843cc658a7bd474ce84328060c5f11` прошёл: source contracts + PNG export completed successfully. Artifact `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT` создан (80,404,908 bytes; artifact ID `15237370094`). Внутри 1x/2x masters: `01_ppgu_atlas_backgrounds_frames.png`, `02_ppgu_atlas_buttons_switches.png`, `03_ppgu_atlas_knob_strips.png`, `04_ppgu_atlas_displays_keyboard.png`, `05_ppgu_atlas_icons_hardware.png`, плюс 61-frame rotary strips и component exports.
+- В Windows C++ build выявлен реальный JUCE 9 API break: `juce::Drawable::createFromSVG(const XmlElement&)` удалён. Ошибки C2039/C3861 были в двух SVG loaders `Source/UI/ThemeManager.cpp` (строки 191 и 285).
+- Оба вызова заменены на JUCE 9 API `juce::Drawable::createFromSVGString(svgText)`; предварительная XML parse/safety validation сохранена. Изменение commit `e319fdde06ac34dc42ad7b3ad86b7c69e8609f77`.
+- Windows x64, native integration и SKIN-1 runs на предыдущем head падали на compile step из-за этих двух ошибок. Это не было ошибкой SVG artwork. Новый compile должен подтвердить устранение API break; CTest/pluginval ещё не подтверждены.
+- Визуальный экспорт 1x открыт и проверен по структуре/читаемости: кнопки и переключатели имеют пять состояний N/H/P/A/D; семь выделенных FX chain switches; цветовые status indicators. Это ещё не pixel-diff против всех утверждённых референсов, и не runtime integration acceptance.

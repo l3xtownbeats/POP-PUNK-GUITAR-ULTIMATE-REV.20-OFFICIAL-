@@ -20,7 +20,7 @@ int main()
     juce::Image sheet(juce::Image::ARGB, 16, 8, true);
     juce::Graphics g(sheet);
     g.fillAll(juce::Colours::transparentBlack);
-    g.setColour(juce::Colours::cyan);
+    g.setColour(juce::Colour::fromRGBA(0, 255, 255, 128));
     g.fillRect(0, 0, 4, 4);
     g.setColour(juce::Colours::magenta);
     g.fillRect(4, 0, 4, 4);
@@ -29,11 +29,13 @@ int main()
     expect(horizontal.size() == 4, "valid horizontal sheet returns requested frame count");
     expect(horizontal[0].getWidth() == 4 && horizontal[0].getHeight() == 4,
            "horizontal frame dimensions are exact");
-    expect(horizontal[0].getPixelAt(0, 0).getAlpha() > 0,
-           "source alpha is preserved");
+    expect(horizontal[0].getPixelAt(0, 0).getAlpha() == 128,
+           "semi-transparent source alpha is preserved exactly");
 
     const auto grid = PPGUStageSpriteSheet::sliceGrid(sheet, 4, 4, 4, 2);
     expect(grid.size() == 8, "valid grid returns row-major frames");
+    expect(grid[0].getPixelAt(0, 0).getAlpha() == 128,
+           "grid slicing preserves semi-transparent alpha");
     expect(grid[1].getPixelAt(0, 0) == juce::Colours::magenta,
            "grid frame order is row-major");
 
@@ -46,6 +48,6 @@ int main()
     expect(PPGUStageSpriteSheet::sliceGrid(sheet, 4, 4, 0, 2).empty(),
            "empty grid is rejected");
 
-    std::cout << "PASS — native sprite slicing validates bounds and preserves alpha.\n";
+    std::cout << "PASS — native sprite slicing validates bounds and preserves source alpha.\n";
     return 0;
 }

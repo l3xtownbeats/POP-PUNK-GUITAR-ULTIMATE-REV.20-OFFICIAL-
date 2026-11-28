@@ -71,10 +71,23 @@ jobs:
 
       # Generated atlases stay inside this build workspace. The build must never
       # push back to main: that creates a second run and can cancel the release build.
-      - name: Checkout JUCE 7.0.12
+      - name: Checkout JUCE 9.0.5
         shell: pwsh
-        run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
+        run: git clone --depth 1 --branch 9.0.5 https://github.com/juce-framework/JUCE.git JUCE
 
+      - name: Verify C++23 and JUCE 9.0.5 toolchain
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $juceCmake = Get-Content JUCE/CMakeLists.txt -Raw
+          if (-not $juceCmake.Contains('VERSION 9.0.5')) {
+            throw 'The checked-out JUCE source is not exactly 9.0.5.'
+          }
+          $standard = Select-String -Path CMakeLists.txt -SimpleMatch 'set(CMAKE_CXX_STANDARD 23)'
+          if (-not $standard) {
+            throw 'The project must compile as C++23.'
+          }
+          git -C JUCE describe --tags --exact-match
       - name: Configure Windows x64
         shell: pwsh
         run: cmake -S . -B build -A x64

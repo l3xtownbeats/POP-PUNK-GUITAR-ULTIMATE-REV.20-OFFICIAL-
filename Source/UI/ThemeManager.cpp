@@ -188,7 +188,7 @@ namespace
             return false;
         }
 
-        auto drawable = juce::Drawable::createFromSVG(*xml);
+        auto drawable = juce::Drawable::createFromSVGString(svgText);
         if (drawable == nullptr)
         {
             error = "Theme SVG could not be rendered";
@@ -282,7 +282,7 @@ namespace
             return false;
         }
 
-        auto drawable = juce::Drawable::createFromSVG(*xml);
+        auto drawable = juce::Drawable::createFromSVGString(svgText);
         if (drawable == nullptr)
         {
             error = "Embedded STILLWATER SVG could not be rendered";
