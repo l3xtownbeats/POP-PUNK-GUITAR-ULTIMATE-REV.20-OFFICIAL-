@@ -163,3 +163,11 @@
 - Removed only the stray duplicated tail. Preserved the C++23/JUCE 9.0.5 toolchain verification and the configure, VST3 build, CTest, skin validation, Pluginval strictness 5 and artifact upload stages.
 - Commit: `85136690a4ea6b94470b68cab92edcf2f5ff15a5`.
 - Exact-head Windows CI must now execute; no build/test acceptance is claimed until it finishes.
+
+
+### 2026-11-28 — JUCE 9 SVG API correction and exported atlas inspection
+
+- The exact-head Windows builds exposed a JUCE 9 breaking change: `Drawable::createFromSVG(const XmlElement&)` was removed. Replaced both ThemeManager call sites with `Drawable::createFromSVGString(svgText)`, preserving the existing XML safety/shape checks before rendering.
+- Commit: `e319fdde06ac34dc42ad7b3ad86b7c69e8609f77`.
+- SVG atlas export at prior artwork head `160aa25...` passed source validation and raster export. Artifact ID `15237370094`, 80,404,908 bytes, includes all five 1x/2x master atlases, three 61-frame rotary strips, and standalone component exports. The 1x button/switch atlas has five states (normal/hover/pressed/active/disabled), seven dedicated FX chain switches and five-color dim/lit status indicators.
+- Build/test acceptance remains pending a fresh JUCE 9 compile and subsequent CTest/pluginval. Visual pixel-diff and runtime atlas integration remain open; the successful SVG export is not a full UI acceptance.
