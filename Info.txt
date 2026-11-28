@@ -582,3 +582,14 @@ These CI results verify the current-head automated build/validation and export w
 - Удалён только повреждённый хвост после корректного завершающего шага Upload REV.20 Windows x64 VST3. Сохранены C++23, exact JUCE 9.0.5 checkout, проверки toolchain, configure/build/CTest/pluginval и artifact upload steps.
 - Commit: `85136690a4ea6b94470b68cab92edcf2f5ff15a5`.
 - Новый run должен подтвердить корректный разбор workflow и пройти полный Windows x64 VST3 pipeline. До его завершения BUILD/CTest/pluginval PASS не присваивать.
+
+
+## 2026-11-28 — JUCE 9 SVG API migration after first full build
+
+**Статус:** SOURCE FIX COMMITTED; NEW WINDOWS BUILD NOT YET OBSERVED.
+
+- Полный SVG atlas pipeline на commit `160aa25bce843cc658a7bd474ce84328060c5f11` прошёл: source contracts + PNG export completed successfully. Artifact `PPGU-NEON-STAGE-SVG-ATLAS-EXPORT` создан (80,404,908 bytes; artifact ID `15237370094`). Внутри 1x/2x masters: `01_ppgu_atlas_backgrounds_frames.png`, `02_ppgu_atlas_buttons_switches.png`, `03_ppgu_atlas_knob_strips.png`, `04_ppgu_atlas_displays_keyboard.png`, `05_ppgu_atlas_icons_hardware.png`, плюс 61-frame rotary strips и component exports.
+- В Windows C++ build выявлен реальный JUCE 9 API break: `juce::Drawable::createFromSVG(const XmlElement&)` удалён. Ошибки C2039/C3861 были в двух SVG loaders `Source/UI/ThemeManager.cpp` (строки 191 и 285).
+- Оба вызова заменены на JUCE 9 API `juce::Drawable::createFromSVGString(svgText)`; предварительная XML parse/safety validation сохранена. Изменение commit `e319fdde06ac34dc42ad7b3ad86b7c69e8609f77`.
+- Windows x64, native integration и SKIN-1 runs на предыдущем head падали на compile step из-за этих двух ошибок. Это не было ошибкой SVG artwork. Новый compile должен подтвердить устранение API break; CTest/pluginval ещё не подтверждены.
+- Визуальный экспорт 1x открыт и проверен по структуре/читаемости: кнопки и переключатели имеют пять состояний N/H/P/A/D; семь выделенных FX chain switches; цветовые status indicators. Это ещё не pixel-diff против всех утверждённых референсов, и не runtime integration acceptance.
